@@ -1,0 +1,9 @@
+/scratch4/BMC/rtfim/rtruns/FV3-Chem
+  superstructure based on 17Mar2018 master branch, a69828b, in fv3gfs repository
+  fv3gfs.fd points to development branch of EMC_FV3GFS-GSDCHEM repository
+      1003fd58ee7def9e55ad69f26c19f06c8be1cd6d FV3 (FV3_prebeta_v1.1-73-g1003fd5)
+      f2943c2ddf9b094b31f8600c19fc0ff113daad08 GSDCHEM (heads/development)
+      d925af99fd0cc688d5bf28a59bff31d7f0982844 NEMS (FV3_prebeta_v1.1-208-gd925af9)
+  run 00Z
+  6-hourly out to 168h
+  0.5 and 0.25 grib2 files 
