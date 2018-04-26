@@ -1,0 +1,4 @@
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
+rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
+rocotoboot -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
+rocotocheck -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
