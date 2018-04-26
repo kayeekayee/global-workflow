@@ -1,0 +1,1 @@
+getic_gsd.sh

@@ -1,0 +1,12 @@
+[submodule "FV3"]
+	path = FV3
+	url = gerrit:FV3
+	branch = chem_coupling
+[submodule "GSDCHEM"]
+	path = GSDCHEM
+	url = gerrit:GSDCHEM
+	branch = development
+[submodule "NEMS"]
+	path = NEMS
+	url = gerrit:NEMS
+	branch = chem_coupling

@@ -1,0 +1,103 @@
+Run rocotostat...
+Generate report...
+WORKFLOW STARTED AT Mon Apr  9 22:10:06 2018 (+1523311806)
+Repository information:
+
+
+REPO TOP:
+development e4e1a71 [origin/development] Re-add 'atmchem_between' compset using split phase ATM run for coupled runs with GSDCHEM.
+Fetch URL: gerrit:EMC_FV3GFS-GSDCHEM
+ M NEMS
+ M log/report-theia-log/rtreport.txt
+
+Entering 'FV3'
+(HEAD detached at 1003fd5) 1003fd5 Enable only chemistry coupling fields to prevent coupled model from crashing.
+Fetch URL: gerrit:FV3
+
+Entering 'GSDCHEM'
+(HEAD detached at f2943c2) f2943c2 Add the path for biomass burning emissions (fire emissions)
+Fetch URL: gerrit:GSDCHEM
+
+Entering 'NEMS'
+(HEAD detached at d925af9) d925af9 Merge branch 'master' into chem_coupling
+Fetch URL: gerrit:NEMS
+ M tests/rtgen
+
+
+BUILD fv3_gsdchem.exe: SUCCEEDED
+  FAIL: job state is DEAD
+
+TEST #1: FAIL
+  Test cpld_fv3_gsdchem_between starting at Mon Apr 9 22:23:20 UTC 2018 (Compare FV3 control results with previous trunk version)
+  Mon Apr  9 22:23:20 UTC 2018
+  atmos_4xdaily.tile1.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile2.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile3.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile4.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile5.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile6.nc: bit-for-bit MISMATCH
+  phyf000.tile1.nc: bit-for-bit MISMATCH
+  phyf000.tile2.nc: bit-for-bit MISMATCH
+  phyf000.tile3.nc: bit-for-bit MISMATCH
+  phyf000.tile4.nc: bit-for-bit MISMATCH
+  phyf000.tile5.nc: bit-for-bit MISMATCH
+  phyf000.tile6.nc: bit-for-bit MISMATCH
+  phyf024.tile1.nc: bit-for-bit MISMATCH
+  phyf024.tile2.nc: bit-for-bit MISMATCH
+  phyf024.tile3.nc: bit-for-bit MISMATCH
+  phyf024.tile4.nc: bit-for-bit MISMATCH
+  phyf024.tile5.nc: bit-for-bit MISMATCH
+  phyf024.tile6.nc: bit-for-bit MISMATCH
+  dynf000.tile1.nc: bit-for-bit MISMATCH
+  dynf000.tile2.nc: bit-for-bit MISMATCH
+  dynf000.tile3.nc: bit-for-bit MISMATCH
+  dynf000.tile4.nc: bit-for-bit MISMATCH
+  dynf000.tile5.nc: bit-for-bit MISMATCH
+  dynf000.tile6.nc: bit-for-bit MISMATCH
+  dynf024.tile1.nc: bit-for-bit MISMATCH
+  dynf024.tile2.nc: bit-for-bit MISMATCH
+  dynf024.tile3.nc: bit-for-bit MISMATCH
+  dynf024.tile4.nc: bit-for-bit MISMATCH
+  dynf024.tile5.nc: bit-for-bit MISMATCH
+  dynf024.tile6.nc: bit-for-bit MISMATCH
+  RESTART/coupler.res: bit-for-bit identical
+  RESTART/fv_core.res.nc: bit-for-bit identical
+  RESTART/fv_core.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile1.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile2.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile3.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile4.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile5.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile6.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile1.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile2.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile3.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile4.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile5.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile6.nc: bit-for-bit MISMATCH
+  Executable did not change during test suite:
+    File: /scratch4/BMC/fim/lzhang/EMC_FV3/stmp4/Kate.Zhang/rtgen.82262/exec/fv3_gsdchem.exe
+    Expected md5sum: c41f693da40d431689c4b263c3defb76
+    Actual md5sum: c41f693da40d431689c4b263c3defb76
+  TEST FAILED AT Mon Apr  9 22:28:33 UTC 2018
+WORKFLOW REPORT AT Mon Apr  9 22:34:18 2018 (+1523313258)
+Tests: 1 failed, 0 passed out of 1
+Builds: 0 failed, 1 passed out of 1
+REGRESSION TEST FAILED
