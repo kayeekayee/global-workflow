@@ -7,3 +7,4 @@
   run 00Z
   6-hourly out to 168h
   0.5 and 0.25 grib2 files 
+  ZhaoCarr microphysics  (imp_physics=99)
