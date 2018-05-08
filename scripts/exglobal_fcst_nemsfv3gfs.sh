@@ -35,16 +35,16 @@ machine=${machine:-"WCOSS_C"}
 machine=$(echo $machine | tr '[a-z]' '[A-Z]')
 
 # Cycling and forecast hour specific parameters
-CASE=${CASE:-C768}
-CDATE=${CDATE:-2017032500}
+CASE=${CASE:-C96}
+CDATE=${CDATE:-2016100300}
 CDUMP=${CDUMP:-gdas}
 FHMIN=${FHMIN:-0}
 FHMAX=${FHMAX:-9}
-FHOUT=${FHOUT:-3}
+FHOUT=${FHOUT:-6}
 FHZER=${FHZER:-6}
 FHCYC=${FHCYC:-24}
 FHMAX_HF=${FHMAX_HF:-0}
-FHOUT_HF=${FHOUT_HF:-1}
+FHOUT_HF=${FHOUT_HF:-6}
 NSOUT=${NSOUT:-"-1"}
 FDIAG=$FHOUT
 if [ $FHMAX_HF -gt 0 -a $FHOUT_HF -gt 0 ]; then FDIAG=$FHOUT_HF; fi
@@ -60,7 +60,7 @@ DATA=${DATA:-$pwd/fv3tmp$$}    # temporary running directory
 ROTDIR=${ROTDIR:-$pwd}         # rotating archive directory
 ICSDIR=${ICSDIR:-$pwd}         # cold start initial conditions
 DMPDIR=${DMPDIR:-$pwd}         # global dumps for seaice, snow and sst analysis
-
+EMIDIR=${EMIDIR:-$pwd}         # anthro. emission 
 # Model resolution specific parameters
 DELTIM=${DELTIM:-225}
 layout_x=${layout_x:-8}
@@ -94,6 +94,7 @@ NTASKS_FV3=${NTASKS_FV3:-$npe_fv3}
 TYPE=${TYPE:-"nh"}                  # choices:  nh, hydro
 MONO=${MONO:-"non-mono"}            # choices:  mono, non-mono
 
+CPL=${CPL:-".true."}
 QUILTING=${QUILTING:-".true."}
 OUTPUT_GRID=${OUTPUT_GRID:-"gaussian_grid"}
 OUTPUT_FILE=${OUTPUT_FILE:-"nemsio"}
@@ -117,6 +118,14 @@ fi
 
 #-------------------------------------------------------
 if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
+
+# Stage the FV3 initial conditions to ROTDIR  
+export OUTDIR="$ICSDIR/$CDATE/$CDUMP/$CASE/INPUT" #lzhang
+COMOUT="$ROTDIR/$CDUMP.$PDY/$cyc"
+[[ ! -d $COMOUT ]] && mkdir -p $COMOUT
+cd $COMOUT || exit 99
+[[ ! -d $INPUT ]] && $NLN $OUTDIR .
+#----------------------------------------------------
 if [ ! -d $DATA ]; then mkdir -p $DATA ;fi
 mkdir -p $DATA/RESTART $DATA/INPUT
 cd $DATA || exit 8
@@ -140,7 +149,8 @@ if [ ! -d $memdir ]; then mkdir -p $memdir; fi
 GDATE=$($NDATE -$assim_freq $CDATE)
 gPDY=$(echo $GDATE | cut -c1-8)
 gcyc=$(echo $GDATE | cut -c9-10)
-gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar
+#gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar #lzhang
+gmemdir=$ROTDIR/${prefix}.$gPDY/$gcyc/$memchar
 
 #-------------------------------------------------------
 # initial conditions
@@ -154,7 +164,7 @@ if [ -f $gmemdir/RESTART/${PDY}.${cyc}0000.coupler.res ]; then
 fi
 
 if [ $warm_start = ".true." ]; then
-
+  CHEMIN=1 #lzhang
   # Link all (except sfc_data) restart files from $gmemdir
   for file in $gmemdir/RESTART/${PDY}.${cyc}0000.*.nc; do
     file2=$(echo $(basename $file))
@@ -188,7 +198,8 @@ if [ $warm_start = ".true." ]; then
     $NLN $file $DATA/INPUT/$file2
   fi
 
-  increment_file=$memdir/${CDUMP}.t${cyc}z.atminc.nc
+  #increment_file=$memdir/${CDUMP}.t${cyc}z.atminc.nc #lzhang 
+  increment_file=$gmemdir/${CDUMP}.t${cyc}z.atminc.nc
   if [ -f $increment_file ]; then
     $NLN $increment_file $DATA/INPUT/fv3_increment.nc
     read_increment=".true."
@@ -197,8 +208,17 @@ if [ $warm_start = ".true." ]; then
     read_increment=".false."
     res_latlon_dynamics="''"
   fi
-
+#lzhang: link sfc data from gfs initial conditions
+  for file in $memdir/INPUT/*.nc; do
+    file2=$(echo $(basename $file))
+    fsuf=$(echo $file2 | cut -c1-3)
+    if [ $fsuf = $fsuf = "sfc" ]; then
+      $NLN $file $DATA/INPUT/$file2
+    fi
+  done
+#lzhang
 else ## cold start                            
+  CHEMIN=0 #lzhang
 
   for file in $memdir/INPUT/*.nc; do
     file2=$(echo $(basename $file))
@@ -471,10 +491,31 @@ $NCP $FIELD_TABLE field_table
 #------------------------------------------------------------------
 rm -f nems.configure
 cat > nems.configure <<EOF
-EARTH_component_list: ATM
-ATM_model:            fv3
+EARTH_component_list: ATM CHM
+EARTH_attributes::
+  Verbosity = max
+::
+
+ATM_model:                      fv3
+ATM_petlist_bounds:             -1 -1
+ATM_attributes::
+  Verbosity = max
+::
+
+CHM_model:                      gsdchem
+CHM_petlist_bounds:             -1 -1
+CHM_attributes::
+  Verbosity = max
+::
+
 runSeq::
-  ATM
+  @1800
+    ATM bef_chem
+    ATM -> CHM
+    CHM
+    CHM -> ATM
+    ATM aft_chem
+  @
 ::
 EOF
 
@@ -495,6 +536,7 @@ ENS_SPS:                 ${ENS_SPS:-".false."}
 
 dt_atmos:                $DELTIM
 calendar:                ${calendar:-'julian'}
+cpl:                     $CPL
 memuse_verbose:          ${memuse_verbose:-".false."}
 atmos_nthreads:          $NTHREADS_FV3
 use_hyper_thread:        ${hyperthread:-".false."}
@@ -693,6 +735,7 @@ cat > input.nml <<EOF
   isot         = ${isot:-"1"}
   debug        = ${gfs_phys_debug:-".false."}
   nstf_name    = $nstf_name
+  cplchm       = .true.
   nst_anl      = $nst_anl
   psautco      = ${psautco:-"0.0008,0.0005"}
   prautco      = ${prautco:-"0.00015,0.00015"}
@@ -797,6 +840,40 @@ cat > input.nml <<EOF
   $namsfc_nml
 /
 
+&chem_nml
+  aer_bc_opt=1
+  aer_ic_opt=1
+  aer_ra_feedback=0
+  aerchem_onoff=1
+  bio_emiss_opt=0
+  biomass_burn_opt=1
+  chem_conv_tr=1
+  chem_in_opt=$CHEMIN
+  chem_opt=300
+  chemdt=3
+  cldchem_onoff=0
+  dmsemis_opt=1
+  dust_opt=3
+  emiss_inpt_opt=1
+  emiss_opt=5
+  gas_bc_opt=1
+  gas_ic_opt=1
+  gaschem_onoff=1
+  kemit=1
+  phot_opt=1
+  photdt=60
+  plumerisefire_frq=60
+  seas_opt=1
+  vertmix_onoff=1
+  wetscav_onoff=0
+  archive_step = 1
+  chem_hist_outname = "chem_out_"
+  emi_inname  = "$EMIDIR/$SMONTH"
+  fireemi_inname  = "../prep"
+  emi_outname = "./"
+  $chem_nml
+/
+
 &fv_grid_nml
   grid_file = 'INPUT/grid_spec.nc'
   $fv_grid_nml
@@ -897,7 +974,8 @@ fi
 
 $NCP $FCSTEXECDIR/$FCSTEXEC $DATA/.
 export OMP_NUM_THREADS=$NTHREADS_FV3
-$APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
+export MKL_NUM_THREADS=0
+$APRUN_FV3 /bin/env KMP_AFFINITY=scatter KMP_NUM_THREADS=1 $DATA/$FCSTEXEC 1>&1 2>&2
 export ERR=$?
 export err=$ERR
 $ERRSCRIPT || exit $err
@@ -910,7 +988,7 @@ if [ $SEND = "YES" ]; then
 
   # Only save restarts at single time in RESTART directory
   # Either at restart_interval or at end of the forecast
-  if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then
+  if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then 
 
     # Add time-stamp to restart files at FHMAX
     RDATE=$($NDATE +$FHMAX $CDATE)
@@ -918,6 +996,7 @@ if [ $SEND = "YES" ]; then
     rcyc=$(echo $RDATE | cut -c9-10)
     for file in $(ls * | grep -v 0000); do
       $NMV $file ${rPDY}.${rcyc}0000.$file
+      $NCP ${rPDY}.${rcyc}0000.$file $memdir/RESTART/${rPDY}.${rcyc}0000.$file #lzhang
     done
 
   else

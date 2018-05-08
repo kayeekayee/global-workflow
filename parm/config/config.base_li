@@ -6,7 +6,7 @@
 echo "BEGIN: config.base"
 
 # Machine environment
-export machine="@MACHINE@"
+export machine="THEIA"
 
 # EMC parallel or NCO production
 export RUN_ENVIR="emc"
@@ -30,7 +30,7 @@ fi
 HPSS_PROJECT=fim
 
 # Directories relative to installation areas:
-export HOMEgfs=@HOMEgfs@
+export HOMEgfs=/scratch4/BMC/rtfim/rtruns/FV3-Chem/
 export PARMgfs=$HOMEgfs/parm
 export FIXgfs=$HOMEgfs/fix
 export USHgfs=$HOMEgfs/ush
@@ -148,16 +148,16 @@ export BASE_ENV="$HOMEgfs/env"
 export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
-export SDATE=@SDATE@
-export EDATE=@EDATE@
+export SDATE=2018041400
+export EDATE=2018041900
 #export assim_freq=6 #lzhang
 export assim_freq=24
-export PSLOT="@PSLOT@"
-export EXPDIR="@EXPDIR@/$PSLOT"
-export ROTDIR="@ROTDIR@/$PSLOT"
+export PSLOT="rt_fv3gfs_chem"
+export EXPDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/$PSLOT"
+export ROTDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/$PSLOT"
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="@ICSDIR@"
+export ICSDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS"
 export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
@@ -179,7 +179,7 @@ export SENDSDM="NO"
 
 # Resolution specific parameters
 export LEVS=65
-export CASE="@CASECTL@"
+export CASE="C96"
 export CASE_ENKF="@CASEENS@"
 
 # Surface cycle update frequency
@@ -191,14 +191,18 @@ export FHMAX=9
 export FHOUT=6  #lzhang
 
 # GFS cycle info
-export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
+export gfs_cyc=2 # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
 
 # GFS output and frequency
 export FHMIN_GFS=0
-export FHMAX_GFS=240
-export FHOUT_GFS=6
-export FHMAX_HF_GFS=0
-export FHOUT_HF_GFS=1
+#export FHMAX_GFS=240 !lzhang
+export FHMAX_GFS=24
+export FHOUT_GFS=6  
+#export FHOUT_GFS=3 !lzhang
+#export FHMAX_HF_GFS=0 !lzhang
+export FHMAX_HF_GFS=12
+export FHOUT_HF_GFS=6 #lzhang
+
 #Coupling option
 export CPL=".true."
 

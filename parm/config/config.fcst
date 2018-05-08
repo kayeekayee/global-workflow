@@ -16,9 +16,9 @@ if [ $DONST = "YES" ]; then
 fi
 
 export FORECASTSH="$HOMEgfs/scripts/exglobal_fcst_nemsfv3gfs.sh"
-#export FCSTEXECDIR="$HOMEfv3gfs/NEMS/exe"
 export FCSTEXECDIR="$HOMEgfs/exec"
-export FCSTEXEC="fv3_gfs_nh.prod.32bit.x"
+#export FCSTEXEC="fv3_gfs_nh.prod.32bit.x" !lzhang
+export FCSTEXEC="NEMS.x"
 export npe_fv3=$npe_fcst # This is model resolution dependent, see note above
 
 if [ $QUILTING = ".true." ]; then
@@ -45,7 +45,8 @@ export cnvcld=".true."
 
 if [ $imp_physics -eq 99 ]; then # ZhaoCarr
     export ncld=1
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr"
+    #export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr" !lzhang
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table"
     export nwat=2
 
 elif [ $imp_physics -eq 6 ]; then # WSM6
@@ -60,7 +61,7 @@ elif [ $imp_physics -eq 8 ]; then # Thompson
 
 elif [ $imp_physics -eq 11 ]; then # GFDL
     export ncld=5
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl"
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table_gfdl"
     export nwat=6
     export dnats=1
     export cal_pre=".false."
@@ -83,7 +84,8 @@ fi
 
 
 # Disable the use of coupler.res; get model start time from model_configure
-export USE_COUPLER_RES="NO"
+#export USE_COUPLER_RES="NO" #lzhang
+export USE_COUPLER_RES="YES"
 
 if [[ "$CDUMP" == "gdas" ]] ; then # GDAS cycle specific parameters
 
@@ -95,17 +97,22 @@ if [[ "$CDUMP" == "gdas" ]] ; then # GDAS cycle specific parameters
     fi
 
     # Write restart files at next assimilation time
-    export restart_interval=6
+    export restart_interval=24
 
 elif [[ "$CDUMP" == "gfs" ]] ; then # GFS cycle specific parameters
 
     # Write more variables to output
     if [ $QUILTING = ".true." -a $OUTPUT_GRID = "gaussian_grid" ]; then
-        export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table"
+        #export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table" !lzhang
+        export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_diag_table"
     else
-        export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_orig"
+        #export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_orig"  !lzhang
+        export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_diag_table"
     fi
-
+    # Write restart files at next assimilation time
+    #export restart_interval=6  !lzhang
+    export restart_interval=24
+    export SEND="YES"
 fi
 
 # Regrid tiles to global Gaussian grid in NEMSIO

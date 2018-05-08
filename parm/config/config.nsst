@@ -12,16 +12,17 @@ export NST_MODEL=2
 
 # nstf_name(2) : NST_SPINUP : 0 = OFF, 1 = ON,
 export NST_SPINUP=0
-if [[ "$CDATE" = $SDATE ]]; then
+#if [[ "$CDATE" = $SDATE ]]; then !lzhang
     export NST_SPINUP=1
-fi
+#fi  !lzhang
 
 # nstf_name(3) : NST_RESV (Reserved, NSST Analysis) : 0 = OFF, 1 = ON
 export NST_RESV=0
 
 # nstf_name(4,5) : ZSEA1, ZSEA2 the two depths to apply vertical average (bias correction)
 export ZSEA1=0
-export ZSEA2=0
+export ZSEA2=0 
+#export ZSEA2=5 !lzhang_64y
 
 export NST_GSI=3          # default 0: No NST info at all;
                           #         1: Input NST info but not used in GSI;

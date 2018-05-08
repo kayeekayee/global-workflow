@@ -125,21 +125,21 @@ for file in $files; do
     $NCP $COMIN/${APREFIX}$file .
 done
 
-cd $DATA/${CDUMP}restart
+#lzhang
+#cd $DATA/${CDUMP}restart
+#htar -P -cvf $ATARDIR/$CDATE/${CDUMP}restart.tar .
+#status=$?
+#if [ $status -ne 0 ]; then
+#    echo "HTAR $CDATE ${CDUMP}restart.tar failed"
+#    exit $status
+#fi
 
-htar -P -cvf $ATARDIR/$CDATE/${CDUMP}restart.tar .
-status=$?
-if [ $status -ne 0 ]; then
-    echo "HTAR $CDATE ${CDUMP}restart.tar failed"
-    exit $status
-fi
-
-hsi ls -l $ATARDIR/$CDATE/${CDUMP}restart.tar
-status=$?
-if [ $status -ne 0 ]; then
-    echo "HSI $CDATE ${CDUMP}restart.tar failed"
-    exit $status
-fi
+#hsi ls -l $ATARDIR/$CDATE/${CDUMP}restart.tar
+#status=$?
+#if [ $status -ne 0 ]; then
+#    echo "HSI $CDATE ${CDUMP}restart.tar failed"
+#    exit $status
+#fi
 
 cd $DATA
 rm -rf ${CDUMP}restart
