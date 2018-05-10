@@ -257,10 +257,17 @@
         <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 
         <dependency>
+  	    <or>
 	        <and>
 	              <taskdep task="gfsgetic"/> 
 	               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nemsio</cyclestr></datadep>
 		</and>  
+		<and>
+	               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nemsio</cyclestr></datadep>
+                       <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+                       <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+		</and>
+  	    </or>
         </dependency>
 </task>
 
@@ -322,8 +329,14 @@
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 	
         <dependency>
-
-	              <taskdep task="gfsgetic"/> 
+  	    <or>
+	        <taskdep task="gfsgetic"/> 
+		<and>
+	               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nemsio</cyclestr></datadep>
+                       <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+                       <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+		</and>
+  	    </or>
 	</dependency>
 
 </task>
