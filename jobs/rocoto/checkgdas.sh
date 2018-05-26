@@ -64,6 +64,8 @@ cd $fv3ic_dir
 # /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1/gdas.2018041100/gdas.tar 
 #      ./gdas.20180411/00/gdas.t00z.atmanl.nemsio
 #      ./gdas.20180411/00/gdas.t00z.sfcanl.nemsio
+# /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1/gdas.2018041100/gdas.tar 
+#      changed 26 May 2018
 #
 
 # check for correct number of parameters

@@ -19,7 +19,7 @@
 	<!ENTITY CASE     "C96">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201804260000">
+	<!ENTITY SDATE    "201805140000">
 	<!ENTITY EDATE    "202804260000">
 	<!ENTITY INTERVAL "24:00:00">
 
@@ -31,7 +31,7 @@
 	<!ENTITY ROTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
 	<!ENTITY ICSDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS">
         <!ENTITY PUBDIR "/scratch3/BMC/public/data/grids/gfs/nemsio">
-        <!ENTITY GDASDIR "/5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1">
+        <!ENTITY GDASDIR "/5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1">
         <!ENTITY RUNDIR "/scratch4/BMC/rtfim/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
         <!ENTITY OUTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
          
@@ -373,15 +373,13 @@
 	</dependency>
 
 </task>  
+<!--
 <metatask name="gfspost">
 
         <var name="grp">001 002 003 004 005</var>
         <var name="dep">f030 f066 f102 f138 f168</var>
         <var name="lst">f000_f006_f012_f018_f024_f030 f036_f042_f048_f054_f060_f066 f072_f078_f084_f090_f096_f102 f108_f114_f120_f126_f132_f138 f144_f150_f156_f162_f168</var>
 
-<!--        <var name="grp">001 002 003 004 005</var>
-        <var name="dep">f000 f006 f012 f018 f024</var>
-        <var name="lst">f000 f006 f012 f018 f024</var> -->
 	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 		<command>&JOBS_DIR;/post.sh</command>
@@ -413,7 +411,6 @@
 	</task>
 
 </metatask>
-<!--
 <task name="gfsvrfy" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/vrfy.sh</command>
