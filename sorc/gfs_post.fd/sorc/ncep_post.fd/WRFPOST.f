@@ -300,10 +300,10 @@
 
         hyb_sigp    = .true.
         d3d_on      = .false.
-        gocart_on   = .false.
+!        gocart_on   = .false.
         popascal    = .false.
         fileNameAER = ''
-!       gocart_on   = .true.
+        gocart_on   = .true. !lzhang
 !       d3d_on      = .true.
 
         if(MODELNAME == 'RAPR') then

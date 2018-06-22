@@ -283,6 +283,8 @@
       deallocate(avgalbedo)
       deallocate(avgcprate)
       deallocate(avgprec)
+      deallocate(avgprec_cont)
+      deallocate(avgcprate_cont)
       deallocate(ptop)
       deallocate(pbot)
       deallocate(avgcfrach)
@@ -470,6 +472,15 @@
         deallocate(sscmass)
         deallocate(sssmass25)
         deallocate(sscmass25)
+        deallocate(dustcb)
+        deallocate(occb)
+        deallocate(bccb)
+        deallocate(sulfcb)
+        deallocate(sscb)
+        deallocate(dustallcb)
+        deallocate(ssallcb)
+        deallocate(dustpm)
+        deallocate(sspm)
       endif
 !
       end

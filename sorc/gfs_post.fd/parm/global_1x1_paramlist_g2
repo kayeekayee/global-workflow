@@ -31,6 +31,7 @@ ABSV:975 mb
 ABSV:0.4 mb
 ACPCP:surface
 ALBDO:surface
+AOTK:entire atmosphere
 APCP:surface
 APTMP:2 m above ground
 var discipline=0 master_table=2 parmcat=0 parm=21:2 m above ground
@@ -64,6 +65,7 @@ CLWMR:900 mb
 CLWMR:925 mb
 CLWMR:950 mb
 CLWMR:975 mb
+COLMD:entire atmosphere
 CPOFP:surface
 CPRAT:surface
 CRAIN:surface
@@ -189,6 +191,31 @@ ICMR:975 mb
 LAND:surface
 LFTX:surface
 LHTFL:surface
+MASSMR:1000 mb
+MASSMR:100 mb
+MASSMR:10 mb
+MASSMR:150 mb
+MASSMR:15 mb
+MASSMR:200 mb
+MASSMR:20 mb
+MASSMR:250 mb
+MASSMR:300 mb
+MASSMR:350 mb
+MASSMR:30 mb
+MASSMR:400 mb
+MASSMR:40 mb
+MASSMR:500 mb
+MASSMR:50 mb
+MASSMR:700 mb
+MASSMR:70 mb
+MASSMR:850 mb
+MASSMR:0.4 mb
+MASSMR:1 mb
+MASSMR:2 mb
+MASSMR:3 mb
+MASSMR:5 mb
+MASSMR:7 mb
+MASSMR:1 hybrid level
 MSLET:mean sea level
 O3MR:1000 mb
 O3MR:100 mb
@@ -216,6 +243,58 @@ O3MR:5 mb
 O3MR:7 mb
 PEVPR:surface
 PLPL:255-0 mb above ground
+PMTC:1000 mb
+PMTC:100 mb
+PMTC:10 mb
+PMTC:150 mb
+PMTC:15 mb
+PMTC:200 mb
+PMTC:20 mb
+PMTC:250 mb
+PMTC:300 mb
+PMTC:350 mb
+PMTC:30 mb
+PMTC:400 mb
+PMTC:40 mb
+PMTC:500 mb
+PMTC:50 mb
+PMTC:700 mb
+PMTC:70 mb
+PMTC:850 mb
+PMTC:0.4 mb
+PMTC:1 mb
+PMTC:2 mb
+PMTC:3 mb
+PMTC:5 mb
+PMTC:7 mb
+PMTC:1 hybrid level
+PMTC:entire atmosphere
+PMTC:surface
+PMTF:10 mb
+PMTF:150 mb
+PMTF:15 mb
+PMTF:200 mb
+PMTF:20 mb
+PMTF:250 mb
+PMTF:300 mb
+PMTF:350 mb
+PMTF:30 mb
+PMTF:400 mb
+PMTF:40 mb
+PMTF:500 mb
+PMTF:50 mb
+PMTF:700 mb
+PMTF:70 mb
+PMTF:850 mb
+PMTF:0.4 mb
+PMTF:1 mb
+PMTF:2 mb
+PMTF:3 mb
+PMTF:5 mb
+PMTF:7 mb
+PMTF:1 hybrid level
+PMTF:entire atmosphere
+PMTF:surface
 POT:0.995 sigma level
 PRATE:surface
 PRES:80 m above ground
@@ -552,6 +631,28 @@ DZDT:900 mb
 DZDT:925 mb
 DZDT:950 mb
 DZDT:975 mb
+VVEL:0.995 sigma level
+VVEL:1000 mb
+VVEL:100 mb
+VVEL:150 mb
+VVEL:200 mb
+VVEL:250 mb
+VVEL:300 mb
+VVEL:350 mb
+VVEL:400 mb
+VVEL:450 mb
+VVEL:500 mb
+VVEL:550 mb
+VVEL:600 mb
+VVEL:650 mb
+VVEL:700 mb
+VVEL:750 mb
+VVEL:800 mb
+VVEL:850 mb
+VVEL:900 mb
+VVEL:925 mb
+VVEL:950 mb
+VVEL:975 mb
 VWSH:PV=-2e-06 (Km^2/kg/s) surface
 VWSH:PV=2e-06 (Km^2/kg/s) surface
 VWSH:tropopause

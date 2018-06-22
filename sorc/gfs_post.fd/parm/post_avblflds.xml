@@ -3852,10 +3852,10 @@
 
     <param>
        <post_avblfldidx>438</post_avblfldidx>
-       <shortname>DUST1_ON_ISOBARIC_LVL</shortname>
+       <shortname>DUST1_ON_ISOBARIC_SFC</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>MASSMR</pname>
-       <fixed_sfc1_type>isobaric_lvl</fixed_sfc1_type>	   
+       <fixed_sfc1_type>isobaric_sfc</fixed_sfc1_type>	   
        <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
@@ -3867,10 +3867,10 @@
 
     <param>
        <post_avblfldidx>439</post_avblfldidx>
-       <shortname>DUST2_ON_ISOBARIC_LVL</shortname>
+       <shortname>DUST2_ON_ISOBARIC_SFC</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>MASSMR</pname>
-       <fixed_sfc1_type>isobaric_lvl</fixed_sfc1_type>	   
+       <fixed_sfc1_type>isobaric_sfc</fixed_sfc1_type>	   
        <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
@@ -3882,10 +3882,10 @@
 
     <param>
        <post_avblfldidx>440</post_avblfldidx>
-       <shortname>DUST3_ON_ISOBARIC_LVL</shortname>
+       <shortname>DUST3_ON_ISOBARIC_SFC</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>MASSMR</pname>
-       <fixed_sfc1_type>isobaric_lvl</fixed_sfc1_type>	   
+       <fixed_sfc1_type>isobaric_sfc</fixed_sfc1_type>	   
        <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
@@ -3897,10 +3897,10 @@
 
     <param>
        <post_avblfldidx>441</post_avblfldidx>
-       <shortname>DUST4_ON_ISOBARIC_LVL</shortname>
+       <shortname>DUST4_ON_ISOBARIC_SFC</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>MASSMR</pname>
-       <fixed_sfc1_type>isobaric_lvl</fixed_sfc1_type>	   
+       <fixed_sfc1_type>isobaric_sfc</fixed_sfc1_type>	   
        <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
@@ -3912,10 +3912,10 @@
 
     <param>
        <post_avblfldidx>442</post_avblfldidx>
-       <shortname>DUST5_ON_ISOBARIC_LVL</shortname>
+       <shortname>DUST5_ON_ISOBARIC_SFC</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>MASSMR</pname>
-       <fixed_sfc1_type>isobaric_lvl</fixed_sfc1_type>	   
+       <fixed_sfc1_type>isobaric_sfc</fixed_sfc1_type>	   
        <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
@@ -5213,9 +5213,8 @@
        <post_avblfldidx>629</post_avblfldidx>
        <shortname>DUST1_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>MASSMR</pname>
+       <pname>PMTF</pname>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
-       <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
        <scale_val_1st_size>2</scale_val_1st_size>
@@ -5228,9 +5227,8 @@
        <post_avblfldidx>630</post_avblfldidx>
        <shortname>DUST2_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>MASSMR</pname>
+       <pname>PMTF</pname>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
-       <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
        <scale_val_1st_size>20</scale_val_1st_size>
@@ -5243,9 +5241,8 @@
        <post_avblfldidx>631</post_avblfldidx>
        <shortname>DUST3_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>MASSMR</pname>
+       <pname>PMTC</pname>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
-       <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
        <scale_val_1st_size>36</scale_val_1st_size>
@@ -5258,9 +5255,8 @@
        <post_avblfldidx>632</post_avblfldidx>
        <shortname>DUST4_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>MASSMR</pname>
+       <pname>PMTC</pname>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
-       <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
        <scale_val_1st_size>60</scale_val_1st_size>
@@ -5273,9 +5269,8 @@
        <post_avblfldidx>633</post_avblfldidx>
        <shortname>DUST5_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>MASSMR</pname>
+       <pname>PMTC</pname>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
-       <aerosol_type>dust_dry</aerosol_type>
        <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
        <scale_fact_1st_size>7</scale_fact_1st_size>
        <scale_val_1st_size>120</scale_val_1st_size>
@@ -5283,6 +5278,103 @@
        <scale_val_2nd_size>200</scale_val_2nd_size>
        <scale>11.0</scale>
     </param>
+
+    <param>
+       <post_avblfldidx>634</post_avblfldidx>
+       <shortname>SS1_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
+       <scale>7.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>635</post_avblfldidx>
+       <shortname>SS2_ON_HYBRID_LVL</shortname>
+       <pname>PMTC</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
+       <scale>7.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>636</post_avblfldidx>
+       <shortname>SS3_ON_HYBRID_LVL</shortname>
+       <pname>PMTC</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
+       <scale>7.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>637</post_avblfldidx>
+       <shortname>SS4_ON_HYBRID_LVL</shortname>
+       <pname>PMTC</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
+       <scale>7.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>638</post_avblfldidx>
+       <shortname>SS0_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>	   
+       <scale>7.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>639</post_avblfldidx>
+       <shortname>SO4_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>5.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>640</post_avblfldidx>
+       <shortname>OC_DRY_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>5.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>641</post_avblfldidx>
+       <shortname>OC_WET_ON_HYBRID_LVL</shortname>
+       <pname>PMTF<</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>5.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>642</post_avblfldidx>
+       <shortname>BC_DRY_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>5.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>643</post_avblfldidx>
+       <shortname>BC_WET_ON_HYBRID_LVL</shortname>
+       <pname>PMTF</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>5.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>644</post_avblfldidx>
+       <shortname>AIR_DENSITY_ON_HYBRID_LVL</shortname>
+       <pname>DEN</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>4.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>645</post_avblfldidx>
+       <shortname>LAYER_THICKNESS_ON_HYBRID_LVL</shortname>
+       <pname>THICK</pname>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <scale>4.0</scale>
+    </param>
+
 
 <!-- 750 -->
     <param>

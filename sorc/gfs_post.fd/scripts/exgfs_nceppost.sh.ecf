@@ -66,7 +66,7 @@ export machine=${machine:-WCOSS_C}
 ###########################
 # Specify Output layers
 ###########################
-export POSTGPVARS="KPO=50,PO=1000.,975.,950.,925.,900.,875.,850.,825.,800.,775.,750.,725.,700.,675.,650.,625.,600.,575.,550.,525.,500.,475.,450.,425.,400.,375.,350.,325.,300.,275.,250.,225.,200.,175.,150.,125.,100.,70.,50.,40.,30.,20.,15.,10.,7.,5.,3.,2.,1.,0.4,"
+export POSTGPVARS="KPO=50,PO=1000.,975.,950.,925.,900.,875.,850.,825.,800.,775.,750.,725.,700.,675.,650.,625.,600.,575.,550.,525.,500.,475.,450.,425.,400.,375.,350.,325.,300.,275.,250.,225.,200.,175.,150.,125.,100.,70.,50.,40.,30.,20.,15.,10.,7.,5.,3.,2.,1.,0.4,gocart_on=.true.," #lzhang
 
 ##########################################################
 # Specify variable to directly output pgrb2 files for GDAS/GFS
@@ -124,6 +124,8 @@ then
    export FILTER=1
 
    $POSTGPSH
+   export err=$?
+   err_chk
    
    if test $GRIBVERSION = 'grib2'
    then
@@ -237,10 +239,13 @@ do
     export VDATE=`${NDATE} +${fhr} ${PDY}${cyc}`
     export OUTTYP=${OUTTYP:-4}
     export GFSOUT=${PREFIX}gfsio${fhr}
+      
 
     if [ $GRIBVERSION = 'grib2' ]; then
       export POSTGRB2TBL=${POSTGRB2TBL:-${NWROOT}/lib/g2tmpl/${g2tmpl_ver}/src/params_grib2_tbl_new}
-      export PostFlatFile=${PostFlatFile:-$PARMpost/postxconfig-NT-GFS.txt}
+      
+      #export PostFlatFile=${PostFlatFile:-$PARMpost/postxconfig-NT-GFS.txt}
+      export PostFlatFile=${PostFlatFile:-$PARMpost/postxconfig-NT-GFS-FV3CHEM.txt} #lzhang
 
       if [ $RUN = gfs ] ; then
         export IGEN=$IGEN_GFS
@@ -252,7 +257,8 @@ do
       if [[ $RUN = gfs ]] ; then
         if test $fhr -eq 0
         then
-          export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00.txt
+          #export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00.txt
+          export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00-FV3CHEM.txt #lzhang
           export CTLFILE=$PARMpost/postcntrl_gfs_f00.xml
         else
           export CTLFILE=${CTLFILEGFS:-$PARMpost/postcntrl_gfs.xml}
@@ -260,7 +266,8 @@ do
       else
         if test $fhr -eq 0
         then
-          export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00.txt
+          #export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00.txt
+          export PostFlatFile=$PARMpost/postxconfig-NT-GFS-F00-FV3CHEM.txt #lzhang
           export CTLFILE=${CTLFILEGFS:-$PARMpost/postcntrl_gfs_f00.xml}
         else
           export CTLFILE=${CTLFILEGFS:-$PARMpost/postcntrl_gfs.xml}
@@ -281,6 +288,8 @@ do
     export FILTER=1 
 
     $POSTGPSH
+    export err=$?
+    err_chk
 
 #wm
 #    mv outpost_gfs_${VDATE}_${CTL} outpost_gfs_${VDATE}_master
@@ -350,6 +359,8 @@ do
       export PGBOUT=fluxfile
       export FILTER=0
       $POSTGPSH
+      export err=$?
+      err_chk
       FLUXFL=${PREFIX}sfluxgrbf${fhr}.grib2
       FLUXFLIDX=${PREFIX}sfluxgrbf${fhr}.grib2.idx
       mv fluxfile $COMOUT/${FLUXFL}
@@ -400,6 +411,8 @@ do
     
     if [ $NET = gfs ]; then
      $POSTGPSH
+     export err=$?
+     err_chk
     fi
 
     if [ $GRIBVERSION = 'grib2' ]; then
@@ -453,6 +466,8 @@ do
           export IGEN=$IGEN_GFS
 
           $POSTGPSH
+          export err=$?
+          err_chk
 
           SPECIALFL=${PREFIX}gtg.grb2
           SPECIALFLIDX=${PREFIX}gtg.grb2i

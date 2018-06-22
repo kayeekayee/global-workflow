@@ -91,14 +91,16 @@ fi
 
 
 $WGRIB2 $PGBOUT2 | grep -F -f $paramlist | $WGRIB2 -i -grib  tmpfile1_$fhr3 $PGBOUT2
+export err=$?; err_chk
 #if [ $machine = WCOSS -o $machine = WCOSS_C -a $downset = 2 ]; then
 if [ $downset = 2 ]; then
    $WGRIB2 $PGBOUT2 | grep -F -f $paramlistb | $WGRIB2 -i -grib  tmpfile2_$fhr3 $PGBOUT2
+   export err=$?; err_chk
 fi
 
 #-----------------------------------------------------
 #-----------------------------------------------------
-if [ $machine = WCOSS -o $machine = WCOSS_C ]; then
+if [ $machine = WCOSS -o $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 ]; then
 #-----------------------------------------------------
 #-----------------------------------------------------
 export nset=1
@@ -114,6 +116,11 @@ while [ $nset -le $totalset ]; do
   export ncount=`$WGRIB2 $tmpfile |wc -l`
 # export tasks_post=$(eval echo \$tasksp_$nknd)
   export nproc=${nproc:-${npe_dwn:-24}}
+  if [ $nproc -gt $ncount ]; then
+    echo " *** FATA ERROR: Total number of records in $tmpfile is not right"
+    export err=8
+    err_chk
+  fi
   export inv=`expr $ncount / $nproc`
   rm -f $DATA/poescript
   export iproc=1
@@ -139,7 +146,8 @@ while [ $nset -le $totalset ]; do
     fi
 
     $WGRIB2 $tmpfile -for ${start}:${end} -grib ${tmpfile}_${iproc}
-    echo "${GFSDWNSH:-$USHgfs/fv3gfs_dwn_new.sh} ${tmpfile}_${iproc} $fhr3 $iproc $nset" >> $DATA/poescript
+    export err=$?; err_chk
+    echo "${GFSDWNSH:-$USHgfs/fv3gfs_dwn_nems.sh} ${tmpfile}_${iproc} $fhr3 $iproc $nset" >> $DATA/poescript
 
     # if at final record and have not reached the final processor then write echo's to
     # poescript for remaining processors
@@ -158,7 +166,7 @@ date
   export MP_PGMMODEL=mpmd
   export MP_CMDFILE=$DATA/poescript
   launcher=${APRUN_DWN:-"aprun -j 1 -n 24 -N 24 -d 1 cfp"}
-  if [ $machine = WCOSS_C ] ; then
+  if [ $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 ] ; then
      $launcher $MP_CMDFILE
   else
      $launcher
@@ -282,19 +290,24 @@ else
                                            -new_grid $grid0p25 pgb2file_${fhr3}_0p25 \
                                            -new_grid $grid0p5  pgb2file_${fhr3}_0p5 \
                                            -new_grid $grid1p0  pgb2file_${fhr3}_1p0
+  export err=$?; err_chk
 
 # convert 1 deg files back to Grib1 for verification
   if [ "$PGB1F" = 'YES' ]; then
     if [ $fhr3 = anl ]; then
      $CNVGRIB -g21 pgb2file_${fhr3}_1p0  $COMOUT/${PREFIX}pgrb.1p00.anl
+     export err=$?; err_chk
     else
      $CNVGRIB -g21 pgb2file_${fhr3}_1p0  $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}
+     export err=$?; err_chk
     fi
   fi
 
    $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}.idx
    cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}
    if [ "$PGBS" = "YES" ]; then
+     $WGRIB2 -s pgb2file_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}.idx #lzhang
+     cp pgb2file_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}     #lzhang
      $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}.idx
      cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}
    fi

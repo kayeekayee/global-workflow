@@ -264,6 +264,7 @@ if [ ${OUTTYP} -eq 4 ] ; then
  export LONB=${LONB:-$($nemsioget $NEMSINP dimx | awk '{print $2}')}
  export LATB=${LATB:-$($nemsioget $NEMSINP dimy | awk '{print $2}')}
  export JCAP=${JCAP:-`expr $LATB - 2`}
+ export LEVS=${LEVS:-$($nemsioget $NEMSINP dimz | awk '{print $2}')}
 
  export MODEL_OUT_FORM=${MODEL_OUT_FORM:-binarynemsiompiio}
  export GFSOUT=${NEMSINP}
@@ -327,7 +328,8 @@ rm -f fort.*
 #ln -sf $SIGINP     postgp.inp.sig$$
 #ln -sf $FLXINP     postgp.inp.flx$$
 #ln -sf $PGBOUT     postgp.out.pgb$$
-
+  export AeroFile=${PARMpost}/optics_luts_*.dat #lzhang
+  cp ${AeroFile} . 
 # change model generating Grib number 
 if [ ${GRIBVERSION} = grib2 ]; then
   cp ${POSTGRB2TBL} .
@@ -357,16 +359,22 @@ if [ $FILTER = "1" ] ; then
 if [ $GRIBVERSION = grib2 ]; then
   if [ ${ens} = YES ] ; then
     $COPYGB2 -x -i'4,0,80' -k'1 3 0 7*-9999 101 0 0' $PGBOUT tfile
+    export err=$?; err_chk
   else
     $COPYGB2 -x -i'4,0,80' -k'0 3 0 7*-9999 101 0 0' $PGBOUT tfile
+    export err=$?; err_chk
   fi
   $WGRIB2 tfile -set_byte 4 11 1 -grib prmsl
+  export err=$?; err_chk
   if [ ${ens} = YES ] ; then
     $COPYGB2 -x -i'4,1,5' -k'1 3 5 7*-9999 100 0 50000' $PGBOUT tfile
+    export err=$?; err_chk
   else
     $COPYGB2 -x -i'4,1,5' -k'0 3 5 7*-9999 100 0 50000' $PGBOUT tfile
+    export err=$?; err_chk
   fi
   $WGRIB2 tfile -set_byte 4 11 193 -grib h5wav
+  export err=$?; err_chk
 
 #cat $PGBOUT prmsl h5wav >> $PGBOUT
   cat  prmsl h5wav >> $PGBOUT
