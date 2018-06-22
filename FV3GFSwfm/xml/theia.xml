@@ -1,0 +1,37 @@
+  <!-- theia -->
+
+  <!ENTITY SCHEDULER   "moabtorque">
+  <!ENTITY PROJECT "gsd-fv3">
+  <!ENTITY SERIALPE "batch">
+  <!ENTITY PE "batch">
+  <!ENTITY SERVICE "service">
+  <!ENTITY MPIRUN       "mpirun -n">
+
+  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
+  <!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
+  <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
+  <!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
+  <!ENTITY RTFIM_HOME "/home/rtfim">
+  <!ENTITY SCRATCH4_ROOT "/scratch4/BMC/fim">
+
+  <!ENTITY DATADIR "&SCRATCH4_ROOT;/fimdata">
+  <!ENTITY DATADR2 "&SCRATCH4_ROOT;/GFS_NEMSIO_2017/">
+  <!ENTITY DATADR2 "&SCRATCH4_ROOT;/GFS_RETRO_FILES_2015/">
+  <!ENTITY CLIMATE_DIR "&SCRATCH4_ROOT;/cmean/">
+
+  <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">
+  <!ENTITY NCL_DIFF_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimalldiff">
+  <!ENTITY COPYGB "/home/rtfim/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
+  <!ENTITY CNVGRIB "cnvgrib">
+  <!ENTITY WGRIB "wgrib">
+  <!ENTITY WGRIB2 "wgrib2">
+
+
+  <!ENTITY DIFFGB "&RTFIM_HOME;/diffgb/diffgb">
+  <!ENTITY PUB_DIR "/scratch4/BMC/public">
+  <!ENTITY GFS_VERIF_DIR "&PUB_DIR;/data/grids/gfs/0p5deg/grib">
+  <!ENTITY GFS_VERIF_RETRO_DIR "&SCRATCH4_ROOT;/GFS_RETRO_VERIF_FILES">
+  <!ENTITY FV3GFS_VERIF_DIR "&FV3GFS_RUN;">
+
+  <!ENTITY CDUMP  "gfs">
+  <!ENTITY CASE   "C384">

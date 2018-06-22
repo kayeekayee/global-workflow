@@ -1,0 +1,10 @@
+REALTIME
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img.db
+rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img.db
+
+RETRO
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_img.db
+rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_img.db
+
+
+

@@ -19,8 +19,8 @@
 	<!ENTITY CASE     "C96">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201805140000">
-	<!ENTITY EDATE    "202804260000">
+	<!ENTITY SDATE    "201806010000">
+	<!ENTITY EDATE    "201806180000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -42,7 +42,6 @@
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY QUEUE      "batch">
-	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY SCHEDULER  "moabtorque">
 
@@ -50,8 +49,7 @@
 	<!ENTITY ARCHIVE_TO_HPSS "NO">
 
 	<!-- ROCOTO parameters that control workflow -->
-        <!-- post tasks for 06/20/18 in DEAD state; set to 2 to continue in r/t -->
-	<!ENTITY CYCLETHROTTLE "2">                 
+	<!ENTITY CYCLETHROTTLE "5">
 	<!ENTITY TASKTHROTTLE  "20">
 	<!ENTITY MAXTRIES      "2">
 
@@ -101,7 +99,7 @@
 	<!ENTITY NATIVE_FCST_GFS    "">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
-	<!ENTITY WALLTIME_POST_GFS  "00:30:00">
+	<!ENTITY WALLTIME_POST_GFS  "00:35:00">
 	<!ENTITY WALLTIME_POST_GFS  "01:00:00">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>6:ppn=12</nodes>">
 	<!ENTITY MEMORY_POST_GFS    "">
@@ -123,13 +121,14 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
-	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
+	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_retro.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
+<!--
 <task name="checkgdas" cycledefs="gfs" maxtries="&MAXTRIES;">
         <command>&JOBS_DIR;/checkgdas.sh</command>
 
@@ -376,6 +375,8 @@
 	</dependency>
 
 </task>  
+-->
+
 <metatask name="gfspost">
 
         <var name="grp">001 002 003 004 005</var>

@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+	<!--
+	PROGRAM
+		Main workflow manager for Forecast only Global Forecast System
+
+	AUTHOR:
+		Rahul Mahajan
+		rahul.mahajan@noaa.gov
+
+	NOTES:
+		This workflow was automatically generated at 2018-04-06 16:58:31.673151
+	-->
+
+	<!-- Experiment parameters such as name, cycle, resolution -->
+	<!ENTITY PSLOT    "rt_fv3gfs_chem">
+	<!ENTITY CDUMP    "gfs">
+	<!ENTITY CASE     "C96">
+
+	<!-- Experiment parameters such as starting, ending dates -->
+	<!ENTITY SDATE    "201805140000">
+	<!ENTITY EDATE    "202804260000">
+	<!ENTITY INTERVAL "24:00:00">
+
+	<!-- Run Envrionment -->
+	<!ENTITY RUN_ENVIR "emc">
+
+	<!-- Experiment related directories -->
+	<!ENTITY EXPDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
+	<!ENTITY ROTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+	<!ENTITY ICSDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS">
+        <!ENTITY PUBDIR "/scratch3/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY GDASDIR "/5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1">
+        <!ENTITY RUNDIR "/scratch4/BMC/rtfim/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY OUTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+         
+	<!-- Directories for driving the workflow -->
+	<!ENTITY HOMEgfs  "/scratch4/BMC/rtfim/rtruns/FV3-Chem/">
+	<!ENTITY JOBS_DIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/jobs/rocoto">
+
+	<!-- Machine related entities -->
+	<!ENTITY ACCOUNT    "gsd-fv3">
+	<!ENTITY QUEUE      "batch">
+	<!ENTITY QUEUE_ARCH "service">
+	<!ENTITY SCHEDULER  "moabtorque">
+
+	<!-- Toggle HPSS archiving -->
+	<!ENTITY ARCHIVE_TO_HPSS "NO">
+
+	<!-- ROCOTO parameters that control workflow -->
+	<!ENTITY CYCLETHROTTLE "1">
+	<!ENTITY TASKTHROTTLE  "20">
+	<!ENTITY MAXTRIES      "2">
+
+	<!-- BEGIN: Resource requirements for the workflow -->
+        
+        <!ENTITY QUEUE_CHECKGDAS_GFS     "&QUEUE_ARCH;">
+        <!ENTITY WALLTIME_CHECKGDAS_GFS  "00:10:00">
+        <!ENTITY RESOURCES_CHECKGDAS_GFS "<nodes>1:ppn=1</nodes>">
+        <!ENTITY MEMORY_CHECKGDAS_GFS    "">
+        <!ENTITY NATIVE_CHECKGDAS_GFS    "">
+
+	<!-- END: Resource requirements for the workflow -->
+
+]>
+
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+
+	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_gdaschk.log</cyclestr></log>
+
+	<!-- Define the cycles -->
+	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+
+<task name="late_checkgdas" cycledefs="gfs" maxtries="&MAXTRIES;">
+        <command>&JOBS_DIR;/checkgdas.sh</command>
+
+        <jobname><cyclestr>&PSLOT;_checkgdas_@H</cyclestr></jobname>
+        <account>&ACCOUNT;</account>
+        <queue>&QUEUE_CHECKGDAS_GFS;</queue>
+        &RESOURCES_CHECKGDAS_GFS;
+        <walltime>&WALLTIME_CHECKGDAS_GFS;</walltime>
+        <memory>&MEMORY_CHECKGDAS_GFS;</memory>
+        <native>&NATIVE_CHECKGDAS_GFS;</native>
+
+        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/late_checkgdas.log</cyclestr></join>
+
+        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+        <envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
+        <envar><name>PUBDIR</name><value>&PUBDIR;</value></envar>
+        <envar><name>GDASDIR</name><value>&GDASDIR;</value></envar>
+        <envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+	
+        <dependency>
+            <and>
+          	<timedep><cyclestr offset="21:15:00">@Y@m@d@H@M00</cyclestr></timedep>
+              	<not>
+		    <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas_available</cyclestr></datadep>
+       	       </not>
+            </and>
+	</dependency>
+
+</task>
+</workflow>
