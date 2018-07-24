@@ -52,9 +52,9 @@ SRCS_f   =  \
 	   ./physics/iounitdef.f                                                     \
 	   ./physics/lrgsclr.f                                                       \
 	   ./physics/mersenne_twister.f                                              \
-	   ./physics/samfdeepcnv.f                                                   \
 	   ./physics/mfpbl.f                                                         \
-	   ./physics/samfshalcnv.f                                                   \
+	   ./physics/mfpblt.f                                                        \
+	   ./physics/mfscu.f                                                         \
 	   ./physics/module_bfmicrophysics.f                                         \
 	   ./physics/moninedmf.f                                                     \
 	   ./physics/moninp.f                                                        \
@@ -92,8 +92,11 @@ SRCS_f   =  \
 	   ./physics/rascnvv2.f                                                      \
 	   ./physics/rayleigh_damp.f                                                 \
 	   ./physics/rayleigh_damp_mesopause.f                                       \
+	   ./physics/samfdeepcnv.f                                                   \
+	   ./physics/samfshalcnv.f                                                   \
 	   ./physics/sascnv.f                                                        \
 	   ./physics/sascnvn.f                                                       \
+	   ./physics/satmedmfvdif.f                                                  \
 	   ./physics/set_soilveg.f                                                   \
 	   ./physics/sfc_cice.f                                                      \
 	   ./physics/sfc_diag.f                                                      \
@@ -141,7 +144,8 @@ SRCS_F90 = \
 	   ./physics/gfdl_cloud_microphys.F90					     \
 	   ./physics/micro_mg_utils.F90                                              \
 	   ./physics/micro_mg2_0.F90                                                 \
-	   ./physics/module_mp_radar.F90						     \
+	   ./physics/micro_mg3_0.F90                                                 \
+	   ./physics/module_mp_radar.F90     				             \
 	   ./physics/module_mp_thompson_gfs.F90                                      \
 	   ./physics/module_mp_wsm6_fv3.F90                                          \
 	   ./GFS_layer/GFS_abstraction_layer.F90 				     \
@@ -149,10 +153,8 @@ SRCS_F90 = \
 	   ./GFS_layer/GFS_driver.F90            				     \
 	   ./GFS_layer/GFS_physics_driver.F90    				     \
 	   ./GFS_layer/GFS_radiation_driver.F90  				     \
-	   ./GFS_layer/GFS_restart.F90           				     \
-	   ./GFS_layer/GFS_typedefs.F90          				     \
-	   ./IPD_layer/IPD_driver.F90						     \
-	   ./IPD_layer/IPD_typedefs.F90                                              
+	   ./GFS_layer/GFS_restart.F90 						     \
+	   ./GFS_layer/GFS_typedefs.F90
 
 SRCS_c   =
 
@@ -174,9 +176,16 @@ $(LIBRARY): $(OBJS)
 # this is the place to override default (implicit) compilation rules
 # and create specific (explicit) rules
 
+ifneq (,$(findstring xCORE-AVX2,$(FFLAGS)))
 ./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
-
+else ifneq (,$(findstring xHOST,$(FFLAGS)))
+./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
+else
+./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
+	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -c $< -o $@
+endif
 ./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
 	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
 

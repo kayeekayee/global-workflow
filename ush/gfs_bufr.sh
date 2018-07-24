@@ -12,7 +12,8 @@
 # 2016-10-30  H Chuang: Tranistion to read nems output.
 #             Change to read flux file fields in gfs_bufr
 #             so remove excution of gfs_flux
-# 
+# 2018-03-22 Guang Ping Lou: Making it works for either 1 hourly or 3 hourly output
+# 2018-05-22 Guang Ping Lou: Making it work for both GFS and FV3GFS 
 echo "History: February 2003 - First implementation of this utility script"
 #
 
@@ -31,7 +32,9 @@ export pgm=gfs_flux
 cat << EOF > gfsflxparm
  &NAMKEN
   nout=$FINT,lonf=$LONB,latg=$LATB,nsfc=80,
-  nstart=$FSTART,nend=$FEND,nint=$FINT,nzero=$NZERO,f00=$f00flag,
+  nstart=$FSTART,nend=$FEND,nint=$FINT,
+  nend1=$NEND1,nint1=$NINT1,nint3=$NINT3,
+  nzero=$NZERO,f00=$f00flag,
 /
 EOF
 hh=$FSTART
@@ -54,11 +57,20 @@ else
    bufrflag=".false."
 fi
 
+if [ -s ${COMIN}/${RUN}.${cycle}.sfcf000.nemsio ]; then
+ SFCF="sfc"
+ CLASS="class1fv3"
+ else
+ SFCF="flx"
+ CLASS="class1"
+fi 
 cat << EOF > gfsparm
  &NAMMET
   iromb=0,maxwv=$JCAP,levs=$LEVS,makebufr=$bufrflag,
   dird="$COMOUT/bufr.${cycle}/bufr",
-  nstart=$FSTART,nend=$FEND,nint=$FINT,nsfc=80,f00=$f00flag,
+  nstart=$FSTART,nend=$FEND,nint=$FINT,
+  nend1=$NEND1,nint1=$NINT1,nint3=$NINT3,
+  nsfc=80,f00=$f00flag,
 /
 EOF
 
@@ -78,7 +90,7 @@ do
    fi
 
    ln -sf $COMIN/${RUN}.${cycle}.atmf${hh2}.nemsio sigf${hh} 
-   ln -sf $COMIN/${RUN}.${cycle}.sfcf${hh2}.nemsio flxf${hh}
+   ln -sf $COMIN/${RUN}.${cycle}.${SFCF}f${hh2}.nemsio flxf${hh}
 ##   ln -sf $COMIN/${RUN}.${cycle}.flxf${hh2}.nemsio flxf${hh}
 
    hh=` expr $hh + $FINT `
@@ -89,10 +101,8 @@ do
 done  
 
 #  define input BUFR table file.
-ln -sf $PARMbufrsnd/bufr_gfs_class1.tbl fort.1
+ln -sf $PARMbufrsnd/bufr_gfs_${CLASS}.tbl fort.1
 ln -sf ${STNLIST:-$PARMbufrsnd/bufr_stalist.meteo.gfs} fort.8
-#ln -sf metflxmrf fort.12
-#ln -sf $SIGLEVEL fort.13
 
 #startmsg
 export APRUN=${APRUN_POSTSND:-'aprun -n 12 -N 3 -j 1'}

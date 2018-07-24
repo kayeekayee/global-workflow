@@ -35,7 +35,8 @@ import workflow_utils as wfu
 
 
 #JKHtaskplan = ['getic', 'fv3ic', 'fcst', 'post', 'vrfy', 'arch']
-taskplan = ['fv3ic', 'fcst', 'post', 'vrfy', 'arch']
+#JKHtaskplan = ['fv3ic', 'fcst', 'post', 'vrfy', 'arch']
+taskplan = ['fv3ic', 'fcst', 'post']
 
 def main():
     parser = ArgumentParser(description='Setup XML workflow and CRONTAB for a forecast only experiment.', formatter_class=ArgumentDefaultsHelpFormatter)
@@ -159,7 +160,7 @@ def get_resources(dict_configs, cdump='gdas'):
 
         cfg = dict_configs[task]
 
-        wtimestr, resstr, queuestr, memstr = wfu.get_resources(machine, cfg, task, cdump=cdump)
+        wtimestr, resstr, queuestr, memstr, natstr = wfu.get_resources(machine, cfg, task, cdump=cdump)
 
         taskstr = '%s_%s' % (task.upper(), cdump.upper())
 
@@ -167,7 +168,7 @@ def get_resources(dict_configs, cdump='gdas'):
         strings.append('\t<!ENTITY WALLTIME_%s  "%s">\n' % (taskstr, wtimestr))
         strings.append('\t<!ENTITY RESOURCES_%s "%s">\n' % (taskstr, resstr))
         strings.append('\t<!ENTITY MEMORY_%s    "%s">\n' % (taskstr, memstr))
-        strings.append('\t<!ENTITY NATIVE_%s    "">\n'   % (taskstr))
+        strings.append('\t<!ENTITY NATIVE_%s    "%s">\n' % (taskstr, natstr))
 
         strings.append('\n')
 
@@ -186,7 +187,7 @@ def get_postgroups(post, cdump='gdas'):
     if cdump in ['gdas']:
         fhrs = range(fhmin, fhmax+fhout, fhout)
     elif cdump in ['gfs']:
-        fhmax = post['FHMAX_GFS']
+        fhmax = np.max([post['FHMAX_GFS_00'],post['FHMAX_GFS_06'],post['FHMAX_GFS_12'],post['FHMAX_GFS_18']])
         fhout = post['FHOUT_GFS']
         fhmax_hf = post['FHMAX_HF_GFS']
         fhout_hf = post['FHOUT_HF_GFS']
@@ -216,6 +217,7 @@ def get_workflow(dict_configs, cdump='gdas'):
     envars.append(rocoto.create_envar(name='RUN_ENVIR', value='&RUN_ENVIR;'))
     envars.append(rocoto.create_envar(name='HOMEgfs', value='&HOMEgfs;'))
     envars.append(rocoto.create_envar(name='EXPDIR', value='&EXPDIR;'))
+    envars.append(rocoto.create_envar(name='ROTDIR', value='&ROTDIR;'))
     envars.append(rocoto.create_envar(name='CDATE', value='<cyclestr>@Y@m@d@H</cyclestr>'))
     envars.append(rocoto.create_envar(name='CDUMP', value='&CDUMP;'))
     envars.append(rocoto.create_envar(name='PDY', value='<cyclestr>@Y@m@d</cyclestr>'))
@@ -299,25 +301,25 @@ def get_workflow(dict_configs, cdump='gdas'):
     tasks.append(task)
     tasks.append('\n')
 
-    # vrfy
-    deps = []
-    dep_dict = {'type':'metatask', 'name':'%spost' % cdump}
-    deps.append(rocoto.add_dependency(dep_dict))
-    dependencies = rocoto.create_dependency(dep=deps)
-    task = wfu.create_wf_task('vrfy', cdump=cdump, envar=envars, dependency=dependencies)
-    tasks.append(task)
-    tasks.append('\n')
+#JKH     # vrfy
+#JKH     deps = []
+#JKH     dep_dict = {'type':'metatask', 'name':'%spost' % cdump}
+#JKH     deps.append(rocoto.add_dependency(dep_dict))
+#JKH     dependencies = rocoto.create_dependency(dep=deps)
+#JKH     task = wfu.create_wf_task('vrfy', cdump=cdump, envar=envars, dependency=dependencies)
+#JKH     tasks.append(task)
+#JKH     tasks.append('\n')
 
-    # arch
-    deps = []
-    dep_dict = {'type':'task', 'name':'%svrfy' % cdump}
-    deps.append(rocoto.add_dependency(dep_dict))
-    dep_dict = {'type':'streq', 'left':'&ARCHIVE_TO_HPSS;', 'right':'YES'}
-    deps.append(rocoto.add_dependency(dep_dict))
-    dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
-    task = wfu.create_wf_task('arch', cdump=cdump, envar=envars, dependency=dependencies, final=True)
-    tasks.append(task)
-    tasks.append('\n')
+#JKH     # arch
+#JKH     deps = []
+#JKH     dep_dict = {'type':'task', 'name':'%svrfy' % cdump}
+#JKH     deps.append(rocoto.add_dependency(dep_dict))
+#JKH     dep_dict = {'type':'streq', 'left':'&ARCHIVE_TO_HPSS;', 'right':'YES'}
+#JKH     deps.append(rocoto.add_dependency(dep_dict))
+#JKH     dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
+#JKH     task = wfu.create_wf_task('arch', cdump=cdump, envar=envars, dependency=dependencies, final=True)
+#JKH     tasks.append(task)
+#JKH     tasks.append('\n')
 
     return ''.join(tasks)
 

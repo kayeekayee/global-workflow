@@ -3,9 +3,9 @@ module module_write_nemsio
   use esmf
   use nemsio_module
   use module_fv3_io_def, only : write_nemsioflip, write_fsyncflag
- 
+
   implicit none
- 
+
   include 'mpif.h'
 
   private
@@ -15,8 +15,8 @@ module module_write_nemsio
   logical :: hydrostatic
   real(kind=ESMF_KIND_R4) :: varr4
   integer,dimension(200,100)      :: nfldlev
-  character(16),dimension(3000,5) :: recname,reclevtyp 
-  integer,dimension(3000,5)       :: reclev 
+  character(16),dimension(3000,5) :: recname,reclevtyp
+  integer,dimension(3000,5)       :: reclev
 
   integer,dimension(:), allocatable    :: nrec
   integer,dimension(:), allocatable    :: idsl, idvc,idvm
@@ -40,7 +40,7 @@ module module_write_nemsio
   logical         :: first_set
 
   public nemsio_first_call, write_nemsio
-  
+
   contains
 
   subroutine nemsio_first_call(fieldbundle, imo, jmo, &
@@ -64,7 +64,7 @@ module module_write_nemsio
     integer, dimension(:), allocatable :: ungriddedLBound, ungriddedUBound
     type(ESMF_Field), allocatable  :: fcstField(:)
     real(ESMF_KIND_R8), dimension(:,:), pointer   :: lonPtr, latPtr
-    
+
 !-------------------------------------------------------------------
 !
     im    = imo
@@ -150,7 +150,7 @@ module module_write_nemsio
          nfldlev(i,mybdl) = 1
          nrec(mybdl) = nrec(mybdl) + 1
        endif
-       
+
     enddo
 !
     nfld = 1
@@ -302,7 +302,11 @@ module module_write_nemsio
 !
 !**  OPEN NEMSIO FILE
 !
-    if(mype==0) print *,'in write_nemsio,bf nemsio_open, filename=',trim(filename),    &
+    if (mype == 0) then
+
+      nfseconds = nf_seconds*nfsecond_den + nfsecond_num
+
+      print *,'in write_nemsio,bf nemsio_open, filename=',trim(filename),    &
       'idate=',idate,'nfour=',NF_HOURS,NF_MINUTES,NF_SECONDS, 'mybdl=',mybdl,          &
       'dim=',im,jm,lm,'nmeta=',nmeta,'idrt=',idrt,'nsoil=',nsoil,                      &
       'ntrac=',ntrac,'nrec=',nrec(mybdl),'extrameta=',extrameta(mybdl),                &
@@ -316,8 +320,6 @@ module module_write_nemsio
 !    if(nmetaaryi(mybdl)>0) print *,'in write_nemsio,bf nemsio_open,nmetaaryi=', &
 !      nmetaaryi(mybdl),'aryival=',trim(aryiname(1,mybdl)),aryilen(1,mybdl),aryival(1:3,1,mybdl)
  
-    if(mype==0) then
-      nfseconds = nf_seconds*nfsecond_den + nfsecond_num
       call nemsio_open(nemsiofile,trim(FILENAME),'write',rc,             &
         modelname="FV3GFS", gdatatype="bin4",                            &
         idate=idate,nfhour=nf_hours, nfminute=nf_minutes,                &
@@ -352,7 +354,7 @@ module module_write_nemsio
     call ESMF_FieldBundleGet(fieldbundle, fieldList=fcstField,     &
          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) & return  ! bail out
+        line=__LINE__, file=__FILE__)) return  ! bail out
 
     jrec = 1
     do i=1, fieldcount(mybdl)
@@ -460,13 +462,13 @@ module module_write_nemsio
            if (typekind == ESMF_TYPEKIND_R4) then
              do n=jstart,jend
                do m=istart,iend
-                  arrayr42d(m,n)=arrayr43d(m,n,k)    
+                  arrayr42d(m,n)=arrayr43d(m,n,k)
                enddo
              enddo
            elseif (typekind == ESMF_TYPEKIND_R8) then
              do n=jstart,jend
                do m=istart,iend
-                  arrayr42d(m,n)=arrayr83d(m,n,k)    
+                  arrayr42d(m,n)=arrayr83d(m,n,k)
                enddo
              enddo
            endif
@@ -545,7 +547,7 @@ module module_write_nemsio
    real(4), dimension(:), allocatable :: ak4,bk4
    real(8), dimension(:), allocatable :: ak8,bk8
 !
-! look at the field bundle attributes 
+! look at the field bundle attributes
     call ESMF_AttributeGet(fldbundle, convention="NetCDF", purpose="FV3", &
       attnestflag=ESMF_ATTNEST_OFF, Count=attcount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -616,7 +618,7 @@ module module_write_nemsio
 !      'nmetavarr8=',nmetavarr8(mybdl) , 'aklen=',aklen
 !
 ! get value:
-    if (nmetavari(mybdl) > 0) then 
+    if (nmetavari(mybdl) > 0) then
       if(.not.allocated(variname))   allocate(variname(100,nbdl),varival(100,nbdl))
     endif
     if (nmetavarr4(mybdl) > 0) then
@@ -647,7 +649,7 @@ module module_write_nemsio
         attnestflag=ESMF_ATTNEST_OFF, attributeIndex=i, name=attName, &
         typekind=typekind, itemCount=n,  rc=rc)
        print *,'in write nemsio fist get att, att=',trim(attName),'n=',n
-      
+
       if (typekind==ESMF_TYPEKIND_I4 ) then
         if(n==1) then
          ni = ni + 1
@@ -746,7 +748,7 @@ module module_write_nemsio
            name=trim(varcname(nc,mybdl)), value=varcval(nc,mybdl), rc=rc)
         endif
       endif
-     
+
 !      if(nmetavari(mybdl)>0) print *,'variname=',variname(1,mybdl),'varival=',varival(1,mybdl)
 !      if(nmetavarc(mybdl)>0) print *,'varcname=',varcname(1,mybdl),'varcval=',varcval(1,mybdl)
 !

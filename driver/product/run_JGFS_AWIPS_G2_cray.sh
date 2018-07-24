@@ -1,10 +1,10 @@
 #!/bin/sh
 
 #BSUB -J jgfs_awips_f12_00
-#BSUB -oo gfs_awips_f12_00.o%J
-#BSUB -eo gfs_awips_f12_00.o%J
+#BSUB -o /gpfs/hps3/ptmp/Boi.Vuong/output/gfs_awips_f12_00.o%J
+#BSUB -e /gpfs/hps3/ptmp/Boi.Vuong/output/gfs_awips_f12_00.o%J
 #BSUB -q debug
-#BSUB -cwd /gpfs/hps/ptmp/Boi.Vuong/output
+#BSUB -cwd /gpfs/hps3/ptmp/Boi.Vuong/output
 #BSUB -W 00:30
 #BSUB -P GFS-T2O
 #BSUB -R rusage[mem=1000]
@@ -12,14 +12,10 @@
 
 export KMP_AFFINITY=disabled
 
-export PDY=`date -u +%Y%m%d`
-export PDY=20180226
+ export PDY=`date -u +%Y%m%d`
+# export PDY=20180514
 
 export PDY1=`expr $PDY - 1`
-
-# export cyc=06
-export cyc=00
-export cycle=t${cyc}z
 
 # export cyc=06
 export cyc=00
@@ -37,14 +33,13 @@ date
 module load PrgEnv-intel/5.2.56
 module load cfp-intel-sandybridge/1.1.0
 module load ESMF-intel-sandybridge/3_1_0rp5
-module load iobuf/2.0.7
+module load iobuf/2.0.8
 module load craype-hugepages2M
 module load craype-haswell
 module load prod_envir
-module load prod_util/1.0.20
+module load prod_util
 module load grib_util/1.0.3
 module load util_shared/1.0.6
-
 #
 #   This is a test version of UTIL_SHARED.v1.0.7 on CRAY
 #
@@ -57,7 +52,7 @@ module list
 # GFS_AWIPS_G2 AWIPS PRODUCT GENERATION
 ########################################
 
-export fcsthrs=006
+export fcsthrs=012
 
 ############################################
 # User Define COM, PCOM, COMIN  directories
@@ -67,14 +62,17 @@ export fcsthrs=006
 # export envir=prod
 
 export SENDCOM=YES
-export SENDDBN=NO
 export KEEPDATA=YES
-export job=gfs_awips_f${fcsthrs}_${cyc}
+export job=jgfs_awips_f${fcsthrs}_${cyc}
 export pid=${pid:-$$}
 export jobid=${job}.${pid}
+
+# Set FAKE DBNET for testing
+export SENDDBN=YES
+export DBNROOT=/gpfs/hps/nco/ops/nwprod/prod_util.v1.0.24/fakedbn
+
 export DATAROOT=/gpfs/hps3/ptmp/Boi.Vuong/output
-# export NWROOT=/gpfs/hps3/emc/global/noscrub/Boi.Vuong/svn
-export NWROOT=/gpfs/hps3/emc/global/noscrub/Boi.Vuong/svn/fv3gfs
+export NWROOT=/gpfs/hps3/emc/global/noscrub/Boi.Vuong/svn
 export COMROOT2=/gpfs/hps3/ptmp/Boi.Vuong/com
 
 mkdir -m 775 -p ${COMROOT2} ${COMROOT2}/logs ${COMROOT2}/logs/jlogfiles
@@ -83,13 +81,12 @@ export jlogfile=${COMROOT2}/logs/jlogfiles/jlogfile.${jobid}
 #############################################################
 # Specify versions
 #############################################################
-export gdas_ver=v15.0.0
 export gfs_ver=v15.0.0
 
 ################################
 # Set up the HOME directory
 ################################
-export HOMEgfs=${HOMEgfs:-${NWROOT}}
+export HOMEgfs=${HOMEgfs:-${NWROOT}/gfs.${gfs_ver}}
 export USHgfs=${USHgfs:-$HOMEgfs/ush}
 export EXECgfs=${EXECgfs:-$HOMEgfs/exec}
 export PARMgfs=${PARMgfs:-$HOMEgfs/parm}
@@ -112,20 +109,23 @@ if [ $envir = "prod" ] ; then
   export COMIN=/gpfs/hps/nco/ops/com/gfs/prod/gfs.${PDY}         ### NCO PROD
 else
 #  export COMIN=/gpfs/hps3/ptmp/emc.glopara/com2/gfs/para/gfs.${PDY}         ### EMC PARA Realtime
-#  export COMIN=/gpfs/hps3/ptmp/emc.glopara/ROTDIRS/prfv3rt1/gfs.${PDY}/${cyc} ### EMC PARA Realtime
+  export COMIN=/gpfs/hps3/ptmp/emc.glopara/ROTDIRS/prfv3rt1/gfs.${PDY}/${cyc} ### EMC PARA Realtime
 #  export COMIN=/gpfs/hps3/ptmp/emc.glopara/prfv3l65/gfs.${PDY}/${cyc} ### EMC PARA Realtime
-  export COMIN=/gpfs/hps3/emc/global/noscrub/Boi.Vuong/svn/gfs.${PDY}/${cyc} ### Boi PARA
+#  export COMIN=/gpfs/hps3/emc/global/noscrub/Boi.Vuong/svn/gfs.${PDY}/${cyc} ### Boi PARA
 #  export COMIN=/gpfs/hps3/ptmp/emc.glopara/ROTDIRS/prfv3test/gfs.${PDY}/${cyc}  ### EMC test PARA ####
 
 #  export COMIN=/gpfs/hps/nco/ops/com/gfs/para/gfs.${PDY}       ### NCO PARA
 fi
 
 export COMOUT=${COMOUT:-${COMROOT2}/${NET}/${envir}/${RUN}.${PDY}/${cyc}}
-export PCOM=${PCOM:-${COMOUT}/wmo}
+export COMOUTwmo=${COMOUTwmo:-${COMOUT}/wmo}
 
 if [ $SENDCOM = YES ] ; then
-  mkdir -m 775 -p $COMOUT $PCOM
+  mkdir -m 775 -p $COMOUT $COMOUTwmo
 fi
+
+export NODES=1
+export APRUN_AWIPSCFP='aprun -j 1 -n 4 -N 4 -d 2 -cc depth cfp'
 
 #########################################################
 # obtain unique process id (pid) and make temp directory

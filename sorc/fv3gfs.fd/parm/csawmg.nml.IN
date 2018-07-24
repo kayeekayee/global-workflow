@@ -152,8 +152,9 @@
        redrag         = .true.
        dspheat        = .fasle.
        hybedmf        = .false.
+       satmedmf       = .false.
        random_clds    = .true.
-       trans_trac     = .true.
+       trans_trac     = .false.
        cnvcld         = .false.
        imfshalcnv     = 2
        imfdeepcnv     = -1
@@ -166,7 +167,7 @@
        ras            = .false.
        cscnv          = .true.
        do_shoc        = .false.
-       shoc_pcrit     = 7000.0
+       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
        do_aw          = .true.
        shoc_cld       = .false.
        h2o_phys       = .true.
@@ -259,4 +260,6 @@
   ISEED_SHUM=1,
   ISEED_SKEB=2,
   ISEED_SPPT=3,
+/
+&nam_sfcperts
 /

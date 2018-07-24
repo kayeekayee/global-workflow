@@ -108,7 +108,8 @@ module GFS_driver
 
 !   use module_microphysics, only: gsmconst
     use cldwat2m_micro,      only: ini_micro
-    use micro_mg2_0,         only: micro_mg_init
+    use micro_mg2_0,         only: micro_mg_init2_0 => micro_mg_init
+    use micro_mg3_0,         only: micro_mg_init3_0 => micro_mg_init
     use aer_cloud,           only: aer_cloud_init
     use module_ras,          only: ras_init
     use module_mp_thompson,  only: thompson_init
@@ -154,12 +155,13 @@ module GFS_driver
                      Init_parm%tracer_names,                       &
                      Init_parm%input_nml_file)
 
-    call init_stochastic_physics(Model,Init_parm)
-    if(Model%me == Model%master) print*,'do_skeb=',Model%do_skeb
 
     call read_o3data  (Model%ntoz, Model%me, Model%master)
     call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
+    call init_stochastic_physics(Model,Init_parm,nblks,Grid)
+
+    if(Model%me == Model%master) print*,'do_skeb=',Model%do_skeb
     do nb = 1,nblks
       ix = Init_parm%blksz(nb)
 !     write(0,*)' ix in gfs_driver=',ix,' nb=',nb
@@ -175,13 +177,18 @@ module GFS_driver
       call Diag     (nb)%create (ix, Model)
     enddo
 
+
     !--- populate the grid components
     call GFS_grid_populate (Grid, Init_parm%xlon, Init_parm%xlat, Init_parm%area)
-     
+
+!   get land surface perturbations here (move to GFS_time_vary if wanting to
+!   update each time-step
+    call run_stochastic_physics_sfc(nblks,Model,Grid,Coupling)
+
     !--- read in and initialize ozone and water
     if (Model%ntoz > 0) then
       do nb = 1, nblks
-        call setindxoz (Init_parm%blksz(nb), Grid(nb)%xlat_d, Grid(nb)%jindx1_o3, &
+          call setindxoz (Init_parm%blksz(nb), Grid(nb)%xlat_d, Grid(nb)%jindx1_o3, &
                         Grid(nb)%jindx2_o3, Grid(nb)%ddy_o3)
       enddo
     endif
@@ -220,19 +227,36 @@ module GFS_driver
     if (Model%imp_physics == 10) then          !--- initialize Morrison-Gettleman microphysics
       if (Model%fprcp <= 0) then
         call ini_micro (Model%mg_dcs, Model%mg_qcvar, Model%mg_ts_auto_ice)
+      elseif (Model%fprcp == 1) then
+        call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair,          &
+                              tmelt, latvap, latice, 1.01_kind_phys,         &
+                              Model%mg_dcs, Model%mg_ts_auto_ice,            &
+                              Model%mg_qcvar,                                &
+                              Model%microp_uniform, Model%do_cldice,         &
+                              Model%hetfrz_classnuc,                         &
+                              Model%mg_precip_frac_method,                   &
+                              Model%mg_berg_eff_factor,                      &
+                              Model%sed_supersat, Model%do_sb_physics,       &
+                              Model%mg_nccons,Model%mg_nicons,               &
+                              Model%mg_ncnst, Model%mg_ninst)
+      elseif (Model%fprcp == 2) then
+        call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair,              &
+                              tmelt, latvap, latice, 1.01_kind_phys,             &
+                              Model%mg_dcs, Model%mg_ts_auto_ice,                &
+                              Model%mg_qcvar,                                    &
+                              Model%mg_do_hail,       Model%mg_do_graupel,       &
+                              Model%microp_uniform,   Model%do_cldice,           &
+                              Model%hetfrz_classnuc,                             &
+                              Model%mg_precip_frac_method,                       &
+                              Model%mg_berg_eff_factor,                          &
+                              Model%sed_supersat, Model%do_sb_physics,           &
+                              Model%mg_nccons,    Model%mg_nicons,               &
+                              Model%mg_ncnst,     Model%mg_ninst,                &
+                              Model%mg_ngcons,    Model%mg_ngnst)
       else
-        call micro_mg_init( kind_phys, gravit, rair, rh2o, cpair,          &
-                            tmelt, latvap, latice, 1.01_kind_phys,         &
-                            Model%mg_dcs,Model%mg_ts_auto_ice,             &
-                            Model%mg_qcvar,                                &
-                            Model%microp_uniform, Model%do_cldice,         &
-                            Model%hetfrz_classnuc,                         &
-!                          .false., .true., .false.,                       &
-!                          'in_cloud        ', 2._kind_phys,               &
-!                          .true., .true., .false.,                        &
-                           'max_overlap     ', 2._kind_phys,               &
-                           .true., .true.,                                 &
-                           .false., .false., 100.e6_kind_phys, 0.15e6_kind_phys )
+        write(0,*)' Model%fprcp = ',Model%fprcp,' is not a valid option - aborting'
+        stop
+      
       endif
       call aer_cloud_init ()
 !
@@ -294,7 +318,6 @@ module GFS_driver
 !      3) defines random seed indices for radiation (in a reproducible way)
 !      5) interpolates coefficients for prognostic ozone calculation
 !      6) performs surface data cycling via the GFS gcycle routine
-!      7) if in coupled mode, assign coupled fields into gfs physics
 !-------------------------------------------------------------------------
   subroutine GFS_time_vary_step (Model, Statein, Stateout, Sfcprop, Coupling, & 
                                  Grid, Tbd, Cldprop, Radtend, Diag)
@@ -368,11 +391,6 @@ module GFS_driver
       endif
     endif
 
-    !--- if coupled, assign coupled fields
-!    if (Model%cplflx) then
-!      call assign_importdata(Model, blksz, Sfcprop)
-!    endif
-
     !--- determine if diagnostics buckets need to be cleared
     if (mod(Model%kdt,Model%nszero) == 1) then
       do nb = 1,nblks
@@ -425,6 +443,27 @@ module GFS_driver
     implicit none
 
     !--- interface variables
+! DH* gfortran correctly throws an error if the intent() declarations
+! for arguments differ between the actual routine (here) and the dummy
+! interface routine (IPD_func0d_proc in IPD_typedefs.F90):
+!
+! Error: Interface mismatch in procedure pointer assignment at (1): INTENT mismatch in argument 'control'
+!
+! Since IPD_func0d_proc declares all arguments as intent(inout), we
+! need to do the same here - however, this way we are loosing the
+! valuable information on the actual intent to this routine. *DH
+#ifdef __GFORTRAN__
+    type(GFS_control_type),         intent(inout) :: Model
+    type(GFS_statein_type),         intent(inout) :: Statein
+    type(GFS_stateout_type),        intent(inout) :: Stateout
+    type(GFS_sfcprop_type),         intent(inout) :: Sfcprop
+    type(GFS_coupling_type),        intent(inout) :: Coupling
+    type(GFS_grid_type),            intent(inout) :: Grid
+    type(GFS_tbd_type),             intent(inout) :: Tbd
+    type(GFS_cldprop_type),         intent(inout) :: Cldprop
+    type(GFS_radtend_type),         intent(inout) :: Radtend
+    type(GFS_diag_type),            intent(inout) :: Diag
+#else
     type(GFS_control_type),   intent(in   ) :: Model
     type(GFS_statein_type),   intent(in   ) :: Statein
     type(GFS_stateout_type),  intent(in   ) :: Stateout
@@ -435,6 +474,7 @@ module GFS_driver
     type(GFS_cldprop_type),   intent(in   ) :: Cldprop
     type(GFS_radtend_type),   intent(in   ) :: Radtend
     type(GFS_diag_type),      intent(inout) :: Diag
+#endif
     !--- local variables
     integer :: k, i
     real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew,sppt_vwt

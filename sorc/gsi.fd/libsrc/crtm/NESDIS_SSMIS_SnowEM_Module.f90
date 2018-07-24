@@ -44,7 +44,7 @@ MODULE NESDIS_SSMIS_SnowEM_Module
   ! -----------------
   ! Version Id for the module
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: NESDIS_SSMIS_SnowEM_Module.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: NESDIS_SSMIS_SnowEM_Module.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
 
 
 CONTAINS

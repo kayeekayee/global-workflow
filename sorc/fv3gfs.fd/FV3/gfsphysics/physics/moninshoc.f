@@ -1,9 +1,13 @@
 !!!!!  ==========================================================  !!!!!
 ! subroutine 'moninshoc' computes pbl height and applies vertical diffusion
 ! using the coefficient provided by the SHOC scheme (from previous step)
-! 1015-05-04 - Shrinivas Moorthi - original version based on monin
+! 2015-05-04 - Shrinivas Moorthi - original version based on monin
+! 2018-03-21 - Shrinivas Moorthi - fixed a bug related to tke vertical diffusion
+!                                  and gneralized the tke location in tracer array
+! 2018-03-23 - Shrinivas Moorthi - used twice the momentum diffusion coefficient
+!                                  for tke as in Deardorff (1980) - added tridi1
 ! 
-      subroutine moninshoc(ix,im,km,ntrac,ntcw,dv,du,tau,rtg,
+      subroutine moninshoc(ix,im,km,ntrac,ntcw,ncnd,dv,du,tau,rtg,
      &                     u1,v1,t1,q1,tkh,prnum,ntke,
      &                     psk,rbsoil,zorl,u10m,v10m,fm,fh,
      &                     tsea,heat,evap,stress,spd1,kpbl,
@@ -13,14 +17,14 @@
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, rd => con_rd, cp => con_cp
+      use physcons, grav => con_g,    rd => con_rd,  cp => con_cp
      &,             hvap => con_hvap, fv => con_fvirt
       implicit none
 !
 !     arguments
 !
       logical lprnt
-      integer ipr, me , ix, im, km, ntrac, ntcw,  ntke
+      integer ipr, me , ix, im, km, ntrac, ntcw, ncnd, ntke
       integer, dimension(im) ::  kinver, kpbl
 !
       real(kind=kind_phys) delt, xkzm_m, xkzm_h, xkzm_s
@@ -40,7 +44,7 @@
 !
 !    locals
 !
-      integer i,iprt,is,k,kk,km1,kmpbl,kp1
+      integer i,is,k,kk,km1,kmpbl,kp1, ntloc
 !
       logical  pblflg(im), sfcflg(im), flg(im)
 
@@ -49,9 +53,9 @@
      &,                     stress, beta, tx1
 !
       real(kind=kind_phys), dimension(im,km)  :: theta, thvx, zl, a1, ad
+     &,                                          dt2odel
       real(kind=kind_phys), dimension(im,km-1):: xkzo, xkzmo, al, au
      &,                                          dku, dkt, rdzt
-!    &,                                          dku, dkt, rdzt, prnum
 !
       real(kind=kind_phys) zi(im,km+1), a2(im,km*(ntrac+1))
 !
@@ -85,8 +89,9 @@
 !
       do k=1,km
         do i=1,im
-          zi(i,k) = phii(i,k) * gravi
-          zl(i,k) = phil(i,k) * gravi
+          zi(i,k)      = phii(i,k) * gravi
+          zl(i,k)      = phil(i,k) * gravi
+          dt2odel(i,k) = dt2 / del(i,k)
         enddo
       enddo
       do i=1,im
@@ -137,23 +142,30 @@
 !
 !
       do i = 1,im
-         z0(i)    = 0.01 * zorl(i)
-         kpbl(i)  = 1
-         hpbl(i)  = zi(i,1)
-         pblflg(i)= .true.
-         sfcflg(i)= .true.
+         z0(i)     = 0.01 * zorl(i)
+         kpbl(i)   = 1
+         hpbl(i)   = zi(i,1)
+         pblflg(i) = .true.
+         sfcflg(i) = .true.
          if(rbsoil(i) > 0.) sfcflg(i) = .false.
-         dusfc(i) = 0.
-         dvsfc(i) = 0.
-         dtsfc(i) = 0.
-         dqsfc(i) = 0.
+         dusfc(i)  = 0.
+         dvsfc(i)  = 0.
+         dtsfc(i)  = 0.
+         dqsfc(i)  = 0.
       enddo
 !
       do k = 1,km
+        do i=1,im
+          tx1(i) = 0.0
+        enddo
+        do kk=1,ncnd
+          do i=1,im
+            tx1(i) = tx1(i) + max(q1(i,k,ntcw+kk-1), qlmin)
+          enddo
+        enddo
         do i = 1,im
-          tem = max(q1(i,k,ntcw),qlmin)
           theta(i,k) = t1(i,k) * psk(i) / prslk(i,k)
-          thvx(i,k)  = theta(i,k)*(1.+fv*max(q1(i,k,1),qmin)-tem)
+          thvx(i,k)  = theta(i,k)*(1.+fv*max(q1(i,k,1),qmin)-tx1(i))
         enddo
       enddo
 !
@@ -168,7 +180,7 @@
 !
 !     write(0,*)' IN moninbl u10=',u10m(1:5),' v10=',v10m(1:5)
       do i=1,im
-         flg(i) = .false.
+         flg(i)  = .false.
          rbup(i) = rbsoil(i)
 !
          if(pblflg(i)) then
@@ -176,18 +188,17 @@
            crb(i) = crbcon
          else
            thermal(i) = tsea(i)*(1.+fv*max(q1(i,1,1),qmin))
-           tem = max(1.0, sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i)))
-           robn = tem / (f0 * z0(i))
-           tem1 = 1.e-7 * robn
-           crb(i) = 0.16 * (tem1 ** (-0.18))
-           crb(i) = max(min(crb(i), crbmax), crbmin)
+           tem   = max(1.0, sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i)))
+           robn   = tem / (f0 * z0(i))
+           tem1   = 1.e-7 * robn
+           crb(i) = max(min(0.16 * (tem1 ** (-0.18)), crbmax), crbmin)
          endif
       enddo
       do k = 1, kmpbl
         do i = 1, im
           if(.not.flg(i)) then
             rbdn(i) = rbup(i)
-            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)),1.)
+            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)), 1.)
             rbup(i) = (thvx(i,k)-thermal(i))*phil(i,k)
      &              / (thvx(i,1)*spdk2)
             kpbl(i) = k
@@ -203,7 +214,7 @@
           elseif(rbup(i) <= crb(i)) then
             rbint = 1.
           else
-            rbint = (crb(i)-rbdn(i))/(rbup(i)-rbdn(i))
+            rbint = (crb(i)-rbdn(i)) / (rbup(i)-rbdn(i))
           endif
           hpbl(i) = zl(i,k-1) + rbint*(zl(i,k)-zl(i,k-1))
           if(hpbl(i) < zi(i,kpbl(i))) kpbl(i) = kpbl(i) - 1
@@ -226,7 +237,7 @@
          if(sfcflg(i)) then
 !          phim(i) = (1.-aphi16*zol1)**(-1./4.)
 !          phih(i) = (1.-aphi16*zol1)**(-1./2.)
-           tem     = 1.0 / (1. - aphi16*zol1)
+           tem     = 1.0 / max(1. - aphi16*zol1, 1.0e-8)
            phih(i) = sqrt(tem)
            phim(i) = sqrt(phih(i))
          else
@@ -248,7 +259,7 @@
         do i = 1, im
           if(.not.flg(i)) then
             rbdn(i) = rbup(i)
-            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)),1.)
+            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)), 1.)
             rbup(i) = (thvx(i,k)-thermal(i)) * phil(i,k)
      &              / (thvx(i,1)*spdk2)
             kpbl(i) = k
@@ -264,7 +275,7 @@
           elseif(rbup(i) <= crb(i)) then
             rbint = 1.
           else
-            rbint = (crb(i)-rbdn(i))/(rbup(i)-rbdn(i))
+            rbint = (crb(i)-rbdn(i)) / (rbup(i)-rbdn(i))
           endif
           if (k > 1) then
             hpbl(i) = zl(i,k-1) + rbint*(zl(i,k)-zl(i,k-1))
@@ -277,7 +288,7 @@
           endif
         endif
         if (pblflg(i)) then
-          tem = phih(i)/phim(i)+cfac*vk*sfcfrac
+          tem = phih(i)/phim(i) + cfac*vk*sfcfrac
         else
           tem = phih(i)/phim(i)
         endif
@@ -330,20 +341,26 @@
 !     if (lprnt) write(0,*)' a1=',a1(ipr,1),' beta=',beta(ipr)
 !    &,' heat=',heat(ipr), ' t1=',t1(ipr,1)
 
-      if(ntrac > 2) then
-        do k = 2, ntrac-1
-          is = (k-1) * km
-          do i = 1, im
-            a2(i,1+is) = q1(i,1,k)
-          enddo
+      ntloc = 1
+      if(ntrac > 1) then
+        is    = 0
+        do k = 2, ntrac
+          if (k /= ntke) then
+            ntloc = ntloc + 1
+            is = is + km
+            do i = 1, im
+              a2(i,1+is) = q1(i,1,k)
+            enddo
+          endif
         enddo
       endif
 !
       do k = 1,km1
+        kp1 = k + 1
         do i = 1,im
-          dtodsd    = dt2/del(i,k)
-          dtodsu    = dt2/del(i,k+1)
-          dsig      = prsl(i,k)-prsl(i,k+1)
+          dtodsd    = dt2odel(i,k)
+          dtodsu    = dt2odel(i,kp1)
+          dsig      = prsl(i,k)-prsl(i,kp1)
           rdz       = rdzt(i,k)
           tem1      = dsig * dkt(i,k) * rdz
           dsdz2     = tem1 * rdz
@@ -351,29 +368,33 @@
           al(i,k)   = -dtodsu*dsdz2
 !
           ad(i,k)   = ad(i,k)-au(i,k)
-          ad(i,k+1) = 1.-al(i,k)
+          ad(i,kp1) = 1.-al(i,k)
           dsdzt     = tem1 * gocp
-          a1(i,k)   = a1(i,k)+dtodsd*dsdzt
-          a1(i,k+1) = t1(i,k+1)-dtodsu*dsdzt
-          a2(i,k+1) = q1(i,k+1,1)
+          a1(i,k)   = a1(i,k)   + dtodsd*dsdzt
+          a1(i,kp1) = t1(i,kp1) - dtodsu*dsdzt
+          a2(i,kp1) = q1(i,kp1,1)
 !
         enddo
       enddo
 !
-      if(ntrac > 2) then
-        do kk = 2, ntrac-1
-          is = (kk-1) * km
-          do k = 1, km1
-            do i = 1, im
-              a2(i,k+1+is) = q1(i,k+1,kk)
+      if(ntrac > 1) then
+        is = 0
+        do kk = 2, ntrac
+          if (kk /= ntke) then
+            is = is + km
+            do k = 1, km1
+              kp1 = k + 1
+              do i = 1, im
+                a2(i,kp1+is) = q1(i,kp1,kk)
+              enddo
             enddo
-          enddo
+          endif
         enddo
       endif
 !
 !     solve tridiagonal problem for heat and moisture
 !
-      call tridin(im,km,ntrac-1,al,ad,au,a1,a2,au,a1,a2)
+      call tridin(im,km,ntloc,al,ad,au,a1,a2,au,a1,a2)
 
 !
 !     recover tendencies of heat and moisture
@@ -390,15 +411,18 @@
             dqsfc(i)   = dqsfc(i)   + conq*del(i,k)*qtend
          enddo
       enddo
-      if(ntrac > 2) then
-        do kk = 2, ntrac-1
-          is = (kk-1) * km
-          do k = 1, km 
-            do i = 1, im
-              qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
-              rtg(i,k,kk) = rtg(i,k,kk) + qtend
+      if(ntrac > 1) then
+        is = 0
+        do kk = 2, ntrac
+          if (kk /= ntke) then
+            is = is + km
+            do k = 1, km 
+              do i = 1, im
+                qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
+                rtg(i,k,kk) = rtg(i,k,kk) + qtend
+              enddo
             enddo
-          enddo
+          endif
         enddo
       endif
 !
@@ -409,17 +433,13 @@
          a1(i,1) = u1(i,1)
          a2(i,1) = v1(i,1)
       enddo
-      if (ntke > 0) then
-        do i = 1, im
-          a2(i,1+km) = q1(i,1,ntke)
-        enddo
-      endif
 !
       do k = 1,km1
+        kp1 = k + 1
         do i=1,im
-          dtodsd    = dt2/del(i,k)
-          dtodsu    = dt2/del(i,k+1)
-          dsig      = prsl(i,k)-prsl(i,k+1)
+          dtodsd    = dt2odel(i,k)
+          dtodsu    = dt2odel(i,kp1)
+          dsig      = prsl(i,k)-prsl(i,kp1)
           rdz       = rdzt(i,k)
           tem1      = dsig*dku(i,k)*rdz
           dsdz2     = tem1 * rdz
@@ -427,40 +447,96 @@
           al(i,k)   = -dtodsu*dsdz2
 !
           ad(i,k)   = ad(i,k) - au(i,k)
-          ad(i,k+1) = 1.0 - al(i,k)
-          a1(i,k+1) = u1(i,k+1)
-          a2(i,k+1) = v1(i,k+1)
+          ad(i,kp1) = 1.0 - al(i,k)
+          a1(i,kp1) = u1(i,kp1)
+          a2(i,kp1) = v1(i,kp1)
 !
         enddo
       enddo
-      if (ntke > 0) then    ! solve tridiagonal problem for momentum and tke
-        do k = 1, km1
-          do i = 1, im
-            a2(i,k+1+km) = q1(i,k+1,ntke)
-          enddo
-        enddo
-        call tridin(im,km,3,al,ad,au,a1,a2,au,a1,a2)
-!
-        do k = 1, km !     recover tendencies of tke
-          do i = 1, im
-            qtend = (a2(i,k+km)-q1(i,k,ntke))*rdt
-            rtg(i,k,ntke) = rtg(i,k,ntke) + qtend
-          enddo
-        enddo
-      else                 ! solve tridiagonal problem for momentum
-        call tridi2(im,km,al,ad,au,a1,a2,au,a1,a2)
-      endif
+
+      call tridi2(im,km,al,ad,au,a1,a2,au,a1,a2)
 !
 !     recover tendencies of momentum
 !
       do k = 1,km
         do i = 1,im
-          utend = (a1(i,k)-u1(i,k))*rdt
-          vtend = (a2(i,k)-v1(i,k))*rdt
+          utend    = (a1(i,k)-u1(i,k))*rdt
+          vtend    = (a2(i,k)-v1(i,k))*rdt
           du(i,k)  = du(i,k)  + utend
           dv(i,k)  = dv(i,k)  + vtend
           dusfc(i) = dusfc(i) + conw*del(i,k)*utend
           dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
+        enddo
+      enddo
+!
+      if (ntke > 0) then    ! solve tridiagonal problem for momentum and tke
+!
+!     compute tridiagonal matrix elements for tke
+!
+        do i=1,im
+           ad(i,1) = 1.0
+           a1(i,1) = q1(i,1,ntke)
+        enddo
+!
+        do k = 1,km1
+          kp1 = k + 1
+          do i=1,im
+            dtodsd    = dt2odel(i,k)
+            dtodsu    = dt2odel(i,kp1)
+            dsig      = prsl(i,k)-prsl(i,kp1)
+            rdz       = rdzt(i,k)
+            tem1      = dsig*dku(i,k)*(rdz+rdz)
+            dsdz2     = tem1 * rdz
+            au(i,k)   = -dtodsd*dsdz2
+            al(i,k)   = -dtodsu*dsdz2
+!
+            ad(i,k)   = ad(i,k) - au(i,k)
+            ad(i,kp1) = 1.0 - al(i,k)
+            a1(i,kp1) = q1(i,kp1,ntke)
+          enddo
+        enddo
+
+        call tridi1(im,km,al,ad,au,a1,au,a1)
+!
+        do k = 1, km !     recover tendencies of tke
+          do i = 1, im
+            qtend = (a1(i,k)-q1(i,k,ntke))*rdt
+            rtg(i,k,ntke) = rtg(i,k,ntke) + qtend
+          enddo
+        enddo
+      endif
+!
+      return
+      end
+      subroutine tridi1(l,n,cl,cm,cu,r1,au,a1)
+!
+      use machine     , only : kind_phys
+      implicit none
+      integer             k,n,l,i
+      real(kind=kind_phys) fk
+!
+      real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),         &
+     &                     au(l,n-1),a1(l,n)
+!
+      do i=1,l
+        fk      = 1./cm(i,1)
+        au(i,1) = fk*cu(i,1)
+        a1(i,1) = fk*r1(i,1)
+      enddo
+      do k=2,n-1
+        do i=1,l
+          fk      = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
+          au(i,k) = fk*cu(i,k)
+          a1(i,k) = fk*(r1(i,k)-cl(i,k)*a1(i,k-1))
+        enddo
+      enddo
+      do i=1,l
+        fk      = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
+        a1(i,n) = fk*(r1(i,n)-cl(i,n)*a1(i,n-1))
+      enddo
+      do k=n-1,1,-1
+        do i=1,l
+          a1(i,k) = a1(i,k)-au(i,k)*a1(i,k+1)
         enddo
       enddo
 !

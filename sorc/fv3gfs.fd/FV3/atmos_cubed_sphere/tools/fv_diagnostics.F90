@@ -197,7 +197,7 @@ contains
 
     real, allocatable :: grid_xt(:), grid_yt(:), grid_xe(:), grid_ye(:), grid_xn(:), grid_yn(:)
     real, allocatable :: grid_x(:),  grid_y(:)
-    real              :: vrange(2), vsrange(2), wrange(2), trange(2), slprange(2), rhrange(2)
+    real              :: vrange(2), vsrange(2), wrange(2), trange(2), slprange(2), rhrange(2), skrange(2)
     real, allocatable :: a3(:,:,:)
     real              :: pfull(npz)
     real              :: hyam(npz), hybm(npz)
@@ -257,6 +257,7 @@ contains
     trange = (/  100.,  350. /)  ! temperature
 #endif
     slprange = (/800.,  1200./)  ! sea-level-pressure
+    skrange  = (/ -10000000.0,  10000000.0 /)  ! dissipation estimate for SKEB
 
     ginv = 1./GRAV
      if (Atm(1)%grid_number == 1) fv_time = Time
@@ -664,6 +665,9 @@ contains
                'omega', 'Pa/s', missing_value=missing_value )
           idiag%id_divg  = register_diag_field ( trim(field), 'divg', axes(1:3), Time,      &
                'mean divergence', '1/s', missing_value=missing_value )
+          ! diagnotic output for skeb testing
+          idiag%id_diss = register_diag_field ( trim(field), 'diss_est', axes(1:3), Time,    &
+               'random', 'none', missing_value=missing_value, range=skrange )
 
           idiag%id_rh = register_diag_field ( trim(field), 'rh', axes(1:3), Time,        &
                'Relative Humidity', '%', missing_value=missing_value )
@@ -2472,10 +2476,8 @@ contains
 
           allocate(var2(isc:iec,jsc:jec))
           allocate(a3(isc:iec,jsc:jec,npz))
-
-          call eqv_pot(a3, Atm(n)%pt, Atm(n)%delp, Atm(n)%delz, Atm(n)%peln, Atm(n)%pkz, Atm(n)%q(isd,jsd,1,sphum),    &
-               isc, iec, jsc, jec, ngc, npz, Atm(n)%flagstruct%hydrostatic, Atm(n)%flagstruct%moist_phys)
-
+          call eqv_pot(a3, Atm(n)%pt, Atm(n)%delp, Atm(n)%delz, Atm(n)%peln, Atm(n)%pkz, Atm(n)%q(isd:ied,jsd:jed,1:npz,sphum), &
+                       isc, iec, jsc, jec, ngc, npz, Atm(n)%flagstruct%hydrostatic, Atm(n)%flagstruct%moist_phys)
 
 !$OMP parallel do default(shared)
           do j=jsc,jec
@@ -2541,7 +2543,7 @@ contains
             used=send_data(idiag%id_pmaskv2, a2, Time)
        endif
 
-       if ( idiag%id_u100m>0 .or. idiag%id_v100m>0 .or.  idiag%id_w100m>0 .or. idiag%id_w5km>0 .or. idiag%id_w2500m>0 .or. idiag%id_w1km>0 .or. idiag%id_basedbz>0 .or. idiag%id_dbz4km>0) then
+       if ( idiag%id_u100m>0 .or. idiag%id_v100m>0 .or. idiag%id_w100m>0 .or. idiag%id_w5km>0 .or. idiag%id_w2500m>0 .or. idiag%id_w1km>0 .or. idiag%id_basedbz>0 .or. idiag%id_dbz4km>0) then
           if (.not.allocated(wz)) allocate ( wz(isc:iec,jsc:jec,npz+1) )
           if ( Atm(n)%flagstruct%hydrostatic) then
              rgrav = 1. / grav
@@ -2864,6 +2866,7 @@ contains
 
        if(idiag%id_pt   > 0) used=send_data(idiag%id_pt  , Atm(n)%pt  (isc:iec,jsc:jec,:), Time)
        if(idiag%id_omga > 0) used=send_data(idiag%id_omga, Atm(n)%omga(isc:iec,jsc:jec,:), Time)
+       if(idiag%id_diss > 0) used=send_data(idiag%id_diss, Atm(n)%diss_est(isc:iec,jsc:jec,:), Time)
        
        allocate( a3(isc:iec,jsc:jec,npz) )
        if(idiag%id_theta_e > 0 ) then
@@ -4843,7 +4846,7 @@ end subroutine eqv_pot
    
  end subroutine fv_diag_init_gn
 
-!>@brief The subroutine 'getcape' calculateds the Convective Available
+!>@brief The subroutine 'getcape' calculates the Convective Available
 !! Potential Energy (CAPE) from a Sounding
 !>@author George H. Bryan
 !! Mesoscale and Microscale Meteorology Division
@@ -4851,8 +4854,6 @@ end subroutine eqv_pot
 !! Boulder, Colorado, USA
 !! gbryan@ucar.edu
 !>@details: Last modified 10 October 2008
-!! See \cite bolton1980computation for constants and definitions
-!! \cite bryan2004reevaluation for ice processes
     subroutine getcape( nk , p , t , dz, q, the, cape , cin, source_in )
     implicit none
 

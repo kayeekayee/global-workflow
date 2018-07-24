@@ -6,7 +6,7 @@
 echo "BEGIN: config.base"
 
 # Machine environment
-export machine="THEIA"
+export machine="@MACHINE@"
 
 # EMC parallel or NCO production
 export RUN_ENVIR="emc"
@@ -30,7 +30,7 @@ fi
 HPSS_PROJECT=fim
 
 # Directories relative to installation areas:
-export HOMEgfs=/scratch4/BMC/rtfim/rtruns/FV3-Chem/
+export HOMEgfs=/scratch3/BMC/fim/lzhang/EMC_FV3/FV3_ESRL
 export PARMgfs=$HOMEgfs/parm
 export FIXgfs=$HOMEgfs/fix
 export USHgfs=$HOMEgfs/ush
@@ -40,22 +40,13 @@ export SCRgfs=$HOMEgfs/scripts
 
 ########################################################################
 
-for exetest in hsi htar ; do
-    if ( ! which $exetest ) ; then
-        echo "$exetest: executable missing after \"module load\"" 1>&2
-        exit 2
-    fi
-done
-
-########################################################################
-
 # GLOBAL static environment parameters
 if [ $machine = "THEIA" ]; then
 
     export NWPROD="/scratch4/NCEPDEV/global/save/glopara/nwpara"
     export DMPDIR="/scratch4/NCEPDEV/global/noscrub/dump"
     export RTMFIX="/scratch4/NCEPDEV/da/save/Michael.Lueken/nwprod/lib/crtm/2.2.3/fix_update"
-    export EMIDIR="/scratch3/BMC/fim/lzhang/emi_C96"
+    export EMIDIR="/scratch3/BMC/fim/lzhang/emi_"
 elif [ $machine = "WCOSS_C" ]; then
 
     export NWPROD="/gpfs/hps/nco/ops/nwprod"
@@ -80,11 +71,12 @@ if [ $machine = "THEIA" ]; then
 #JKH    export PTMP="/scratch4/NCEPDEV/stmp4/$USER"
 #JKH    export NOSCRUB="/scratch4/NCEPDEV/global/noscrub/$USER"
     export HOMEDIR="/scratch4/BMC/fim/NCEPDEV/global/save/$USER"
-    export STMP="/scratch4/BMC/rtfim/NCEPDEV/stmp3/$USER"
-    export PTMP="/scratch4/BMC/rtfim/NCEPDEV/stmp4/$USER"
+    export STMP="/scratch4/BMC/fim/NCEPDEV/stmp3/$USER"
+    export PTMP="/scratch4/BMC/fim/NCEPDEV/stmp4/$USER"
     export NOSCRUB="/scratch4/BMC/fim/NCEPDEV/global/noscrub/$USER"
 
     # Base directories for various builds
+    export BASE_GIT="/scratch4/NCEPDEV/global/save/glopara/git"
     export BASE_SVN="/scratch4/NCEPDEV/global/save/glopara/svn"
 
 elif [ $machine = "WCOSS_C" ]; then
@@ -96,6 +88,7 @@ elif [ $machine = "WCOSS_C" ]; then
     export NOSCRUB="/gpfs/hps3/emc/global/noscrub/$USER"
 
     # Base directories for various builds
+    export BASE_GIT="/gpfs/hps3/emc/global/noscrub/emc.glopara/git"
     export BASE_SVN="/gpfs/hps3/emc/global/noscrub/emc.glopara/svn"
 
 fi
@@ -114,9 +107,18 @@ if [ $machine = "THEIA" ]; then
     export GRBINDEX2="$NWPROD/util/exec/grb2index"
     export CNVGRIB="/apps/cnvgrib/1.4.0/bin/cnvgrib"
     export CNVGRIB21_GFS="/apps/cnvgrib/1.4.0/bin/cnvgrib"
-    export POSTGRB2TBL="/scratch3/NCEPDEV/nwprod/lib/sorc/g2tmpl/params_grib2_tbl_new"
+    export POSTGRB2TBL="/scratch3/NCEPDEV/nwprod/lib/g2tmpl/v1.5.0/sorc/params_grib2_tbl_new"
 
 fi
+
+# Toggle to turn on/off GFS downstream processing.
+export DO_BUFRSND="NO"
+export DO_GEMPAK="NO"
+export DO_AWIPS="NO"
+
+# NO for retrospective parallel; YES for real-time parallel
+export REALTIME="NO"
+
 
 ####################################################
 # DO NOT ADD MACHINE DEPENDENT STUFF BELOW THIS LINE
@@ -129,8 +131,8 @@ export HOMEgsi="$HOMEgfs"
 export FIXgsi="$HOMEgfs/fix/fix_gsi"
 export HOMEfv3gfs="$HOMEgfs/sorc/fv3gfs.fd"
 export HOMEpost="$HOMEgfs"
-export BASE_PREP="$BASE_SVN/obsproc/releases/obsproc_prep_RB-4.0.0"
-export BASE_PREP_GLOBAL="$BASE_SVN/obsproc/releases/obsproc_global_RB-3.0.0"
+export HOMEobsproc_prep="$BASE_GIT/obsproc/obsproc_prep.iss-46886.fv3gfs"
+export HOMEobsproc_network="$BASE_GIT/obsproc/obsproc_global.iss-46886.fv3gfs"
 export BASE_VERIF="$BASE_SVN/verif/global/tags/vsdb"
 
 # CONVENIENT utility scripts and other environment parameters
@@ -148,16 +150,16 @@ export BASE_ENV="$HOMEgfs/env"
 export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
-export SDATE=2018041400
-export EDATE=2018041900
-#export assim_freq=6 #lzhang
-export assim_freq=24
-export PSLOT="rt_fv3gfs_chem"
-export EXPDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/$PSLOT"
-export ROTDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/$PSLOT"
+export SDATE=@SDATE@
+export EDATE=@EDATE@
+#export assim_freq=6
+export assim_freq=24 #lzhang
+export PSLOT="@PSLOT@"
+export EXPDIR="@EXPDIR@/$PSLOT"
+export ROTDIR="@ROTDIR@/$PSLOT"
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS"
+export ICSDIR="@ICSDIR@"
 export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
@@ -179,7 +181,7 @@ export SENDSDM="NO"
 
 # Resolution specific parameters
 export LEVS=65
-export CASE="C96"
+export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 
 # Surface cycle update frequency
@@ -191,10 +193,16 @@ export FHMAX=9
 export FHOUT=6  #lzhang
 
 # GFS cycle info
-export gfs_cyc=2 # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
+export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
 
 # GFS output and frequency
 export FHMIN_GFS=0
+export FHMAX_GFS_00=120
+export FHMAX_GFS_06=120
+export FHMAX_GFS_12=120
+export FHMAX_GFS_18=120
+#export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc}) !lzhang
+
 #export FHMAX_GFS=240 !lzhang
 export FHMAX_GFS=24
 export FHOUT_GFS=6  
@@ -216,8 +224,8 @@ export OUTPUT_FILE="nemsio"
 #export OUTPUT_FILE="netcdf"  # !lzhang
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
-#export imp_physics=11
-export imp_physics=99
+export imp_physics=11
+#export imp_physics=99 #lzhang
 
 # Shared parameters
 # Hybrid related
@@ -245,8 +253,15 @@ export DONST="YES"
 # The switch to apply SST elevation correction or not
 export nst_anl=.true.
 
-# Precipitation accumulation, true--no bucket, false--bucket=FHZER
-export lprecip_accu=".true."
+# Analysis increments to zero in CALCINCEXEC
+export INCREMENTS_TO_ZERO="'delz_inc','clwmr_inc','icmr_inc'"
+
+
+# Archiving options
+export HPSSARCH="YES"        # save data to HPSS archive
+export ARCH_CYC=18           # Archive data at this cycle for warm_start capability. Cannot be 00
+export ARCH_WARMICFREQ=6     # Archive frequency in days for warm_start capability
+export ARCH_FCSTICFREQ=3     # Archive frequency in days for gdas and gfs forecast-only capability
 
 # Analysis increments to zero in CALCINCEXEC
 export INCREMENTS_TO_ZERO="'delz_inc','clwmr_inc','icmr_inc'" #lzhang

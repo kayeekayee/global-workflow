@@ -52,7 +52,7 @@ MODULE CRTM_IR_Land_SfcOptics
   ! Module parameters
   ! -----------------
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: CRTM_IR_Land_SfcOptics.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: CRTM_IR_Land_SfcOptics.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   ! Message string length
   INTEGER, PARAMETER :: ML = 256
 

@@ -15,6 +15,7 @@ import os
 import sys
 import glob
 import subprocess
+import numpy as np
 from distutils.spawn import find_executable
 from datetime import datetime, timedelta
 import rocoto
@@ -23,6 +24,7 @@ DATE_ENV_VARS=['CDATE','SDATE','EDATE']
 SCHEDULER_MAP={'ZEUS':'moabtorque',
                'THEIA':'moabtorque',
                'WCOSS':'lsf',
+               'WCOSS_DELL_P3':'lsf',
                'WCOSS_C':'lsfcray'}
 
 class UnknownMachineError(Exception): pass
@@ -265,28 +267,45 @@ def get_resources(machine, cfg, task, cdump='gdas'):
         tasks = cfg['npe_%s_gfs' % ltask]
     else:
         tasks = cfg['npe_%s' % ltask]
-        
+
     if cdump in ['gfs'] and 'npe_node_%s_gfs' % task in cfg.keys():
         ppn = cfg['npe_node_%s_gfs' % ltask]
     else:
         ppn = cfg['npe_node_%s' % ltask]
 
-    nodes = tasks / ppn
+    if machine in [ 'WCOSS_DELL_P3']:
+        threads = cfg['nth_%s' % ltask]
+
+    nodes = np.int(np.ceil(np.float(tasks) / np.float(ppn)))
+
+#   Jim Taft recommended submitting WCOSS_DELL_P3 jobs with
+#   ppn=1 and core(28).   There appears to be a performance 
+#   hit when specifying core(28).  For time being set core(24).
+    if machine in [ 'WCOSS_DELL_P3']:
+        ppn = 1
+        threads = 24
 
     memstr = '' if memory is None else str(memory)
+    natstr = ''
 
-    if machine in ['ZEUS', 'THEIA', 'WCOSS_C']:
+    if machine in ['ZEUS', 'THEIA', 'WCOSS_C', 'WCOSS_DELL_P3']:
         resstr = '<nodes>%d:ppn=%d</nodes>' % (nodes, ppn)
 
         if machine in ['WCOSS_C'] and task in ['arch', 'earc', 'getic']:
             resstr += '<shared></shared>'
+
+        if machine in ['WCOSS_DELL_P3']:
+            natstr = "-R 'affinity[core(%d)]'" % (threads)
+
+            if task in ['arch', 'earc', 'getic']:
+                 natstr = "-R 'affinity[core(1)]'"
 
     elif machine in ['WCOSS']:
         resstr = '<cores>%d</cores>' % tasks
 
     queuestr = '&QUEUE_ARCH;' if task in ['arch', 'earc', 'getic'] else '&QUEUE;'
 
-    return wtimestr, resstr, queuestr, memstr
+    return wtimestr, resstr, queuestr, memstr, natstr
 
 
 def create_crontab(base, cronint=5):

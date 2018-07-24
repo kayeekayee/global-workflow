@@ -1854,24 +1854,24 @@
      &                      /1,'DUST SEDIMENTATION  ',152,200,     &
                              'dust sedimentation fluxes         '/
       DATA IFILV(617),AVBL(617),IQ(617),IS(617),AVBLGRB2(617)      &
-     &                      /1,'DUST25 SFC MASS CON ',153,001,     &
-                             'dust pm25 sfc mass concentration  '/
+     &                      /1,'DUST DRY DEPOSITION ',153,200,     &
+                             'dust dry deposition fluxes        '/
       DATA IFILV(618),AVBL(618),IQ(618),IS(618),AVBLGRB2(618)      &
-     &                      /1,'SEAS25 SFC MASS CON ',154,001,     &
-                             'seas pm25 sfc mass concentration  '/
+     &                      /1,'DUST WET DEPOSITION ',154,200,     &
+                             'dust wet deposition fluxes        '/
 ! ADD AEROSOL SURFACE MASS CONCENTRATION (GOCART), use table 129
       DATA IFILV(619),AVBL(619),IQ(619),IS(619),AVBLGRB2(619)      &
-     &                      /1,'PM10 SFC MASS CON ',156,001,     &
-                             'coarse sfc mass concentration '/
+     &                      /1,'CR AER SFC MASS CON ',156,001,     &
+                             'coarse aer sfc mass concentration '/
       DATA IFILV(620),AVBL(620),IQ(620),IS(620),AVBLGRB2(620)      &
-     &                      /1,'PM25 SFC MASS CON ',157,001,     &
-                             'fine  sfc mass concentration   '/
+     &                      /1,'FN AER SFC MASS CON ',157,001,     &
+                             'fine aer sfc mass concentration   '/
 ! ADD AEROSOL COLUMN MASS DENSITY  (GOCART)
       DATA IFILV(621),AVBL(621),IQ(621),IS(621),AVBLGRB2(621)      &
-     &                      /1,'PM10 COL MASS DEN ',155,200,     &
+     &                      /1,'CR AER COL MASS DEN ',155,200,     &
                              'coarse aerosol col mass density   '/
       DATA IFILV(622),AVBL(622),IQ(622),IS(622),AVBLGRB2(622)      &
-     &                      /1,'PM25 COL MASS DEN ',158,200,     &
+     &                      /1,'FN AER COL MASS DEN ',158,200,     &
                              'fine aerosol col mass density     '/
 ! ADD AEROSOL OPTICAL DEPTH AT OTHER CHANNELS (GOCART)
       DATA IFILV(623),AVBL(623),IQ(623),IS(623),AVBLGRB2(623)      &
@@ -1946,23 +1946,6 @@
       DATA IFILV(645),AVBL(645),IQ(645),IS(645),AVBLGRB2(645)      &
      &                      /1,'DPRES ON MDL SFCS   ',1,110,     &
      &                       'DPRES hybrid_lvl '/
-! ADD OTHER PM2.5 AEROSOL COLUMN MASS DENSITY  (GOCART)
-      DATA IFILV(646),AVBL(646),IQ(646),IS(646),AVBLGRB2(646)      &
-     &                      /1,'DUST COL MASS DEN ',159,200,     &
-                             'fine dust col mass density   '/
-      DATA IFILV(647),AVBL(647),IQ(647),IS(647),AVBLGRB2(647)      &
-     &                      /1,'SEAS COL MASS DEN ',160,200,     &
-                             'fine seas col mass density     '/
-      DATA IFILV(648),AVBL(648),IQ(648),IS(648),AVBLGRB2(648)      &
-     &                      /1,'BC COL MASS DEN ',161,200,     &
-                             'fine bc col mass density     '/
-      DATA IFILV(649),AVBL(649),IQ(649),IS(649),AVBLGRB2(649)      &
-     &                      /1,'OC COL MASS DEN ',162,200,     &
-                             'fine oc col mass density     '/
-      DATA IFILV(650),AVBL(650),IQ(650),IS(650),AVBLGRB2(650)      &
-     &                      /1,'SULF COL MASS DEN ',163,200,     &
-                             'fine sulf col mass density     '/
-
 ! Reserving Index 601-700 for GOCART
 !
 

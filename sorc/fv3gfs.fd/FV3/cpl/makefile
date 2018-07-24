@@ -15,7 +15,7 @@ else
     $(info )
 endif
 
-LIBRARY  = libfv3cplflds.a
+LIBRARY  = libfv3cpl.a
 
 #FFLAGS   += -I../fms
 

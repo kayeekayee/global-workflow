@@ -915,7 +915,7 @@
       ENDDO
       deallocate(wrk1,wrk2)
 
-      print *, 'gocart_on1=',gocart_on
+
       if (gocart_on) then
 
 ! GFS output dust in nemsio (GOCART)
@@ -930,8 +930,7 @@
           enddo
         enddo
 !       DUST = SPVAL
-        !VarName='du001'
-        VarName='dust1'
+        VarName='du001'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -941,8 +940,7 @@
 !        if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,1)
         end do ! do loop for l      
       
-       ! VarName='du002'
-        VarName='dust2'
+        VarName='du002'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -952,8 +950,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,2)
         end do ! do loop for l 
       
-        !VarName='du003'
-        VarName='dust3'
+        VarName='du003'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -963,8 +960,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,3)
         end do ! do loop for l 
       
-        !VarName='dust4'
-        VarName='dust4'
+        VarName='du004'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -974,8 +970,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,4)
         end do ! do loop for l 
       
-        !VarName='du005'
-        VarName='dust5'
+        VarName='du005'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -997,8 +992,7 @@
           enddo
         enddo
 !       SALT = SPVAL
-        !VarName='ss001'
-        VarName='seas1'
+        VarName='ss001'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1008,8 +1002,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,1)
         end do ! do loop for l
 
-        !VarName='ss002'
-        VarName='seas1'
+        VarName='ss002'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1019,8 +1012,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,2)
         end do ! do loop for l
 
-        !VarName='ss003'
-        VarName='seas2'
+        VarName='ss003'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1030,8 +1022,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,3)
         end do ! do loop for l
 
-        !VarName='ss004'
-        VarName='seas3'
+        VarName='ss004'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1041,7 +1032,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,4)
         end do ! do loop for l
 
-        VarName='seas4'
+        VarName='ss005'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1063,8 +1054,7 @@
           enddo
         enddo
 !       SOOT = SPVAL
-        !VarName='bcphobic'
-        VarName='bc1'
+        VarName='bcphobic'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1074,8 +1064,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,soot(isa,jsa,ll,1)
         end do ! do loop for l
 
-        !VarName='bcphilic'
-        VarName='bc2'
+        VarName='bcphilic'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1097,8 +1086,7 @@
           enddo
         enddo
 !       WASO = SPVAL
-        !VarName='ocphobic'
-        VarName='oc1'
+        VarName='ocphobic'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1108,8 +1096,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,waso(isa,jsa,ll,1)
         end do ! do loop for l
 
-        !VarName='ocphilic'
-        VarName='oc2'
+        VarName='ocphilic'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1131,8 +1118,7 @@
           enddo
         enddo
 !       SUSO = SPVAL
-        !VarName='so4'
-        VarName='sulf'
+        VarName='so4'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1

@@ -20,13 +20,12 @@
                                 NOLEAP, NO_CALENDAR, date_to_string,       &
                                 get_date
 
-  use  atmos_model_mod,   only: atmos_model_init, atmos_model_end,  &
-                                atmos_model_info_get,               &
-                                update_atmos_model_dynamics,        &
-                                update_atmos_radiation_physics,     &
-                                update_atmos_state_bef_chem,        &
-                                update_atmos_state_aft_chem,        &
-                                atmos_data_type, atmos_model_restart
+  use  atmos_model_mod,   only: atmos_model_init, atmos_model_end,         &
+                                update_atmos_model_dynamics,               &
+                                update_atmos_radiation_physics,            &
+                                update_atmos_model_state,                  &
+                                atmos_data_type, atmos_model_restart,      &
+                                addLsmask2grid
 
   use constants_mod,      only: constants_init
   use       fms_mod,      only: open_namelist_file, file_exist, check_nml_error, &
@@ -56,8 +55,8 @@
 !
   use module_fv3_io_def, only:  num_pes_fcst, num_files, filename_base, nbdlphys
   use module_fv3_config, only:  dt_atmos, calendar, restart_interval, &
-                                quilting, calendar_type,              &
-                                force_date_from_configure
+                                quilting, calendar_type, cpl,         &
+                                cplprint_flag, force_date_from_configure
 !
 !-----------------------------------------------------------------------
 !
@@ -88,17 +87,13 @@
   type(ESMF_VM),save                          :: VM
   type(ESMF_Grid)                             :: fcstGrid
 
-!----- coupled model data -----
+!----- coupled model date -----
 
   integer :: date_init(6)
-  integer :: numLevels = 0
-  integer :: numTracers = 0
-  integer :: numSoilLayers = 0
 !
 !-----------------------------------------------------------------------
 !
   public SetServices, fcstGrid
-  public numLevels, numTracers, numSoilLayers
 !
   contains
 !
@@ -121,13 +116,7 @@
       return  ! bail out
 !
     call ESMF_GridCompSetEntryPoint(fcst_comp, ESMF_METHOD_RUN, &
-         userRoutine=fcst_run_bef_chem, phase=1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_GridCompSetEntryPoint(fcst_comp, ESMF_METHOD_RUN, &
-         userRoutine=fcst_run_aft_chem, phase=2, rc=rc)
+         userRoutine=fcst_run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -319,8 +308,8 @@
      res_intvl = restart_interval*3600
      atm_int_state%Time_step_restart = set_time (res_intvl, 0)
      atm_int_state%Time_restart = atm_int_state%Time_atmos + atm_int_state%Time_step_restart
-     atm_int_state%intrm_rst = .false.
-     if (res_intvl>0) atm_int_state%intrm_rst = .true.
+     atm_int_state%intrm_rst = 0
+     if (res_intvl>0) atm_int_state%intrm_rst = 1
 !
 !
 !----- write time stamps (for start time and end time) ------
@@ -380,9 +369,15 @@
           file=__FILE__)) &
           return  ! bail out
 !
-!jw test to write out vtk file:
-          call ESMF_GridWriteVTK(fcstgrid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
-               filename='fv3cap_fv3Grid', rc=rc)
+!test to write out vtk file:
+        if( cpl ) then
+          call addLsmask2grid(fcstGrid, rc=rc)
+!         print *,'call addLsmask2grid after fcstgrid, rc=',rc
+          if( cplprint_flag ) then
+            call ESMF_GridWriteVTK(fcstgrid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
+                 filename='fv3cap_fv3Grid', rc=rc)
+          endif
+        endif
 !
 ! Add gridfile Attribute to the exportState
         call ESMF_AttributeAdd(exportState, convention="NetCDF", purpose="FV3", &
@@ -414,8 +409,12 @@
 !
 ! Add time Attribute to the exportState
         call ESMF_AttributeAdd(exportState, convention="NetCDF", purpose="FV3", &
-          attrList=(/"time        ","time:long_name","time:units    ",          &
-          "time:cartesian_axis","time:calendar_type","time:calendar "/), rc=rc)
+          attrList=(/ "time               ", &
+                      "time:long_name     ", &
+                      "time:units         ", &
+                      "time:cartesian_axis", &
+                      "time:calendar_type ", &
+                      "time:calendar      " /), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=__FILE__)) &
@@ -510,7 +509,7 @@
                return  ! bail out
            enddo
 !
-           call fv_phys_bundle_setup(atm_int_state%Atm%axes,          &
+           call fv_phys_bundle_setup(atm_int_state%Atm%diag, atm_int_state%Atm%axes, &
                 fieldbundlephys, fcstgrid, quilting, nbdlphys)
 !
            ! Add the field to the importState so parent can connect to it
@@ -528,9 +527,6 @@
 
 !end qulting
       endif
-
-      call atmos_model_info_get(nlev=numLevels, ntracers=numTracers, &
-        nsoillev=numSoilLayers)
 !
 !-----------------------------------------------------------------------
 !
@@ -550,7 +546,7 @@
 !####################################################################### 
 !----------------------------------------------------------------------- 
 !
-   subroutine fcst_run_bef_chem(fcst_comp, importState, exportState,clock,rc)
+   subroutine fcst_run(fcst_comp, importState, exportState,clock,rc)
 !
 !----------------------------------------------------------------------- 
 !***  the run step for the fcst gridded component.  
@@ -586,20 +582,19 @@
 !
 !-----------------------------------------------------------------------
 !
-      call ESMF_GridCompGet(fcst_comp, name=compname, localpet=mype, rc=rc)
+      call ESMF_GridCompGet(fcst_comp, name=compname, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
 !
+      call ESMF_VMGetCurrent(VM,rc=RC)
+!
+      call ESMF_VMGet(VM, localpet=mype,rc=rc)
       call ESMF_ClockGet(clock, advanceCount=NTIMESTEP_ESMF, rc=rc)   
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
       
       na = NTIMESTEP_ESMF
-!     if(mype==0) print *,'in fcst run_bef_chem, na=',na
+!     if(mype==0) print *,'in fcst run, na=',na
 !
 !-----------------------------------------------------------------------
 ! *** call fcst integration subroutines  
@@ -612,92 +607,10 @@
 
       call update_atmos_radiation_physics (atm_int_state%Atm)
 
-      call update_atmos_state_bef_chem (atm_int_state%Atm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-
-!-----------------------------------------------------------------------
-!
-!     IF(RC /= ESMF_SUCCESS) THEN
-!       WRITE(0,*)"FAIL: fcst_RUN"
-!      ELSE
-         WRITE(0,*)"PASS: fcstRUN, na=",na
-!     ENDIF
-!
-      if(mype==0) print *,'fcst _run_bef_chem time is ', mpi_wtime()-tbeg1
-!
-!-----------------------------------------------------------------------
-!
-   end subroutine fcst_run_bef_chem
-!
-!-----------------------------------------------------------------------
-!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!-----------------------------------------------------------------------
-!
-   subroutine fcst_run_aft_chem(fcst_comp, importState, exportState,clock,rc)
-!
-!----------------------------------------------------------------------- 
-!***  the run step for the fcst gridded component.  
-!----------------------------------------------------------------------- 
-!
-      type(ESMF_GridComp)        :: fcst_comp
-      type(ESMF_State)           :: importState, exportState
-      type(ESMF_Clock)           :: clock
-      integer,intent(out)        :: rc
-!
-!-----------------------------------------------------------------------
-!***  local variables
-!
-      type(ESMF_FieldBundle)     :: file_bundle 
-!
-      integer                    :: i,j, mype, na, date(6)
-      character(20)              :: compname
-
-      type(ESMF_Time)            :: currtime
-      integer(kind=ESMF_KIND_I8) :: ntimestep_esmf
-      character(len=64)          :: timestamp
-!
-!-----------------------------------------------------------------------
-!
-      real(kind=8)   :: mpi_wtime, tbeg1
-!
-!-----------------------------------------------------------------------
-!***********************************************************************
-!-----------------------------------------------------------------------
-!
-      tbeg1 = mpi_wtime()
-      rc     = esmf_success
-!
-!-----------------------------------------------------------------------
-!
-      call ESMF_GridCompGet(fcst_comp, name=compname, localpet=mype, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-!
-      call ESMF_ClockGet(clock, advanceCount=NTIMESTEP_ESMF, rc=rc)   
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      
-      na = NTIMESTEP_ESMF
-      if(mype==0) print *,'in fcst run, na=',na
-!
-!-----------------------------------------------------------------------
-! *** call fcst integration subroutines  
-
-      call update_atmos_state_aft_chem (atm_int_state%Atm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
+      call update_atmos_model_state (atm_int_state%Atm)
 
 !--- intermediate restart
-      if (atm_int_state%intrm_rst) then
+      if (atm_int_state%intrm_rst>0) then
         if ((na /= atm_int_state%num_atmos_calls) .and.   &
            (atm_int_state%Time_atmos == atm_int_state%Time_restart)) then
           timestamp = date_to_string (atm_int_state%Time_restart)
@@ -712,17 +625,17 @@
 !
 !-----------------------------------------------------------------------
 !
-!     IF(RC /= ESMF_SUCCESS) THEN
-!       WRITE(0,*)"FAIL: fcst_RUN"
+      IF(RC /= ESMF_SUCCESS) THEN
+        WRITE(0,*)"FAIL: fcst_RUN"
 !      ELSE
-         WRITE(0,*)"PASS: fcstRUN, na=",na
-!     ENDIF
+!        WRITE(0,*)"PASS: fcstRUN, na=",na
+      ENDIF
 !
 !     if(mype==0) print *,'fcst _run time is ', mpi_wtime()-tbeg1
 !
 !-----------------------------------------------------------------------
 !
-   end subroutine fcst_run_aft_chem
+   end subroutine fcst_run
 !
 !-----------------------------------------------------------------------
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

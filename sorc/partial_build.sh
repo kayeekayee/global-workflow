@@ -5,15 +5,15 @@
                        "Build_gsi" "Build_ncep_post" \
                        "Build_gdas" "Build_nems_util" \
                        "Build_chgres" "Build_cycle" \
-                       "Build_gaussian_sfcanl" \
+                       "Build_sfcanl_nsttfchg" \
                        "Build_orog" "Build_tropcy" \
                        "Build_nctools" "Build_enkf_chgres_recenter" \
-                       "Build_radmon" "Build_oznmon" \
                        "Build_gfs_fbwndgfs" "Build_gfs_overpdtg2" \
                        "Build_gfs_wintemv" "Build_gfs_cnvgrib21_gfs" \
                        "Build_gfs_bufrsnd" "Build_emcsfc" \
                        "Build_fv3nc2nemsio" "Build_regrid_nemsio" \
-                       "Build_prod_util" "Build_grib_util")
+                       "Build_prod_util" \
+                       "Build_grib_util")
 
 #
 # function parse_cfg: read config file and retrieve the values

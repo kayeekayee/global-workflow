@@ -37,7 +37,7 @@ MODULE Spectral_Units_Conversion
   ! -----------------
   ! Version Id for the module
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: Spectral_Units_Conversion.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: Spectral_Units_Conversion.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   REAL(fp), PARAMETER :: ZERO = 0.0_fp
   REAL(fp), PARAMETER :: ONE  = 1.0_fp
 

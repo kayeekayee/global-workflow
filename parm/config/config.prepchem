@@ -13,6 +13,6 @@ echo "BEGIN: config.prepchem"
 
 # Set job and DATAROOT
 export job=${CDUMP}_prep_${cyc}
-export EMIDIR="/scratch3/BMC/fim/lzhang/emi_C96"
+export EMIDIR="/scratch3/BMC/fim/lzhang/emi_"
 
 echo "END: config.prepchem"

@@ -106,7 +106,7 @@ module atmosphere_mod
 !   </tr>
 !   <tr>
 !     <td>IPD_typedefs_mod</td>
-!     <td>IPD_data_type, kind_phys</td>
+!     <td>IPD_data_type, kind_phys => IPD_kind_phys</td>
 !   </tr>
 !   <tr>
 !     <td>mpp_mod</td>
@@ -165,7 +165,7 @@ use field_manager_mod,      only: MODEL_ATMOS
 use tracer_manager_mod,     only: get_tracer_index, get_number_tracers, &
                                   NO_TRACER
 use DYCORE_typedefs,        only: DYCORE_data_type
-use IPD_typedefs,           only: IPD_data_type, kind_phys
+use IPD_typedefs,           only: IPD_data_type, kind_phys => IPD_kind_phys
 use fv_iau_mod,             only: IAU_external_data_type
 
 !-----------------
@@ -537,7 +537,8 @@ contains
                         Atm(n)%flagstruct%nwat, Atm(n)%delp, Atm(n)%pe,     &
                         Atm(n)%peln, Atm(n)%pkz, Atm(n)%pt, Atm(n)%q,       &
                         Atm(n)%ua, Atm(n)%va, Atm(n)%flagstruct%hydrostatic,&
-                        Atm(n)%w, Atm(n)%delz, u_dt, v_dt, t_dt, Atm(n)%flagstruct%n_sponge)
+                        Atm(n)%w, Atm(n)%delz, u_dt, v_dt, t_dt,            &
+                        Atm(n)%flagstruct%n_sponge)
     endif
 
 #ifdef USE_Q_DT
@@ -911,7 +912,7 @@ contains
    logical, optional, intent(in) :: init
 
    if (PRESENT(init)) then
-     if (init == .true.) then
+     if (init) then
        call fv_nggps_diag_init(Atm(mytile:mytile), Atm(mytile)%atmos_axes, Time)
        return
      else
@@ -1644,9 +1645,9 @@ contains
 !--------------------------------------
 ! Local GFS-phys consistent parameters:
 !--------------------------------------
-   real(kind=kind_phys), parameter:: p00 = 1.e5
-   real(kind=kind_phys), parameter:: qmin = 1.0e-10   
-   real(kind=kind_phys):: pk0inv, ptop, pktop
+   real(kind=kind_phys), parameter :: p00 = 1.e5
+   real(kind=kind_phys), parameter :: qmin = 1.0e-10   
+   real(kind=kind_phys) :: pk0inv, ptop, pktop
    real(kind=kind_phys) :: rTv, dm, qgrs_rad
    integer :: nb, blen, npz, i, j, k, ix, k1, dnats, nq_adv
 

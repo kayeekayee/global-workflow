@@ -67,6 +67,10 @@ layout_x=${layout_x:-8}
 layout_y=${layout_y:-16}
 LEVS=${LEVS:-65}
 
+ OUTTIME=$(( $FHOUT*3600/ $DELTIM ))
+if [ $imp_physics -eq 99 ]; then NTRACER=0; fi
+if [ $imp_physics -eq 11 ]; then NTRACER=1; fi
+
 # Utilities
 NCP=${NCP:-"/bin/cp -p"}
 NLN=${NLN:-"/bin/ln -sf"}
@@ -258,8 +262,8 @@ else
     O3FORC=global_o3prdlos.f77
 fi
 H2OFORC=${H2OFORC:-"global_h2o_pltc.f77"}
-$NLN $FIX_AM/${O3FORC}                         $DATA/INPUT/global_o3prdlos.f77
-$NLN $FIX_AM/${H2OFORC}                        $DATA/INPUT/global_h2oprdlos.f77
+$NLN $FIX_AM/${O3FORC}                         $DATA/global_o3prdlos.f77
+$NLN $FIX_AM/${H2OFORC}                        $DATA/global_h2oprdlos.f77
 $NLN $FIX_AM/global_solarconstant_noaa_an.txt  $DATA/solarconstant_noaa_an.txt
 $NLN $FIX_AM/global_sfc_emissivity_idx.txt     $DATA/sfc_emissivity_idx.txt
 
@@ -493,28 +497,28 @@ rm -f nems.configure
 cat > nems.configure <<EOF
 EARTH_component_list: ATM CHM
 EARTH_attributes::
-  Verbosity = max
+  Verbosity = 0
 ::
 
 ATM_model:                      fv3
 ATM_petlist_bounds:             -1 -1
 ATM_attributes::
-  Verbosity = max
+  Verbosity = 0
 ::
 
 CHM_model:                      gsdchem
 CHM_petlist_bounds:             -1 -1
 CHM_attributes::
-  Verbosity = max
+  Verbosity = 0
 ::
 
 runSeq::
-  @1800
-    ATM bef_chem
+  @$DELTIM
+    ATM phase1
     ATM -> CHM
     CHM
     CHM -> ATM
-    ATM aft_chem
+    ATM phase2
   @
 ::
 EOF
@@ -593,6 +597,10 @@ cat > input.nml <<EOF
   chksum_debug = $chksum_debug
   dycore_only = $dycore_only
   fdiag = $FDIAG
+  fhmax = $FHMAX
+  fhout = $FHOUT
+  fhmaxhf = $FHMAX_HF
+  fhouthf = $FHOUT_HF
   $atmos_model_nml
 /
 
@@ -610,7 +618,7 @@ cat > input.nml <<EOF
 
 &fms_nml
   clock_grain = 'ROUTINE'
-  domains_stack_size = ${domains_stack_size:-3000000}
+  domains_stack_size = ${domains_stack_size:-300000000}
   print_memory_usage = ${print_memory_usage:-".false."}
   $fms_nml
 /
@@ -698,7 +706,6 @@ cat > input.nml <<EOF
 
 &gfs_physics_nml
   fhzero       = $FHZER
-  lprecip_accu = ${lprecip_accu:-".true."}
   h2o_phys     = ${h2o_phys:-".true."}
   ldiag3d      = ${ldiag3d:-".false."}
   fhcyc        = $FHCYC
@@ -735,6 +742,7 @@ cat > input.nml <<EOF
   isot         = ${isot:-"1"}
   debug        = ${gfs_phys_debug:-".false."}
   nstf_name    = $nstf_name
+  cplflx       = .false.
   cplchm       = .true.
   nst_anl      = $nst_anl
   psautco      = ${psautco:-"0.0008,0.0005"}
@@ -847,7 +855,7 @@ cat > input.nml <<EOF
   aerchem_onoff=1
   bio_emiss_opt=0
   biomass_burn_opt=1
-  chem_conv_tr=1
+  chem_conv_tr=2
   chem_in_opt=$CHEMIN
   chem_opt=300
   chemdt=3
@@ -865,10 +873,10 @@ cat > input.nml <<EOF
   plumerisefire_frq=60
   seas_opt=1
   vertmix_onoff=1
-  wetscav_onoff=0
-  archive_step = 1
+  gfdlmp_onoff=$NTRACER
+  archive_step = $OUTTIME
   chem_hist_outname = "chem_out_"
-  emi_inname  = "$EMIDIR/$SMONTH"
+  emi_inname  = "${EMIDIR}${CASE}/$SMONTH"
   fireemi_inname  = "../prep"
   emi_outname = "./"
   $chem_nml
@@ -927,10 +935,19 @@ EOF
 /
 EOF
 
+
+    cat >> input.nml << EOF
+&nam_sfcperts
+  $nam_sfcperts_nml
+/
+EOF
+
 else
 
   cat >> input.nml << EOF
 &nam_stochy
+/
+&nam_sfcperts
 /
 EOF
 
@@ -988,7 +1005,7 @@ if [ $SEND = "YES" ]; then
 
   # Only save restarts at single time in RESTART directory
   # Either at restart_interval or at end of the forecast
-  if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then 
+  if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then
 
     # Add time-stamp to restart files at FHMAX
     RDATE=$($NDATE +$FHMAX $CDATE)

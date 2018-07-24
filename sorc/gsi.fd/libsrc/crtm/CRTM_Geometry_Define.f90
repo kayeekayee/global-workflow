@@ -84,7 +84,7 @@ MODULE CRTM_Geometry_Define
   ! Module parameters
   ! -----------------
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: CRTM_Geometry_Define.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: CRTM_Geometry_Define.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   ! Literal constants 
   REAL(fp), PARAMETER :: ZERO = 0.0_fp 
   ! Message string length 
@@ -1166,7 +1166,8 @@ CONTAINS
       CALL Read_Cleanup(); RETURN
     END IF
     ! ...Allocate the return structure array
-    ALLOCATE(Geometry(n_input_profiles), STAT=alloc_stat, ERRMSG=alloc_msg)
+   !ALLOCATE(Geometry(n_input_profiles), STAT=alloc_stat, ERRMSG=alloc_msg)
+    ALLOCATE(Geometry(n_input_profiles), STAT=alloc_stat)
     IF ( alloc_stat /= 0 ) THEN
       msg = 'Error allocating Geometry array - '//TRIM(alloc_msg)
       CALL Read_Cleanup(); RETURN
@@ -1213,7 +1214,8 @@ CONTAINS
           msg = TRIM(msg)//'; Error closing input file during error cleanup - '//TRIM(io_msg)
       END IF
       IF ( ALLOCATED(Geometry) ) THEN 
-        DEALLOCATE(Geometry, STAT=alloc_stat, ERRMSG=alloc_msg)
+       !DEALLOCATE(Geometry, STAT=alloc_stat, ERRMSG=alloc_msg)
+        DEALLOCATE(Geometry, STAT=alloc_stat)
         IF ( alloc_stat /= 0 ) &
           msg = TRIM(msg)//'; Error deallocating Geometry array during error cleanup - '//&
                 TRIM(alloc_msg)

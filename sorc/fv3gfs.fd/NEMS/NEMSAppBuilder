@@ -9,22 +9,24 @@ set -x
 
 ulimit -s 200000
 
-# add paths to find personal "dialog" installations on Theia, Yellowstone.
+# add paths to find personal "dialog" installations on Theia, Cheyenne
 PATH=$PATH:/scratch4/NCEPDEV/nems/save/Gerhard.Theurich/bin:/glade/p/work/theurich/bin
 
 global_name='NEMSAppBuilder'
 global_version='version 1.1.0'
-global_capabilities='autobuild dialog whiptail FV3 HYCOM MOM5 MOM6 CICE IPE WRFHYDRO WW3 LIS IMP GSM NMMB KISS NOAH NOAHMP GSDCHEM LegacyGSM LegacyNMM'
+global_capabilities='autobuild dialog whiptail FV3 HYCOM MOM5 MOM6 CICE IPE WRFHYDRO WW3 LIS IMP GSM NMMB KISS NOAH NOAHMP LegacyGSM LegacyNMM'
 
 # determine whether dialog or whiptail is available
 read dialog <<< "$(which dialog 2> /dev/null)"
 read whiptail <<< "$(which whiptail 2> /dev/null)"
 
+echo "$dialog"
+
 # use whichever tool was found
 if [[ "$#" -gt 0 ]] ; then
   tool=autobuild
   toolflag=autobuild
-elif ["${dialog}x" != "x" ] ; then
+elif [[ "${dialog}x" != "x" ]] ; then
   tool=$dialog
   toolflag="dialog"
   if [[ "$tool" =~ "scratch4/NCEPDEV/nems/save/Gerhard.Theurich/bin" ]]; then
@@ -32,8 +34,11 @@ elif ["${dialog}x" != "x" ] ; then
     # processes. Those branches seem to cause (intermittent) trouble on Theia
     # for some reason!
     toolflag="NOTdialog"
+  else
+    set +x
   fi
 elif [ "${whiptail}x" != "x" ] ; then
+  set +x
   tool=$whiptail
   toolflag="whiptail"
 else
@@ -60,10 +65,10 @@ if [[ -e /gpfs/hps && -e /usrx ]] ; then
 	MACHINE_ID=wcoss
         if ( ! cat /proc/cpuinfo |grep 'processor.*32' ) ; then
             # Fewer than 32 fake (hyperthreading) cpus, so Phase 1.
-            FULL_MACHINE_ID=wcoss.phase1
+            FULL_MACHINE_ID=wcoss_phase1
             PEX=1
         else
-            FULL_MACHINE_ID=wcoss.phase2
+            FULL_MACHINE_ID=wcoss_phase2
             PEX=2
         fi
     else
@@ -76,8 +81,8 @@ elif [[ -e /scratch4 && -e /scratch3 ]] ; then
     FULL_MACHINE_ID=theia
     MACHINE_ID=theia
 elif [[ -e /glade ]] ; then
-    FULL_MACHINE_ID=yellowstone
-    MACHINE_ID=yellowstone
+    FULL_MACHINE_ID=cheyenne
+    MACHINE_ID=cheyenne
 elif [[ -e /pan2 && -e /lfs3 ]] ; then
     FULL_MACHINE_ID=jet
     MACHINE_ID=jet
@@ -97,13 +102,14 @@ MACHINE_ID_UNDER=$( echo "$MACHINE_ID" | sed 's,\.,_,g' )
 FULL_MACHINE_ID_DOT=$( echo "$FULL_MACHINE_ID" | sed 's,_,\.,g' )
 FULL_MACHINE_ID_UNDER=$( echo "$FULL_MACHINE_ID" | sed 's,\.,_,g' )
 
-if [[ "$MACHINE_ID" == yellowstone ]] ; then
-    source /glade/apps/opt/lmod/lmod/init/bash
-elif [[ "$MACHINE_ID" == gaea ]] ; then
+if [[ "$MACHINE_ID" == gaea ]] ; then
     # The module init stuff is buggy on gaea.  You really do need
     # /etc/profile.
     source /etc/profile
 fi
+
+NEMS_COMPILER="${NEMS_COMPILER:-intel}"
+BUILD_TARGET="$FULL_MACHINE_ID.$NEMS_COMPILER"
 
 echo "MACHINE_ID=$MACHINE_ID FULL_MACHINE_ID=$FULL_MACHINE_ID"
 
@@ -644,7 +650,7 @@ build_checkloop(){
   
           # now wait for either for $mypid to finish because of canceling, or
           # $makepid to finish due to done or bail out of make command.
-  
+          set +x
           while ps -p "$makepid" > /dev/null
           do
             if ! ps -p "$mypid" > /dev/null
@@ -682,7 +688,7 @@ build_checkloop(){
 
       # now wait for either for $mypid to finish because of canceling, or
       # $makepid to finish due to done or bail out of make command.
-  
+      set +x
       while ps -p "$makepid" > /dev/null
       do
         if ! ps -p "$mypid" > /dev/null
@@ -691,7 +697,7 @@ build_checkloop(){
         fi
       done
       kill "$mypid" > /dev/null 2>&1
-  
+
       if ([ ! -d "$COMP_BINDIR" ]); then
         # build did not succeed
         "$tool" --clear --backtitle "NEMS Application Builder" \
@@ -808,7 +814,12 @@ build_fv3(){
     cp -fp $NEMSDIR/src/conf/configure.nems "$COMP_SRCDIR"/conf/configure.fv3
     cp -fp $NEMSDIR/src/conf/modules.nems "$COMP_SRCDIR"/conf/modules.fv3
     gmake clean
-    gmake ${COMPOS[@]:1} -j 8 nemsinstall
+    # CISL kills your shell if using too much resources on the login node
+    if [[ $MACHINE_ID == "cheyenne" ]]; then
+      gmake ${COMPOS[@]:1} -j 3 nemsinstall
+    else
+      gmake ${COMPOS[@]:1} -j 8 nemsinstall
+    fi
     if ([ ! -d $COMP_BINDIR ]); then
       echo "...failed building $COMP."
     else
@@ -915,19 +926,17 @@ build_mom6(){
   if [[ $1"" == "clean" ]] ; then
     echo "Cleaning $COMP..."
     echo "Only partially implemented!!!"
-    cd MOM6
+    cd $COMP_SRCDIR
     rm -rf exec src/path_names_shared
     find . -name '*.o' -o -name '*.mod' -o -name '*.a' | xargs rm -f
-    cd ../MOM_CAP
-    rm -f mom5.mk.install
-    find . -name '*.o' -o -name '*.mod' -o -name '*.a' | xargs rm -f
+    rm -f src/MOM6/config_src/nems_cap/mom5.mk.install
     cd ..
     echo "...done cleaning $COMP."
   else
     echo "Building $COMP..."
     cd $COMP_SRCDIR
     ./compile.sh --platform $MACHINE_ID
-    cd ../MOM_CAP
+    cd $COMP_SRCDIR/src/MOM6/config_src/nems_cap
     echo "make -f makefile.nuopc VERSION=mom6 USER_CFLAGS=-DMOM6_CAP NEMSMOMDIR=$COMP_SRCDIR/exec/$MACHINE_ID INSTALLDIR=$COMP_BINDIR install"
     make -f makefile.nuopc VERSION=mom6 USER_CFLAGS=-DMOM6_CAP NEMSMOMDIR=$COMP_SRCDIR/exec/$MACHINE_ID INSTALLDIR=$COMP_BINDIR install
     if ([ ! -d "$COMP_BINDIR" ]); then
@@ -1025,7 +1034,7 @@ build_ww3(){
   local WW3_COMP=$FULL_MACHINE_ID
   if ([ ! -f "$COMP_SRCDIR/bin/comp.$WW3_COMP" ]); then
      local WW3_COMP='Intel'
-  fi 
+  fi
   if [[ "$1" == "clean" ]] ; then
     echo "Cleaning $COMP..."
     cd "$COMP_SRCDIR/esmf"
@@ -1090,35 +1099,6 @@ build_lis(){
   fi
 }
 
-build_gsdchem(){
-  # in: COMP, COMP_SRCDIR, COMP_BINDIR
-
-  if [[ "$1" == "clean" ]] ; then
-    echo "Cleaning $COMP..."
-    cd "$COMP_SRCDIR"
-    make distclean
-    echo "...done cleaning $COMP."
-  else
-    echo "Building $COMP..."
-    cd "$COMP_SRCDIR"
-    ./configure --prefix=$COMP_BINDIR --datarootdir=$COMP_BINDIR --libdir=$COMP_BINDIR
-    if [[ "$?" != "0" ]] ; then
-      echo "...failed to configure $COMP."
-      exit 1
-    fi
-    make
-    if [[ "$?" != "0" ]] ; then
-      echo "...failed compiling $COMP."
-      exit 1
-    fi
-    make install
-    if ([ ! -d "$COMP_BINDIR" ]); then
-      echo "...failed installing $COMP."
-    else
-      echo "...done building $COMP."
-    fi
-  fi
-}
 
 # MAIN #########################################################################
 
@@ -1283,7 +1263,6 @@ NEMS)
             SHYD="HYD: Stub Model"                                        \
             XHYD="HYD: Dead Model"                                        \
             WRFHYDRO="HYD: Hydraulics portion of WRF-Hydro Model"         \
-            GSDCHEM="CHM: GSD Version of GOCART Chemistry Model"         \
         2>> $LOGFILE
         if [[ "$tool" == autobuild ]] ; then
             break
@@ -1300,7 +1279,7 @@ NEMS)
 # Need to find the associated appBuilder file
 FOUNDAPP=false
 for i in "${appbuilderlist[@]}" ; do
-  if [[ $( basename $i ) =~ "$APP" ]] ; then
+  if [[ $( basename $i ) == "$APP.appBuilder" ]] ; then
     source "$i"
     echo "${COMPONENTS[@]}" >> $LOGFILE
     FOUNDAPP=true
@@ -1370,6 +1349,8 @@ note "Determine platform...$MACHINE_ID" 10 35 "Info"
 # configure NEMS for the specific platform
 if [ $MACHINE_ID = linux_gnu ]; then
   COMPILER=""
+elif [ $MACHINE_ID = theia ] || [ $MACHINE_ID = cheyenne ]; then
+  COMPILER=${NEMS_COMPILER}_
 else
   COMPILER="intel_"
 fi
@@ -1481,7 +1462,7 @@ if [[ "$APPLEVELUSE" == "true" ]] ; then
         elif [[ ${COMPOS[0]} == "MOM5" ]] ; then
             BUILD_FUNC=build_mom5
         elif [[ ${COMPOS[0]} == "MOM6" ]] ; then
-            BUILD_FUNC=build_mom6
+            BUILD_FUNC=build_mom6 
         elif [[ ${COMPOS[0]} == "CICE" ]] ; then
             BUILD_FUNC=build_cice
         elif [[ ${COMPOS[0]} == "IPE" ]] ; then
@@ -1494,8 +1475,6 @@ if [[ "$APPLEVELUSE" == "true" ]] ; then
             BUILD_FUNC=build_lis
         elif [[ ${COMPOS[0]} == "FV3" ]] ; then
             BUILD_FUNC=build_fv3
-        elif [[ ${COMPOS[0]} == "GSDCHEM" ]] ; then
-            BUILD_FUNC=build_gsdchem
         else
             BUILD_FUNC=build_std
         fi
@@ -1625,9 +1604,6 @@ for i in "${COMPONENTS[@]}" ; do
   elif [[ ${COMPOS[0]} == "LIS" ]] ; then
     COMP=$COMP",lis"
     COMPDIRS="$COMPDIRS LIS_DIR=$LIS_BINDIR"
-  elif [[ ${COMPOS[0]} == "GSDCHEM" ]] ; then
-    COMP=$COMP",gsdchem"
-    COMPDIRS="$COMPDIRS GSDCHEM_DIR=$GSDCHEM_BINDIR"
   fi
 done
 echo "COMP=$COMP,COMPDIRS=$COMPDIRS"
@@ -1702,7 +1678,7 @@ if [[ "$CLEAN_FIRST" == YES ]] ; then
   
       # now wait for either for $mypid to finish because of canceling, or
       # $makepid to finish due to done or bail out of make command.
-  
+      set +x
       while ps -p $makepid > /dev/null
       do
         if ! ps -p $mypid > /dev/null
@@ -1737,7 +1713,7 @@ while [[ ! -f ../exe/NEMS.x ]] ; do
           --and-widget --ok-label "CANCEL" \
           --begin 2 1 --msgbox "Press CANCEL to interrupt." 5 30 \
           2> /dev/null &
-    set -x
+
     mypid=$!
     # NOTE: $MAKEOPT must NOT be in quotes.
     make $MAKEOPT 2>&1 | tee -a $LOGDIR/appBuilder.NEMS.log.$$
@@ -1755,6 +1731,7 @@ while [[ ! -f ../exe/NEMS.x ]] ; do
       fi
     done
     kill $mypid > /dev/null 2>&1
+
   
     echo "Passed build step."
     if [[ ! -f ../exe/NEMS.x ]] ; then

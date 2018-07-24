@@ -62,7 +62,7 @@ MODULE CRTM_ChannelInfo_Define
   ! -----------------
   ! Version Id for the module
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: CRTM_ChannelInfo_Define.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: CRTM_ChannelInfo_Define.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   ! Message string length
   INTEGER, PARAMETER :: ML = 256
   

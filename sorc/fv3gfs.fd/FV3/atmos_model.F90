@@ -44,7 +44,7 @@ module atmos_model_mod
 
 use mpp_mod,            only: mpp_pe, mpp_root_pe, mpp_clock_id, mpp_clock_begin
 use mpp_mod,            only: mpp_clock_end, CLOCK_COMPONENT, MPP_CLOCK_SYNC
-use mpp_mod,            only: mpp_min, mpp_max, mpp_error, mpp_chksum, FATAL
+use mpp_mod,            only: mpp_min, mpp_max, mpp_error, mpp_chksum
 use mpp_domains_mod,    only: domain2d
 use mpp_mod,            only: mpp_get_current_pelist_name
 #ifdef INTERNAL_FILE_NML
@@ -60,8 +60,7 @@ use diag_manager_mod,   only: diag_send_complete_instant
 use time_manager_mod,   only: time_type, get_time, get_date, &
                               operator(+), operator(-)
 use field_manager_mod,  only: MODEL_ATMOS
-use tracer_manager_mod, only: get_number_tracers, get_tracer_names, &
-                              get_tracer_index
+use tracer_manager_mod, only: get_number_tracers, get_tracer_names
 use xgrid_mod,          only: grid_box_type
 use atmosphere_mod,     only: atmosphere_init
 use atmosphere_mod,     only: atmosphere_restart
@@ -83,17 +82,15 @@ use block_control_mod,  only: block_control_type, define_blocks_packed
 use DYCORE_typedefs,    only: DYCORE_data_type, DYCORE_diag_type
 use IPD_typedefs,       only: IPD_init_type, IPD_control_type, &
                               IPD_data_type, IPD_diag_type,    &
-                              IPD_restart_type, kind_phys
-use IPD_driver,         only: IPD_initialize, IPD_setup_step,  &
-                              IPD_radiation_step,              &
-                              IPD_physics_step1,               &
-                              IPD_physics_step2
+                              IPD_restart_type, IPD_kind_phys, &
+                              IPD_func0d_proc, IPD_func1d_proc
+use IPD_driver,         only: IPD_initialize, IPD_step
+use physics_abstraction_layer, only: time_vary_step, radiation_step1, physics_step1, physics_step2
 use FV3GFS_io_mod,      only: FV3GFS_restart_read, FV3GFS_restart_write, &
                               FV3GFS_IPD_checksum,                       &
-                              gfdl_diag_register, gfdl_diag_output
+                              FV3GFS_diag_register, FV3GFS_diag_output,  &
+                              DIAG_SIZE
 use fv_iau_mod, only: iau_external_data_type,getiauforcing,iau_initialize
-use module_cplfields,   only: cplFieldGet
-use ESMF
 
 !-----------------------------------------------------------------------
 
@@ -101,35 +98,36 @@ implicit none
 private
 
 public update_atmos_radiation_physics
-public update_atmos_state_bef_chem, update_atmos_state_aft_chem
+public update_atmos_model_state
 public update_atmos_model_dynamics
 public atmos_model_init, atmos_model_end, atmos_data_type
 public atmos_model_restart
-public atmos_model_info_get
+public addLsmask2grid
 !-----------------------------------------------------------------------
 
 !<PUBLICTYPE >
  type atmos_data_type
-     type (domain2d)               :: domain             ! domain decomposition
      integer                       :: axes(4)            ! axis indices (returned by diag_manager) for the atmospheric grid 
                                                          ! (they correspond to the x, y, pfull, phalf axes)
-     real,                 pointer, dimension(:,:) :: lon_bnd  => null() ! local longitude axis grid box corners in radians.
-     real,                 pointer, dimension(:,:) :: lat_bnd  => null() ! local latitude axis grid box corners in radians.
-     real(kind=kind_phys), pointer, dimension(:,:) :: lon      => null() ! local longitude axis grid box centers in radians.
-     real(kind=kind_phys), pointer, dimension(:,:) :: lat      => null() ! local latitude axis grid box centers in radians.
-     type (time_type)              :: Time               ! current time
-     type (time_type)              :: Time_step          ! atmospheric time step.
-     type (time_type)              :: Time_init          ! reference time.
      integer, pointer              :: pelist(:) =>null() ! pelist where atmosphere is running.
-     logical                       :: pe                 ! current pe.
-     type(grid_box_type)           :: grid               ! hold grid information needed for 2nd order conservative flux exchange
-                                                         ! to calculate gradient on cubic sphere grid.
      integer                       :: layout(2)          ! computer task laytout
-     real(kind=8), pointer, dimension(:)           :: ak, bk
-     real(kind=kind_phys), pointer, dimension(:,:) :: dx, dy
-     real(kind=8), pointer, dimension(:,:)         :: area
-     real(kind=8), pointer, dimension(:,:,:)       :: layer_hgt, level_hgt
+     logical                       :: pe                 ! current pe.
+     real(kind=8),             pointer, dimension(:)     :: ak, bk
+     real,                     pointer, dimension(:,:)   :: lon_bnd  => null() ! local longitude axis grid box corners in radians.
+     real,                     pointer, dimension(:,:)   :: lat_bnd  => null() ! local latitude axis grid box corners in radians.
+     real(kind=IPD_kind_phys), pointer, dimension(:,:)   :: lon      => null() ! local longitude axis grid box centers in radians.
+     real(kind=IPD_kind_phys), pointer, dimension(:,:)   :: lat      => null() ! local latitude axis grid box centers in radians.
+     real(kind=IPD_kind_phys), pointer, dimension(:,:)   :: dx, dy
+     real(kind=8),             pointer, dimension(:,:)   :: area
+     real(kind=8),             pointer, dimension(:,:,:) :: layer_hgt, level_hgt
+     type(domain2d)                :: domain             ! domain decomposition
+     type(time_type)               :: Time               ! current time
+     type(time_type)               :: Time_step          ! atmospheric time step.
+     type(time_type)               :: Time_init          ! reference time.
+     type(grid_box_type)           :: grid               ! hold grid information needed for 2nd order conservative flux exchange 
+     type(IPD_diag_type), pointer, dimension(:) :: Diag
  end type atmos_data_type
+                                                         ! to calculate gradient on cubic sphere grid.
 !</PUBLICTYPE >
 
 integer :: fv3Clock, getClock, updClock, setupClock, radClock, physClock
@@ -158,7 +156,7 @@ type(DYCORE_diag_type)                 :: DYCORE_Diag(25)
 !----------------
 type(IPD_control_type)              :: IPD_Control
 type(IPD_data_type),    allocatable :: IPD_Data(:)  ! number of blocks
-type(IPD_diag_type)                 :: IPD_Diag(250)
+type(IPD_diag_type),    target      :: IPD_Diag(DIAG_SIZE)
 type(IPD_restart_type)              :: IPD_Restart
 
 !--------------
@@ -205,7 +203,8 @@ subroutine update_atmos_radiation_physics (Atmos)
   type (atmos_data_type), intent(in) :: Atmos
 !--- local variables---
     integer :: nb, jdat(8), rc
-
+    procedure(IPD_func0d_proc), pointer :: Func0d => NULL()
+    procedure(IPD_func1d_proc), pointer :: Func1d => NULL()
     if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "statein driver"
 !--- get atmospheric state from the dynamic core
     call set_atmosphere_pelist()
@@ -233,18 +232,18 @@ subroutine update_atmos_radiation_physics (Atmos)
 
 !--- execute the IPD atmospheric setup step
       call mpp_clock_begin(setupClock)
-      call IPD_setup_step (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart)
-
+      Func1d => time_vary_step
+      call IPD_step (IPD_Control, IPD_Data(:), IPD_Diag, IPD_Restart, IPD_func1d=Func1d)
 !--- if coupled, assign coupled fields
       if( IPD_Control%cplflx ) then
-        print *,'in atmos_model,nblks=',Atm_block%nblks
-        print *,'in atmos_model,IPD_Data size=',size(IPD_Data)
-        print *,'in atmos_model,tsfc(1)=',IPD_Data(1)%sfcprop%tsfc(1)
-        print *,'in atmos_model, tsfc size=',size(IPD_Data(1)%sfcprop%tsfc)
-!jw        call assign_importdata(IPD_Control, IPD_DATA(:), Atm_block)
+!        print *,'in atmos_model,nblks=',Atm_block%nblks
+!        print *,'in atmos_model,IPD_Data size=',size(IPD_Data)
+!        print *,'in atmos_model,tsfc(1)=',IPD_Data(1)%sfcprop%tsfc(1)
+!        print *,'in atmos_model, tsfc size=',size(IPD_Data(1)%sfcprop%tsfc)
         call assign_importdata(rc)
-        print *,'in atmos_model, after assign_importdata, rc=',rc
+!        print *,'in atmos_model, after assign_importdata, rc=',rc
       endif
+
       call mpp_clock_end(setupClock)
 
       if (mpp_pe() == mpp_root_pe() .and. debug) write(6,*) "radiation driver"
@@ -252,12 +251,13 @@ subroutine update_atmos_radiation_physics (Atmos)
 !--- execute the IPD atmospheric radiation subcomponent (RRTM)
 
       call mpp_clock_begin(radClock)
+      Func0d => radiation_step1
 !$OMP parallel do default (none)       &
 !$OMP            schedule (dynamic,1), &
-!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart) &
+!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Func0d) &
 !$OMP            private  (nb)
       do nb = 1,Atm_block%nblks
-        call IPD_radiation_step (IPD_Control, IPD_Data(nb), IPD_Diag, IPD_Restart)
+        call IPD_step (IPD_Control, IPD_Data(nb:nb), IPD_Diag, IPD_Restart, IPD_func0d=Func0d)
       enddo
       call mpp_clock_end(radClock)
 
@@ -271,12 +271,13 @@ subroutine update_atmos_radiation_physics (Atmos)
 !--- execute the IPD atmospheric physics step1 subcomponent (main physics driver)
 
       call mpp_clock_begin(physClock)
+      Func0d => physics_step1
 !$OMP parallel do default (none) &
 !$OMP            schedule (dynamic,1), &
-!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart) &
+!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Func0d) &
 !$OMP            private  (nb)
       do nb = 1,Atm_block%nblks
-        call IPD_physics_step1 (IPD_Control, IPD_Data(nb), IPD_Diag, IPD_Restart)
+        call IPD_step (IPD_Control, IPD_Data(nb:nb), IPD_Diag, IPD_Restart, IPD_func0d=Func0d)
       enddo
       call mpp_clock_end(physClock)
 
@@ -290,12 +291,13 @@ subroutine update_atmos_radiation_physics (Atmos)
 !--- execute the IPD atmospheric physics step2 subcomponent (stochastic physics driver)
 
       call mpp_clock_begin(physClock)
+      Func0d => physics_step2
 !$OMP parallel do default (none) &
 !$OMP            schedule (dynamic,1), &
-!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart) &
+!$OMP            shared   (Atm_block, IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Func0d) &
 !$OMP            private  (nb)
       do nb = 1,Atm_block%nblks
-        call IPD_physics_step2 (IPD_Control, IPD_Data(nb), IPD_Diag, IPD_Restart)
+        call IPD_step (IPD_Control, IPD_Data(nb:nb), IPD_Diag, IPD_Restart, IPD_func0d=Func0d)
       enddo
       call mpp_clock_end(physClock)
 
@@ -331,7 +333,7 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
   integer :: isc, iec, jsc, jec
   integer :: isd, ied, jsd, jed
   integer :: blk, ibs, ibe, jbs, jbe
-  real(kind=kind_phys) :: dt_phys
+  real(kind=IPD_kind_phys) :: dt_phys
   real, allocatable    :: q(:,:,:,:), p_half(:,:,:)
   character(len=80)    :: control
   character(len=64)    :: filename, filename2, pelist_name
@@ -449,6 +451,7 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
 #endif
 
    call IPD_initialize (IPD_Control, IPD_Data, IPD_Diag, IPD_Restart, Init_parm)
+   Atmos%Diag => IPD_Diag
 
    Atm(mytile)%flagstruct%do_skeb = IPD_Control%do_skeb
 
@@ -468,7 +471,7 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
 !rab   call atmosphere_tracer_postinit (IPD_Data, Atm_block)
 
    call atmosphere_nggps_diag (Time, init=.true.)
-   call gfdl_diag_register (Time, IPD_Data(:)%Sfcprop, IPD_Data(:)%Cldprop, IPD_Data(:)%IntDiag, IPD_Data(:)%grid, Atm_block, IPD_Control, Atmos%axes)
+   call FV3GFS_diag_register (IPD_Diag, Time, Atm_block, IPD_Control, Atmos%lon, Atmos%lat, Atmos%axes)
    call FV3GFS_restart_read (IPD_Data, IPD_Restart, Atm_block, IPD_Control, Atmos%domain)
 
    !--- set the initial diagnostic timestamp
@@ -500,7 +503,6 @@ subroutine atmos_model_init (Atmos, Time_init, Time, Time_step)
        enddo
      else
        maxh  = fhmax / fhout
-       fdiag(1) = fdiag(1) + fhout
        do i = 2, maxh
          fdiag(i) = fdiag(i-1) + fhout
        enddo
@@ -543,60 +545,17 @@ end subroutine update_atmos_model_dynamics
 
 
 !#######################################################################
-! <SUBROUTINE NAME="update_atmos_state_bef_chem"
+! <SUBROUTINE NAME="update_atmos_model_state"
 !
 ! <OVERVIEW>
-subroutine update_atmos_state_bef_chem (Atmos, rc)
+subroutine update_atmos_model_state (Atmos)
 ! to update the model state after all concurrency is completed
   type (atmos_data_type), intent(inout) :: Atmos
-  integer, optional,      intent(out)   :: rc
 !--- local variables
-  integer :: localrc
-
-    !--- begin
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    !--- if coupled, exchange coupled fields
-    if( IPD_Control%cplchm ) then
-      ! -- export fields to chemistry
-      call update_atmos_model_fields('export', rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) return  ! bail out
-    endif
-
- end subroutine update_atmos_state_bef_chem
-! </SUBROUTINE>
-
-
-
-!#######################################################################
-! <SUBROUTINE NAME="update_atmos_state_aft_chem"
-!
-! <OVERVIEW>
-subroutine update_atmos_state_aft_chem (Atmos, rc)
-! to update the model state after all concurrency is completed
-  type (atmos_data_type), intent(inout) :: Atmos
-  integer, optional,      intent(out)   :: rc
-!--- local variables
-  integer :: localrc
   integer :: isec,seconds
-  real(kind=kind_phys) :: time_int, time_intfull
-
-    !--- begin
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    !--- if coupled, exchange coupled fields
-    if( IPD_Control%cplchm ) then
-      ! -- import fields from chemistry
-      call update_atmos_model_fields('import', rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) return  ! bail out
-    endif
-
+  integer :: rc
+  real(kind=IPD_kind_phys) :: time_int, time_intfull
+!
     call set_atmosphere_pelist()
     call mpp_clock_begin(fv3Clock)
     call mpp_clock_begin(updClock)
@@ -621,7 +580,7 @@ subroutine update_atmos_state_aft_chem (Atmos, rc)
       time_intfull = real(seconds)
       if (mpp_pe() == mpp_root_pe()) write(6,*) ' gfs diags time since last bucket empty: ',time_int/3600.,'hrs'
       call atmosphere_nggps_diag(Atmos%Time)
-      call gfdl_diag_output(Atmos%Time, Atm_block, IPD_Control%nx, IPD_Control%ny, &
+      call FV3GFS_diag_output(Atmos%Time, IPD_DIag, Atm_block, IPD_Control%nx, IPD_Control%ny, &
                             IPD_Control%levs, 1, 1, 1.d0, time_int, time_intfull)
       if (mod(isec,3600*nint(IPD_Control%fhzero)) == 0) diag_time = Atmos%Time
       call diag_send_complete_instant (Atmos%Time)
@@ -637,14 +596,10 @@ subroutine update_atmos_state_aft_chem (Atmos, rc)
     if (IPD_Control%cplflx) then
       print *,'COUPLING: IPD layer'
 !jw       call setup_exportdata(IPD_Control, IPD_Data, Atm_block)
-      call setup_exportdata(localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) return  ! bail out
+      call setup_exportdata(rc)
     endif
 
- end subroutine update_atmos_state_aft_chem
+ end subroutine update_atmos_model_state
 ! </SUBROUTINE>
 
 
@@ -702,337 +657,6 @@ end subroutine atmos_model_restart
 ! </SUBROUTINE>
 
 !#######################################################################
-! <SUBROUTINE NAME="atmos_model_info_get">
-subroutine atmos_model_info_get(nlev, ntracers, nsoillev)
-
-  integer, optional, intent(out) :: nlev, ntracers, nsoillev
-
-  if (present(nlev))     nlev = Atm_block%npz
-  if (present(ntracers)) call get_number_tracers(MODEL_ATMOS, num_tracers=ntracers)
-  if (present(nsoillev)) then
-    nsoillev = 0
-    if (allocated(IPD_Data)) then
-      if (associated(IPD_Data(1)%Sfcprop%slc)) &
-        nsoillev = size(IPD_Data(1)%Sfcprop%slc, 2)
-    end if
-  end if
-
-end subroutine atmos_model_info_get
-! </SUBROUTINE>
-
-!#######################################################################
-! <SUBROUTINE NAME="update_atmos_model_fields">
-! <DESCRIPTION>
-!  Populate exported field storage with the current atmospheric state 
-!  fields. Update chemical tracers using data from imported fields.
-!  The fields are exported/imported from/to the atmospheric state
-!  post-physics calculations.
-!
-!  NOTE: It is assumed that all the chemical tracers follow the standard
-!  atmospheric tracers, which end with ozone. The order of the chemical
-!  tracers must match their order in the chemistry component.
-!
-!  Requires:
-!         IPD_Data
-!         Atm_block
-! </DESCRIPTION>
-subroutine update_atmos_model_fields(state, rc)
-
-  character(len=*),  intent(in)  :: state
-  integer, optional, intent(out) :: rc
-
-  !--- local variables
-  integer :: localrc
-  integer :: ni, nj, nk, nt, ntoz
-  integer :: nb, ix, i, j, k, it
-  integer :: ib, jb
-
-  real(ESMF_KIND_R8), dimension(:,:,:),   pointer :: prsl, phil, &
-                                                     prsi, phii, &
-                                                     temp, &
-                                                     ua, va, vvl, &
-                                                     dkt, slc
-  real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: q
-
-  real(ESMF_KIND_R8), dimension(:,:), pointer :: hpbl, area, stype, rainc, &
-    uustar, rain, sfcdsw, slmsk, tsfc, shfsfc, snowd, vtype, vfrac, zorl
-
-  logical, parameter :: diag = .true.
-
-  ! -- begin
-  if (present(rc)) rc = ESMF_SUCCESS
-
-  ni  = Atm_block%iec - Atm_block%isc + 1
-  nj  = Atm_block%jec - Atm_block%jsc + 1
-  nk  = Atm_block%npz
-  call get_number_tracers(MODEL_ATMOS, num_tracers=nt)
-
-  select case (trim(state))
-    case ('import')
-      !--- retrieve references to allocated memory for each field
-      call cplFieldGet(state,'mass_fraction_of_tracers_in_air', &
-        farrayPtr4d=q, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      !--- tracers quantities
-      !--- locate the end location of standard atmospheric tracers, marked by ozone
-      ntoz = get_tracer_index(MODEL_ATMOS, 'o3mr')
-
-      do it = ntoz + 1, nt
-!$OMP parallel do default (none) &
-!$OMP             shared  (it, nk, nj, ni, Atm_block, IPD_Data, q)  &
-!$OMP             private (k, j, jb, i, ib, nb, ix)
-        do k = 1, nk
-          do j = 1, nj
-            jb = j + Atm_block%jsc - 1
-            do i = 1, ni
-              ib = i + Atm_block%isc - 1
-              nb = Atm_block%blkno(ib,jb)
-              ix = Atm_block%ixp(ib,jb)
-              IPD_Data(nb)%Stateout%gq0(ix,k,it) = q(i,j,k,it)
-            enddo
-          enddo
-        enddo
-      enddo
-
-      if (diag) then
-        write(6,'("update_atmos: ",a,": qgrs - min/max/avg",3g16.6)') &
-          trim(state), minval(q), maxval(q), sum(q)/size(q)
-      end if
-
-    case ('export')
-      !--- retrieve references to allocated memory for each field
-      call cplFieldGet(state,'air_pressure', farrayPtr3d=prsi, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'air_pressure_in_model_layers', &
-        farrayPtr3d=prsl, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'geopotential', farrayPtr3d=phii, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'geopotential_in_model_layers', &
-        farrayPtr3d=phil, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'air_temperature', farrayPtr3d=temp, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'x_wind', farrayPtr3d=ua, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'y_wind', farrayPtr3d=va, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'omega', farrayPtr3d=vvl, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'mass_fraction_of_tracers_in_air', &
-        farrayPtr4d=q, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'soil_moisture_content', farrayPtr3d=slc, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'soil_type', farrayPtr2d=stype, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'atmosphere_boundary_layer_thickness', &
-        farrayPtr2d=hpbl, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'cell_area', farrayPtr2d=area, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'convective_rainfall_amount', &
-        farrayPtr2d=rainc, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'exchange_coefficient_heat', farrayPtr3d=dkt, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'friction_velocity', farrayPtr2d=uustar, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'rainfall_amount', farrayPtr2d=rain, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'surface_downwelling_shortwave_flux_in_air', &
-        farrayPtr2d=sfcdsw, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'surface_mask', farrayPtr2d=slmsk, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'surface_skin_temperature', farrayPtr2d=tsfc, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'surface_upward_sensible_heat_flux', &
-        farrayPtr2d=shfsfc, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'thickness_of_snowfall_amount', &
-        farrayPtr2d=snowd, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'vegetation_type', farrayPtr2d=vtype, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'vegetation_area_fraction', &
-        farrayPtr2d=vfrac, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      call cplFieldGet(state,'z_over_l', farrayPtr2d=zorl, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-
-      !--- handle all three-dimensional variables
-!$OMP parallel do default (none) &
-!$OMP             shared  (nk, nj, ni, Atm_block, IPD_Data, prsi, phii, prsl, phil, temp, ua, va, vvl, dkt)  &
-!$OMP             private (k, j, jb, i, ib, nb, ix)
-      do k = 1, nk
-        do j = 1, nj
-          jb = j + Atm_block%jsc - 1
-          do i = 1, ni
-            ib = i + Atm_block%isc - 1
-            nb = Atm_block%blkno(ib,jb)
-            ix = Atm_block%ixp(ib,jb)
-            !--- interface values
-            prsi(i,j,k) = IPD_Data(nb)%Statein%prsi(ix,k)
-            phii(i,j,k) = IPD_Data(nb)%Statein%phii(ix,k)
-            !--- layer values
-            prsl(i,j,k) = IPD_Data(nb)%Statein%prsl(ix,k)
-            phil(i,j,k) = IPD_Data(nb)%Statein%phil(ix,k)
-            temp(i,j,k) = IPD_Data(nb)%Stateout%gt0(ix,k)
-            ua  (i,j,k) = IPD_Data(nb)%Stateout%gu0(ix,k)
-            va  (i,j,k) = IPD_Data(nb)%Stateout%gv0(ix,k)
-            vvl (i,j,k) = IPD_Data(nb)%Statein%vvl (ix,k)
-            dkt (i,j,k) = IPD_Data(nb)%Coupling%dkt(ix,k)
-          enddo
-        enddo
-      enddo
-
-      !--- top interface values
-      k = nk+1
-      do j = 1, nj
-        jb = j + Atm_block%jsc - 1
-        do i = 1, ni
-          ib = i + Atm_block%isc - 1
-          nb = Atm_block%blkno(ib,jb)
-          ix = Atm_block%ixp(ib,jb)
-          prsi(i,j,k) = IPD_Data(nb)%Statein%prsi(ix,k)
-          phii(i,j,k) = IPD_Data(nb)%Statein%phii(ix,k)
-        enddo
-      enddo
-
-      !--- tracers quantities
-      do it = 1, nt
-!$OMP parallel do default (none) &
-!$OMP             shared  (it, nk, nj, ni, Atm_block, IPD_Data, q)  &
-!$OMP             private (k, j, jb, i, ib, nb, ix)
-        do k = 1, nk
-          do j = 1, nj
-            jb = j + Atm_block%jsc - 1
-            do i = 1, ni
-              ib = i + Atm_block%isc - 1
-              nb = Atm_block%blkno(ib,jb)
-              ix = Atm_block%ixp(ib,jb)
-              q(i,j,k,it) = IPD_Data(nb)%Stateout%gq0(ix,k,it)
-            enddo
-          enddo
-        enddo
-      enddo
-
-!$OMP parallel do default (none) &
-!$OMP             shared  (nj, ni, Atm_block, IPD_Data, &
-!$OMP                      hpbl, area, stype, rainc, rain, uustar, sfcdsw, &
-!$OMP                      slmsk, snowd, tsfc, shfsfc, vtype, vfrac, zorl, slc) &
-!$OMP             private (j, jb, i, ib, nb, ix)
-      do j = 1, nj
-        jb = j + Atm_block%jsc - 1
-        do i = 1, ni
-          ib = i + Atm_block%isc - 1
-          nb = Atm_block%blkno(ib,jb)
-          ix = Atm_block%ixp(ib,jb)
-          hpbl(i,j)    = IPD_Data(nb)%IntDiag%hpbl(ix)
-          area(i,j)    = IPD_Data(nb)%Grid%area(ix)
-          stype(i,j)   = IPD_Data(nb)%Sfcprop%stype(ix)
-          rainc(i,j)   = IPD_Data(nb)%Coupling%rainc_cpl(ix) 
-          rain(i,j)    = IPD_Data(nb)%Coupling%rain_cpl(ix) 
-          uustar(i,j)  = IPD_Data(nb)%Sfcprop%uustar(ix)
-          sfcdsw(i,j)  = IPD_Data(nb)%Coupling%sfcdsw(ix)
-          slmsk(i,j)   = IPD_Data(nb)%Sfcprop%slmsk(ix)
-          snowd(i,j)   = IPD_Data(nb)%Sfcprop%snowd(ix)
-          tsfc(i,j)    = IPD_Data(nb)%Sfcprop%tsfc(ix)
-          shfsfc(i,j)  = IPD_Data(nb)%Coupling%ushfsfci(ix)
-          vtype(i,j)   = IPD_Data(nb)%Sfcprop%vtype(ix)
-          vfrac(i,j)   = IPD_Data(nb)%Sfcprop%vfrac(ix)
-          zorl(i,j)    = IPD_Data(nb)%Sfcprop%zorl(ix)
-          slc(i,j,:)   = IPD_Data(nb)%Sfcprop%slc(ix,:)
-        enddo
-      enddo
-
-      if (diag) then
-        ! -- diagnostics
-        write(6,'("update_atmos: prsi - min/max/avg",3g16.6)') minval(prsi), maxval(prsi), sum(prsi)/size(prsi)
-        write(6,'("update_atmos: phii - min/max/avg",3g16.6)') minval(phii), maxval(phii), sum(phii)/size(phii)
-        write(6,'("update_atmos: prsl - min/max/avg",3g16.6)') minval(prsl), maxval(prsl), sum(prsl)/size(prsl)
-        write(6,'("update_atmos: phil - min/max/avg",3g16.6)') minval(phil), maxval(phil), sum(phil)/size(phil)
-        write(6,'("update_atmos: tgrs - min/max/avg",3g16.6)') minval(temp), maxval(temp), sum(temp)/size(temp)
-        write(6,'("update_atmos: ugrs - min/max/avg",3g16.6)') minval(ua), maxval(ua), sum(ua)/size(ua)
-        write(6,'("update_atmos: vgrs - min/max/avg",3g16.6)') minval(va), maxval(va), sum(va)/size(va)
-        write(6,'("update_atmos: vvl  - min/max/avg",3g16.6)') minval(vvl ), maxval(vvl ), sum(vvl )/size(vvl )
-        write(6,'("update_atmos: qgrs - min/max/avg",3g16.6)') minval(q), maxval(q), sum(q)/size(q)
-
-        write(6,'("update_atmos: hpbl - min/max/avg",3g16.6)') minval(hpbl), maxval(hpbl), sum(hpbl)/size(hpbl)
-        write(6,'("update_atmos: rainc - min/max/avg",3g16.6)') minval(rainc), maxval(rainc), sum(rainc)/size(rainc)
-        write(6,'("update_atmos: rain - min/max/avg",3g16.6)') minval(rain), maxval(rain), sum(rain)/size(rain)
-        write(6,'("update_atmos: shfsfc - min/max/avg",3g16.6)') minval(shfsfc), maxval(shfsfc), sum(shfsfc)/size(shfsfc)
-        write(6,'("update_atmos: sfcdsw - min/max/avg",3g16.6)') minval(sfcdsw), maxval(sfcdsw), sum(sfcdsw)/size(sfcdsw)
-        write(6,'("update_atmos: slmsk - min/max/avg",3g16.6)') minval(slmsk), maxval(slmsk), sum(slmsk)/size(slmsk)
-        write(6,'("update_atmos: snowd - min/max/avg",3g16.6)') minval(snowd), maxval(snowd), sum(snowd)/size(snowd)
-        write(6,'("update_atmos: tsfc - min/max/avg",3g16.6)') minval(tsfc), maxval(tsfc), sum(tsfc)/size(tsfc)
-        write(6,'("update_atmos: vtype - min/max/avg",3g16.6)') minval(vtype), maxval(vtype), sum(vtype)/size(vtype)
-        write(6,'("update_atmos: vfrac - min/max/avg",3g16.6)') minval(vfrac), maxval(vfrac), sum(vfrac)/size(vfrac)
-        write(6,'("update_atmos: area - min/max/avg",3g16.6)') minval(area), maxval(area), sum(area)/size(area)
-        write(6,'("update_atmos: stype - min/max/avg",3g16.6)') minval(stype), maxval(stype), sum(stype)/size(stype)
-        write(6,'("update_atmos: zorl - min/max/avg",3g16.6)') minval(zorl), maxval(zorl), sum(zorl)/size(zorl)
-        write(6,'("update_atmos: slc - min/max/avg",3g16.6)') minval(slc), maxval(slc), sum(slc)/size(slc)
-      end if
-
-    case default
-      ! -- do nothing
-  end select
-
-end subroutine update_atmos_model_fields
-! </SUBROUTINE>
-
 !#######################################################################
 ! <SUBROUTINE NAME="atmos_data_type_chksum">
 !
@@ -1100,7 +724,6 @@ end subroutine atmos_data_type_chksum
 
   subroutine assign_importdata(rc)
 
-    use machine,           only: kind_phys
     use module_cplfields,  only: importFields, nImportFields
     use ESMF
 !
@@ -1113,7 +736,7 @@ end subroutine atmos_data_type_chksum
     type(ESMF_TypeKind_Flag)                           :: datatype
     real(kind=ESMF_KIND_R4), dimension(:,:), pointer   :: datar42d
     real(kind=ESMF_KIND_R8), dimension(:,:), pointer   :: datar82d
-    real(kind=kind_phys), dimension(:,:), pointer      :: datar8
+    real(kind=IPD_kind_phys), dimension(:,:), pointer  :: datar8
     logical found
 !
 !------------------------------------------------------------------------------
@@ -1272,7 +895,7 @@ end subroutine atmos_data_type_chksum
         endif
 
         ! get sea ice volume:  for sea ice covered area
-        fldname = 'hicein_cpl'
+        fldname = 'mean_ice_volume'
         if (trim(impfield_name) == trim(fldname) .and. found) then
           do j=jsc,jec
             do i=isc,iec
@@ -1307,7 +930,6 @@ end subroutine atmos_data_type_chksum
 !
   subroutine setup_exportdata (rc)
 
-    use machine,           only: kind_phys, kind_evod
     use module_cplfields,  only: exportData, nExportFields, exportFieldsList, &
                                  queryFieldList, fillExportFields
 
@@ -1320,7 +942,7 @@ end subroutine atmos_data_type_chksum
 
     !--- local variables
     integer            :: j, i, ix, nb, isc, iec, jsc, jec, idx
-    real(kind_evod)    :: rtime
+    real(IPD_kind_phys)    :: rtime
 !
     print *,'enter setup_exportdata'
 
@@ -1954,10 +1576,7 @@ end subroutine atmos_data_type_chksum
 
 !---
     ! Fill the export Fields for ESMF/NUOPC style coupling
-    call fillExportFields(exportData,rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__ )) return  ! bail out
+    call fillExportFields(exportData,rc)
 
 !---
     ! zero out accumulated fields
@@ -1989,6 +1608,75 @@ end subroutine atmos_data_type_chksum
 
   end subroutine setup_exportdata
 
+  subroutine addLsmask2grid(fcstgrid, rc)
+
+    use ESMF
+!
+    implicit none
+    type(ESMF_Grid)      :: fcstgrid
+    integer, optional, intent(out) :: rc
+!
+!  local vars
+    integer isc, iec, jsc, jec
+    integer i, j, nb, ix
+!    integer CLbnd(2), CUbnd(2), CCount(2), TLbnd(2), TUbnd(2), TCount(2)
+    type(ESMF_StaggerLoc) :: staggerloc
+    integer, allocatable :: lsmask(:,:)
+    integer(kind=ESMF_KIND_I4), pointer  :: maskPtr(:,:)
+!
+    isc = IPD_control%isc
+    iec = IPD_control%isc+IPD_control%nx-1
+    jsc = IPD_control%jsc
+    jec = IPD_control%jsc+IPD_control%ny-1
+    allocate(lsmask(isc:iec,jsc:jec))
+!
+    do j=jsc,jec
+      do i=isc,iec
+        nb = Atm_block%blkno(i,j)
+        ix = Atm_block%ixp(i,j)
+        lsmask(i,j) = IPD_Data(nb)%SfcProp%slmsk(ix)
+      enddo
+    enddo
+!
+! Get mask
+    call ESMF_GridAddItem(fcstgrid, itemflag=ESMF_GRIDITEM_MASK,   &
+         staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+!    call ESMF_GridGetItemBounds(fcstgrid, itemflag=ESMF_GRIDITEM_MASK,   &
+!         staggerloc=ESMF_STAGGERLOC_CENTER, computationalLBound=ClBnd,  &
+!         computationalUBound=CUbnd, computationalCount=Ccount,  &
+!         totalLBound=TLbnd, totalUBound=TUbnd, totalCount=Tcount, rc=rc)
+!    print *,'in set up grid, aft add esmfgridadd item mask, rc=',rc, &
+!     'ClBnd=',ClBnd,'CUbnd=',CUbnd,'Ccount=',Ccount, &
+!     'TlBnd=',TlBnd,'TUbnd=',TUbnd,'Tcount=',Tcount
+!    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+!      line=__LINE__, &
+!      file=__FILE__)) &
+!      return  ! bail out
+
+    call ESMF_GridGetItem(fcstgrid, itemflag=ESMF_GRIDITEM_MASK,   &
+         staggerloc=ESMF_STAGGERLOC_CENTER,farrayPtr=maskPtr, rc=rc)
+!    print *,'in set up grid, aft get maskptr, rc=',rc, 'size=',size(maskPtr,1),size(maskPtr,2), &
+!      'bound(maskPtr)=', LBOUND(maskPtr,1),LBOUND(maskPtr,2),UBOUND(maskPtr,1),UBOUND(maskPtr,2)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+!    
+    do j=jsc,jec
+      do i=isc,iec
+        maskPtr(i-isc+1,j-jsc+1) = lsmask(i,j)
+      enddo
+    enddo
+!      print *,'in set set lsmask, maskPtr=', maxval(maskPtr), minval(maskPtr)
+!
+    deallocate(lsmask)  
+
+  end subroutine addLsmask2grid
 !------------------------------------------------------------------------------
 
 end module atmos_model_mod

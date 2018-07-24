@@ -58,7 +58,7 @@ MODULE SSU_Input_Define
   ! Module parameters
   ! -----------------
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: SSU_Input_Define.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: SSU_Input_Define.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   ! Release and version
   INTEGER, PARAMETER :: SSU_INPUT_RELEASE = 1  ! This determines structure and file formats.
   INTEGER, PARAMETER :: SSU_INPUT_VERSION = 1  ! This is just the default data version.

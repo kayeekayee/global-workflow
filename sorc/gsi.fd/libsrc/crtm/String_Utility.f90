@@ -43,7 +43,7 @@ MODULE String_Utility
   ! Module parameters
   ! -----------------
   CHARACTER(*), PARAMETER :: MODULE_RCS_ID = &
-    '$Id: String_Utility.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+    '$Id: String_Utility.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   ! List of character for case conversion
   CHARACTER(*), PARAMETER :: LOWER_CASE = 'abcdefghijklmnopqrstuvwxyz'
   CHARACTER(*), PARAMETER :: UPPER_CASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 

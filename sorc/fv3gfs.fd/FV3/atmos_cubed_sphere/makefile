@@ -17,7 +17,7 @@ endif
 
 LIBRARY  = libfv3core.a
 
-FFLAGS   += -I../fms -I../fms/include -I../gfsphysics -I../io
+FFLAGS   += -I../fms -I../fms/include -I../gfsphysics -I ../ipd -I../io
 
 SRCS_f   =
 
@@ -92,6 +92,10 @@ $(LIBRARY): $(OBJS)
 	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(FAST) -c $< -o $@
 
 ./driver/fvGFS/fv_nggps_diag.o : ./driver/fvGFS/fv_nggps_diag.F90
+	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(ESMF_INC) -c $< -o $@
+
+# additional include files (ESMF_INC) needed for PGI
+./driver/fvGFS/atmosphere.o : ./driver/fvGFS/atmosphere.F90
 	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(ESMF_INC) -c $< -o $@
 
 .PHONY: clean

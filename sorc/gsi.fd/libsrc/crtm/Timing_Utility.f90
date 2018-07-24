@@ -23,6 +23,7 @@ MODULE Timing_Utility
   PUBLIC :: Timing_End
   PUBLIC :: Timing_Display
   PUBLIC :: Timing_Inspect
+  PUBLIC :: Timing_ToString
   PUBLIC :: Timing_Set
   PUBLIC :: Timing_Get
   PUBLIC :: Timing_WriteFile
@@ -34,7 +35,7 @@ MODULE Timing_Utility
 
   ! Parameters
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: Timing_Utility.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: Timing_Utility.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   INTEGER, PARAMETER :: ML = 256
 
 
@@ -369,6 +370,7 @@ CONTAINS
     IF ( PRESENT(End_Clock  ) ) End_Clock   = self%End_Clock
     IF ( PRESENT(Is_Valid   ) ) Is_Valid    = self%Is_Valid
   END SUBROUTINE Timing_Get
+
 
 !--------------------------------------------------------------------------------
 !:sdoc+:

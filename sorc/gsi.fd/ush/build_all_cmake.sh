@@ -5,18 +5,29 @@ set -ex
 cd ..
 pwd=$(pwd)
 
-target=$1
-dir_root=${2:-$pwd}
+dir_root=${1:-$pwd}
 
-if [ $target = wcoss ]; then
+if [[ -d /dcom && -d /hwrf ]] ; then
     . /usrx/local/Modules/3.2.10/init/sh
-    conf_target=nco
-elif [ $target = cray -o $target = wcoss_c ]; then
+    target=wcoss
+    . $MODULESHOME/init/sh
+elif [[ -d /cm ]] ; then
     . $MODULESHOME/init/sh
     conf_target=nco
-elif [ $target = theia ]; then
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=wcoss_d
+elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
-    conf_target=theia
+    target=theia
+elif [[ -d /jetmon ]] ; then
+    . $MODULESHOME/init/sh
+    target=jet
+elif [[ -d /sw/gaea ]] ; then
+    . /opt/cray/pe/modules/3.2.10.5/init/sh
+    target=gaea
 else
     echo "unknown target = $target"
     exit 9
@@ -33,15 +44,18 @@ rm -rf $dir_root/build
 mkdir -p $dir_root/build
 cd $dir_root/build
 
-module purge
-if [ $target = wcoss -o $target = cray ]; then
+if [ $target = wcoss -o $target = cray -o $target = gaea ]; then
+    module purge
     module load $dir_modules/modulefile.ProdGSI.$target
-else
+elif [ $target = theia ]; then
+    module purge
+    source $dir_modules/modulefile.ProdGSI.$target
+else 
+    module purge
     source $dir_modules/modulefile.ProdGSI.$target
 fi
-module list
 
-cmake -DBUILD_UTIL=ON ..
+cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=PRODUCTION -DBUILD_CORELIBS=OFF ..
 
 make -j 8
 

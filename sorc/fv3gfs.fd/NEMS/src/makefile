@@ -310,15 +310,6 @@ ifneq (,$(findstring $(COMMA)wrfhydro$(COMMA),$(COMP)))
   DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
   DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
 endif
-ifneq (,$(findstring $(COMMA)gsdchem$(COMMA),$(COMP)))
-  include $(gsdchem_mk)
-  DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_GSDCHEM=$(ESMF_DEP_FRONT)
-  DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
-  DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
-  DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
-  DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
-  DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
-endif
 ################################################################################
 ##$(info $$DEP_LINK_OBJS is [${DEP_LINK_OBJS}])
 
@@ -326,9 +317,16 @@ CPPFLAGS += $(DEP_FRONTS)
 
 TARGET = ../exe/NEMS.x
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
 INCS = -IENS_Cpl \
 	-I. \
-       $(DEP_INCS)
+	$(ESMF_INC) \
+	$(DEP_INCS)
+else
+INCS = -IENS_Cpl \
+	-I. \
+	$(DEP_INCS)
+endif
 
 MAIN = MAIN_NEMS.o
 
@@ -443,8 +441,7 @@ all:
 	@echo "\"swav\", \"xwav\", \"ww3\";"
 	@echo "\"slnd\", \"xlnd\", \"noah\", \"noahmp\";"
 	@echo "\"sipm\", \"xipm\", \"ipe\";"
-	@echo "\"shyd\", \"xhyd\", \"wrfhydro\";"
-	@echo "\"gsdchem\"."
+	@echo "\"shyd\", \"xhyd\", \"wrfhydro\"."
 	@echo
 	@echo "E.g. \"gmake nmm_gsm COMP=satm,xatm,socn,xocn,mom5,hycom,sice,xice,cice,swav,xwav,slnd,xlnd,sipm,xipm,shyd,xhyd\"."
 	@echo
@@ -458,14 +455,25 @@ all:
 LIBS_NEMS = $(DEP_LINK_OBJS)             \
             ENS_Cpl/ENS_Cpl.a
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+EXTRA_LINK_FLAGS = -headerpad_max_install_names
+else
+EXTRA_LINK_FLAGS =
+endif
+
 nems: nems_libs $(OBJS) $(COBJS) $(MAIN)
 	echo libgocart is $(LIBGOCART)
 	echo extlibs is $(EXTLIBS)
-	$(FC) $(SMP) -o $(TARGET) $(MAIN) $(OBJS) $(COBJS) $(LIBS_NEMS) $(EXTLIBS) $(LIBGOCART)
+	$(FC) $(SMP) -o $(TARGET) $(MAIN) $(OBJS) $(COBJS) $(LIBS_NEMS) $(EXTLIBS) $(LIBGOCART) $(EXTRA_LINK_FLAGS)
 	@echo "$(TARGET) is created."
         
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+nems_libs:
+	cd ENS_Cpl             && make stub
+else
 nems_libs:
 	cd ENS_Cpl             && gmake stub
+endif
         
 
 ################################################################################
@@ -474,24 +482,52 @@ nems_libs:
 #
 ################################################################################
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+clean:
+	$(RM) -f *.tmp.f90 *.lst *.o *.mod lm map $(TARGET)
+	cd ENS_Cpl             && make clean
+else
 clean:
 	$(RM) -f *.f90 *.lst *.o *.mod lm map $(TARGET)
 	cd ENS_Cpl             && gmake clean
+endif
 
-.SUFFIXES:
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+.SUFFIXES: .F90 .tmp.f90 .o
+else
 .SUFFIXES: .F90 .f90 .o
+endif
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+.F90.tmp.f90:
+	$(CPP) $(CPPFLAGS) $< > $*.tmp.f90
+else
 .F90.f90:
 	$(CPP) $(CPPFLAGS) $< > $*.f90
+endif
 
 $(COBJS) : %.o: %.c 
 	$(CC) -c $*.c
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+$(OBJS): %.o: %.tmp.f90
+	$(FC) $(FFLAGS) $(INCS) -c $*.tmp.f90
+	mv -v $*.tmp.o $*.o
+	$(RM) $*.tmp.f90
+else
 $(OBJS): %.o: %.f90
 	$(FC) $(FFLAGS) $(INCS) -c $*.f90
 	$(RM) $*.f90
+endif
 
+ifneq (,$(findstring MACOSX,$(CPPDEFS)))
+MAIN_NEMS.o: %.o: %.tmp.f90
+	$(FC) $(FFLAGS) $(INCS) -c $*.tmp.f90
+	mv -v $*.tmp.o $*.o
+	$(RM) $*.tmp.f90
+else
 MAIN_NEMS.o: %.o: %.f90
 	$(FC) $(FFLAGS) $(INCS) -c $*.f90
 	$(RM) $*.f90
+endif
 

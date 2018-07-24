@@ -52,7 +52,7 @@ MODULE CRTM_NLTECorrection
   ! -----------------
   ! Version Id for the module
   CHARACTER(*), PARAMETER :: MODULE_VERSION_ID = &
-  '$Id: CRTM_NLTECorrection.f90 60152 2015-08-13 19:19:13Z paul.vandelst@noaa.gov $'
+  '$Id: CRTM_NLTECorrection.f90 99117 2017-11-27 18:37:14Z tong.zhu@noaa.gov $'
   
   
 CONTAINS

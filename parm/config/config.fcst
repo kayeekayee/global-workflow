@@ -41,7 +41,6 @@ export dnats=0
 export cal_pre=".true."
 export do_sat_adj=".false."
 export random_clds=".true."
-export cnvcld=".true."
 
 if [ $imp_physics -eq 99 ]; then # ZhaoCarr
     export ncld=1
@@ -67,7 +66,6 @@ elif [ $imp_physics -eq 11 ]; then # GFDL
     export cal_pre=".false."
     export do_sat_adj=".true."
     export random_clds=".false."
-    export cnvcld=".false."
 
     export hord_mt_nh_nonmono=6
     export hord_xx_nh_nonmono=6
@@ -127,7 +125,6 @@ fi
 export REMAPSH="$HOMEgfs/ush/fv3gfs_remap.sh"
 export master_grid="0p25deg"                   # 1deg 0p5deg 0p25deg 0p125deg etc
 export npe_remap=$((npe_fcst < 240 ? npe_fcst : 240))
-export nth_remap=2
 
 # Global latlon NetCDF to nemsio utility parameters
 export NC2NEMSIOSH="$HOMEgfs/ush/fv3gfs_nc2nemsio.sh"

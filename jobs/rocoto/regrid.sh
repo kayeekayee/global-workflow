@@ -32,6 +32,10 @@ HISDAY=`echo $TMPDAY | cut -c1-8`
 if [ ! -s $DATA ]; then mkdir -p $DATA; fi
 cd $DATA || exit 8
 
+res=$(echo $CASE |cut -c2-5)
+LONB=$((4*res))
+LATB=$((2*res))
+
 mkdir -p regrid
 cd regrid
 #$NCP /scratch3/BMC/fim/lzhang/EMC_FV3/fv3gfs_merge_v1/global_shared.v15.0.0/exec/chgres_recenter.exe . 
@@ -44,8 +48,8 @@ fi
 
 cat > ./fort.43 << !
  &nam_setup
-  i_output=384
-  j_output=192
+  i_output=$LONB
+  j_output=$LATB
   input_file="$ICSDIR/$SYEAR$SMONTH$SDAY$SHOUR/$CDUMP/gdas.t${cyc}z.atmanl.nemsio"
   output_file="atmanl.$SYEAR$SMONTH$SDAY$SHOUR"
   terrain_file="$OUTDIR/$CDUMP.$HISDAY/00/$CDUMP.t00z.atmf000.nemsio"

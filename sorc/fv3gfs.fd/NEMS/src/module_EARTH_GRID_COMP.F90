@@ -143,9 +143,6 @@
 #ifdef FRONT_WRFHYDRO
       use FRONT_WRFHYDRO,   only: WRFHYDRO_SS  => SetServices
 #endif
-#ifdef FRONT_GSDCHEM
-      use FRONT_GSDCHEM,    only: GSDCHEM_SS  => SetServices
-#endif
   ! - Mediator
       use module_MEDIATOR,        only: MED_SS     => SetServices
       use module_MEDSpaceWeather, only: MEDSW_SS   => SetServices
@@ -2466,6 +2463,22 @@
         file=__FILE__)) &
         return  ! bail out
 
+      !For MOM6 and WW3 variables to match: 
+      call NUOPC_FieldDictionarySetSyno( &
+        standardNames = (/"surface_eastward_sea_water_velocity",&
+                          "ocn_current_zonal                  "/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call NUOPC_FieldDictionarySetSyno( &
+        standardNames = (/"surface_northward_sea_water_velocity",&
+                          "ocn_current_merid                   "/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
       if (.not.NUOPC_FieldDictionaryHasEntry( &
         "eastward_stokes_drift_current")) then
         call NUOPC_FieldDictionaryAddEntry( &
@@ -2714,284 +2727,6 @@
         call NUOPC_FieldDictionaryAddEntry( &
           standardName="height", &
           canonicalUnits="km", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      ! Chemistry fields
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "air_pressure")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="air_pressure", &
-          canonicalUnits="Pa", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "air_pressure_in_model_layers")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="air_pressure_in_model_layers", &
-          canonicalUnits="Pa", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "geopotential")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="geopotential", &
-          canonicalUnits="m2 s-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "geopotential_in_model_layers")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="geopotential_in_model_layers", &
-          canonicalUnits="m2 s-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "air_temperature")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="air_temperature", &
-          canonicalUnits="K", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "x_wind")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="x_wind", &
-          canonicalUnits="m s-1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "y_wind")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="y_wind", &
-          canonicalUnits="m s-1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "omega")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="omega", &
-          canonicalUnits="Pa s-1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "mass_fraction_of_tracers_in_air")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="mass_fraction_of_tracers_in_air", &
-          canonicalUnits="kg kg-1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "atmosphere_boundary_layer_thickness")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="atmosphere_boundary_layer_thickness", &
-          canonicalUnits="m", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "cell_area")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="cell_area", &
-          canonicalUnits="m2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "convective_rainfall_amount")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="convective_rainfall_amount", &
-          canonicalUnits="kg m-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "friction_velocity")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="friction_velocity", &
-          canonicalUnits="m s-1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "rainfall_amount")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="rainfall_amount", &
-          canonicalUnits="kg m-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "soil_moisture_content")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="soil_moisture_content", &
-          canonicalUnits="kg m-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "surface_downwelling_shortwave_flux_in_air")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="surface_downwelling_shortwave_flux_in_air", &
-          canonicalUnits="W m-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "surface_mask")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="surface_mask", &
-          canonicalUnits="1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "surface_skin_temperature")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="surface_skin_temperature", &
-          canonicalUnits="K", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "surface_upward_sensible_heat_flux")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="surface_upward_sensible_heat_flux", &
-          canonicalUnits="W m-2", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "thickness_of_snowfall_amount")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="thickness_of_snowfall_amount", &
-          canonicalUnits="m", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "vegetation_type")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="vegetation_type", &
-          canonicalUnits="1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "vegetation_area_fraction")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="vegetation_area_fraction", &
-          canonicalUnits="1", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=__FILE__)) &
-          return  ! bail out
-      endif
-
-      if (.not.NUOPC_FieldDictionaryHasEntry( &
-        "z_over_l")) then
-        call NUOPC_FieldDictionaryAddEntry( &
-          standardName="z_over_l", &
-          canonicalUnits="1", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
@@ -3540,19 +3275,6 @@
               petList=petList, comp=comp, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-#else
-            write (msg, *) "Model '", trim(model), "' was requested, "// &
-              "but is not available in the executable!"
-            call ESMF_LogSetError(ESMF_RC_NOT_VALID, msg=msg, line=__LINE__, &
-              file=__FILE__, rcToReturn=rc)
-            return  ! bail out
-#endif
-          elseif (trim(model) == "gsdchem") then
-#ifdef FRONT_GSDCHEM
-            call NUOPC_DriverAddComp(driver, trim(prefix), GSDCHEM_SS, &
-              petList=petList, comp=comp, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//__FILE__)) return  !  bail out
 #else
             write (msg, *) "Model '", trim(model), "' was requested, "// &
               "but is not available in the executable!"

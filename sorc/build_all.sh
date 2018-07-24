@@ -82,11 +82,11 @@ echo " .... Building chgres .... "
 }
 
 #------------------------------------
-# build gaussian_sfcanl 
+# build sfcanl_nsttfchg 
 #------------------------------------
-$Build_gaussian_sfcanl && {
-echo " .... Building gaussian_sfcanl .... "
-./build_gaussian_sfcanl.sh > $logs_dir/build_gaussian_sfcanl.log 2>&1
+$Build_sfcanl_nsttfchg && {
+echo " .... Building gaussian_sfcanl and nst_tf_chg .... "
+./build_sfcanl_nsttfchg.sh > $logs_dir/build_sfcanl_nsttfchg.log 2>&1
 }
 
 #------------------------------------
@@ -111,22 +111,6 @@ echo " .... Building cycle .... "
 $Build_enkf_chgres_recenter && {
 echo " .... Building enkf_chgres_recenter .... "
 ./build_enkf_chgres_recenter.sh > $logs_dir/build_enkf_chgres_recenter.log 2>&1
-}
-
-#------------------------------------
-# build radmon
-#------------------------------------
-$Build_radmon && {
-echo " .... Building radmon .... "
-./build_radmon.sh > $logs_dir/build_radmon.log 2>&1
-}
-
-#------------------------------------
-# build oznmon
-#------------------------------------
-$Build_oznmon && {
-echo " .... Building oznmon .... "
-./build_oznmon.sh > $logs_dir/build_oznmon.log 2>&1
 }
 
 #------------------------------------
