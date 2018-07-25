@@ -261,7 +261,7 @@ contains
         gsw(i,j)=rsds(ip,jp)
         vegfra(i,j)=vfrac2d(ip,jp)
         rmol(i,j)=0.
-        znt(i,j)=zorl2d(ip,jp)*.01
+        znt(i,j)=zorl2d(ip,jp)*.01 !(unit:cm -> m)
 !SLMSK   - SEA(0),LAND(1),ICE(2) MASK
 !       xland(i,j)=1.
 !       if (slmsk2d(i,j) == 0.) then
@@ -445,7 +445,7 @@ contains
           kkp = kk - kts + 1
           do i=its,ite
             ip = i - its + 1
-            chem(i,k,j,nv)=tr3d(ip,jp,kkp,ntra+nv)/ppm2ugkg(nv)
+            chem(i,k,j,nv)=max(epsilc,tr3d(ip,jp,kkp,ntra+nv)/ppm2ugkg(nv))
           enddo
         enddo
       enddo

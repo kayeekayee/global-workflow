@@ -150,11 +150,11 @@
        cal_pre        = .true.
        redrag         = .true.
        dspheat        = .true.
-       hybedmf        = .true.
+       hybedmf        = @[HYBEDMF]
+       satmedmf       = @[SATMEDMF]
        random_clds    = .true.
-       trans_trac     = .true.
+       trans_trac     = .false.
        cnvcld         = .true.
-       cplchm         = .true.
        imfshalcnv     = 2
        imfdeepcnv     = 2
        cdmbgwd        = 3.5,0.25
@@ -163,6 +163,8 @@
        isot           = 1
        debug          = .false.
        nstf_name      = @[NSTF_NAME]
+       cplchm         = .true.
+       cplflx         = @[CPLFLX]
        iau_delthrs    = 6
        iaufhrs        = 30
        iau_inc_files  = @[IAU_INC_FILES]
@@ -235,6 +237,19 @@
   ISEED_SKEB=2,
   ISEED_SPPT=3,
 /
+&nam_sfcperts
+  NSFCPERT=6,
+  PERTZ0=-999.,
+  PERTSHC=-999.,
+  PERTZT=-999.,
+  PERTLAI=-999.,
+  PERTVEGF=-999.,
+  PERTALB=-999.,
+  SFC_TAU=21600,
+  SFC_LSCALE=500000,
+  ISEED_SFC=0,
+  SPPT_LAND=.FALSE.,
+/
 
 &chem_nml
   aer_bc_opt=1
@@ -243,7 +258,7 @@
   aerchem_onoff=1
   bio_emiss_opt=0
   biomass_burn_opt=1
-  chem_conv_tr=1
+  chem_conv_tr=2
   chem_in_opt=0
   chem_opt=300
   chemdt=3
@@ -261,7 +276,7 @@
   plumerisefire_frq=60
   seas_opt=1
   vertmix_onoff=1
-  wetscav_onoff=0
+  gfdlmp_onoff=0
   archive_step = 1
   chem_hist_outname = "chem_out_"
   emi_inname  = "/scratch3/BMC/fim/lzhang/emi_C96/10/"

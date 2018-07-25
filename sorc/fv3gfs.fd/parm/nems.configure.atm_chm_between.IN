@@ -25,10 +25,10 @@ CHM_attributes::
 # Run Sequence #
 runSeq::
   @@[coupling_interval_sec]
-    ATM bef_chem
+    ATM phase1
     ATM -> CHM
     CHM
     CHM -> ATM
-    ATM aft_chem
+    ATM phase2
   @
 ::

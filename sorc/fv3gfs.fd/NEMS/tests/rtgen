@@ -562,10 +562,10 @@ def decide_tmp_theia():
 
     @returns path to a temporary directory, which may not yet exist."""
     logger=logging.getLogger('rtgen')
-    stmps=[ '/scratch3/NCEPDEV/stmp1',
-            '/scratch3/NCEPDEV/stmp2',
-            '/scratch4/NCEPDEV/stmp3',
-            '/scratch4/NCEPDEV/stmp4' ]
+    stmps=[ '/scratch4/BMC/fim/lzhang/EMC_FV3/stmp1',
+            '/scratch4/BMC/fim/lzhang/EMC_FV3/stmp2',
+            '/scratch4/BMC/fim/lzhang/EMC_FV3/stmp3',
+            '/scratch4/BMC/fim/lzhang/EMC_FV3/stmp4' ]
     try:
         args=['-B', '1G', '--' ]
         args.extend(stmps)
