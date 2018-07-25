@@ -479,6 +479,16 @@
         allocate(sscmass(im,jsta_2l:jend_2u))
         allocate(sssmass25(im,jsta_2l:jend_2u))
         allocate(sscmass25(im,jsta_2l:jend_2u))
+        allocate(dustcb(im,jsta_2l:jend_2u))
+        allocate(occb(im,jsta_2l:jend_2u))
+        allocate(bccb(im,jsta_2l:jend_2u))
+        allocate(sulfcb(im,jsta_2l:jend_2u))
+        allocate(sscb(im,jsta_2l:jend_2u))
+        allocate(dustallcb(im,jsta_2l:jend_2u))
+        allocate(ssallcb(im,jsta_2l:jend_2u))
+        allocate(dustpm(im,jsta_2l:jend_2u))
+        allocate(sspm(im,jsta_2l:jend_2u))
+
       endif
 ! 
       end

@@ -2234,7 +2234,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                DO I=1,IM
-                 GRID1(I,J) = DUST(I,J,LL,1)
+                 !GRID1(I,J) = DUST(I,J,LL,1)
+                 GRID1(I,J) = DUST(I,J,LL,1)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2263,7 +2264,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                DO I=1,IM
-                 GRID1(I,J) = DUST(I,J,LL,2)
+                 !GRID1(I,J) = DUST(I,J,LL,2)
+                 GRID1(I,J) = DUST(I,J,LL,2)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2292,7 +2294,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = DUST(I,J,LL,3)
+                   !GRID1(I,J) = DUST(I,J,LL,3)
+                   GRID1(I,J) = DUST(I,J,LL,3)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2321,7 +2324,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = DUST(I,J,LL,4)
+                   !GRID1(I,J) = DUST(I,J,LL,4)
+                   GRID1(I,J) = DUST(I,J,LL,4)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2350,7 +2354,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = DUST(I,J,LL,5)
+                   !GRID1(I,J) = DUST(I,J,LL,5)
+                   GRID1(I,J) = DUST(I,J,LL,5)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2379,7 +2384,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SALT(I,J,LL,2)
+                   !GRID1(I,J) = SALT(I,J,LL,2)
+                   GRID1(I,J) = SALT(I,J,LL,2)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2408,7 +2414,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SALT(I,J,LL,3)
+                   !GRID1(I,J) = SALT(I,J,LL,3)
+                   GRID1(I,J) = SALT(I,J,LL,3)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2437,7 +2444,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SALT(I,J,LL,4)
+                   !GRID1(I,J) = SALT(I,J,LL,4)
+                   GRID1(I,J) = SALT(I,J,LL,4)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2466,7 +2474,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SALT(I,J,LL,5)
+                   !GRID1(I,J) = SALT(I,J,LL,5)
+                   GRID1(I,J) = SALT(I,J,LL,5)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2495,7 +2504,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SALT(I,J,LL,1)
+                   !GRID1(I,J) = SALT(I,J,LL,1)
+                   GRID1(I,J) = SALT(I,J,LL,1)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2524,7 +2534,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SUSO(I,J,LL,1)
+                   !GRID1(I,J) = SUSO(I,J,LL,1)
+                   GRID1(I,J) = SUSO(I,J,LL,1)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2553,7 +2564,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = WASO(I,J,LL,1)
+                   !GRID1(I,J) = WASO(I,J,LL,1)
+                   GRID1(I,J) = WASO(I,J,LL,1)*RHOMID(I,J,LL) !lzhang
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2582,7 +2594,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = WASO(I,J,LL,2)
+                   !GRID1(I,J) = WASO(I,J,LL,2)
+                   GRID1(I,J) = WASO(I,J,LL,2)*RHOMID(I,J,LL) !lzhang
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2611,7 +2624,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SOOT(I,J,LL,1)
+                   !GRID1(I,J) = SOOT(I,J,LL,1)
+                   GRID1(I,J) = SOOT(I,J,LL,1)*RHOMID(I,J,LL) !lzhang
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2640,7 +2654,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   GRID1(I,J) = SOOT(I,J,LL,2)
+                   !GRID1(I,J) = SOOT(I,J,LL,2)
+                   GRID1(I,J) = SOOT(I,J,LL,2)*RHOMID(I,J,LL) !lzhang
                  ENDDO
                ENDDO
                if(grib=="grib1") then
