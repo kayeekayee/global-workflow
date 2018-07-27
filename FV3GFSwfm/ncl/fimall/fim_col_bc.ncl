@@ -52,7 +52,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->COLMD_P48_L10_GLL0_4(:,:) ; Column black carbon
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -64,7 +64,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -77,7 +77,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -93,7 +93,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -107,7 +107,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$SI$(::-1,:) * 100
+  tvar = grb_file->$BCCOL$(::-1,:) ; Column black carbon
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
   hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
@@ -127,7 +127,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -140,7 +140,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -152,7 +152,7 @@ if (domainname .eq. "244") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$BCCOL$(:,:) ; Column black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -294,7 +294,7 @@ if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column Black Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -367,7 +367,7 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust >=1.2e-05,<2e-05 (kg/kg)"
+  titlestring = "Column Black Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -423,7 +423,7 @@ if (domainname .eq. "242") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column Black Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -497,11 +497,31 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
 ;    "cnLevels" : (/ .0000005,.000001,.0000015,.000002,.000005,.00001,.00002,.00003,.00004,.00005,.000075,.0001,.00015,.0002 /)
     "cnLevels" : (/ 5e-8,1e-7,1.5e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,1.5e-5,2e-5 /)
+;    "pmLabelBarDisplayMode" : "NoCreate"
     "cnExplicitLabelBarLabelsOn" : True
-    "lbLabelStrings" : (/ 5e-8,1e-7,1.5e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,1.5e-5,2e-5 /)
     "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.012
+    "lbLabelStrings" : (/ 5e-8,1e-7,1.5e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,1.5e-5,2e-5 /)
+    "lbLabelFont" : 4
+    "lbLabelFontHeightF" : 0.005
   end setvalues
+;
+;  lbid = create "LabelBar" labelBarClass wid
+;    "lbOrientation" : "Horizontal"
+;    "lbAutoManage" : False
+;    "lbLabelFont" : 4
+;    "lbLabelFontHeightF" : .005
+;    "lbPerimOn" : False
+;    "lbLabelFontColor" : "white"
+;    "lbFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+;    "lbLabelStrings" : (/ "5e-8","1e-7","1.5e-7","2e-7","5e-7","1e-6","2e-6","3e-6", \
+;                          "4e-6","5e-6","7.5e-6","1e-5","1.5e-5","2e-5wn" /)
+;    "lbMonoFillPattern" : True
+;    "lbLabelAlignment" : "InteriorEdges"
+;    "vpXF"      : 0.18
+;    "vpYF"      : (vpy - vpheight) + 0.015
+;    "vpWidthF"  : vpwidth-0.26
+;    "vpHeightF" : 0.1
+;  end create
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then
@@ -534,6 +554,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ; Draw map
 ;
   draw(cnid)
+;  draw(lbid)
   draw(mpid)
 ;  draw(cnid4)
 ;

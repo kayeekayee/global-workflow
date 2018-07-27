@@ -119,8 +119,11 @@ cd ${pwd}/../ush                ||exit 8
 #--link executables 
 
 cd $pwd/../exec
-[[ -s fv3_gfs_nh.prod.32bit.x ]] && rm -f fv3_gfs_nh.prod.32bit.x
-$LINK ../sorc/fv3gfs.fd/NEMS/exe/fv3_gfs_nh.prod.32bit.x .
+[[ -s NEMS.x ]] && rm -f NEMS.x
+$LINK ../sorc/fv3gfs.fd/NEMS/exe/NEMS.x .
+
+#JKH[[ -s fv3_gfs_nh.prod.32bit.x ]] && rm -f fv3_gfs_nh.prod.32bit.x
+#JKH$LINK ../sorc/fv3gfs.fd/NEMS/exe/fv3_gfs_nh.prod.32bit.x .
 
 [[ -s gfs_ncep_post ]] && rm -f gfs_ncep_post
 $LINK ../sorc/gfs_post.fd/exec/ncep_post gfs_ncep_post

@@ -86,6 +86,8 @@ else
       ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
     fi 
   fi
+fi
+
 echo "YYYYMMDDHH:  ${yyyymmdd}${hh}"
 gdasfile=$GDASDIR/${yyyymmdd}${hh}/gdas.tar
 hsi -q list $gdasfile

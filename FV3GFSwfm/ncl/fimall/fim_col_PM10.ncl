@@ -52,7 +52,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -64,7 +64,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -77,7 +77,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -93,7 +93,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -107,7 +107,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$SEASALTCOL$(::-1,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(::-1,:) ; Column PM10
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
   hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
@@ -127,7 +127,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -140,7 +140,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -152,7 +152,7 @@ if (domainname .eq. "244") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
+  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -170,7 +170,7 @@ end if
 load "$NCL_HOME/obj/get_date_str_FIM.ncl"
 ;
 print(date_str) 
-print("Column Sea Salt")
+print("Column PM10")
 print(min(tvar))
 print(max(tvar))
 print("500 mb hvar")
@@ -212,7 +212,7 @@ end create
 ; Create an ncgmWorkstation object.
 ;
         wid = create "mdssWork" ncgmWorkstationClass defaultapp
-           "wkMetaName" : "./col_seasalt.ncgm"
+           "wkMetaName" : "./col_PM10.ncgm"
         end create
     else
       if (X11 .eq. 1) then
@@ -228,7 +228,7 @@ end create
 ; Create a PSWorkstation object.
 ;
           wid = create "mdssWork" psWorkstationClass defaultapp
-           "wkPSFileName" : "./col_seasalt.ps"
+           "wkPSFileName" : "./col_PM10.ps"
           end create
         end if
       end if
@@ -290,17 +290,15 @@ if (domainname .eq. "130") then
 ;
   setvalues cnid
     "cnRasterModeOn" : False
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-    "cnLevels" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "cnExplicitLabelBarLabelsOn" : True
-    "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)    
+;    "cnLevels" : (/ .00002,.00003,.00004,.00005,.0001,.0002,.0003,.0004,.0005,.001,.002,.003,.004,.005 /)
+    "cnLevels" : (/ .00004, .00005, .00001, .00002, .00003, .00004, .00005, .0001, .0002, \
+                    .0003, .0004, .0005, .001, .002 /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Column Sea Salt (kg/m~S~2~N~)"
+  titlestring = "Column PM10 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -373,7 +371,7 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Column Sea Salt (kg/m~S~2~N~)"
+  titlestring = "Column PM10 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -425,18 +423,14 @@ if (domainname .eq. "242") then
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
-    "cnRasterModeOn" : False
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)    
-    "cnLevels" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "cnExplicitLabelBarLabelsOn" : True
-    "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .00004, .00005, .00001, .00002, .00003, .00004, .00005, .0001, .0002, \
+                    .0003, .0004, .0005, .001, .002 /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Column Sea Salt (kg/m~S~2~N~)"
+  titlestring = "Column PM10 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -507,13 +501,9 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
   load "$NCL_HOME/obj/pwtr.ncl"
 ;
   setvalues cnid
-    "cnRasterModeOn" : False
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)    
-    "cnLevels" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "cnExplicitLabelBarLabelsOn" : True
-    "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
-    "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .00004, .00005, .00001, .00002, .00003, .00004, .00005, .0001, .0002, \
+                    .0003, .0004, .0005, .001, .002 /)
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
@@ -540,7 +530,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     end setvalues
   end if
 ;
-  titlestring = "Column Sea Salt (kg/m~S~2~N~)"
+  titlestring = "Column PM10 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;

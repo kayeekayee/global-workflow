@@ -52,7 +52,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->COLMD_P48_L10_GLL0_5(:,:) ; Column organic carbon
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -64,7 +64,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -77,7 +77,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -93,7 +93,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -107,7 +107,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$SI$(::-1,:) * 100
+  tvar = grb_file->$OCCOL$(::-1,:) ; Column organic carbon
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
   hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
@@ -127,7 +127,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -140,7 +140,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -152,7 +152,7 @@ if (domainname .eq. "244") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -294,7 +294,7 @@ if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column Organic Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -367,7 +367,7 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust >=1.2e-05,<2e-05 (kg/kg)"
+  titlestring = "Column Organic Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -423,7 +423,7 @@ if (domainname .eq. "242") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column Organic Carbon (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -500,7 +500,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     "cnExplicitLabelBarLabelsOn" : True
     "lbLabelStrings" : (/ 5e-8,1e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,2e-5,3e-5,4e-5 /)
     "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.012
+    "lbLabelFontHeightF" : 0.007
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \

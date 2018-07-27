@@ -31,7 +31,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->AOTK_P48_L10_GLL0_4(:,:) ; AOD black carbon
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
 ;
 end if
 ;
@@ -42,7 +42,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -55,7 +55,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -71,7 +71,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -85,7 +85,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$SI$(::-1,:) * 100
+  tvar = grb_file->$AODBCSFC$(::-1,:) ; AOD black carbon
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
   hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
@@ -105,7 +105,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -118,7 +118,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -130,7 +130,7 @@ if (domainname .eq. "244") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$AODBCSFC$(:,:) ; AOD black carbon
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -265,11 +265,13 @@ if (domainname .eq. "130") then
 ;
   setvalues cnid
     "cnRasterModeOn" : False
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .0001,.0003,.0005,.001,.003,.005,.01,.03,.05,.07,.09,.1,.3,.5  /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Black Carbon Aerosol Optical Depth"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -340,9 +342,14 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/intfd.ncl"
 ;
+  setvalues cnid
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .0001,.0003,.0005,.001,.003,.005,.01,.03,.05,.07,.09,.1,.3,.5  /)
+  end setvalues
+;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust >=1.2e-05,<2e-05 (kg/kg)"
+  titlestring = "Black Carbon Aerosol Optical Depth"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -394,11 +401,13 @@ if (domainname .eq. "242") then
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .0001,.0003,.0005,.001,.003,.005,.01,.03,.05,.07,.09,.1,.3,.5  /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Black Carbon Aerosol Optical Depth"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -470,7 +479,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   setvalues cnid
     "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-    "cnLevels" : (/ .002,.004,.006,.01,.02,.04,.06,.08,.1,.2,.4,.6,.8,1 /)
+    "cnLevels" : (/ .0001,.0003,.0005,.001,.003,.005,.01,.03,.05,.07,.09,.1,.3,.5  /)
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \

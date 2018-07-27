@@ -52,7 +52,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->COLMD_P48_L10_GLL0(:,:) ; Column PM25
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -64,7 +64,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -77,7 +77,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -93,7 +93,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -107,7 +107,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$SI$(::-1,:) * 100
+  tvar = grb_file->$PM25COL$(::-1,:) ; Column PM25
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
   hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
@@ -127,7 +127,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -140,7 +140,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -152,7 +152,7 @@ if (domainname .eq. "244") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SI$(:,:)
+  tvar = grb_file->$PM25COL$(:,:) ; Column PM25
   hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
@@ -290,11 +290,13 @@ if (domainname .eq. "130") then
 ;
   setvalues cnid
     "cnRasterModeOn" : False
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .0000025,.000005,.0000075,.00001,.000025,.00005,.0001,.00015,.0002,.00025,.0003,.0005,.00075,.001 /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column PM25 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -367,7 +369,7 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust >=1.2e-05,<2e-05 (kg/kg)"
+  titlestring = "Column PM25 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -419,11 +421,13 @@ if (domainname .eq. "242") then
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .0000025,.000005,.0000075,.00001,.000025,.00005,.0001,.00015,.0002,.00025,.0003,.0005,.00075,.001 /)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
+  titlestring = "Column PM25 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -495,7 +499,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   setvalues cnid
     "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-    "cnLevels" : (/ .000005,.00001,.000015,.00002,.00005,.0001,.0002,.0003,.0004,.0005,.00075,.001,.0015,.002 /)
+    "cnLevels" : (/ .0000025,.000005,.0000075,.00001,.000025,.00005,.0001,.00015,.0002,.00025,.0003,.0005,.00075,.001 /)
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
