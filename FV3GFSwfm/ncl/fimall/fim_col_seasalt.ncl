@@ -53,7 +53,7 @@ if (domainname .eq. "fim") then
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -65,7 +65,7 @@ if (domainname .eq. "129") then
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -78,7 +78,7 @@ if (domainname .eq. "83") then
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -94,7 +94,7 @@ if (domainname .eq. "130") then
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -110,9 +110,9 @@ if (domainname .eq. "174") then
   tvar = grb_file->$SEASALTCOL$(::-1,:) ; Column sea salt
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
-  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
-  hvarorig = hvar
-  fliphvar = lonFlip(hvar)
+;  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
+;  hvarorig = hvar
+;  fliphvar = lonFlip(hvar)
 ;
 end if
 ;
@@ -128,7 +128,7 @@ if (domainname .eq. "236") then
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -141,7 +141,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -153,10 +153,11 @@ if (domainname .eq. "244") then
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
   tvar = grb_file->$SEASALTCOL$(:,:) ; Column sea salt
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
+tvarsave = tvar
 ;tvar = tvar * 10.
 ;do ii = 0,nx-1
 ;  do jj = 0,ny-1
@@ -173,9 +174,9 @@ print(date_str)
 print("Column Sea Salt")
 print(min(tvar))
 print(max(tvar))
-print("500 mb hvar")
-print(min(hvar))
-print(max(hvar))
+;print("500 mb hvar")
+;print(min(hvar))
+;print(max(hvar))
 ;
 xdim = nx - 1
 ydim = ny - 1
@@ -244,6 +245,7 @@ setvalues wid
    "wkForegroundColor" : "white"
 end setvalues
 NhlSetColor(wid,255,0.55,0.14,0.80)
+NhlSetColor(wid,254,0.5,0.5,0.5)
 ;
 setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
@@ -255,9 +257,10 @@ if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
 ;
-;  if (min(tvar(lly,llx)) .eq. 0 .and. max(tvar(lly,llx)) .eq. 0) then
-;    tvar(lly,llx) = .001
-;  end if
+  tvar = tvarsave
+  if (min(tvar(lly,llx)) .eq. max(tvar(lly,llx))) then
+    tvar(lly,llx) = 2e-07
+  end if
 ;
   if (iq .eq. 0) then
     load "$NCL_HOME/obj/lambert_conformal_map_blk.ncl"
@@ -265,6 +268,7 @@ if (domainname .eq. "130") then
     load "$NCL_HOME/obj/lc_map_counties.ncl"
     setvalues mpid
       "mpNationalLineColor" : "background"
+      "mpCountyLineColor" : "background"
     end setvalues
   end if
 ;
@@ -277,14 +281,14 @@ if (domainname .eq. "130") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  hfield = create "ScalarField" scalarFieldClass appid
-      "sfDataArray" : hvar
-      "sfXCStartSubsetV" : llx
-      "sfYCStartSubsetV" : lly
-      "sfXCEndSubsetV" : urx
-      "sfYCEndSubsetV" : ury
-      "sfMissingValueV" : hvar@_FillValue
-  end create
+;  hfield = create "ScalarField" scalarFieldClass appid
+;      "sfDataArray" : hvar
+;      "sfXCStartSubsetV" : llx
+;      "sfYCStartSubsetV" : lly
+;      "sfXCEndSubsetV" : urx
+;      "sfYCEndSubsetV" : ury
+;      "sfMissingValueV" : hvar@_FillValue
+;  end create
 ;
   load "$NCL_HOME/obj/intfd.ncl"
 ;
@@ -295,10 +299,10 @@ if (domainname .eq. "130") then
     "cnExplicitLabelBarLabelsOn" : True
     "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
     "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "lbLabelFontHeightF" : 0.008
   end setvalues
 ;
-  load "$NCL_HOME/obj/height_60m.ncl"
+;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
   titlestring = "Column Sea Salt (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
@@ -314,7 +318,7 @@ if (domainname .eq. "130") then
   if (iq .eq. 0) then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 10
+      gsres@gsMarkerColor = 254
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -325,7 +329,7 @@ if (domainname .eq. "130") then
   else
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 10
+      gsres@gsMarkerColor = 254
       gsres@gsMarkerSizeF = 0.01
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -360,18 +364,18 @@ if (domainname .eq. "174") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  hfield = create "ScalarField" scalarFieldClass appid
-      "sfDataArray" : hvar
-      "sfXCStartSubsetV" : llx
-      "sfYCStartSubsetV" : lly
-      "sfXCEndSubsetV" : urx
-      "sfYCEndSubsetV" : ury
-      "sfMissingValueV" : hvar@_FillValue
-  end create
+;  hfield = create "ScalarField" scalarFieldClass appid
+;      "sfDataArray" : hvar
+;      "sfXCStartSubsetV" : llx
+;      "sfYCStartSubsetV" : lly
+;      "sfXCEndSubsetV" : urx
+;      "sfYCEndSubsetV" : ury
+;      "sfMissingValueV" : hvar@_FillValue
+;  end create
 ;
   load "$NCL_HOME/obj/intfd.ncl"
 ;
-  load "$NCL_HOME/obj/height_60m.ncl"
+;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
   titlestring = "Column Sea Salt (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
@@ -412,14 +416,14 @@ if (domainname .eq. "242") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  hfield = create "ScalarField" scalarFieldClass appid
-      "sfDataArray" : hvar
-      "sfXCStartSubsetV" : llx
-      "sfYCStartSubsetV" : lly
-      "sfXCEndSubsetV" : urx
-      "sfYCEndSubsetV" : ury
-      "sfMissingValueV" : hvar@_FillValue
-  end create
+;  hfield = create "ScalarField" scalarFieldClass appid
+;      "sfDataArray" : hvar
+;      "sfXCStartSubsetV" : llx
+;      "sfYCStartSubsetV" : lly
+;      "sfXCEndSubsetV" : urx
+;      "sfYCEndSubsetV" : ury
+;      "sfMissingValueV" : hvar@_FillValue
+;  end create
 ;
   load "$NCL_HOME/obj/intfd.ncl"
 ;
@@ -431,10 +435,10 @@ if (domainname .eq. "242") then
     "cnExplicitLabelBarLabelsOn" : True
     "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
     "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "lbLabelFontHeightF" : 0.008
   end setvalues
 ;
-  load "$NCL_HOME/obj/height_60m.ncl"
+;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
   titlestring = "Column Sea Salt (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"
@@ -469,14 +473,14 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
         "sfMissingValueV" : tvar@_FillValue
     end create
 ;
-    hfield = create "ScalarField" scalarFieldClass appid
-        "sfDataArray" : hvar
-        "sfXCStartV" : 0
-        "sfYCStartV" : ydim
-        "sfXCEndV" : xdim
-        "sfYCEndV" : 0
-        "sfMissingValueV" : hvar@_FillValue
-    end create
+;    hfield = create "ScalarField" scalarFieldClass appid
+;        "sfDataArray" : hvar
+;        "sfXCStartV" : 0
+;        "sfYCStartV" : ydim
+;        "sfXCEndV" : xdim
+;        "sfYCEndV" : 0
+;        "sfMissingValueV" : hvar@_FillValue
+;    end create
 ;
   end if
 ;
@@ -492,14 +496,14 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
         "sfMissingValueV" : tvar@_FillValue
     end create
 ;
-    hfield = create "ScalarField" scalarFieldClass appid
-        "sfDataArray" : hvar
-        "sfXCStartV" : 0
-        "sfYCStartV" : 0
-        "sfXCEndV" : xdim
-        "sfYCEndV" : ydim
-        "sfMissingValueV" : hvar@_FillValue
-    end create
+;    hfield = create "ScalarField" scalarFieldClass appid
+;        "sfDataArray" : hvar
+;        "sfXCStartV" : 0
+;        "sfYCStartV" : 0
+;        "sfXCEndV" : xdim
+;        "sfYCEndV" : ydim
+;        "sfMissingValueV" : hvar@_FillValue
+;    end create
 ;
   end if
 ;
@@ -513,7 +517,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     "cnExplicitLabelBarLabelsOn" : True
     "lbLabelStrings" : (/ 1e-07,6e-07,3e-06,6e-06,1e-05,1.3e-05,1.6e-05,2e-05,2.3e-05,2.6e-05,3e-05,3.3e-05,3.6e-05,1e-04 /)
     "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
+    "lbLabelFontHeightF" : 0.008
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
@@ -525,7 +529,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   end if
 ;
-  load "$NCL_HOME/obj/height_60m.ncl"
+;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
   if (domainname .eq. "fim" .or. domainname .eq. "129") then
     setvalues cnid4
@@ -554,7 +558,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
   if (domainname .eq. "236") then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 10
+      gsres@gsMarkerColor = 254
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
