@@ -375,6 +375,15 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/intfd.ncl"
 ;
+  setvalues cnid
+    "cnRasterModeOn" : False
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .000004, .000005, .00001, .00002, .00003, .00004, .00005, .0001, .0002, \
+                    .0003, .0004, .0005, .001, .002 /)
+    "lbAutoManage" : False
+    "lbLabelFontHeightF" : 0.01
+  end setvalues
+;
 ;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
   titlestring = "Column PM10 (kg/m~S~2~N~)"
@@ -523,18 +532,18 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
 ;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
-    setvalues cnid4
-      "cnLineThicknessF" : 1
-      "cnLineLabelDensityF" : 0.001
-    end setvalues
-  end if
-;
-  if (domainname .eq. "201") then
-    setvalues cnid4
-      "cnLineLabelDensityF" : 0.001
-    end setvalues
-  end if
+;  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+;    setvalues cnid4
+;      "cnLineThicknessF" : 1
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
+;;
+;  if (domainname .eq. "201") then
+;    setvalues cnid4
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
 ;
   titlestring = "Column PM10 (kg/m~S~2~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"

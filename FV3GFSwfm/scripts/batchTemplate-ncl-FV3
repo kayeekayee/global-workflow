@@ -69,7 +69,8 @@
 CONTEXT="batchTemplate-ncl"
 
 ## load modules
-module load ncl
+module load intel
+module load ncl/6.5.0
 
 CONVERT=`which convert`
 MONTAGE=`which montage`
@@ -315,6 +316,7 @@ if [ "${ISDIR}" == "NAT" ]; then
                   col_oc      \
                   col_sulf    \
                   col_seasalt \
+                  col_PM10    \
                   col_PM25    \
                   col_tozne   \
                   sfc_aodfd   \
@@ -397,6 +399,7 @@ if [ "${ISDIR}" == "NAT" ]; then
                 col_oc.png      \
                 col_sulf.png    \
                 col_seasalt.png \
+                col_PM10.png    \
                 col_PM25.png    \
                 col_tozne.png   \
                 sfc_aodfd.png   \
@@ -923,6 +926,14 @@ if [ "${ISDIR}" == "NAT" ]; then
                    col_seasalt-5.png \
                    col_seasalt-6.png \
                    col_seasalt-7.png \
+                   col_PM10-0.png    \
+                   col_PM10-1.png    \
+                   col_PM10-2.png    \
+                   col_PM10-3.png    \
+                   col_PM10-4.png    \
+                   col_PM10-5.png    \
+                   col_PM10-6.png    \
+                   col_PM10-7.png    \
                    col_PM25-0.png    \
                    col_PM25-1.png    \
                    col_PM25-2.png    \
@@ -1412,6 +1423,12 @@ if [ "${ISDIR}" == "NAT" ]; then
                    col_seasalt-3.png \
                    col_seasalt-4.png \
                    col_seasalt-5.png \
+                   col_PM10-0.png    \
+                   col_PM10-1.png    \
+                   col_PM10-2.png    \
+                   col_PM10-3.png    \
+                   col_PM10-4.png    \
+                   col_PM10-5.png    \
                    col_PM25-0.png    \
                    col_PM25-1.png    \
                    col_PM25-2.png    \
@@ -1683,6 +1700,9 @@ if [ "${ISDIR}" == "NAT" ]; then
                    col_seasalt-0.png \
                    col_seasalt-1.png \
                    col_seasalt-2.png \
+                   col_PM10-0.png    \
+                   col_PM10-1.png    \
+                   col_PM10-2.png    \
                    col_PM25-0.png    \
                    col_PM25-1.png    \
                    col_PM25-2.png    \
@@ -1793,6 +1813,7 @@ if [ "${ISDIR}" == "NAT" ]; then
                     oc_col      \
                     sulf_col    \
                     seasalt_col \
+                    PM10_col    \
                     PM25_col    \
                     tozne_col   \
                     aodfd_sfc   \

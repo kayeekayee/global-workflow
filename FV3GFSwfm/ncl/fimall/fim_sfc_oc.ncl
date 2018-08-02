@@ -533,18 +533,18 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
 ;  load "$NCL_HOME/obj/height_60m.ncl"
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
-    setvalues cnid4
-      "cnLineThicknessF" : 1
-      "cnLineLabelDensityF" : 0.001
-    end setvalues
-  end if
-;
-  if (domainname .eq. "201") then
-    setvalues cnid4
-      "cnLineLabelDensityF" : 0.001
-    end setvalues
-  end if
+;  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+;    setvalues cnid4
+;      "cnLineThicknessF" : 1
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
+;;
+;  if (domainname .eq. "201") then
+;    setvalues cnid4
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
 ;
   titlestring = "Surface Organic Carbon (~F33~m~F22~g/m~S~3~N~)"
   load "$NCL_HOME/obj/add_titles.ncl"

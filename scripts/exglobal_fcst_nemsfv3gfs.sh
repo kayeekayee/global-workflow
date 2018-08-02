@@ -189,6 +189,10 @@ if [ $warm_start = ".true." ]; then
       $NLN $file $DATA/INPUT/$file2
     fi
   done
+  
+#lzhang cp atminc.nc to output dir
+   cd $DATA
+   $NCP ../calcinc/atminc.nc $memdir/${CDUMP}.t${cyc}z.atminc.nc
 
   # Handle coupler.res file for DA cycling
   if [ ${USE_COUPLER_RES:-"NO"} = "YES" ]; then
@@ -202,8 +206,8 @@ if [ $warm_start = ".true." ]; then
     $NLN $file $DATA/INPUT/$file2
   fi
 
-  #increment_file=$memdir/${CDUMP}.t${cyc}z.atminc.nc #lzhang 
-  increment_file=$gmemdir/${CDUMP}.t${cyc}z.atminc.nc
+  increment_file=$memdir/${CDUMP}.t${cyc}z.atminc.nc #lzhang 
+  #increment_file=$gmemdir/${CDUMP}.t${cyc}z.atminc.nc
   if [ -f $increment_file ]; then
     $NLN $increment_file $DATA/INPUT/fv3_increment.nc
     read_increment=".true."
