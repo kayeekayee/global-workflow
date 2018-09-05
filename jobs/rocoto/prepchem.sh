@@ -50,7 +50,7 @@ print "yr: $SYEAR mm: $SMONTH dd: $SDAY hh: $SHOUR"
 status=$?
 if [$status !=0]; then
      echo "error prep_chem_sources failed  $status "
-     return $status
+     exit $status
 fi
 
  

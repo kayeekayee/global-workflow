@@ -874,7 +874,7 @@ cat > input.nml <<EOF
   kemit=1
   phot_opt=1
   photdt=60
-  plumerisefire_frq=60
+  plumerisefire_frq=30
   seas_opt=1
   vertmix_onoff=1
   gfdlmp_onoff=$NTRACER

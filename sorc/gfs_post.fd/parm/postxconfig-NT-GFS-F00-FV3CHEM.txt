@@ -663,7 +663,7 @@ hybrid_lvl
 ?
 0
 ?
-Black_carbon_hydrophilic_dry
+black_carbon_hydrophilic
 equall_to_first_limit
 10
 236
@@ -700,7 +700,7 @@ hybrid_lvl
 ?
 0
 ?
-Black_carbon_hydrophobic_dry
+black_carbon_hydrophobic
 equall_to_first_limit
 10
 236
@@ -737,7 +737,7 @@ hybrid_lvl
 ?
 0
 ?
-Particulate_organic_matter_hydrophilic_dry
+particulate_org_matter_hydrophilic
 equall_to_first_limit
 10
 424
@@ -774,7 +774,7 @@ hybrid_lvl
 ?
 0
 ?
-Particulate_organic_matter_hydrophobic_dry
+particulate_org_matter_hydrophobic
 equall_to_first_limit
 10
 424
@@ -1033,7 +1033,7 @@ entire_atmos
 ?
 0
 ?
-particulate_organic_matter_dry
+particulate_org_matter_dry
 smaller_than_first_limit
 6
 20
@@ -1440,7 +1440,7 @@ entire_atmos
 ?
 0
 ?
-particulate_organic_matter_Dry
+particulate_org_matter_dry
 smaller_than_first_limit
 10
 424

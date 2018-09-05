@@ -4967,7 +4967,7 @@
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>AOTK</pname>
        <fixed_sfc1_type>entire_atmos</fixed_sfc1_type>	   
-       <aerosol_type>particulate_organic_matter_dry</aerosol_type>
+       <aerosol_type>particulate_org_matter_dry</aerosol_type>
        <typ_intvl_size>smaller_than_first_limit</typ_intvl_size>
        <scale_fact_1st_size>6</scale_fact_1st_size>
        <scale_val_1st_size>20</scale_val_1st_size>
@@ -5377,7 +5377,7 @@
        <shortname>OCPHOBIC_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>PMTF</pname>
-       <aerosol_type>Particulate_organic_matter_hydrophobic_dry</aerosol_type>
+       <aerosol_type>particulate_org_matter_hydrophobic</aerosol_type>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
        <typ_intvl_size>equall_to_first_limit</typ_intvl_size>
        <scale_fact_1st_size>10</scale_fact_1st_size>
@@ -5390,7 +5390,7 @@
        <shortname>OCPHILIC_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>PMTF</pname>
-       <aerosol_type>Particulate_organic_matter_hydrophilic_dry</aerosol_type>
+       <aerosol_type>particulate_org_matter_hydrophilic</aerosol_type>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
        <typ_intvl_size>equall_to_first_limit</typ_intvl_size>
        <scale_fact_1st_size>10</scale_fact_1st_size>
@@ -5403,7 +5403,7 @@
        <shortname>BCPHOBIC_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>PMTF</pname>
-       <aerosol_type>Black_carbon_hydrophobic_dry</aerosol_type>
+       <aerosol_type>black_carbon_hydrophobic</aerosol_type>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
        <typ_intvl_size>equall_to_first_limit</typ_intvl_size>
        <scale_fact_1st_size>10</scale_fact_1st_size>
@@ -5416,7 +5416,7 @@
        <shortname>BCPHILIC_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>PMTF</pname>
-       <aerosol_type>Black_carbon_hydrophilic_dry</aerosol_type>
+       <aerosol_type>black_carbon_hydrophilic</aerosol_type>
        <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
        <typ_intvl_size>equall_to_first_limit</typ_intvl_size>
        <scale_fact_1st_size>10</scale_fact_1st_size>
@@ -5485,7 +5485,7 @@
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname>COLMD</pname>
        <fixed_sfc1_type>entire_atmos</fixed_sfc1_type>
-       <aerosol_type>particulate_organic_matter_Dry</aerosol_type>
+       <aerosol_type>particulate_org_matter_dry</aerosol_type>
        <typ_intvl_size>smaller_than_first_limit</typ_intvl_size>
        <scale_fact_1st_size>10</scale_fact_1st_size>
        <scale_val_1st_size>424</scale_val_1st_size>

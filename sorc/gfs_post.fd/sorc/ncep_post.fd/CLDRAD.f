@@ -4581,7 +4581,7 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
                DO N = 1, NBIN_SU
                EXT01 = EXTRHD_SU(IH1,N,IB)                                &
      &          + RDRH(I,J,L)*(EXTRHD_SU(IH2,N,IB)-EXTRHD_SU(IH1,N,IB))
-               EXT(I,J,L) = EXT(I,J,L)+1e-9*SUSO(I,J,L,N) * EXT01/(96.07/28.)
+          EXT(I,J,L) = EXT(I,J,L)+1e-9*SUSO(I,J,L,N) * EXT01/(96.07/28.)
                ENDDO   ! N-loop
                EXT(I,J,L) = EXT(I,J,L) * 1000.
              ENDDO  ! L-loop

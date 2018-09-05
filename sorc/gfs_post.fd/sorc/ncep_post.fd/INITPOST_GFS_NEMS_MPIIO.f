@@ -46,7 +46,7 @@
 !     LANGUAGE: FORTRAN
 !     MACHINE : CRAY C-90
 !$$$  
-      use vrbls4d, only: dust, SALT, SUSO, SOOT, WASO 
+      use vrbls4d, only: dust, SALT, SUSO, SOOT, WASO, PP25, PP10 
       use vrbls3d, only: t, q, uh, vh,wh,pmid,pint,alpint, dpres,zint,zmid,o3,               &
               qqr, qqs, cwm, qqi, qqw, omga, rhomid, q2, cfr, rlwtt, rswtt, tcucn,              &
               tcucns, train, el_pbl, exch_h, vdifftt, vdiffmois, dconvmois, nradtt,             &
@@ -70,7 +70,7 @@
               avgedir,avgecan,avgetrans,avgesnow,avgprec_cont,avgcprate_cont, &
               avisbeamswin,avisdiffswin,airbeamswin,airdiffswin, &
               alwoutc,alwtoac,aswoutc,aswtoac,alwinc,aswinc,avgpotevp,snoavg,&
-              dustcb,bccb,occb,sulfcb,sscb,dustallcb,ssallcb,dustpm,sspm !lzhang 
+              dustcb,bccb,occb,sulfcb,sscb,dustallcb,ssallcb,dustpm,sspm,pp25cb,pp10cb !lzhang 
       use soil,  only: sldpth, sh2o, smc, stc
       use masks, only: lmv, lmh, htm, vtm, gdlat, gdlon, dx, dy, hbm2, sm, sice
 !     use kinds, only: i_llong
@@ -1603,6 +1603,68 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,suso(isa,jsa,ll,1)
         end do ! do loop for l
 
+! GFS output pp25 in nemsio (GOCART)
+        pp25cb=0.0
+        do n=1,nbin_su
+          do l=1,lm
+!$omp parallel do private(i,j)
+            do j=jsta_2l,jend_2u
+              do i=1,im
+                pp25(i,j,l,n) = spval
+              enddo
+            enddo
+          enddo
+        enddo
+!       PP25 = SPVAL
+        !VarName='so4'
+        VarName='pp25'
+        VcoordName='mid layer'
+        do l=1,lm
+          ll=lm-l+1
+          call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u &
+          ,l,nrec,fldsize,spval,tmp &
+          ,recname,reclevtyp,reclev,VarName,VcoordName &
+          ,pp25(1:im,jsta_2l:jend_2u,ll,1))
+
+            pp25cb(1:im,jsta_2l:jend_2u)=pp25cb(1:im,jsta_2l:jend_2u)+ &
+        pp25(1:im,jsta_2l:jend_2u,ll,1)* &
+           dpres(1:im,jsta_2l:jend_2u,ll)/grav
+
+!         if(debugprint)print*,'sample l ',VarName,' =
+!         ',ll,suso(isa,jsa,ll,1)
+        end do ! do loop for l
+
+! GFS output pp10 in nemsio (GOCART)
+        pp10cb=0.0
+        do n=1,nbin_su
+          do l=1,lm
+!$omp parallel do private(i,j)
+            do j=jsta_2l,jend_2u
+              do i=1,im
+                pp10(i,j,l,n) = spval
+              enddo
+            enddo
+          enddo
+        enddo
+!       PP10 = SPVAL
+        !VarName='so4'
+        VarName='pp10'
+        VcoordName='mid layer'
+        do l=1,lm
+          ll=lm-l+1
+          call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u &
+          ,l,nrec,fldsize,spval,tmp &
+          ,recname,reclevtyp,reclev,VarName,VcoordName &
+          ,pp10(1:im,jsta_2l:jend_2u,ll,1))
+
+            pp10cb(1:im,jsta_2l:jend_2u)=pp10cb(1:im,jsta_2l:jend_2u)+ &
+        pp10(1:im,jsta_2l:jend_2u,ll,1)* &
+           dpres(1:im,jsta_2l:jend_2u,ll)/grav
+
+!         if(debugprint)print*,'sample l ',VarName,' =
+!         ',ll,suso(isa,jsa,ll,1)
+        end do ! do loop for l
+
 
 ! -- compute air density RHOMID and remove negative tracer values
         do l=1,lm
@@ -1653,24 +1715,33 @@
             bccb(i,j) = MAX(bccb(i,j), 0.0)
             occb(i,j) = MAX(occb(i,j), 0.0)
             sulfcb(i,j) = MAX(sulfcb(i,j), 0.0)
+            pp25cb(i,j) = MAX(sulfcb(i,j), 0.0)
+            pp10cb(i,j) = MAX(sulfcb(i,j), 0.0)
 
+!      PM10 concentration
        dusmass(i,j)=(dust(i,j,l,1)+dust(i,j,l,2)+dust(i,j,l,3)+ &
        0.74*dust(i,j,l,4)+salt(i,j,l,2)+salt(i,j,l,3)+salt(i,j,l,4) + &
        salt(i,j,l,5)+soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
-       waso(i,j,l,2) +suso(i,j,l,1))*RHOMID(i,j,l)  !ug/m3
-     
+       waso(i,j,l,2) +suso(i,j,l,1)+pp25(i,j,l,1)+pp10(i,j,l,1)) &
+       *RHOMID(i,j,l)  !ug/m3
+
+!      PM25 dust and seasalt      
        dustpm(i,j)=(dust(i,j,l,1)+0.38*dust(i,j,l,2))*RHOMID(i,j,l) !ug/m3
        sspm(i,j)=(salt(i,j,l,2)+0.83*salt(i,j,l,3))*RHOMID(i,j,l)  !ug/m3 
-       
+
+!      PM25 concentration       
        dusmass25(i,j)=(dust(i,j,l,1)+0.38*dust(i,j,l,2)+ &
        salt(i,j,l,2)+0.83*salt(i,j,l,3) + &
        soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
-       waso(i,j,l,2) +suso(i,j,l,1))*RHOMID(i,j,l)  !ug/m3
+       waso(i,j,l,2) +suso(i,j,l,1)+pp25(i,j,l,1))*RHOMID(i,j,l)  !ug/m3
 
+!      PM10 column
         ducmass(i,j)=dustallcb(i,j)+ssallcb(i,j)+bccb(i,j)+ &
-         occb(i,j)+sulfcb(i,j)
+         occb(i,j)+sulfcb(i,j)+pp25cb(i,j)+pp10cb(i,j)
+
+!      PM25 column
         ducmass25(i,j)=dustcb(i,j)+sscb(i,j)+bccb(i,j)+occb(i,j) &
-         +sulfcb(i,j)
+         +sulfcb(i,j)+pp25cb(i,j)
 
             end do
           end do

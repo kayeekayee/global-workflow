@@ -425,6 +425,8 @@
         deallocate(soot)
         deallocate(waso)
         deallocate(suso)
+        deallocate(pp25)
+        deallocate(pp10)
 ! vrbls3d
         deallocate(ext)
         deallocate(asy)
@@ -476,6 +478,8 @@
         deallocate(occb)
         deallocate(bccb)
         deallocate(sulfcb)
+        deallocate(pp25cb)
+        deallocate(pp10cb)
         deallocate(sscb)
         deallocate(dustallcb)
         deallocate(ssallcb)

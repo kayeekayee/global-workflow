@@ -432,6 +432,8 @@
         allocate(soot(im,jsta_2l:jend_2u,lm,nbin_bc))
         allocate(waso(im,jsta_2l:jend_2u,lm,nbin_oc))
         allocate(suso(im,jsta_2l:jend_2u,lm,nbin_su))
+        allocate(pp25(im,jsta_2l:jend_2u,lm,nbin_su))
+        allocate(pp10(im,jsta_2l:jend_2u,lm,nbin_su))
 ! vrbls3d
         allocate(ext(im,jsta_2l:jend_2u,lm))
         allocate(asy(im,jsta_2l:jend_2u,lm))
@@ -483,6 +485,8 @@
         allocate(occb(im,jsta_2l:jend_2u))
         allocate(bccb(im,jsta_2l:jend_2u))
         allocate(sulfcb(im,jsta_2l:jend_2u))
+        allocate(pp25cb(im,jsta_2l:jend_2u))
+        allocate(pp10cb(im,jsta_2l:jend_2u))
         allocate(sscb(im,jsta_2l:jend_2u))
         allocate(dustallcb(im,jsta_2l:jend_2u))
         allocate(ssallcb(im,jsta_2l:jend_2u))
