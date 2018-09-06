@@ -20,7 +20,7 @@ CONTAINS
               U,V,t_phy,moist,dz8w,p_phy,p8w,                   &
               pbl,XLV,CP,G,r_v,z,cu_co_ten,                     &
               numgas,chem_opt,                                  &
-              num_chem,num_moist,                               &
+              num_chem,num_moist,tile,                               &
               ids,ide, jds,jde, kds,kde,                        &
               ims,ime, jms,jme, kms,kme,                        &
               its,ite, jts,jte, kts,kte                         )
@@ -28,8 +28,8 @@ CONTAINS
   IMPLICIT NONE
 !-------------------------------------------------------------
    INTEGER,      INTENT(IN   ) ::                               &
-                                  numgas,chem_opt,           &
-              num_chem,num_moist,                               &
+                                  numgas,chem_opt,              &
+              num_chem,num_moist, tile,                              &
                                   ids,ide, jds,jde, kds,kde,    & 
                                   ims,ime, jms,jme, kms,kme,    & 
                                   its,ite, jts,jte, kts,kte
@@ -176,38 +176,40 @@ CONTAINS
 !    ENDDO
 !
 !---- CALL NON_RESOLVED CONVECTIVE TRANSPORT
-      ipr(:)=0 !lzhang turn off all the debug output related to ipr=1
+      ipr(:)=0
 #if 0
       DO I=ITS,ITF
-!         if(pret(i)*3600. .gt. 4)write(20,*)j,i,itimestep,pret(i)
-         if(pret(i)*3600. .gt. 0.1)then
-         if(j.eq.63 .and. (i.eq.64 ) .and. (itimestep .eq.8))then
-           write(20,*)'j,i,pret(i),ter11(i) = ',j,i,itimestep,pret(i)
+         !if(pret(i)*3600. .gt.4) then
+          !write(20,*)'zl0',tile,j,i,itimestep,pret(i)
+           !write(20,*)'zl0'
+         if(pret(i)*3600. .gt.4.and.j.eq.76 .and. (i.eq.87 ) .and. (itimestep .eq.8).and.(tile.eq.2)) then
+           write(20,*)'zltile,j,i,pret(i),ter11(i) = ',tile,j,i,itimestep,pret(i)
            DO K=kts,ktf
-              write(20,123)k,p(i,k),t(i,k),q(i,k),tracer(i,k,p_bc2)
+              write(20,123)k,p(i,k),t(i,k),q(i,k),tracer(i,k,16)
            ENDDO
            ipr(i)=1
          endif
-         endif
-       enddo
+         !endif
+
+      ENDDO
 #endif
+
 123  format(1x,i3,f7.1,1x,f6.1,2(1x,e13.4))
 124  format(1x,i3,f7.1,1x,2(1x,e13.4))
-
 !
-      CALL CUP_gf(kpbli,ktop,tracer,trdep,aaeq,t,q,ter11,zz,pret,p,tracert,    &
+      CALL CUP_gf(itimestep,tile,kpbli,ktop,tracer,trdep,aaeq,t,q,ter11,zz,pret,p,tracert,    &
            hstary,dt,psur,us,vs,tcrit,num_chem,chem_opt,numgas,      &
            rho,xlv,r_v,cp,g,ipr,its,ite,itf,kts,kte,ktf,csum,xmb )
+#if 0
       DO I=ITS,ITF
-      if(ipr(i).eq.1)then
-!        if(pret(i)*3600. .gt. 2.)then
-!         if(j.eq.31 .and. (i.eq.92 .or. i.eq.93))then
-           write(20,*)'j,i,pret(i),xmb(i) = ',j,i,itimestep,xmb(i)
+      if(pret(i)*3600. .gt. 4.and.j.eq.76.and.i.eq.87.and.tile.eq.2.and.(itimestep .eq.8))then
+           write(20,*)'zl9,j,i,pret(i),xmb(i) =,ktop(i)',j,i,itimestep,tile,xmb(i),ktop(i),pret(i)
            DO K=kts,ktf
-              write(20,124)k,p(i,k),tracert(i,k,p_bc2),trdep(i,p_bc2)
+              write(20,124)k,p(i,k),tracert(i,k,p_bc2),trdep(i,16)
            ENDDO
        endif
        enddo
+#endif
             do nv=1,num_chem
             DO I=its,itf
               if(pret(i).le.0.)then
@@ -225,7 +227,7 @@ CONTAINS
 
            do i=its,itf
              trdep(i,1)=pret(i)
-             trdep(i,2)=maxval(tracert(i,:,p_bc2))
+             trdep(i,2)=maxval(tracert(i,:,16))
            enddo
 
 
@@ -258,14 +260,14 @@ CONTAINS
 !this routine derived from the GF scheme, consistent when using GF, but can also
 !be used with any other convective parameterization
 !
-   SUBROUTINE CUP_gf(kpbli,ktop,chem,chem_psum,aaeq,t,q,z1,z,pre,p,outc,    &
+   SUBROUTINE CUP_gf(ktau,tile,kpbli,ktop,chem,chem_psum,aaeq,t,q,z1,z,pre,p,outc,    &
               hstary,DTIME,PSUR,US,VS,TCRIT,numc,chem_opt,numgas, &
               rho,xlv,r_v,cp,g,ipr,its,ite,itf,kts,kte,ktf,csum,xmb )
    IMPLICIT NONE
 
      integer                                                           &
         ,intent (in   )                   ::                           &
-        numc,chem_opt,numgas,its,ite,itf,kts,kte,ktf
+        numc,chem_opt,numgas,its,ite,itf,kts,kte,ktf,tile,ktau
   !
   ! 
   !
@@ -446,6 +448,7 @@ CONTAINS
       use_excess=0
       ztexec(:)=0.
       zqexec(:)=0.
+      cap_max_increment(i)=25.
 !srf- end
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -479,7 +482,7 @@ CONTAINS
         zd(i,k)=0.
         hcot(i,k)=0.
         cd(i,k)=1.e-9 ! 1.*entr_rate
-        cdd(i,k)=1.e-9
+        cdd(i,k)=0.
       enddo
       enddo
 !
@@ -535,12 +538,13 @@ CONTAINS
            xlv,r_v,cp,g,ierr,z1,itf,ktf,its,ite,  kts,kte)
       do i=its,itf
         if(ierr(i).eq.0)then
-          if (ipr(i).eq.1)then
-            write(20,*)'he,hes ',i
-            do k=kts,ktf
-              write(20,*)k,z(i,k),he_cup(i,k),hes_cup(i,k)
-            enddo
-          endif
+!          if (pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
+!            write(20,*)'zl10,he,hes ',i
+!            do k=kts,ktf
+!              write(20,*)'zl11',k,z(i,k),he_cup(i,k),hes_cup(i,k),ierr(i)
+!            enddo
+!          endif
+
         if(aaeq(i).lt.-0.1)then
            ierr(i)=20
         endif
@@ -575,6 +579,9 @@ CONTAINS
       CALL cup_MAXIMI(HE_CUP,1,KBMAX,K22,ierr, &
            itf,ktf, its,ite,  kts,kte)
        DO 36 i=its,itf
+          !if (pre(i)*3600. .gt.4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
+          !  write(20,*)'zl12,i,k22,kbmax = ',i,k22(i),kbmax(i),ierr(i)
+          !endif
          IF(ierr(I).eq.0.)THEN
          IF(K22(I).GE.KBMAX(i))then
            ierr(i)=2
@@ -601,11 +608,11 @@ CONTAINS
            itf,ktf, &
            its,ite,  kts,kte, &
            z_cup,entr_rate,he,0)
-      do i=its,itf
-          if (ipr(i).eq.1)then
-            write(20,*)'i,k22,kbcon = ',i,k22(i),kbcon(i),ierr(i)
-          endif
-       enddo
+      !do i=its,itf
+      !    if (pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
+      !      write(20,*)'zl13,i,k22,kbcon = ',i,k22(i),kbcon(i),ierr(i)
+      !    endif
+      ! enddo
 !
 !--- increase detrainment in stable layers
 !
@@ -643,7 +650,8 @@ CONTAINS
       call rates_up_pdf('deep',ktop,ierr,p_cup,entr_rate_2d,hkb,he,hes_cup,z_cup, &
            kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zu,kpbli,ktopdby,csum)
       do i=its,itf
-          if (ipr(i).eq.1)then
+          !if (ipr(i).eq.1)then
+          if (ipr(i).eq.1.and.pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
             write(20,*)'ktop,ierr,kpbli,csum,kstabi = ',ktop(i),ierr(i),kpbli(i),csum(i),kstabi(i)
             do k=kts,ktf
               write(20,*)k,z_cup(i,k),zu(i,k)
@@ -752,7 +760,7 @@ CONTAINS
          if(ierr(i).eq.0)then
             zktop=(z_cup(i,ktop(i))-z1(i))*.6
             zktop=min(zktop+z1(i),zcutdown+z1(i))
-             if(ipr(i).eq.1)write(20,*)zktop,z_cup(i,ktop(i))
+            ! if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl14',zktop,z_cup(i,ktop(i))
             do k=kts,ktf
               if(z_cup(i,k).gt.zktop)then
                  kzdown(i)=k
@@ -768,7 +776,7 @@ CONTAINS
       call cup_minimi(HEs_cup,K22,kzdown,JMIN,ierr, &
            itf,ktf, its,ite,  kts,kte)
       DO 100 i=its,itf
-         if(ipr(i).eq.1)write(20,*)'minim',kzdown(i),jmin(i),ierr(i)
+        ! if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl15,minim',kzdown(i),jmin(i),ierr(i)
          IF(ierr(I).eq.0.)THEN
 !
 !--- check whether it would have buoyancy, if there where
@@ -812,7 +820,7 @@ CONTAINS
 !     and cloud top.
 !
       do i=its,itf
-         if(ipr(i).eq.1)write(20,*)'jmin = ',jmin(i)
+        ! if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl16,jmin = ',jmin(i),i
          IF(ierr(I).eq.0.)THEN
             if ( jmin(i) - 1 .lt. kdet(i)   ) kdet(i) = jmin(i)-1
             IF(-z_cup(I,KBCON(I))+z_cup(I,KTOP(I)).LT.depth_min)then
@@ -821,46 +829,51 @@ CONTAINS
             endif
          endif
       enddo
-
 !
 !--- normalized downdraft mass flux profile,also work on bottom detrainment
 !--- in this routine
 !
-      do k=kts,ktf
       do i=its,itf
+      do k=kts,ktf
        zd(i,k)=0.
        cdd(i,k)=0.
        dd_massentr(i,k)=0.
        dd_massdetr(i,k)=0.
        hcd(i,k)=hes_cup(i,k)
        dbyd(i,k)=0.
-       mentrd_rate_2d(i,k)=entr_rate(i) 
-        if(ipr(i).eq.1)write(20,*)'go into pdf routine',kdet(i),jmin(i),kpbli(i),ierr(i)
+       mentrd_rate_2d(i,k)=entr_rate(i)
+        !if(pre(i)*3600. .gt. 0.1.and.i.eq.64)write(0,*)'zl,go into pdf routine1',kdet(i),jmin(i),kpbli(i),ierr(i)
       enddo
-      enddo
+        !if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zlp00,go into pdf routine1',i,pre(i),kdet(i),jmin(i),kpbli(i),ierr(i)
+      enddo 
+
       do i=its,itf
         beta=max(.035,.055-float(csum(i))*.0015)  !.02
         bud(i)=0.
-        if(ipr(i).eq.1)write(20,*)'go into pdf routine',kdet(i),jmin(i),beta,kpbli(i),ierr(i)
+        !if(ipr(i).eq.1)write(0,*)'zl,go into pdf routine2',kdet(i),jmin(i),beta,kpbli(i),ierr(i)
+        !if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl0,go into pdf routine2',kdet(i),jmin(i),beta,kpbli(i),ierr(i)
         IF(ierr(I).eq.0)then
         cdd(i,1:jmin(i))=1.e-9
         cdd(i,jmin(i))=0.
-        dd_massdetr(i,:)=0.
-        dd_massentr(i,:)=0.
+        !dd_massdetr(i,:)=0.
+        !dd_massentr(i,:)=0.
            call get_zu_zd_pdf_fim("DOWN",ierr(i),kdet(i),jmin(i),zd(i,:),kts,kte,ktf,beta,kpbli(i),csum(i))
-        if(ipr(i).eq.1)then
-           do k=kts,ktop(i)
-           write(20,*)kdet(i),jmin(i),kpbli(i),zd(i,k)
-           enddo
-        endif
+         !if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
+         !  do k=kts,ktop(i)
+         !  write(20,*)'zl1',kdet(i),jmin(i),kpbli(i),zd(i,jmin(i)),zd(i,jmin(i)-1)
+         !  enddo
+         !endif
+
         if(zd(i,jmin(i)) .lt.1.e-8)then
           zd(i,jmin(i))=0.
           jmin(i)=jmin(i)-1
           if(zd(i,jmin(i)) .lt.1.e-8)then
              ierr(i)=876
-             exit
+           !  exit
+             cycle  !lzhang
           endif
         endif
+        
         do ki=jmin(i)  ,maxloc(zd(i,:),1),-1
 !-srf mass cons
           !=> from jmin to maximum value zd -> change entrainment
@@ -888,9 +901,9 @@ CONTAINS
           if(zd(i,ki+1).gt.0.)cdd(i,ki)= dd_massdetr(i,ki)/(dzo*zd(i,ki+1))
         enddo
 
-        do k=kts,jmin(i)
-        if(ipr(i).eq.1)write(20,*)k,jmin(i),zd(i,k)
-        enddo
+        !do k=kts,jmin(i)
+        ! if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl2',k,jmin(i),zd(i,k),hcd(i,jmin(i)),hes_cup(i,jmin(i))
+        !enddo
         do k=kts,ktop(i)+1
           if(p_cup(i,k).gt.600.)then
             c1d(i,k)=0.
@@ -906,6 +919,9 @@ CONTAINS
 ! downdraft moist static energy + moisture budget
             dbyd(i,jmin(i))=hcd(i,jmin(i))-hes_cup(i,jmin(i))
             bud(i)=dbyd(i,jmin(i))*(z_cup(i,jmin(i)+1)-z_cup(i,jmin(i)))
+
+       ! if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zlts1', dbyd(i,jmin(i)),bud(i),z_cup(i,jmin(i)+1),z_cup(i,jmin(i))
+
             do ki=jmin(i)  ,1,-1
 !-srf mass cons
              dzo=z_cup(i,ki+1)-z_cup(i,ki)
@@ -916,7 +932,8 @@ CONTAINS
                         dd_massentr(i,ki)*h_entr)   /            &
                         (zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki))
              dbyd(i,ki)=hcd(i,ki)-hes_cup(i,ki)
-             if(ipr(i).eq.1)write(20,*)'ki,bud = ',ki,bud(i),hcd(i,ki)
+             !if(ipr(i).eq.1)write(0,*)'zl,ki,bud = ',ki,bud(i),hcd(i,ki)
+        !     if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)'zl3,ki,bud = ',ki,bud(i),hcd(i,ki)
              bud(i)=bud(i)+dbyd(i,ki)*dzo
             enddo
           endif
@@ -964,10 +981,10 @@ CONTAINS
            if(numc.gt.0)then
              do i=its,itf
                if(ierr(i).eq.0)then
-                 if(ipr(i).eq.1)write(20,*)"pwdper",pwev(i),pwav(i),edtc(i,1)
+                 !if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)"zl4,pwdper",pwev(i),pwav(i),edtc(i,1)
                 do k=kts,jmin(i)
                  pwdper(i,k)=-edtc(i,1)*pwd(i,k)/pwav(i)
-                 if(ipr(i).eq.1)write(20,*)"pwdper",k,pwd(i,k)
+                 !if(pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)write(20,*)"zl5,pwdper",k,pwd(i,k)
                 enddo
                 edt(i)=edtc(i,1)
               do nv=1,numc
@@ -985,7 +1002,9 @@ CONTAINS
     if(nv.gt. numgas .or. nv.eq.p_sulf) then
     alpha = .5    ! scavenging factor
       ! if(nv.le. numgas .and. nv.ne.p_sulf)cycle
-       if(nv.eq.p_bc1 .or. nv.eq.p_oc1 .or. nv.eq.p_dms) alpha=0.
+       !if(nv.eq.p_bc1 .or. nv.eq.p_oc1 .or. nv.eq.p_dms) alpha=0.
+       if(nv.eq.p_bc1 .or. nv.eq.p_oc1) alpha=0.2 !lzhang
+       if(nv.eq.p_dms) alpha=0.
        if(nv.eq.p_sulf .or. nv.eq.p_seas_1 .or. nv.eq.p_seas_2 .or. &
           nv.eq.p_seas_3 .or. nv.eq.p_seas_4)alpha=1.
        !if(nv.eq.p_bc2 .or. nv.eq.p_oc2)alpha=0.8
@@ -1062,16 +1081,17 @@ CONTAINS
                 enddo
 !
               enddo ! numc
-                 if(ipr(i).eq.1 .and.nv.eq.7)then
+#if 0
+                 if(pre(i)*3600. .gt. 4.and.i.eq.87 .and.tile.eq.2.and.ktau.eq.8)then
                    nv=p_bc2
                    do k=kts,ktop(i)
-                   write(20,*)"chem_up",k,chem(i,k,nv),chem_up(i,k,nv),chem_pw(i,k,nv)
+                   write(20,*)"zl6,chem_up",k,chem(i,k,16),chem_up(i,k,16),chem_pw(i,k,16)
                    enddo
                    do k=kts,jmin(i)
-                   write(20,*)"chem_down",k,chem_down(i,k,nv),chem_pwd(i,k,nv)
+                   write(20,*)"zl7,chem_down",k,chem_down(i,k,16),chem_pwd(i,k,16)
                    enddo
                  endif
-
+#endif
             endif ! ierr=0
           enddo ! i
         endif ! numc=0
@@ -1142,7 +1162,7 @@ CONTAINS
             ! these three are only used at or near mass detrainment and/or
             ! entrainment levels
 	    G_rain=  0.5*(chem_pw (i,k,nv)+chem_pw (i,k+1,nv))*g/dp
-	    E_dn  =  0.5*(chem_pwd(i,k,nv)+chem_pwd(i,k+1,nv))*g/dp ! pwdo < 0 and E_dn must > 0
+	    E_dn  =  0.5*(chem_pwd(i,k,nv)+chem_pwd(i,k+1,nv))*g/dp  ! pwdo < 0 and E_dn must > 0
             !-- condensation source term = detrained + flux divergence of
             !-- cloud liquid water (qrco) + converted to rain
 	
@@ -1152,8 +1172,19 @@ CONTAINS
                dellac(i,k,nv) =-(zu(i,k+1)*(chem_up(i,k+1,nv)-chem_cup(i,k+1,nv) ) - &
                     zu(i,k  )*(chem_up (i,k,nv  )-chem_cup(i,k,nv  ) ) )*g/dp &
                     +(zd(i,k+1)*(chem_down(i,k+1,nv)-chem_cup(i,k+1,nv) ) - &
-                    zd(i,k  )*(chem_down(i,k,nv  )-chem_cup(i,k,nv)))*g/dp*edt(i) &
+                    zd(i,k  )*(chem_down(i,k,nv  )-chem_cup(i,k,nv)))*g/dp*edt(i) & 
                          - g_rain + E_dn
+#if 0
+      if(pre(i)*3600. .gt. 4.and.i.eq.87 .and.tile.eq.2.and.ktau.eq.8.and.nv.eq.16)then
+      write (20,*),'zln8',zu(i,k+1),chem_up(i,k+1,nv),chem_cup(i,k+1,nv)
+      write (20,*),'zln9',zu(i,k  ),chem_up(i,k,nv),chem_cup(i,k,nv),zd(i,k+1)
+      write (20,*),'zln10',chem_down(i,k+1,nv),chem_cup(i,k+1,nv),zd(i,k  )
+      write (20,*),'zln11',chem_down(i,k,nv  ),chem_cup(i,k,nv),g/dp,edt(i)
+      write (20,*),'zln12',dellac(i,k,nv),g_rain,E_dn
+      write (20,*),'zln13',pre(i),pwav(i)+edt(i)*pwev(i),xmb(i)
+      endif
+#endif
+
             enddo
 
          endif ! ierr
@@ -1169,7 +1200,7 @@ CONTAINS
               do i=its,itf
                  if(ierr(i).eq.0)then
                     denom=max(pre(i),pwav(i)+edt(i)*pwev(i))
-                    xmb(i)=pre(i)/denom
+                    xmb(i)=pre(i)/max(epsilc,denom)
                     do nv=1,numc
                       do k=kts,ktop(i)
                           outc(i,k,nv)=dellac(i,k,nv)*xmb(i)
@@ -1179,9 +1210,9 @@ CONTAINS
               enddo
              endif ! numc
       do i=its,itf
-          if (ipr(i).eq.1)then
-            write(20,*)'ierr(i) = ',ierr(i),xmb(i)
-          endif
+         ! if (pre(i)*3600. .gt. 4.and.i.eq.87.and.tile.eq.2.and.ktau.eq.8)then
+         !   write(20,*)'zl8,ierr(i) = ',ierr(i),xmb(i)
+         ! endif
        enddo
 
 
@@ -1428,7 +1459,8 @@ CONTAINS
          qcd(i,ki)=(qcd(i,ki+1)*zd(i,ki+1)                          &
                   -.5*dd_massdetr(i,ki)*qcd(i,ki+1)+ &
                   dd_massentr(i,ki)*q(i,ki))   /            &
-                  (zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki))
+                  !(zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki))
+                  max(epsilc,(zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki)))
 !        write(0,*)'qcd in dd_moi = ',qcd(i,ki)
 
 !
@@ -2321,7 +2353,7 @@ CONTAINS
             DO k=kbcon(i),ktop(i)
                denom=zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1)
                if(denom.lt.1.e-12)then
-!zlzl           write(14,*)k,denom,zu(i,k-1),up_massdetr(i,k-1),up_massentr(i,k-1)
+           write(14,*)k,denom,zu(i,k-1),up_massdetr(i,k-1),up_massentr(i,k-1)
                      ierr(i)=51
                 exit
                endif
@@ -2604,7 +2636,7 @@ ELSEIF(draft == "DOWN" .or. draft == "DOWNM") then
   do k=kts,min(kt+1,ktf)
       kratio= float(k)/float(kt+1)
       zuh(k) = FZU*kratio**(alpha-1.0) * (1.0-kratio)**(beta-1.0)
-!      write(0,*)k,zuh(k)
+!      write(0,*) k,zuh(k)
    enddo
    if(maxloc(zuh(:),1).ge.kpbli)then
       do k=maxloc(zuh(:),1),1,-1
@@ -2631,7 +2663,6 @@ ELSEIF(draft == "DOWN" .or. draft == "DOWNM") then
        zu(k)=fzu*zu(k)
      enddo
      zu(1)=0.
-
 
 ENDIF
    !- normalize ZU

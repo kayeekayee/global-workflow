@@ -1,45 +1,108 @@
 Run rocotostat...
 Generate report...
-WORKFLOW STARTED AT Wed Jul 11 21:47:28 2018 (+1531345648)
+WORKFLOW STARTED AT Tue Sep  4 21:33:14 2018 (+1536096794)
 Repository information:
 
 
 REPO TOP:
-(HEAD detached at ms08) 919e1b7 Update to latest NEMSfv3gfs 'master' branch (7bd56d6).
+(HEAD detached at ms081) 5403771 Update chmistry namelist to support new GSDCHEM revision (2798538).
 Fetch URL: gerrit:EMC_FV3GFS-GSDCHEM
  M GSDCHEM
  M NEMS
+ M compsets/platforms.input
  M log/report-theia.intel-log/rtreport.txt
  M parm/chm.nml.IN
+ M tests/rt.sh
 
 Entering 'FV3'
 chem_coupling 067e486 [origin/chem_coupling] Export only chemistry fields to temporarily circumvent a possible bug in ESMF/NUOPC.
 Fetch URL: gerrit:FV3
 
 Entering 'GSDCHEM'
-development 727afd2 [origin/development] Change coupling field names to match FV3's latest version.
+development 2798538 [origin/development] Add support for WCOSS platforms to build system.
 Fetch URL: gerrit:GSDCHEM
- M src/chem/dep/Makefile.am
- M src/chem/dep/Makefile.in
- M src/chem/dep/dep_dry_gocart_mod.F90
- M src/chem/dep/dep_mod.F90
- M src/chem/gocart/gocart_aerosols_mod.F90
- M src/chem/gocart/gocart_mod.F90
- M src/chem/gocart/gocart_model_mod.F90
- M src/chem/gocart/gocart_prep_mod.F90
- M src/chem/seas/seas_mod.F90
- M src/chem/shr/chem_config_mod.F90
+ M src/chem/dep/dep_ctrans_grell_mod.F90
 
 Entering 'NEMS'
-chem_coupling 2e03776 [origin/chem_coupling] Rename field dictionary entries for chemistry coupling to match FV3 code update.
+chem_coupling e3ca177 [origin/chem_coupling] Update platform id for WCOSS Phase1 & Phase2 in NEMS Application Builder.
 Fetch URL: gerrit:NEMS
- M NEMSAppBuilder
  M tests/rtgen
 
 
-BUILD fv3_gsdchem.exe: DEAD
-TEST #1 cpld_fv3_gsdchem_between: not yet complete...
-WORKFLOW REPORT AT Wed Jul 11 22:04:47 2018 (+1531346687)
-Tests: 0 failed, 0 passed out of 1
-Builds: 1 failed, 0 passed out of 1
-REGRESSION TEST IS STILL RUNNING (SOME TESTS FAILED)
+BUILD fv3_gsdchem.exe: SUCCEEDED
+  FAIL: job state is DEAD
+
+TEST #1: FAIL
+  Test cpld_fv3_gsdchem_between starting at Tue Sep 4 21:46:02 UTC 2018 (Compare FV3 control results with previous trunk version)
+  Tue Sep  4 21:46:02 UTC 2018
+  atmos_4xdaily.tile1.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile2.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile3.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile4.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile5.nc: bit-for-bit MISMATCH
+  atmos_4xdaily.tile6.nc: bit-for-bit MISMATCH
+  phyf000.tile1.nc: bit-for-bit MISMATCH
+  phyf000.tile2.nc: bit-for-bit MISMATCH
+  phyf000.tile3.nc: bit-for-bit MISMATCH
+  phyf000.tile4.nc: bit-for-bit MISMATCH
+  phyf000.tile5.nc: bit-for-bit MISMATCH
+  phyf000.tile6.nc: bit-for-bit MISMATCH
+  phyf024.tile1.nc: bit-for-bit MISMATCH
+  phyf024.tile2.nc: bit-for-bit MISMATCH
+  phyf024.tile3.nc: bit-for-bit MISMATCH
+  phyf024.tile4.nc: bit-for-bit MISMATCH
+  phyf024.tile5.nc: bit-for-bit MISMATCH
+  phyf024.tile6.nc: bit-for-bit MISMATCH
+  dynf000.tile1.nc: bit-for-bit MISMATCH
+  dynf000.tile2.nc: bit-for-bit MISMATCH
+  dynf000.tile3.nc: bit-for-bit MISMATCH
+  dynf000.tile4.nc: bit-for-bit MISMATCH
+  dynf000.tile5.nc: bit-for-bit MISMATCH
+  dynf000.tile6.nc: bit-for-bit MISMATCH
+  dynf024.tile1.nc: bit-for-bit MISMATCH
+  dynf024.tile2.nc: bit-for-bit MISMATCH
+  dynf024.tile3.nc: bit-for-bit MISMATCH
+  dynf024.tile4.nc: bit-for-bit MISMATCH
+  dynf024.tile5.nc: bit-for-bit MISMATCH
+  dynf024.tile6.nc: bit-for-bit MISMATCH
+  RESTART/coupler.res: bit-for-bit identical
+  RESTART/fv_core.res.nc: bit-for-bit identical
+  RESTART/fv_core.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_core.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_srf_wnd.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile1.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile2.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile3.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile4.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile5.nc: bit-for-bit MISMATCH
+  RESTART/fv_tracer.res.tile6.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile1.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile2.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile3.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile4.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile5.nc: bit-for-bit MISMATCH
+  RESTART/phy_data.tile6.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile1.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile2.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile3.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile4.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile5.nc: bit-for-bit MISMATCH
+  RESTART/sfc_data.tile6.nc: bit-for-bit MISMATCH
+  Executable did not change during test suite:
+    File: /scratch4/BMC/fim/lzhang/EMC_FV3/stmp4/Kate.Zhang/rtgen.146937/exec/fv3_gsdchem.exe
+    Expected md5sum: ef5cbec65597cdd7422f732d949cee7a
+    Actual md5sum: ef5cbec65597cdd7422f732d949cee7a
+  TEST FAILED AT Tue Sep  4 21:52:02 UTC 2018
+WORKFLOW REPORT AT Tue Sep  4 21:57:28 2018 (+1536098248)
+Tests: 1 failed, 0 passed out of 1
+Builds: 0 failed, 1 passed out of 1
+REGRESSION TEST FAILED

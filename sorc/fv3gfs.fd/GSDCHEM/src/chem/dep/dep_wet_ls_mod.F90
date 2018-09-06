@@ -28,8 +28,8 @@ subroutine wetdep_ls(dt,var,rain,moist,rho,var_rmv,num_moist, &
           INTENT(IN   ) :: rho,dz8w,vvel        
    REAL,  DIMENSION( ims:ime , kms:kme , jms:jme ,1:num_chem),                        &
           INTENT(INOUT) :: var        
-   REAL,  DIMENSION( jms:jme ),                                  &
-          INTENT(IN   ) :: rain
+   REAL,  DIMENSION(ims:ime , jms:jme ),                                  &
+          INTENT(IN   ) :: rain !lzhang
    REAL,  DIMENSION( ims:ime ,  jms:jme,num_chem ),                                  &
           INTENT(INOUT   ) :: var_rmv
    REAL,  DIMENSION( its:ite ,  jts:jte ) :: var_sum
@@ -47,7 +47,9 @@ subroutine wetdep_ls(dt,var,rain,moist,rho,var_rmv,num_moist, &
     if(nv.gt. numgas .or. nv.eq.p_sulf) then
     alpha = .5    ! scavenging factor
       ! if(nv.le. numgas .and. nv.ne.p_sulf)cycle
-       if(nv.eq.p_bc1 .or. nv.eq.p_oc1 .or. nv.eq.p_dms) alpha=0.
+       !if(nv.eq.p_bc1 .or. nv.eq.p_oc1 .or. nv.eq.p_dms) alpha=0. !lzhang
+       if(nv.eq.p_bc1 .or. nv.eq.p_oc1) alpha=0.2 !lzhang
+       if(nv.eq.p_dms) alpha=0.
        if(nv.eq.p_sulf .or. nv.eq.p_seas_1 .or. nv.eq.p_seas_2 .or. &
           nv.eq.p_seas_3 .or. nv.eq.p_seas_4)alpha=1.
        !if(nv.eq.p_bc2 .or. nv.eq.p_oc2)alpha=0.8
@@ -81,13 +83,14 @@ subroutine wetdep_ls(dt,var,rain,moist,rho,var_rmv,num_moist, &
      var_rmvl(i,:,j)=0.
      frc(i,j)=0.
      rain_clw(i,j)=0.
-     if(rain(j).gt.1.e-3)then
+     if(rain(i,j).gt.1.e-3)then
 ! convert rain back to rate
 !
-        rain_clw(i,j)=rain(j)/dt
+        rain_clw(i,j)=rain(i,j)/dt
 ! total cloud water
 !
-        do k=1,kte-1
+        !do k=1,kte-1
+        do k=1,kte !lzhang
            dvar=max(0.,moist(i,k,j,p_qc)*rho(i,k,j)*vvel(i,k,j)*dz8w(i,k,j))
            var_sum_clw(i,j)=var_sum_clw(i,j)+dvar
            var_sum(i,j)=var_sum(i,j)+var(i,k,j,nv)*rho(i,k,j)
@@ -107,8 +110,9 @@ subroutine wetdep_ls(dt,var,rain,moist,rho,var_rmv,num_moist, &
 !
     do i=its,ite
     do j=jts,jte
-     if(rain(j).gt.1.e-3 .and. var_sum(i,j).gt.1.e-6 .and. var_sum_clw(i,j).gt.1.e-5)then
-       do k=kts,kte-2
+     if(rain(i,j).gt.1.e-3 .and. var_sum(i,j).gt.1.e-6 .and. var_sum_clw(i,j).gt.1.e-5)then
+       !do k=kts,kte-2  !lzhang
+       do k=kts,kte
         if(var(i,k,j,nv).gt.1.e-08 .and. moist(i,k,j,p_qc).gt.1.e-8)then
         factor = max(0.,frc(i,j)*rho(i,k,j)*dz8w(i,k,j)*vvel(i,k,j))
 !       print *,'var before ',k,km,var(i,k,j,nv),factor

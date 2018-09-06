@@ -65,10 +65,10 @@ if [[ -e /gpfs/hps && -e /usrx ]] ; then
 	MACHINE_ID=wcoss
         if ( ! cat /proc/cpuinfo |grep 'processor.*32' ) ; then
             # Fewer than 32 fake (hyperthreading) cpus, so Phase 1.
-            FULL_MACHINE_ID=wcoss.phase1
+            FULL_MACHINE_ID=wcoss_phase1
             PEX=1
         else
-            FULL_MACHINE_ID=wcoss.phase2
+            FULL_MACHINE_ID=wcoss_phase2
             PEX=2
         fi
     else
@@ -1110,7 +1110,7 @@ build_gsdchem(){
   else
     echo "Building $COMP..."
     cd "$COMP_SRCDIR"
-    ./configure --prefix=$COMP_BINDIR --datarootdir=$COMP_BINDIR --libdir=$COMP_BINDIR #FCFLAGS="-g -O0 -traceback -check all -fpe0 -ftz -ftrapuv" 
+    ./configure --prefix=$COMP_BINDIR --datarootdir=$COMP_BINDIR --libdir=$COMP_BINDIR
     if [[ "$?" != "0" ]] ; then
       echo "...failed to configure $COMP."
       exit 1

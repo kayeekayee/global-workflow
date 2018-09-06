@@ -1,10 +1,25 @@
-/scratch4/BMC/rtfim/rtruns/FV3-Chem
+09/06/18
+updated to Li's latest located at /scratch3/BMC/fim/lzhang/EMC_FV3/FV3_ESRL/sorc/
+   fv3gfs.fd points to /scratch4/BMC/fim/lzhang/cv-test/EMC_FV3GFS-GSDCHEM/
+        067e4866d89377002e02e4d4c276be6296b44ed6 FV3 (nemsfv3gfs_beta_v1.0.4-83-g067e486)
+       +108d6a3ca3512b0e4a6a63a599bb379012d685db GSDCHEM (heads/newgrell)
+        e3ca17765e3751ef36a5309aa2a3a45258f37cac NEMS (nemsfv3gfs_beta_v1.0.4-207-ge3ca177)
+
+07/24/18
+updated to superstructure based on 24Jun2018 master branch, e758bd, in fv3gfs repository
+updated to Li's latest  
+C384
+GFDL microphysics  (imp_physics=11)
+
+04/26/18
+initial version of realtime FV3-Chem:  /scratch4/BMC/rtfim/rtruns/FV3-Chem
   superstructure based on 17Mar2018 master branch, a69828b, in fv3gfs repository
   fv3gfs.fd points to development branch of EMC_FV3GFS-GSDCHEM repository
       1003fd58ee7def9e55ad69f26c19f06c8be1cd6d FV3 (FV3_prebeta_v1.1-73-g1003fd5)
       f2943c2ddf9b094b31f8600c19fc0ff113daad08 GSDCHEM (heads/development)
       d925af99fd0cc688d5bf28a59bff31d7f0982844 NEMS (FV3_prebeta_v1.1-208-gd925af9)
   run 00Z
+  C96
   6-hourly out to 168h
   0.5 and 0.25 grib2 files 
   ZhaoCarr microphysics  (imp_physics=99)
