@@ -1,9 +1,9 @@
 09/06/18
 updated to Li's latest located at /scratch3/BMC/fim/lzhang/EMC_FV3/FV3_ESRL/sorc/
-   fv3gfs.fd points to /scratch4/BMC/fim/lzhang/cv-test/EMC_FV3GFS-GSDCHEM/
-        067e4866d89377002e02e4d4c276be6296b44ed6 FV3 (nemsfv3gfs_beta_v1.0.4-83-g067e486)
-       +108d6a3ca3512b0e4a6a63a599bb379012d685db GSDCHEM (heads/newgrell)
-        e3ca17765e3751ef36a5309aa2a3a45258f37cac NEMS (nemsfv3gfs_beta_v1.0.4-207-ge3ca177)
+  fv3gfs.fd points to /scratch4/BMC/fim/lzhang/cv-test/EMC_FV3GFS-GSDCHEM/
+     067e4866d89377002e02e4d4c276be6296b44ed6 FV3 (nemsfv3gfs_beta_v1.0.4-83-g067e486)
+    +9b98268c1f715b12f8af1d6c23cac7ba3b561318 GSDCHEM (heads/newgrell)
+     e3ca17765e3751ef36a5309aa2a3a45258f37cac NEMS (nemsfv3gfs_beta_v1.0.4-207-ge3ca177)
 
 07/24/18
 updated to superstructure based on 24Jun2018 master branch, e758bd, in fv3gfs repository
