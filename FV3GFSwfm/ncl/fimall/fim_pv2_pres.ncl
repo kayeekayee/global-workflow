@@ -220,17 +220,31 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$PV2PRES$(:,:) / 100.  ; convert to mb
-  uvar = grb_file->$PV2U$(:,:)
-  uvar@_FillValue = 999
-  uvar = where(uvar.le.150,uvar,uvar@_FillValue)
-  uvar = uvar * 1.9429 ; convert to knots
-  vvar = grb_file->$PV2V$(:,:)
-  vvar@_FillValue = 999
-  vvar = where(vvar.le.150,vvar,vvar@_FillValue)
-  vvar = vvar * 1.9429 ; convert to knots
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    hvar = grb_file->$PV2PRES$(::-1,:) / 100.  ; convert to mb
+    uvar = grb_file->$PV2U$(::-1,:)
+    uvar@_FillValue = 999
+    uvar = where(uvar.le.150,uvar,uvar@_FillValue)
+    uvar = uvar * 1.9429 ; convert to knots
+    vvar = grb_file->$PV2V$(::-1,:)
+    vvar@_FillValue = 999
+    vvar = where(vvar.le.150,vvar,vvar@_FillValue)
+    vvar = vvar * 1.9429 ; convert to knots
+  else
+    lat = grb_file->$LAT$(:)
+    hvar = grb_file->$PV2PRES$(:,:) / 100.  ; convert to mb
+    uvar = grb_file->$PV2U$(:,:)
+    uvar@_FillValue = 999
+    uvar = where(uvar.le.150,uvar,uvar@_FillValue)
+    uvar = uvar * 1.9429 ; convert to knots
+    vvar = grb_file->$PV2V$(:,:)
+    vvar@_FillValue = 999
+    vvar = where(vvar.le.150,vvar,vvar@_FillValue)
+    vvar = vvar * 1.9429 ; convert to knots
+  end if
   uv2 = uvar * uvar
   vv2 = vvar * vvar
   tvar = sqrt(uv2 + vv2)

@@ -5,13 +5,6 @@ modl = getenv("MODL")
 interval = getenv("FCST_INTERVAL")
 interval = 6
 ;
-str = str_match(modl, "FV3")
-if (.not.ismissing(str)) then
-  fv3 = True
-else
-  fv3 = False
-end if
-;
 load "$NCL_HOME/obj/cmap1.ncl"
 ;
 begin
@@ -53,23 +46,19 @@ if (domainname .eq. "fim") then
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
       else
-        if (fv3) then
-          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
-        else
-          zz = WEASDACC + fctm + "h" ; use total snowfall
-          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-          back6fname = asciiread("back6_file.txt",-1,"string")
-          back6_grb_file = addfile(back6fname,"r")
-          back6fctm = back6_grb_file->$TSFC$@forecast_time
-          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-          if (back6fctmunits .ne. "hours") then
-            back6fctm = back6fctm * tointeger(back6fctmunits)
-          end if
-          back6fcst1 = back6fctm
-          zz = WEASDACC + back6fcst1 + "h"
-          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-          tvar = tvar - back6tvar
+        zz = WEASDACC + fctm + "h" ; use total snowfall
+        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
+        back6fname = asciiread("back6_file.txt",-1,"string")
+        back6_grb_file = addfile(back6fname,"r")
+        back6fctm = back6_grb_file->$TSFC$@forecast_time
+        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+        if (back6fctmunits .ne. "hours") then
+          back6fctm = back6fctm * tointeger(back6fctmunits)
         end if
+        back6fcst1 = back6fctm
+        zz = WEASDACC + back6fcst1 + "h"
+        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+        tvar = tvar - back6tvar
       end if
     end if
   else

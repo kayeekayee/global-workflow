@@ -58,12 +58,16 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(:,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;
@@ -75,12 +79,16 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(:,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;
@@ -95,12 +103,16 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(:,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;
@@ -113,12 +125,16 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(::-1,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(::-1,:)
   else
-    tvar = grb_file->$BLYDP$(::-1,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(::-1,:)
+    else
+      tvar = grb_file->$BLYDP$(::-1,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
 ;
@@ -135,12 +151,16 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(:,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;
@@ -152,12 +172,16 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+  if (fv3) then
+    tvar = grb_file->$NTAULWRF$(:,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;
@@ -166,14 +190,20 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if (isfilevar(grb_file,NLWRT)) then
-    tvar = grb_file->$NLWRT$(:,:)
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$NTAULWRF$(::-1,:)
   else
-    tvar = grb_file->$BLYDP$(:,:)
+    lat = grb_file->$LAT$(:)
+    if (isfilevar(grb_file,NLWRT)) then
+      tvar = grb_file->$NLWRT$(:,:)
+    else
+      tvar = grb_file->$BLYDP$(:,:)
+    end if
+    tvar = -tvar
   end if
-  tvar = -tvar
 ;
 end if
 ;

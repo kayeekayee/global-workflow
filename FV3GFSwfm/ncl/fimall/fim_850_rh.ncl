@@ -13,30 +13,12 @@ airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/)
 fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
-; Get the 850mb level index
-;
-do ll = 0,5
-  lnam = "lv_ISBL"+ll
-  if (isfilevar(grb_file,lnam)) then
-    break
-  end if
-end do
-;
-levnam = grb_file->$lnam$
-levunits = grb_file->$lnam$@units
-if (levunits .eq. "Pa") then
-  levnam = levnam / 100
-end if
-do ii = 0, dimsizes(levnam)-1
-  if (levnam(ii) .eq. 850) then
-    level = ii
-    break
-  end if
-end do
-;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
+;
+isolev = 850
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 if (modl .ne. "MPAS") then
   intm = grb_file->$TSFC$@initial_time
@@ -57,7 +39,7 @@ if (domainname .eq. "fim") then
     fctm = grb_file->PRES_GDS0_SFC@forecast_time
     lat = grb_file->g0_lat_0(:)
     lon = grb_file->g0_lon_1(:)
-    tvar = grb_file->R_H_GDS0_ISBL(level,::-1,:) * 100.
+    tvar = grb_file->R_H_GDS0_ISBL(levelrh,::-1,:) * 100.
 ;
     tvar = lonFlip(tvar)
   else
@@ -66,7 +48,7 @@ if (domainname .eq. "fim") then
 ;
     lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    tvar = grb_file->$RHISBL$(level,:,:)
+    tvar = grb_file->$RHISBL$(levelrh,:,:)
   end if
 ;
 end if
@@ -78,7 +60,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$RHISBL$(level,:,:)
+  tvar = grb_file->$RHISBL$(levelrh,:,:)
 ;
 end if
 ;
@@ -90,7 +72,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$RHISBL$(level,:,:)
+  tvar = grb_file->$RHISBL$(levelrh,:,:)
 ;
 end if
 ;
@@ -105,7 +87,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$RHISBL$(level,:,:)
+  tvar = grb_file->$RHISBL$(levelrh,:,:)
 ;
 end if
 ;
@@ -118,7 +100,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$RHISBL$(level,::-1,:)
+  tvar = grb_file->$RHISBL$(levelrh,::-1,:)
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
 ;
@@ -135,7 +117,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$RHISBL$(level,:,:)
+  tvar = grb_file->$RHISBL$(levelrh,:,:)
 ;
 end if
 ;
@@ -147,7 +129,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$RHISBL$(level,:,:)
+  tvar = grb_file->$RHISBL$(levelrh,:,:)
 ;
 end if
 ;
@@ -156,9 +138,15 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$RHISBL$(level,:,:)
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$RHISBL$(levelrh,::-1,:)
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$RHISBL$(levelrh,:,:)
+  end if
 ;
 end if
 ;

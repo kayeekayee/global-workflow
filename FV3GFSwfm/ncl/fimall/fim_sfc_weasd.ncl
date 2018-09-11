@@ -214,11 +214,13 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
+;
   if (fv3) then
-    tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$WEASD$(::-1,:) * 0.03937; convert to inches
   else
+    lat = grb_file->$LAT$(:)
     if (modl .eq. "FIM-8HRRRPhys_C") then
       zz = "WEASD_244_SFC_acc"+fctm+"h"
       tvar = grb1_file->$zz$(:,:) * 0.03937; convert to inches

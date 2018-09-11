@@ -9,7 +9,7 @@ end create
 ;
 txid = create "TextItems" textItemClass wid
   "txFuncCode" : "~"
-  "txString" : modl+" "+intm+" "+fctm+" hr fcst"
+  "txString" : modl+intm+" "+fctm+" hr fcst"
   "txFont" : 22
   "txFontHeightF" : 0.015
   "txFontColor" : 1

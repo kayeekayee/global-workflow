@@ -3,13 +3,6 @@ load "$NCARG_ROOT/lib/ncarg/nclex/gsun/gsn_code.ncl"
 load "$NCARG_LIB/ncarg/nclscripts/csm/contributed.ncl"
 modl = getenv("MODL")
 ;
-str = str_match(modl, "FV3")
-if (.not.ismissing(str)) then
-  fv3 = True
-else
-  fv3 = False
-end if
-;
 load "$NCL_HOME/obj/cmap1.ncl"
 ;
 begin
@@ -20,34 +13,12 @@ airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/)
 fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
-; Get the 700mb level index
-;
-if (fv3) then
-  lnam = "lv_ISBL6"
-else
-  do ll = 0,5
-    lnam = "lv_ISBL"+ll
-    if (isfilevar(grb_file,lnam)) then
-      break
-    end if
-  end do
-end if
-;
-levnam = grb_file->$lnam$
-levunits = grb_file->$lnam$@units
-if (levunits .eq. "Pa") then
-  levnam = levnam / 100
-end if
-do ii = 0, dimsizes(levnam)-1
-  if (levnam(ii) .eq. 700) then
-    level = ii
-    break
-  end if
-end do
-;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
+;
+isolev = 700
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 intm = grb_file->$TSFC$@initial_time
 fctm = grb_file->$TSFC$@forecast_time
@@ -63,8 +34,8 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -75,8 +46,8 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -88,8 +59,8 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -104,8 +75,8 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -118,18 +89,18 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
+  hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+  hvarorig = hvar
+  fliphvar = lonFlip(hvar)
   testvar = grb_file->$VVEL$
   testvardims = getfilevardims(grb_file,VVEL)
   if (dimsizes(testvardims) .eq. 2) then
     tvar = grb_file->$VVEL$(::-1,:) * -10.  ; scale it here
   else
-    tvar = grb_file->$VVEL$(level,::-1,:) * -10.  ; scale it here
+    tvar = grb_file->$VVEL$(levelvv,::-1,:) * -10.  ; scale it here
   end if
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
-  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
-  hvarorig = hvar
-  fliphvar = lonFlip(hvar)
 ;
 end if
 ;
@@ -144,8 +115,8 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -157,8 +128,8 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  tvar = grb_file->$VVEL$(levelvv,:,:)
 ;
 end if
 ;
@@ -167,17 +138,25 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
-  lat = lat - 50.955
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  tvar = grb_file->$VVEL$(level,:,:)
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    lat = lat - 50.955
+    hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+    tvar = grb_file->$VVEL$(levelvv,::-1,:)
+  else
+    lat = grb_file->$LAT$(:)
+    lat = lat - 50.955
+    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+    tvar = grb_file->$VVEL$(levelvv,:,:)
+  end if
 ;
 end if
 ;
-if (domainname .ne. "174") then
-  tvar = tvar * -10.
-end if
+;if (domainname .ne. "174") then
+;  tvar = tvar * -10.
+;end if
 ;
 load "$NCL_HOME/obj/get_date_str_FIM.ncl"
 ;
@@ -292,6 +271,7 @@ if (domainname .eq. "130") then
 ;
   setvalues cnid
     "cnRasterModeOn" : False
+    "cnLevels" : (/-.4,-.3,-.2,-.1,.1,.2,.3,.4,.5,.6,.7/)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
@@ -307,7 +287,11 @@ if (domainname .eq. "130") then
     end setvalues
   end if
 ;
-  titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  if (fv3) then
+    titlestring = "700mb Vert Vel (m/s), Height (dm)"
+  else
+    titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_cnid4.ncl"
 ;
@@ -376,6 +360,10 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/vvel.ncl"
 ;
+  setvalues cnid
+    "cnLevels" : (/-.4,-.3,-.2,-.1,.1,.2,.3,.4,.5,.6,.7/)
+  end setvalues
+;
   load "$NCL_HOME/obj/height_60m.ncl"
 ;
   setvalues cnid4
@@ -383,7 +371,11 @@ if (domainname .eq. "174") then
     "cnLineThicknessF" : 2.0
   end setvalues
 ;
-  titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  if (fv3) then
+    titlestring = "700mb Vert Vel (m/s), Height (dm)"
+  else
+    titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_cnid4.ncl"
 ;
@@ -433,6 +425,7 @@ if (domainname .eq. "242") then
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
+    "cnLevels" : (/-.4,-.3,-.2,-.1,.1,.2,.3,.4,.5,.6,.7/)
   end setvalues
 ;
   load "$NCL_HOME/obj/height_60m.ncl"
@@ -442,7 +435,11 @@ if (domainname .eq. "242") then
     "cnLineThicknessF" : 2.0
   end setvalues
 ;
-  titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  if (fv3) then
+    titlestring = "700mb Vert Vel (m/s), Height (dm)"
+  else
+    titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_cnid4.ncl"
 ;
@@ -533,6 +530,10 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   load "$NCL_HOME/obj/vvel.ncl"
 ;
+  setvalues cnid
+    "cnLevels" : (/-.4,-.3,-.2,-.1,.1,.2,.3,.4,.5,.6,.7/)
+  end setvalues
+;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then
 ;
@@ -561,7 +562,11 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     end setvalues
   end if
 ;
-  titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  if (fv3) then
+    titlestring = "700mb Vert Vel (m/s), Height (dm)"
+  else
+    titlestring = "700mb Vert Vel (-Pa/s * 10), Height (dm)"
+  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_cnid4.ncl"
 ;

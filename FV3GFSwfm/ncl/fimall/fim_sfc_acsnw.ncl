@@ -107,19 +107,23 @@ if (domainname .eq. "83") then
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        if (fv3) then
+          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+        else
+          zz = WEASDACC + fctm + "h" ; use total snowfall
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+          back6fname = asciiread("back6_file.txt",-1,"string")
+          back6_grb_file = addfile(back6fname,"r")
+          back6fctm = back6_grb_file->$TSFC$@forecast_time
+          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+          if (back6fctmunits .ne. "hours") then
+            back6fctm = back6fctm * tointeger(back6fctmunits)
+          end if
+          back6fcst1 = back6fctm
+          zz = WEASDACC + back6fcst1 + "h"
+          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+          tvar = tvar - back6tvar
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
     end if
   else
@@ -148,20 +152,23 @@ if (domainname .eq. "130") then
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        if (fv3) then
+          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+        else
+          zz = WEASDACC + fctm + "h" ; use total snowfall
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+          back6fname = asciiread("back6_file.txt",-1,"string")
+          back6_grb_file = addfile(back6fname,"r")
+          back6fctm = back6_grb_file->$TSFC$@forecast_time
+          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+          if (back6fctmunits .ne. "hours") then
+            back6fctm = back6fctm * tointeger(back6fctmunits)
+          end if
+          back6fcst1 = back6fctm
+          zz = WEASDACC + back6fcst1 + "h"
+          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+          tvar = tvar - back6tvar
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
     end if
   else
@@ -188,19 +195,23 @@ if (domainname .eq. "174") then
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        if (fv3) then
+          tvar = grb_file->$WEASD$(::-1,:) * 0.03937; convert to inches
+        else
+          zz = WEASDACC + fctm + "h" ; use total snowfall
+          tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
+          back6fname = asciiread("back6_file.txt",-1,"string")
+          back6_grb_file = addfile(back6fname,"r")
+          back6fctm = back6_grb_file->$TSFC$@forecast_time
+          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+          if (back6fctmunits .ne. "hours") then
+            back6fctm = back6fctm * tointeger(back6fctmunits)
+          end if
+          back6fcst1 = back6fctm
+          zz = WEASDACC + back6fcst1 + "h"
+          back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+          tvar = tvar - back6tvar
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
     end if
   else
@@ -231,19 +242,23 @@ if (domainname .eq. "236") then
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        if (fv3) then
+          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+        else
+          zz = WEASDACC + fctm + "h" ; use total snowfall
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+          back6fname = asciiread("back6_file.txt",-1,"string")
+          back6_grb_file = addfile(back6fname,"r")
+          back6fctm = back6_grb_file->$TSFC$@forecast_time
+          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+          if (back6fctmunits .ne. "hours") then
+            back6fctm = back6fctm * tointeger(back6fctmunits)
+          end if
+          back6fcst1 = back6fctm
+          zz = WEASDACC + back6fcst1 + "h"
+          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+          tvar = tvar - back6tvar
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
     end if
   else
@@ -269,19 +284,23 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
       if (isfilevar(grb_file,zz)) then
         tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        if (fv3) then
+          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+        else
+          zz = WEASDACC + fctm + "h" ; use total snowfall
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+          back6fname = asciiread("back6_file.txt",-1,"string")
+          back6_grb_file = addfile(back6fname,"r")
+          back6fctm = back6_grb_file->$TSFC$@forecast_time
+          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+          if (back6fctmunits .ne. "hours") then
+            back6fctm = back6fctm * tointeger(back6fctmunits)
+          end if
+          back6fcst1 = back6fctm
+          zz = WEASDACC + back6fcst1 + "h"
+          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+          tvar = tvar - back6tvar
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
     end if
   else
@@ -295,34 +314,74 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if (fctm .gt. 0) then
-    if (isfilevar(grb_file,WEASDACC)) then
-      zz = WEASDACC
-      tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-    else
-      zz = WEASDACC + interval + "h"
-      if (isfilevar(grb_file,zz)) then
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if (fctm .gt. 0) then
+      if (isfilevar(grb_file,WEASDACC)) then
+        zz = WEASDACC
+        tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
       else
-        zz = WEASDACC + fctm + "h" ; use total snowfall
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
-        back6fname = asciiread("back6_file.txt",-1,"string")
-        back6_grb_file = addfile(back6fname,"r")
-        back6fctm = back6_grb_file->$TSFC$@forecast_time
-        back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-        if (back6fctmunits .ne. "hours") then
-          back6fctm = back6fctm * tointeger(back6fctmunits)
+        zz = WEASDACC + interval + "h"
+        if (isfilevar(grb_file,zz)) then
+          tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
+        else
+          if (fv3) then
+            tvar = grb_file->$WEASD$(::-1,:) * 0.03937; convert to inches
+          else
+            zz = WEASDACC + fctm + "h" ; use total snowfall
+            tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches
+            back6fname = asciiread("back6_file.txt",-1,"string")
+            back6_grb_file = addfile(back6fname,"r")
+            back6fctm = back6_grb_file->$TSFC$@forecast_time
+            back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+            if (back6fctmunits .ne. "hours") then
+              back6fctm = back6fctm * tointeger(back6fctmunits)
+            end if
+            back6fcst1 = back6fctm
+            zz = WEASDACC + back6fcst1 + "h"
+            back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+            tvar = tvar - back6tvar
+          end if
         end if
-        back6fcst1 = back6fctm
-        zz = WEASDACC + back6fcst1 + "h"
-        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-        tvar = tvar - back6tvar
       end if
+    else
+      exit
     end if
   else
-    exit
+    lat = grb_file->$LAT$(:)
+    if (fctm .gt. 0) then
+      if (isfilevar(grb_file,WEASDACC)) then
+        zz = WEASDACC
+        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+      else
+        zz = WEASDACC + interval + "h"
+        if (isfilevar(grb_file,zz)) then
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+        else
+          if (fv3) then
+            tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+          else
+            zz = WEASDACC + fctm + "h" ; use total snowfall
+            tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches
+            back6fname = asciiread("back6_file.txt",-1,"string")
+            back6_grb_file = addfile(back6fname,"r")
+            back6fctm = back6_grb_file->$TSFC$@forecast_time
+            back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+            if (back6fctmunits .ne. "hours") then
+              back6fctm = back6fctm * tointeger(back6fctmunits)
+            end if
+            back6fcst1 = back6fctm
+            zz = WEASDACC + back6fcst1 + "h"
+            back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+            tvar = tvar - back6tvar
+          end if
+        end if
+      end if
+    else
+      exit
+    end if
   end if
 ;
 end if
@@ -397,6 +456,7 @@ end create
 setvalues wid
    "wkColorMap" : gen_colormap()
 end setvalues
+newindex = NhlNewColor(wid,0.8,0.2,0.8)
 ;
 setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
@@ -435,6 +495,7 @@ if (domainname .eq. "130") then
 ;
   setvalues cnid
     "cnRasterModeOn" : False
+    "cnFillColors" : (/ 1,20,3,4,5,6,7,8,9,10,11,12,13,22 /)
   end setvalues
 ;
   titlestring = interval + "hr Accumulated Snow/Sleet Using 10:1 Ratio (in)"
@@ -500,7 +561,11 @@ if (domainname .eq. "174") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  load "$NCL_HOME/obj/weasd.ncl"
+  load "$NCL_HOME/obj/acsnw.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/ 1,20,3,4,5,6,7,8,9,10,11,12,13,22 /)
+  end setvalues
 ;
   titlestring = interval + "hr Accumulated Snow/Sleet Using 10:1 Ratio (in)"
   load "$NCL_HOME/obj/add_titles.ncl"
@@ -544,10 +609,11 @@ if (domainname .eq. "242") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  load "$NCL_HOME/obj/weasd.ncl"
+  load "$NCL_HOME/obj/acsnw.ncl"
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
+    "cnFillColors" : (/ 1,20,3,4,5,6,7,8,9,10,11,12,13,22 /)
   end setvalues
 ;
   titlestring = interval + "hr Accumulated Snow/Sleet Using 10:1 Ratio (in)"
@@ -599,6 +665,10 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
   end if
 ;
   load "$NCL_HOME/obj/acsnw.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/ 1,20,3,4,5,6,7,8,9,10,11,12,13,22 /)
+  end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then

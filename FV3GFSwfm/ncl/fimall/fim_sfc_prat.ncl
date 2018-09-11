@@ -2,106 +2,36 @@
 load "$NCARG_ROOT/lib/ncarg/nclex/gsun/gsn_code.ncl"
 load "$NCARG_LIB/ncarg/nclscripts/csm/contributed.ncl"
 modl = getenv("MODL")
-interval = getenv("FCST_INTERVAL")
-interval = 6
-fcstln = getenv("FCST_LENGTH")
 ;
-load "$NCL_HOME/obj/cmap1_track2.ncl"
+load "$NCL_HOME/obj/cmap_brown.ncl"
 ;
 begin
 ;
 airport_id = asciiread("$NCL_HOME/Airports_id.txt",-1,"string")
 airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/),"float")
 ;
-fname = asciiread("arw_file.txt",-1,"string") 
+fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
 ;
-if (isfilevar(grb_file,TSFC)) then
-  intm = grb_file->$TSFC$@initial_time
-  fctm = grb_file->$TSFC$@forecast_time
-  fctmunits = grb_file->$TSFC$@forecast_time_units
-  if (fctmunits .ne. "hours") then
-    fctm = fctm * tointeger(fctmunits)
-  end if
-else  ; for grid 129
-  intm = grb_file->$TPACC$@initial_time
-  fctm = grb_file->$TPACC$@forecast_time
-  fctmunits = grb_file->$TPACC$@forecast_time_units
-  if (fctmunits .ne. "hours") then
-    fctm = fctm * tointeger(fctmunits)
-  end if
-end if
-;
-if (fctm .ge. 12) then
-  back12fname = asciiread("back12_file.txt",-1,"string")
-  back12_grb_file = addfile(back12fname,"r")
-  if (isfilevar(back12_grb_file,TSFC)) then
-    back12fctm = back12_grb_file->$TSFC$@forecast_time
-    back12fctmunits = back12_grb_file->$TSFC$@forecast_time_units
-    if (back12fctmunits .ne. "hours") then
-      back12fctm = back12fctm * tointeger(back12fctmunits)
-    end if
-  else  ; for grid 129
-    back12fctm = back12_grb_file->$TPACC$@forecast_time
-    back12fctmunits = back12_grb_file->$TPACC$@forecast_time_units
-    if (back12fctmunits .ne. "hours") then
-      back12fctm = back12fctm * tointeger(back12fctmunits)
-    end if
-  end if
-else
-  exit
+intm = grb_file->$TISBL$@initial_time
+fctm = grb_file->$TISBL$@forecast_time
+fctmunits = grb_file->$TISBL$@forecast_time_units
+if (fctmunits .ne. "hours") then
+  fctm = fctm * tointeger(fctmunits)
 end if
 ;
 if (domainname .eq. "fim") then
 ;
-  if (modl .eq. "MPAS") then
-    ny = filevardimsizes(grb_file,"g0_lat_0")
-    nx = filevardimsizes(grb_file,"g0_lon_1")
+  ny = filevardimsizes(grb_file,LAT)
+  nx = filevardimsizes(grb_file,LON)
 ;
-    intm = grb_file->PRES_GDS0_SFC@initial_time
-    fctm = grb_file->PRES_GDS0_SFC@forecast_time
-    lat = grb_file->g0_lat_0(:)
-    lon = grb_file->g0_lon_1(:)
-    if ( fctm .ge. 12 ) then
-      tvar = grb_file->ACPCP_GDS0_SFC(::-1,:) + grb_file->NCPCP_GDS0_SFC(::-1,:)
-      back12fname = asciiread("back12_file.txt",-1,"string")
-      back12_grb_file = addfile(back12fname,"r")
-      back12fctm = back12_grb_file->PRES_GDS0_SFC@forecast_time
-      back12tvar = back12_grb_file->ACPCP_GDS0_SFC(::-1,:) + back12_grb_file->NCPCP_GDS0_SFC(::-1,:)
-      tvar = tvar - back12tvar
-      tvar = tvar * 0.03937 ; convert to inches
-      tvar = lonFlip(tvar)
-    else
-      exit
-    end if
-  else
-    ny = filevardimsizes(grb_file,LAT)
-    nx = filevardimsizes(grb_file,LON)
-;
-    lat = grb_file->$LAT$(:)
-    lon = grb_file->$LON$(:)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
-        zz = TPACC
-      else
-        zz = TPACC + fctm + "h"
-      end if
-      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      exit
-    end if
-;    zz = TPACC + back12fctm + "h"
-    if (back12fctm .ne. 12) then
-      back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      back12tvar = 0
-    end if
-    tvar = tvar - back12tvar
-  end if
+  lat = grb_file->$LAT$(:)
+  lon = grb_file->$LON$(:)
+  tvar = grb_file->PRATE_P8_L1_GLL0_avg6h(:,:)
 ;
 end if
 ;
@@ -110,17 +40,10 @@ if (domainname .eq. "129") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  zz = TPACC
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  zz = TPACC
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -132,23 +55,8 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + fctm + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
-;  zz = TPACC + back12fctm + "h"
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(:,:) ; Int fine dust
+  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -163,23 +71,8 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + fctm + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
-;  zz = TPACC + back12fctm + "h"
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(:,:)
+  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -192,25 +85,12 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + fctm + "h"
-    end if
-    tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
-;  zz = TPACC + back12fctm + "h"
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(::-1,:) * 100
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
+  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; convert to decameters
+  hvarorig = hvar
+  fliphvar = lonFlip(hvar)
 ;
 end if
 ;
@@ -225,23 +105,8 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + fctm + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
-;  zz = TPACC + back12fctm + "h"
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(:,:)
+  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -253,23 +118,8 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + fctm + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
-;  zz = TPACC + back12fctm + "h"
-  if (back12fctm .ne. 12) then
-    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back12tvar = 0
-  end if
-  tvar = tvar - back12tvar
+  tvar = grb_file->$SI$(:,:)
+  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -282,49 +132,30 @@ if (domainname .eq. "244") then
 ;
   if (fv3) then
     lat = grb_file->$LAT$(::-1)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
-        zz = TPACC
-      else
-        zz = TPACC + fctm + "h"
-      end if
-      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-    else
-      exit
-    end if
-;    zz = TPACC + back12fctm + "h"
-    if (back12fctm .ge. 12) then
-      back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-    else
-      back12tvar = 0
-    end if
+    tvar = grb_file->$SI$(::-1,:)
+    hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
   else
     lat = grb_file->$LAT$(:)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
-        zz = TPACC
-      else
-        zz = TPACC + fctm + "h"
-      end if
-      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      exit
-    end if
-;    zz = TPACC + back12fctm + "h"
-    if (back12fctm .ge. 12) then
-      back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      back12tvar = 0
-    end if
+    tvar = grb_file->$SI$(:,:)
+    hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
   end if
-  tvar = tvar - back12tvar
 ;
 end if
 ;
+;tvar = tvar * 10.
+;do ii = 0,nx-1
+;  do jj = 0,ny-1
+;    if (tvar(jj,ii) .lt. 2.) then
+;      tvar(jj,ii) = 1.
+;    end if
+;  end do
+;end do
+;tvar = log10(tvar)
+;
 load "$NCL_HOME/obj/get_date_str_FIM.ncl"
 ;
-print(date_str)
-print("12h totp")
+print(date_str) 
+print("6h avg precip rate")
 print(min(tvar))
 print(max(tvar))
 ;
@@ -363,7 +194,7 @@ end create
 ; Create an ncgmWorkstation object.
 ;
         wid = create "mdssWork" ncgmWorkstationClass defaultapp
-           "wkMetaName" : "./12h_totp.ncgm"
+           "wkMetaName" : "./sfc_prate.ncgm"
         end create
     else
       if (X11 .eq. 1) then
@@ -379,25 +210,36 @@ end create
 ; Create a PSWorkstation object.
 ;
           wid = create "mdssWork" psWorkstationClass defaultapp
-           "wkPSFileName" : "./12h_totp.ps"
+           "wkPSFileName" : "./sfc_prate.ps"
           end create
         end if
       end if
     end if
 ;
 ; Assign the colormap to the workstation.
-;
+;setvalues wid
+;   "wkColorMap" : gen_colormap()
+;end setvalues
 setvalues wid
-   "wkColorMap" : gen_colormap()
+   "wkColorMap" : "WhiteBlueGreenYellowRed"
+   "wkBackgroundColor" : "black"
+   "wkForegroundColor" : "white"
 end setvalues
+NhlSetColor(wid,255,0.55,0.14,0.80)
 ;
 setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
 end setvalues
 ;
+; Create a ScalarField object.
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
+;
+;  if (min(tvar(lly,llx)) .eq. 0 .and. max(tvar(lly,llx)) .eq. 0) then
+;    tvar(lly,llx) = .001
+;  end if
 ;
   if (iq .eq. 0) then
     load "$NCL_HOME/obj/lambert_conformal_map_blk.ncl"
@@ -405,8 +247,6 @@ if (domainname .eq. "130") then
     load "$NCL_HOME/obj/lc_map_counties.ncl"
     setvalues mpid
       "mpNationalLineColor" : "background"
-      "mpCountyLineColor" : "background"
-      "mpGridAndLimbOn" : False
     end setvalues
   end if
 ;
@@ -418,13 +258,25 @@ if (domainname .eq. "130") then
       "sfYCEndSubsetV" : ury
       "sfMissingValueV" : tvar@_FillValue
   end create
-  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+;
+  hfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : hvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : hvar@_FillValue
+  end create
+;
+  load "$NCL_HOME/obj/intfd.ncl"
 ;
   setvalues cnid
     "cnRasterModeOn" : False
   end setvalues
 ;
-  titlestring = "Last 12h Total Precip (in)"
+  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -432,12 +284,13 @@ if (domainname .eq. "130") then
 ;
   draw(cnid)
   draw(mpid)
+;  draw(cnid4)
 ;
   gsres = True
   if (iq .eq. 0) then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 20
+      gsres@gsMarkerColor = 10
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -448,7 +301,7 @@ if (domainname .eq. "130") then
   else
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 20
+      gsres@gsMarkerColor = 10
       gsres@gsMarkerSizeF = 0.01
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -483,9 +336,20 @@ if (domainname .eq. "174") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+  hfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : hvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : hvar@_FillValue
+  end create
 ;
-  titlestring = "Last 12h Total Precip (in)"
+  load "$NCL_HOME/obj/intfd.ncl"
+;
+  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  titlestring = "Integrated Fine Dust >=1.2e-05,<2e-05 (kg/kg)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -493,6 +357,7 @@ if (domainname .eq. "174") then
 ;
   draw(cnid)
   draw(mpid)
+;  draw(cnid4)
 ;
   frame(wid)
 ;
@@ -523,19 +388,24 @@ if (domainname .eq. "242") then
       "sfMissingValueV" : tvar@_FillValue
   end create
 ;
-  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+  hfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : hvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : hvar@_FillValue
+  end create
 ;
-;  if (iq .ne. 0) then
-    setvalues cnid
-      "cnFillMode" : "AreaFill"
-    end setvalues
-;  else
-;    setvalues cnid
-;      "cnFillMode" : "RasterFill"
-;    end setvalues
-;  end if
+  load "$NCL_HOME/obj/intfd.ncl"
 ;
-  titlestring = "Last 12h Total Precip (in)"
+  setvalues cnid
+    "cnFillMode" : "AreaFill"
+  end setvalues
+;
+  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  titlestring = "Integrated Fine Dust [ log(~F33~m~F22~g/m~S~3~N~ * 10) ]"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -543,6 +413,7 @@ if (domainname .eq. "242") then
 ;
   draw(cnid)
   draw(mpid)
+;  draw(cnid4)
 ;
   frame(wid)
 ;
@@ -554,7 +425,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
-; Create ScalarField objects.
+; Create a ScalarField object.
 ;
   if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
 ;
@@ -566,6 +437,15 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
         "sfYCEndV" : 0
         "sfMissingValueV" : tvar@_FillValue
     end create
+;
+;    hfield = create "ScalarField" scalarFieldClass appid
+;        "sfDataArray" : hvar
+;        "sfXCStartV" : 0
+;        "sfYCStartV" : ydim
+;        "sfXCEndV" : xdim
+;        "sfYCEndV" : 0
+;        "sfMissingValueV" : hvar@_FillValue
+;    end create
 ;
   end if
 ;
@@ -581,9 +461,24 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
         "sfMissingValueV" : tvar@_FillValue
     end create
 ;
+;    hfield = create "ScalarField" scalarFieldClass appid
+;        "sfDataArray" : hvar
+;        "sfXCStartV" : 0
+;        "sfYCStartV" : 0
+;        "sfXCEndV" : xdim
+;        "sfYCEndV" : ydim
+;        "sfMissingValueV" : hvar@_FillValue
+;    end create
+;
   end if
 ;
-  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+;  load "$NCL_HOME/obj/intfd.ncl"
+  load "$NCL_HOME/obj/pwtr.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+    "cnLevels" : (/ .001,.002,.003,.005,.01,.02,.03,.04,.05,.1,.2,.3,.4,.5 /)
+  end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then
@@ -594,7 +489,22 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   end if
 ;
-  titlestring = "Last 12h Total Precip (in)"
+;  load "$NCL_HOME/obj/height_60m.ncl"
+;
+;  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+;    setvalues cnid4
+;      "cnLineThicknessF" : 1
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
+;;
+;  if (domainname .eq. "201") then
+;    setvalues cnid4
+;      "cnLineLabelDensityF" : 0.001
+;    end setvalues
+;  end if
+;
+  titlestring = "Precip Rate (mm/s)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -602,12 +512,13 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   draw(cnid)
   draw(mpid)
+;  draw(cnid4)
 ;
   gsres = True
   if (domainname .eq. "236") then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 20
+      gsres@gsMarkerColor = 10
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -622,4 +533,4 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
-;
+

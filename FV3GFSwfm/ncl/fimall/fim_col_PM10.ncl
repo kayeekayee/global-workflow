@@ -150,10 +150,10 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
+  lat = grb_file->$LAT$(::-1)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$PM10COL$(:,:) ; Column PM10
-;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  tvar = grb_file->$PM10COL$(::-1,:) ; Column PM10
+;  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
 ;
 end if
 ;
@@ -374,15 +374,6 @@ if (domainname .eq. "174") then
 ;  end create
 ;
   load "$NCL_HOME/obj/intfd.ncl"
-;
-  setvalues cnid
-    "cnRasterModeOn" : False
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-    "cnLevels" : (/ .000004, .000005, .00001, .00002, .00003, .00004, .00005, .0001, .0002, \
-                    .0003, .0004, .0005, .001, .002 /)
-    "lbAutoManage" : False
-    "lbLabelFontHeightF" : 0.01
-  end setvalues
 ;
 ;  load "$NCL_HOME/obj/height_60m.ncl"
 ;

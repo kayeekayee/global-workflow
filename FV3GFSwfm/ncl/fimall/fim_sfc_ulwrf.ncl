@@ -120,9 +120,15 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$ULWRF$(:,:)
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$ULWRF$(::-1,:)
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$ULWRF$(:,:)
+  end if
 ;
 end if
 ;

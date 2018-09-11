@@ -13,24 +13,12 @@ airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/)
 fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
-; Get the 850-500mb level indices
-;
-do ll = 0,5
-  lnam = "lv_ISBL"+ll
-  if (isfilevar(grb_file,lnam)) then
-    break
-  end if
-end do
-;
-levnam = grb_file->$lnam$
-levunits = grb_file->$lnam$@units
-if (levunits .eq. "Pa") then
-  levnam = levnam / 100
-end if
-;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
+;
+isolev = 850
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 if (modl .ne. "MPAS") then
   intm = grb_file->$TSFC$@initial_time
@@ -42,98 +30,98 @@ if (modl .ne. "MPAS") then
 end if
 ;
 if (modl .eq. "MPAS") then
-  do ii = 0, dimsizes(levnam)-1
-    if (levnam(ii) .eq. 850) then
+  do ii = 0, dimsizes(rhlevnam)-1
+    if (rhlevnam(ii) .eq. 850) then
       level850 = ii
     end if
-;    if (levnam(ii) .eq. 825) then
+;    if (rhlevnam(ii) .eq. 825) then
 ;      level825 = ii
 ;    end if
-;    if (levnam(ii) .eq. 800) then
+;    if (rhlevnam(ii) .eq. 800) then
 ;      level800 = ii
 ;    end if
-;    if (levnam(ii) .eq. 775) then
+;    if (rhlevnam(ii) .eq. 775) then
 ;      level775 = ii
 ;    end if
-;    if (levnam(ii) .eq. 750) then
+;    if (rhlevnam(ii) .eq. 750) then
 ;      level750 = ii
 ;    end if
-;    if (levnam(ii) .eq. 725) then
+;    if (rhlevnam(ii) .eq. 725) then
 ;      level725 = ii
 ;    end if
-    if (levnam(ii) .eq. 700) then
+    if (rhlevnam(ii) .eq. 700) then
       level700 = ii
     end if
-;    if (levnam(ii) .eq. 675) then
+;    if (rhlevnam(ii) .eq. 675) then
 ;      level675 = ii
 ;    end if
-;    if (levnam(ii) .eq. 650) then
+;    if (rhlevnam(ii) .eq. 650) then
 ;      level650 = ii
 ;    end if
-;    if (levnam(ii) .eq. 625) then
+;    if (rhlevnam(ii) .eq. 625) then
 ;      level625 = ii
 ;    end if
-;    if (levnam(ii) .eq. 600) then
+;    if (rhlevnam(ii) .eq. 600) then
 ;      level600 = ii
 ;    end if
-;    if (levnam(ii) .eq. 575) then
+;    if (rhlevnam(ii) .eq. 575) then
 ;      level575 = ii
 ;    end if
-;    if (levnam(ii) .eq. 550) then
+;    if (rhlevnam(ii) .eq. 550) then
 ;      level550 = ii
 ;    end if
-;    if (levnam(ii) .eq. 525) then
+;    if (rhlevnam(ii) .eq. 525) then
 ;      level525 = ii
 ;    end if
-    if (levnam(ii) .eq. 500) then
+    if (rhlevnam(ii) .eq. 500) then
       level500 = ii
     end if
   end do
 else
-  do ii = 0, dimsizes(levnam)-1
-    if (levnam(ii) .eq. 850) then
+  do ii = 0, dimsizes(rhlevnam)-1
+    if (rhlevnam(ii) .eq. 850) then
       level850 = ii
     end if
-;    if (levnam(ii) .eq. 825) then
+;    if (rhlevnam(ii) .eq. 825) then
 ;      level825 = ii
 ;    end if
-;    if (levnam(ii) .eq. 800) then
+;    if (rhlevnam(ii) .eq. 800) then
 ;      level800 = ii
 ;    end if
-;    if (levnam(ii) .eq. 775) then
+;    if (rhlevnam(ii) .eq. 775) then
 ;      level775 = ii
 ;    end if
-;    if (levnam(ii) .eq. 750) then
+;    if (rhlevnam(ii) .eq. 750) then
 ;      level750 = ii
 ;    end if
-;    if (levnam(ii) .eq. 725) then
+;    if (rhlevnam(ii) .eq. 725) then
 ;      level725 = ii
 ;    end if
-    if (levnam(ii) .eq. 700) then
+    if (rhlevnam(ii) .eq. 700) then
       level700 = ii
     end if
-;    if (levnam(ii) .eq. 675) then
+;    if (rhlevnam(ii) .eq. 675) then
 ;      level675 = ii
 ;    end if
-;    if (levnam(ii) .eq. 650) then
+;    if (rhlevnam(ii) .eq. 650) then
 ;      level650 = ii
 ;    end if
-;    if (levnam(ii) .eq. 625) then
+;    if (rhlevnam(ii) .eq. 625) then
 ;      level625 = ii
 ;    end if
-;    if (levnam(ii) .eq. 600) then
+;    if (rhlevnam(ii) .eq. 600) then
 ;      level600 = ii
 ;    end if
-;    if (levnam(ii) .eq. 575) then
+;    if (rhlevnam(ii) .eq. 575) then
 ;      level575 = ii
 ;    end if
-;    if (levnam(ii) .eq. 550) then
+;    if (rhlevnam(ii) .eq. 550) then
 ;      level550 = ii
 ;    end if
-;    if (levnam(ii) .eq. 525) then
+;    if (rhlevnam(ii) .eq. 525) then
 ;      level525 = ii
 ;    end if
-    if (levnam(ii) .eq. 500) then
+    if (rhlevnam(ii) .eq. 500) then
       level500 = ii
     end if
   end do
@@ -421,30 +409,57 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  wstrid = 7
 ;
-  uvar = grb_file->$UISBL$(level700,:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$VISBL$(level700,:,:) * 1.9429 ; convert to knots
-  rh85 = grb_file->$RHISBL$(level850,:,:)
-;  rh82 = grb_file->$RHISBL$(level825,:,:)
-;  rh80 = grb_file->$RHISBL$(level800,:,:)
-;  rh77 = grb_file->$RHISBL$(level775,:,:)
-;  rh75 = grb_file->$RHISBL$(level750,:,:)
-;  rh72 = grb_file->$RHISBL$(level725,:,:)
-  rh70 = grb_file->$RHISBL$(level700,:,:)
-;  rh67 = grb_file->$RHISBL$(level675,:,:)
-;  rh65 = grb_file->$RHISBL$(level650,:,:)
-;  rh62 = grb_file->$RHISBL$(level625,:,:)
-;  rh60 = grb_file->$RHISBL$(level600,:,:)
-;  rh57 = grb_file->$RHISBL$(level575,:,:)
-;  rh55 = grb_file->$RHISBL$(level550,:,:)
-;  rh52 = grb_file->$RHISBL$(level525,:,:)
-  rh50 = grb_file->$RHISBL$(level500,:,:)
-;  tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
-;          rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
-  tvar = (rh85 + rh70 + rh50) / 3
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    wstrid = 7
+;
+    uvar = grb_file->$UISBL$(level700,::-1,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$VISBL$(level700,::-1,:) * 1.9429 ; convert to knots
+    rh85 = grb_file->$RHISBL$(level850,::-1,:)
+;    rh82 = grb_file->$RHISBL$(level825,::-1,:)
+;    rh80 = grb_file->$RHISBL$(level800,::-1,:)
+;    rh77 = grb_file->$RHISBL$(level775,::-1,:)
+;    rh75 = grb_file->$RHISBL$(level750,::-1,:)
+;    rh72 = grb_file->$RHISBL$(level725,::-1,:)
+    rh70 = grb_file->$RHISBL$(level700,::-1,:)
+;    rh67 = grb_file->$RHISBL$(level675,::-1,:)
+;    rh65 = grb_file->$RHISBL$(level650,::-1,:)
+;    rh62 = grb_file->$RHISBL$(level625,::-1,:)
+;    rh60 = grb_file->$RHISBL$(level600,::-1,:)
+;    rh57 = grb_file->$RHISBL$(level575,::-1,:)
+;    rh55 = grb_file->$RHISBL$(level550,::-1,:)
+;    rh52 = grb_file->$RHISBL$(level525,::-1,:)
+    rh50 = grb_file->$RHISBL$(level500,::-1,:)
+;    tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
+;            rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
+    tvar = (rh85 + rh70 + rh50) / 3
+  else
+    lat = grb_file->$LAT$(:)
+    wstrid = 7
+;
+    uvar = grb_file->$UISBL$(level700,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$VISBL$(level700,:,:) * 1.9429 ; convert to knots
+    rh85 = grb_file->$RHISBL$(level850,:,:)
+;    rh82 = grb_file->$RHISBL$(level825,:,:)
+;    rh80 = grb_file->$RHISBL$(level800,:,:)
+;    rh77 = grb_file->$RHISBL$(level775,:,:)
+;    rh75 = grb_file->$RHISBL$(level750,:,:)
+;    rh72 = grb_file->$RHISBL$(level725,:,:)
+    rh70 = grb_file->$RHISBL$(level700,:,:)
+;    rh67 = grb_file->$RHISBL$(level675,:,:)
+;    rh65 = grb_file->$RHISBL$(level650,:,:)
+;    rh62 = grb_file->$RHISBL$(level625,:,:)
+;    rh60 = grb_file->$RHISBL$(level600,:,:)
+;    rh57 = grb_file->$RHISBL$(level575,:,:)
+;    rh55 = grb_file->$RHISBL$(level550,:,:)
+;    rh52 = grb_file->$RHISBL$(level525,:,:)
+    rh50 = grb_file->$RHISBL$(level500,:,:)
+;    tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
+;            rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
+    tvar = (rh85 + rh70 + rh50) / 3
+  end if
 ;
 end if
 ;

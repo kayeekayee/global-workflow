@@ -13,30 +13,12 @@ airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/)
 fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
-; Get the 500mb level index
-;
-do ll = 0,5
-  lnam = "lv_ISBL"+ll
-  if (isfilevar(grb_file,lnam)) then
-    break
-  end if
-end do
-;
-levnam = grb_file->$lnam$
-levunits = grb_file->$lnam$@units
-if (levunits .eq. "Pa") then
-  levnam = levnam / 100
-end if
-do ii = 0, dimsizes(levnam)-1
-  if (levnam(ii) .eq. 500) then
-    level = ii
-    break
-  end if
-end do
-;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
+;
+isolev = 500
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 intm = grb_file->$TSFC$@initial_time
 fctm = grb_file->$TSFC$@forecast_time
@@ -52,7 +34,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) 
   vvar = grb_file->$VISBL$(level,:,:)
   vort = new((/ny,nx/),float)
@@ -82,7 +64,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:)
   vvar = grb_file->$VISBL$(level,:,:)
   vort = new((/ny,nx/),float)
@@ -113,7 +95,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:)
   vvar = grb_file->$VISBL$(level,:,:)
   vort = new((/ny,nx/),float)
@@ -134,7 +116,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
 ;  uvar = grb_file->$UISBL$(level,:,:)
 ;  vvar = grb_file->$VISBL$(level,:,:)
   uvartmp = grb_file->$UISBL$(level,:,:) ; use to rotate winds
@@ -181,7 +163,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
   hvarorig = hvar
   fliphvar = lonFlip(hvar)
   uvar = grb_file->$UISBL$(level,::-1,:)
@@ -222,7 +204,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:)
   vvar = grb_file->$VISBL$(level,:,:)
 ;  uvartmp = grb_file->$UISBL$(level,:,:) ; use to rotate winds
@@ -273,7 +255,7 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvartmp = grb_file->$UISBL$(level,:,:)
   vvartmp = grb_file->$VISBL$(level,:,:)
   rot = grb_file->$ROT$(:,:)
@@ -316,25 +298,47 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
-  lat = lat - 50.955
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  uvar = grb_file->$UISBL$(level,:,:)
-  vvar = grb_file->$VISBL$(level,:,:)
-  vort = new((/ny,nx/),float)
-  flipuvar = new((/ny,nx/),float)
-  flipvvar = new((/ny,nx/),float)
-  fliplat = new((/ny/),float)
-  do j = 0,ny-1
-    do k = 0,nx-1
-      fj = (ny-1) - j
-      fliplat(j) = lat(fj)
-      flipuvar(j,k) = uvar(fj,k)
-      flipvvar(j,k) = vvar(fj,k)
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    lat = lat - 50.955
+    hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,::-1,:)
+    vvar = grb_file->$VISBL$(level,::-1,:)
+    vort = new((/ny,nx/),float)
+    flipuvar = new((/ny,nx/),float)
+    flipvvar = new((/ny,nx/),float)
+    fliplat = new((/ny/),float)
+    do j = 0,ny-1
+      do k = 0,nx-1
+        fj = (ny-1) - j
+        fliplat(j) = lat(fj)
+        flipuvar(j,k) = uvar(fj,k)
+        flipvvar(j,k) = vvar(fj,k)
+      end do
     end do
-  end do
-  lat = fliplat
+    lat = fliplat
+  else
+    lat = grb_file->$LAT$(:)
+    lat = lat - 50.955
+    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,:,:)
+    vvar = grb_file->$VISBL$(level,:,:)
+    vort = new((/ny,nx/),float)
+    flipuvar = new((/ny,nx/),float)
+    flipvvar = new((/ny,nx/),float)
+    fliplat = new((/ny/),float)
+    do j = 0,ny-1
+      do k = 0,nx-1
+        fj = (ny-1) - j
+        fliplat(j) = lat(fj)
+        flipuvar(j,k) = uvar(fj,k)
+        flipvvar(j,k) = vvar(fj,k)
+      end do
+    end do
+    lat = fliplat
+  end if
 ;
   vort = uv2vr_cfd(uvar,vvar,lat,lon,2)
   vort = -vort

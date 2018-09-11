@@ -150,10 +150,10 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
+  lat = grb_file->$LAT$(::-1)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
-;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  tvar = grb_file->$OCCOL$(::-1,:) ; Column organic carbon
+;  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
 ;
 end if
 ;

@@ -59,8 +59,8 @@ if (domainname .eq. "fim") then
     lon = grb_file->$LON$(:)
 ;
     if (fv3) then
-      uvar = grb_file->$U10M$(1,:,:) * 1.9429 ; convert to knots
-      vvar = grb_file->$V10M$(1,:,:) * 1.9429 ; convert to knots
+      uvar = grb_file->$U10M$(5,:,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$V10M$(5,:,:) * 1.9429 ; convert to knots
       uv2 = uvar * uvar
       vv2 = vvar * vvar
       tvar = sqrt(uv2 + vv2) + .00001
@@ -93,7 +93,15 @@ if (domainname .eq. "83") then
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
 ;
-  tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(5,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,:,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvar = sqrt(uv2 + vv2) + .00001
+  else
+    tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -109,7 +117,15 @@ if (domainname .eq. "130") then
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
 ;
-  tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(5,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,:,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvar = sqrt(uv2 + vv2) + .00001
+  else
+    tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -123,7 +139,15 @@ if (domainname .eq. "174") then
   lonorig = lon
   fliplon = lonFlip(lon)
 ;
-  tvarorig = grb_file->$WS80M$(::-1,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(5,::-1,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,::-1,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvarorig = sqrt(uv2 + vv2) + .00001
+  else
+    tvarorig = grb_file->$WS80M$(::-1,:) * 1.9429 ; convert to knots
+  end if
   tvar = tvarorig
   fliptvar = lonFlip(tvar)
 ;
@@ -141,7 +165,15 @@ if (domainname .eq. "236") then
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
 ;
-  tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(5,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,:,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvar = sqrt(uv2 + vv2) + .00001
+  else
+    tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -154,7 +186,15 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
 ;
-  tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(5,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,:,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvar = sqrt(uv2 + vv2) + .00001
+  else
+    tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -163,10 +203,19 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
 ;
-  tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    uvar = grb_file->$U10M$(5,::-1,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(5,::-1,:) * 1.9429 ; convert to knots
+    uv2 = uvar * uvar
+    vv2 = vvar * vvar
+    tvar = sqrt(uv2 + vv2) + .00001
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$WS80M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;

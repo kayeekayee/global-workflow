@@ -13,29 +13,12 @@ airport_loc = asciiread("$NCL_HOME/Airports_locs.txt",(/dimsizes(airport_id),2/)
 fname = asciiread("arw_file.txt",-1,"string")
 grb_file = addfile(fname,"r")
 ;
-; Get the 250mb level index
-;
-do ll = 0,5
-  lnam = "lv_ISBL"+ll
-  if (isfilevar(grb_file,lnam)) then
-    break
-  end if
-end do
-;
-levnam = grb_file->$lnam$
-levunits = grb_file->$lnam$@units
-if (levunits .eq. "Pa") then
-  levnam = levnam / 100
-end if
-do ii = 0, dimsizes(levnam)-1
-  if (levnam(ii) .eq. 250) then
-    level = ii
-  end if
-end do
-;
 domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
+;
+isolev = 250
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 intm = grb_file->$TSFC$@initial_time
 fctm = grb_file->$TSFC$@forecast_time
@@ -51,7 +34,7 @@ if (domainname .eq. "fim") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
   vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
   uv2 = uvar * uvar
@@ -68,7 +51,7 @@ if (domainname .eq. "129") then
 ;
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
   vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
   uv2 = uvar * uvar
@@ -86,7 +69,7 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
   vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
   uv2 = uvar * uvar
@@ -107,7 +90,7 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
   vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
   uv2 = uvar * uvar
@@ -126,7 +109,7 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
   hvarorig = hvar
   fliphvar = lonFlip(hvar)
   uvar = grb_file->$UISBL$(level,::-1,:) * 1.9429 ; convert to knots
@@ -154,7 +137,7 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
   vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
   uv2 = uvar * uvar
@@ -172,21 +155,24 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
   uvartmp = grb_file->$UISBL$(level,:,:)
   vvartmp = grb_file->$VISBL$(level,:,:)
-  rot = grb_file->$ROT$(:,:)
-  if (domainname .eq. "224") then
-    rot = -rot
-    uvartmp = -uvartmp
-    vvartmp = -vvartmp
+  if (fv3) then
+    uvar = uvartmp * 1.9429 ; convert to knots
+    vvar = vvartmp * 1.9429 ; convert to knots
+  else
+    rot = grb_file->$ROT$(:,:)
+    if (domainname .eq. "224") then
+      rot = -rot
+      uvartmp = -uvartmp
+      vvartmp = -vvartmp
+    end if
+    ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
+    vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
+    uvar = ugrid * 1.9429 ; convert to knots
+    vvar = vgrid * 1.9429 ; convert to knots
   end if
-;
-  ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
-  vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
-;
-  uvar = ugrid * 1.9429 ; convert to knots
-  vvar = vgrid * 1.9429 ; convert to knots
 ;
   uv2 = uvar * uvar
   vv2 = vvar * vvar
@@ -200,11 +186,19 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
-  uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,::-1,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$VISBL$(level,::-1,:) * 1.9429 ; convert to knots
+  else
+    lat = grb_file->$LAT$(:)
+    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
+  end if
   uv2 = uvar * uvar
   vv2 = vvar * vvar
   tvar = sqrt(uv2 + vv2)
@@ -280,7 +274,7 @@ setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
 end setvalues
 ;
-print(levnam(level)+"mb")
+print("250mb")
 print("gh")
 print(min(hvar))
 print(max(hvar))
@@ -360,27 +354,8 @@ if (domainname .eq. "130") then
     "vpHeightF" : vpheight
   end create
 ;
-  if (levnam(level) .eq. 25 .or. levnam(level) .eq. 20 .or. \
-      levnam(level) .eq. 10 .or. levnam(level) .eq. 5) then
-;
-    load "$NCL_HOME/obj/wind_20-300by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 250) then
-;
-    load "$NCL_HOME/obj/wind_20-180by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 850) then
-;
-    load "$NCL_HOME/obj/wind_5-90by5.ncl"
-    load "$NCL_HOME/obj/height_60m.ncl"
-;
-  end if
+  load "$NCL_HOME/obj/wind_20-180by20.ncl"
+  load "$NCL_HOME/obj/height_120m.ncl"
 ;
   setvalues cnid
     "cnRasterModeOn" : False
@@ -396,7 +371,7 @@ if (domainname .eq. "130") then
     end setvalues
   end if
 ;
-  titlestring = levnam(level) + "mb Wind (kt)"
+  titlestring = "250mb Wind (kt)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_vcid.ncl"
 ;
@@ -491,29 +466,10 @@ if (domainname .eq. "174") then
       "vpHeightF" : vpheight
   end create
 ;
-  if (levnam(level) .eq. 25 .or. levnam(level) .eq. 20 .or. \
-      levnam(level) .eq. 10 .or. levnam(level) .eq. 5) then
+  load "$NCL_HOME/obj/wind_20-180by20.ncl"
+  load "$NCL_HOME/obj/height_120m.ncl"
 ;
-    load "$NCL_HOME/obj/wind_20-300by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 250) then
-;
-    load "$NCL_HOME/obj/wind_20-180by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 850) then
-;
-    load "$NCL_HOME/obj/wind_5-90by5.ncl"
-    load "$NCL_HOME/obj/height_60m.ncl"
-;
-  end if
-;
-  titlestring = levnam(level) + "mb Wind (kt)"
+  titlestring = "250mb Wind (kt)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_vcid.ncl"
 ;
@@ -587,33 +543,14 @@ if (domainname .eq. "242") then
       "vpHeightF" : vpheight
   end create
 ;
-  if (levnam(level) .eq. 25 .or. levnam(level) .eq. 20 .or. \
-      levnam(level) .eq. 10 .or. levnam(level) .eq. 5) then
-;
-    load "$NCL_HOME/obj/wind_20-300by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 250) then
-;
-    load "$NCL_HOME/obj/wind_20-180by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 850) then
-;
-    load "$NCL_HOME/obj/wind_5-90by5.ncl"
-    load "$NCL_HOME/obj/height_60m.ncl"
-;
-  end if
+  load "$NCL_HOME/obj/wind_20-180by20.ncl"
+  load "$NCL_HOME/obj/height_120m.ncl"
 ;
   setvalues cnid
     "cnFillMode" : "AreaFill"
   end setvalues
 ;
-  titlestring = levnam(level) + "mb Wind (kt)"
+  titlestring = "250mb Wind (kt)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_vcid.ncl"
 ;
@@ -718,27 +655,8 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
       "vpHeightF" : vpheight
   end create
 ;
-  if (levnam(level) .eq. 25 .or. levnam(level) .eq. 20 .or. \
-      levnam(level) .eq. 10 .or. levnam(level) .eq. 5) then
-;
-    load "$NCL_HOME/obj/wind_20-300by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 250) then
-;
-    load "$NCL_HOME/obj/wind_20-180by20.ncl"
-    load "$NCL_HOME/obj/height_120m.ncl"
-;
-  end if
-;
-  if (levnam(level) .eq. 850) then
-;
-    load "$NCL_HOME/obj/wind_5-90by5.ncl"
-    load "$NCL_HOME/obj/height_60m.ncl"
-;
-  end if
+  load "$NCL_HOME/obj/wind_20-180by20.ncl"
+  load "$NCL_HOME/obj/height_120m.ncl"
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then
@@ -770,7 +688,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     "vcMinMagnitudeF" : 0
   end setvalues
 ;
-  titlestring = levnam(level) + "mb Wind (kt)"
+  titlestring = "250mb Wind (kt)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel_vcid.ncl"
 ;

@@ -371,33 +371,63 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,CPACC)) then
-      zz = CPACC
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,CPACC)) then
+        zz = CPACC
+      else
+        zz = CPACC + interval + "h"
+      end if
+      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
     else
-      zz = CPACC + interval + "h"
+      exit
     end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+;
+    t32 = grb_file->$T2M$(0,::-1,:) - 273.15
+    t32 = t32 * 9/5 + 32 ; Convert to F
+;
+    mvar = grb_file->$MSLP$(::-1,:) / 100. ; convert from Pa to mb
+    mint = 4
+    mdens = 0.5
+    mlinethick = 1.0
+;
+    h5 = grb_file->$GHISBL$(level500,::-1,:) / 10. ; use decameters
+    h10 = grb_file->$GHISBL$(level1000,::-1,:) / 10. ; use decameters
+    thick = h5 - h10
+    thint = 6
+    thdens = 0.5
+    thlinethick = 1.0
   else
-    exit
+    lat = grb_file->$LAT$(:)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,CPACC)) then
+        zz = CPACC
+      else
+        zz = CPACC + interval + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
+;
+    t32 = grb_file->$T2M$(:,:) - 273.15
+    t32 = t32 * 9/5 + 32 ; Convert to F
+;
+    mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
+    mint = 4
+    mdens = 0.5
+    mlinethick = 1.0
+;
+    h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
+    h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
+    thick = h5 - h10
+    thint = 6
+    thdens = 0.5
+    thlinethick = 1.0
   end if
-;
-  t32 = grb_file->$T2M$(:,:) - 273.15
-  t32 = t32 * 9/5 + 32 ; Convert to F
-;
-  mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 4
-  mdens = 0.5
-  mlinethick = 1.0
-;
-  h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
-  h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
-  thick = h5 - h10
-  thint = 6
-  thdens = 0.5
-  thlinethick = 1.0
 ;
 end if
 ;

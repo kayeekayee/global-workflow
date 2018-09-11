@@ -4,13 +4,7 @@ load "$NCARG_LIB/ncarg/nclscripts/csm/contributed.ncl"
 modl = getenv("MODL")
 interval = getenv("FCST_INTERVAL")
 interval = 6
-;
-str = str_match(modl, "FV3")
-if (.not.ismissing(str)) then
-  fv3 = True
-else
-  fv3 = False
-end if
+fcstln = getenv("FCST_LENGTH")
 ;
 load "$NCL_HOME/obj/cmap1_track2.ncl"
 ;
@@ -24,46 +18,53 @@ grb_file = addfile(fname,"r")
 ;
 domainname = asciiread("domain.txt",-1,"string")
 ;
-; Get the 500mb and 1000mb level indexes
-;
-if (domainname .ne. "129") then
-  do ll = 0,5
-    lnam = "lv_ISBL"+ll
-    if (isfilevar(grb_file,lnam)) then
-      break
-    end if
-  end do
-;
-  levnam = grb_file->$lnam$
-  levunits = grb_file->$lnam$@units
-  if (levunits .eq. "Pa") then
-    levnam = levnam / 100
-  end if
-  do ii = 0, dimsizes(levnam)-1
-    if (levnam(ii) .eq. 500) then
-      level500 = ii
-    end if
-    if (levnam(ii) .eq. 1000) then
-      level1000 = ii
-    end if
-  end do
-end if
-;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
 ;
-if (modl .ne. "MPAS") then
+isolev = 500
+load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
+;
+if (isfilevar(grb_file,TSFC)) then
   intm = grb_file->$TSFC$@initial_time
+  print("intm = "+intm)
   fctm = grb_file->$TSFC$@forecast_time
+  print("fctm = "+fctm)
   fctmunits = grb_file->$TSFC$@forecast_time_units
+  if (fctmunits .ne. "hours") then
+    fctm = fctm * tointeger(fctmunits)
+  end if
+else  ; for grid 129
+  intm = grb_file->$TPACC$@initial_time
+  fctm = grb_file->$TPACC$@forecast_time
+  fctmunits = grb_file->$TPACC$@forecast_time_units
   if (fctmunits .ne. "hours") then
     fctm = fctm * tointeger(fctmunits)
   end if
 end if
 ;
+if (fctm .ge. 6) then
+  back6fname = asciiread("back6_file.txt",-1,"string")
+  print("back6fname is "+back6fname)
+  back6_grb_file = addfile(back6fname,"r")
+  if (isfilevar(back6_grb_file,TSFC)) then
+    back6fctm = back6_grb_file->$TSFC$@forecast_time
+    back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+    if (back6fctmunits .ne. "hours") then
+      back6fctm = back6fctm * tointeger(back6fctmunits)
+    end if
+  else  ; for grid 129
+    back6fctm = back6_grb_file->$TPACC$@forecast_time
+    back6fctmunits = back6_grb_file->$TPACC$@forecast_time_units
+    if (back6fctmunits .ne. "hours") then
+      back6fctm = back6fctm * tointeger(back6fctmunits)
+    end if
+  end if
+else
+  exit
+end if
+;
 if (domainname .eq. "fim") then
 ;
   if (modl .eq. "MPAS") then
-;
     ny = filevardimsizes(grb_file,"g0_lat_0")
     nx = filevardimsizes(grb_file,"g0_lon_1")
 ;
@@ -71,31 +72,19 @@ if (domainname .eq. "fim") then
     fctm = grb_file->PRES_GDS0_SFC@forecast_time
     lat = grb_file->g0_lat_0(:)
     lon = grb_file->g0_lon_1(:)
-;
-    if ( fctm .gt. 0 ) then
+    if ( fctm .ge. 6 ) then
       tvar = grb_file->ACPCP_GDS0_SFC(::-1,:) + grb_file->NCPCP_GDS0_SFC(::-1,:)
+      back6fname = asciiread("back6_file.txt",-1,"string")
+      back6_grb_file = addfile(back6fname,"r")
+      back6fctm = back6_grb_file->PRES_GDS0_SFC@forecast_time
+      back6tvar = back6_grb_file->ACPCP_GDS0_SFC(::-1,:) + back6_grb_file->NCPCP_GDS0_SFC(::-1,:)
+      tvar = tvar - back6tvar
       tvar = tvar * 0.03937 ; convert to inches
       tvar = lonFlip(tvar)
     else
       exit
     end if
-;
-    mvar = grb_file->PRMSL_GDS0_MSL(::-1,:) / 100. ; convert from Pa to mb
-    mvar = lonFlip(mvar)
-    mint = 8
-    mdens = 0.8
-    mlinethick = 1.0
-;
-    h5 = grb_file->HGT_GDS0_ISBL(level500,::-1,:) / 10. ; use decameters
-    h10 = grb_file->HGT_GDS0_ISBL(level1000,::-1,:) / 10. ; use decameters
-    thick = h5 - h10
-    thick = lonFlip(thick)
-    thint = 6
-    thdens = 0.1
-    thlinethick = 1.0
-;
   else
-;
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
@@ -105,33 +94,43 @@ if (domainname .eq. "fim") then
       if (isfilevar(grb_file,TPACC)) then
         zz = TPACC
       else
-        zz = TPACC + interval + "h"
+        zz = TPACC + fctm + "h"
       end if
       tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
     else
       exit
     end if
-;
-    if (fv3) then
-      t32 = grb_file->$T2M$(0,:,:) - 273.15
+    if (isfilevar(back6_grb_file,TPACC)) then
+      zz = TPACC
     else
-      t32 = grb_file->$T2M$(:,:) - 273.15
+      zz = TPACC + back6fctm + "h"
     end if
-    t32 = t32 * 9/5 + 32 ; Convert to F
-;
-    mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-    mint = 8
-    mdens = 0.8
-    mlinethick = 1.0
-;
-    h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
-    h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
-    thick = h5 - h10
-    thint = 6
-    thdens = 0.1
-    thlinethick = 1.0
-;
+    if (back6fctm .eq. 0) then
+      back6tvar = tvar * 0
+    else
+      back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    end if
+    tvar = tvar - back6tvar
   end if
+;
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(:,:) - 273.15
+  end if
+  t32 = t32 * 9/5 + 32 ; Convert to F
+;
+  mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
+  mint = 8
+  mdens = 0.8
+  mlinethick = 1.0
+;
+  h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
+  h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
+  thick = h5 - h10
+  thint = 6
+  thdens = 0.1
+  thlinethick = 1.0
 ;
 end if
 ;
@@ -140,33 +139,17 @@ if (domainname .eq. "129") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
+  zz = TPACC
+  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + interval + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  zz = TPACC
+  if (back6fctm .ne. 6) then
+    back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
-    exit
+    back6tvar = 0
   end if
-;
-;  t32 = grb_file->$T2M$(:,:) - 273.15
-;  t32 = t32 * 9/5 + 32 ; Convert to F
-;
-;  mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-;  mint = 8
-;  mdens = 0.8
-;  mlinethick = 1.0
-;
-;  h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
-;  h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
-;  thick = h5 - h10
-;  thint = 6
-;  thdens = 0.1
-;  thlinethick = 1.0
+  tvar = tvar - back6tvar
 ;
 end if
 ;
@@ -182,14 +165,29 @@ if (domainname .eq. "83") then
     if (isfilevar(grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + fctm + "h"
     end if
     tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
     exit
   end if
+  if (isfilevar(back6_grb_file,TPACC)) then
+    zz = TPACC
+  else
+    zz = TPACC + back6fctm + "h"
+  end if
+  if (back6fctm .eq. 0) then
+    back6tvar = tvar * 0
+  else
+    back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  end if
+  tvar = tvar - back6tvar
 ;
-  t32 = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(:,:) - 273.15
+  end if
   t32 = t32 * 9/5 + 32 ; Convert to F
 ;
   mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
@@ -221,18 +219,33 @@ if (domainname .eq. "130") then
     if (isfilevar(grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + fctm + "h"
     end if
     tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
     exit
   end if
+  if (isfilevar(back6_grb_file,TPACC)) then
+    zz = TPACC
+  else
+    zz = TPACC + back6fctm + "h"
+  end if
+  if (back6fctm .eq. 0) then
+    back6tvar = tvar * 0
+  else
+    back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  end if
+  tvar = tvar - back6tvar
 ;
-  t32 = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(:,:) - 273.15
+  end if
   t32 = t32 * 9/5 + 32 ; Convert to F
 ;
   mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 2
+  mint = 8
   mdens = 0.5
   mlinethick = 1.0
 ;
@@ -258,17 +271,34 @@ if (domainname .eq. "174") then
     if (isfilevar(grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + fctm + "h"
     end if
     tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
   else
     exit
   end if
+  if (isfilevar(back6_grb_file,TPACC)) then
+    zz = TPACC
+  else
+    zz = TPACC + back6fctm + "h"
+  end if
+  if (back6fctm .eq. 0) then
+    back6tvar = tvar * 0
+  else
+    back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+  end if
+  tvar = tvar - back6tvar
+  tvarorig = tvar
+  fliptvar = lonFlip(tvar)
 ;
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
 ;
-  t32 = grb_file->$T2M$(::-1,:) - 273.15
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,::-1,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(::-1,:) - 273.15
+  end if
   t32 = t32 * 9/5 + 32 ; Convert to F
   t32orig = t32
   flipt32 = lonFlip(t32)
@@ -306,18 +336,33 @@ if (domainname .eq. "236") then
     if (isfilevar(grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + fctm + "h"
     end if
     tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
     exit
   end if
+  if (isfilevar(back6_grb_file,TPACC)) then
+    zz = TPACC
+  else
+    zz = TPACC + back6fctm + "h"
+  end if
+  if (back6fctm .eq. 0) then
+    back6tvar = tvar * 0
+  else
+    back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  end if
+  tvar = tvar - back6tvar
 ;
-  t32 = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(:,:) - 273.15
+  end if
   t32 = t32 * 9/5 + 32 ; Convert to F
 ;
   mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 2
+  mint = 8
   mdens = 0.5
   mlinethick = 1.0
 ;
@@ -339,22 +384,36 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
   if ( fctm .gt. 0 ) then
-    zz = TPACC + interval + "h"
     if (isfilevar(grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + fctm + "h"
     end if
     tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
     exit
   end if
+  if (isfilevar(back6_grb_file,TPACC)) then
+    zz = TPACC
+  else
+    zz = TPACC + back6fctm + "h"
+  end if
+  if (back6fctm .eq. 0) then
+    back6tvar = tvar * 0
+  else
+    back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  end if
+  tvar = tvar - back6tvar
 ;
-  t32 = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    t32 = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    t32 = grb_file->$T2M$(:,:) - 273.15
+  end if
   t32 = t32 * 9/5 + 32 ; Convert to F
 ;
   mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 4
+  mint = 8
   mdens = 0.5
   mlinethick = 1.0
 ;
@@ -372,40 +431,92 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fctm + "h"
+      end if
+      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
+    if (isfilevar(back6_grb_file,TPACC)) then
       zz = TPACC
     else
-      zz = TPACC + interval + "h"
+      zz = TPACC + back6fctm + "h"
     end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    if (back6fctm .eq. 0) then
+      back6tvar = tvar * 0
+    else
+      back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    end if
+    tvar = tvar - back6tvar
+;
+    t32 = grb_file->$T2M$(0,::-1,:) - 273.15
+    t32 = t32 * 9/5 + 32 ; Convert to F
+;
+    mvar = grb_file->$MSLP$(::-1,:) / 100. ; convert from Pa to mb
+    mint = 8
+    mdens = 0.5
+    mlinethick = 1.0
+;
+    h5 = grb_file->$GHISBL$(level500,::-1,:) / 10. ; use decameters
+    h10 = grb_file->$GHISBL$(level1000,::-1,:) / 10. ; use decameters
+    thick = h5 - h10
+    thint = 6
+    thdens = 0.5
+    thlinethick = 1.0
   else
-    exit
+    lat = grb_file->$LAT$(:)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fctm + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
+    if (isfilevar(back6_grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + back6fctm + "h"
+    end if
+    if (back6fctm .eq. 0) then
+      back6tvar = tvar * 0
+    else
+      back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    end if
+    tvar = tvar - back6tvar
+;
+    t32 = grb_file->$T2M$(:,:) - 273.15
+    t32 = t32 * 9/5 + 32 ; Convert to F
+;
+    mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
+    mint = 8
+    mdens = 0.5
+    mlinethick = 1.0
+;
+    h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
+    h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
+    thick = h5 - h10
+    thint = 6
+    thdens = 0.5
+    thlinethick = 1.0
   end if
-;
-  t32 = grb_file->$T2M$(:,:) - 273.15
-  t32 = t32 * 9/5 + 32 ; Convert to F
-;
-  mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 4
-  mdens = 0.5
-  mlinethick = 1.0
-;
-  h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
-  h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
-  thick = h5 - h10
-  thint = 6
-  thdens = 0.5
-  thlinethick = 1.0
 ;
 end if
 ;
 load "$NCL_HOME/obj/get_date_str_FIM.ncl"
 ;
 print(date_str)
-print("acp")
+print("6h totp")
 print(min(tvar))
 print(max(tvar))
 ;
@@ -471,15 +582,10 @@ end create
 setvalues wid
    "wkColorMap" : gen_colormap()
 end setvalues
-;gsn_draw_colormap(wid)
-;frame(wid)
-;exit
 ;
 setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
 end setvalues
-;
-; Create a ScalarField object.
 ;
 if (domainname .eq. "130") then
 ;
@@ -492,6 +598,7 @@ if (domainname .eq. "130") then
     setvalues mpid
       "mpNationalLineColor" : "background"
       "mpCountyLineColor" : "background"
+      "mpGridAndLimbOn" : False
     end setvalues
   end if
 ;
@@ -531,9 +638,7 @@ if (domainname .eq. "130") then
       "sfMissingValueV" : thick@_FillValue
   end create
 ;
-; 3-h convective precip
-;
-  load "$NCL_HOME/obj/precip_0-2_whtbkg.ncl"
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
 ;
   setvalues cnid
     "cnRasterModeOn" : False
@@ -699,15 +804,7 @@ if (domainname .eq. "174") then
       "sfMissingValueV" : thick@_FillValue
   end create
 ;
-; 3-h precip
-;
-  load "$NCL_HOME/obj/precip_0-2_whtbkg.ncl"
-;
-  setvalues cnid
-    "cnRasterModeOn" : False
-  end setvalues
-;
-; 32F isotherm
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
 ;
   load "$NCL_HOME/obj/32F_isotherm.ncl"
 ;
@@ -715,10 +812,12 @@ if (domainname .eq. "174") then
       "cnLineColors" : (/24/)
   end setvalues
 ;
-  if (idom .eq. 0 .or. idom .eq. 1 .or. idom .eq. 4) then
-    mdens = 3.0
-  else
-    mdens = 1.0
+  if (iq .ne. 0) then
+    mlinethick = 2.0
+    thlinethick = 2.0
+    setvalues cnid5
+      "cnLineThicknessF" : 3.0
+    end setvalues
   end if
 ;
   cnid4 = create "contourplot" contourPlotClass wid
@@ -844,11 +943,17 @@ if (domainname .eq. "242") then
       "sfMissingValueV" : thick@_FillValue
   end create
 ;
-  load "$NCL_HOME/obj/precip_0-2_whtbkg.ncl"
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
 ;
-  setvalues cnid
-    "cnFillMode" : "AreaFill"
-  end setvalues
+;  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+;  else
+;    setvalues cnid
+;      "cnFillMode" : "RasterFill"
+;    end setvalues
+;  end if
 ;
   load "$NCL_HOME/obj/32F_isotherm.ncl"
 ;
@@ -856,7 +961,13 @@ if (domainname .eq. "242") then
       "cnLineColors" : (/24/)
   end setvalues
 ;
-  mdens = 1.0
+  if (iq .ne. 0) then
+    mlinethick = 2.0
+    thlinethick = 2.0
+    setvalues cnid5
+      "cnLineThicknessF" : 3.0
+    end setvalues
+  end if
 ;
   cnid4 = create "contourplot" contourPlotClass wid
       "cnScalarFieldData":  mfield
@@ -948,43 +1059,39 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
         "sfMissingValueV" : tvar@_FillValue
     end create
 ;
-    if (domainname .ne. "129") then
+    t32field = create "ScalarField" scalarFieldClass appid
+        "sfDataArray" : t32
+        "sfXCStartV" : 0
+        "sfYCStartV" : ydim
+        "sfXCEndV" : xdim
+        "sfYCEndV" : 0
+        "sfMissingValueV" : t32@_FillValue
+    end create
 ;
-      if (modl .ne. "MPAS") then
-        t32field = create "ScalarField" scalarFieldClass appid
-            "sfDataArray" : t32
-            "sfXCStartV" : 0
-            "sfYCStartV" : ydim
-            "sfXCEndV" : xdim
-            "sfYCEndV" : 0
-            "sfMissingValueV" : t32@_FillValue
-        end create
-      end if
+    mfield = create "ScalarField" scalarFieldClass appid
+        "sfDataArray" : mvar
+        "sfXCStartV" : 0
+        "sfYCStartV" : ydim
+        "sfXCEndV" : xdim
+        "sfYCEndV" : 0
+        "sfMissingValueV" : mvar@_FillValue
+    end create
 ;
-      mfield = create "ScalarField" scalarFieldClass appid
-          "sfDataArray" : mvar
-          "sfXCStartV" : 0
-          "sfYCStartV" : ydim
-          "sfXCEndV" : xdim
-          "sfYCEndV" : 0
-          "sfMissingValueV" : mvar@_FillValue
-      end create
-;
-      zfield = create "ScalarField" scalarFieldClass appid
-          "sfDataArray" : thick
-          "sfXCStartV" : 0
-          "sfYCStartV" : ydim
-          "sfXCEndV" : xdim
-          "sfYCEndV" : 0
-          "sfMissingValueV" : thick@_FillValue
-      end create
-;
-    end if
+    zfield = create "ScalarField" scalarFieldClass appid
+        "sfDataArray" : thick
+        "sfXCStartV" : 0
+        "sfYCStartV" : ydim
+        "sfXCEndV" : xdim
+        "sfYCEndV" : 0
+        "sfMissingValueV" : thick@_FillValue
+    end create
 ;
   end if
 ;
   if (domainname .eq. "236" .or. domainname .eq. "201" .or. domainname .eq. "224" .or. \
       domainname .eq. "83") then
+;
+    iq = 0
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -1024,79 +1131,12 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   end if
 ;
-  load "$NCL_HOME/obj/precip_0-2_whtbkg.ncl"
-;
-; 32F isotherm
-;
-  if (modl .ne. "MPAS") then
-    load "$NCL_HOME/obj/32F_isotherm.ncl"
-;
-    setvalues cnid5
-        "cnLineColors" : (/24/)
-    end setvalues
-  end if
-;
-  if (domainname .ne. "129") then
-;
-    cnid4 = create "contourplot" contourPlotClass wid
-        "cnScalarFieldData":  mfield
-        "cnFillOn" : False
-        "cnLevelSelectionMode" : "ManualLevels"
-        "cnMinLevelValF" : 900
-        "cnMaxLevelValF" : 1100
-        "cnLevelSpacingF" : mint
-        "cnLevelFlags" : (/"LineAndLabel"/)
-        "cnInfoLabelOn" : False
-        "cnLinesOn" : True
-        "cnLineColor" : 23
-        "cnLineLabelsOn" : True
-        "cnLineLabelInterval" : 1
-        "cnLineLabelFont" : 21
-        "cnLineLabelFontHeightF" : 0.01
-        "cnLineLabelFontColor" : 23 ; "Background"
-        "cnLineLabelBackgroundColor" : 1
-        "cnLineLabelPlacementMode" : "Computed"
-        "cnLineLabelDensityF" : mdens
-        "cnLineThicknessF" : mlinethick
-        "pmTickMarkDisplayMode" : "NoCreate"
-        "vpXF"      : vpx        ; set viewport
-        "vpYF"      : vpy
-        "vpWidthF"  : vpwidth
-        "vpHeightF" : vpheight
-    end create
-;
-    cnid6 = create "contourplot" contourPlotClass wid
-        "cnScalarFieldData":  zfield
-        "cnFillOn" : False
-        "cnLevelSelectionMode" : "ManualLevels"
-        "cnMinLevelValF" : 402
-        "cnMaxLevelValF" : 600
-        "cnLevelSpacingF" : thint
-        "cnLevelFlags" : (/"LineAndLabel"/)
-        "cnInfoLabelOn" : False
-        "cnLinesOn" : True
-        "cnLineColor" : 2
-;        "cnLineDashPattern" : 5
-        "cnLineLabelsOn" : True
-        "cnLineLabelInterval" : 1
-        "cnLineLabelFont" : 21
-        "cnLineLabelFontHeightF" : 0.01
-        "cnLineLabelFontColor" : 2 ; "Foreground"
-        "cnLineLabelBackgroundColor" : 1
-        "cnLineLabelPlacementMode" : "Computed"
-        "cnLineLabelDensityF" : thdens
-        "cnLineThicknessF" : thlinethick
-        "pmTickMarkDisplayMode" : "NoCreate"
-        "vpXF"      : vpx        ; set viewport
-        "vpYF"      : vpy
-        "vpWidthF"  : vpwidth
-        "vpHeightF" : vpheight
-    end create
-;
-  end if
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
       domainname .eq. "201" .or. domainname .eq. "224") then
+;
+    iq = 0
 ;
     setvalues cnid
       "cnRasterModeOn" : False
@@ -1104,31 +1144,89 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   end if
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
-    titlestring = interval + "h Precip (in), MSLP (mb)"
-  else
-    titlestring = interval + "h Precip (in), MSLP (mb), 1000-500 Thickness (dm)"
+  load "$NCL_HOME/obj/32F_isotherm.ncl"
+;
+  setvalues cnid5
+      "cnLineColors" : (/24/)
+  end setvalues
+;
+  if (domainname .ne. "fim") then
+    if (iq .ne. 0) then
+      mlinethick = 2.0
+      thlinethick = 2.0
+      setvalues cnid5
+        "cnLineThicknessF" : 3.0
+      end setvalues
+    end if
   end if
 ;
+  cnid4 = create "contourplot" contourPlotClass wid
+      "cnScalarFieldData":  mfield
+      "cnFillOn" : False
+      "cnLevelSelectionMode" : "ManualLevels"
+      "cnMinLevelValF" : 900
+      "cnMaxLevelValF" : 1100
+      "cnLevelSpacingF" : mint
+      "cnLevelFlags" : (/"LineAndLabel"/)
+      "cnInfoLabelOn" : False
+      "cnLinesOn" : True
+      "cnLineColor" : 23
+      "cnLineLabelsOn" : True
+      "cnLineLabelInterval" : 1
+      "cnLineLabelFont" : 21
+      "cnLineLabelFontHeightF" : 0.01
+      "cnLineLabelFontColor" : 23 ; "Background"
+      "cnLineLabelBackgroundColor" : 1
+      "cnLineLabelPlacementMode" : "Computed"
+      "cnLineLabelDensityF" : mdens
+      "cnLineThicknessF" : mlinethick
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  cnid6 = create "contourplot" contourPlotClass wid
+      "cnScalarFieldData":  zfield
+      "cnFillOn" : False
+      "cnLevelSelectionMode" : "ManualLevels"
+      "cnMinLevelValF" : 402
+      "cnMaxLevelValF" : 600
+      "cnLevelSpacingF" : thint
+      "cnLevelFlags" : (/"LineAndLabel"/)
+      "cnInfoLabelOn" : False
+      "cnLinesOn" : True
+      "cnLineColor" : 2
+;      "cnLineDashPattern" : 5
+      "cnLineLabelsOn" : True
+      "cnLineLabelInterval" : 1
+      "cnLineLabelFont" : 21
+      "cnLineLabelFontHeightF" : 0.01
+      "cnLineLabelFontColor" : 2 ; "Foreground"
+      "cnLineLabelBackgroundColor" : 1
+      "cnLineLabelPlacementMode" : "Computed"
+      "cnLineLabelDensityF" : thdens
+      "cnLineThicknessF" : thlinethick
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  titlestring = interval + "h Precip (in), MSLP (mb), 1000-500 Thickness (dm)"
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
-; Draw map of 3h Precip, MSLP
+; Draw map
 ;
   draw(cnid)
-  if (domainname .ne. "129") then
-    draw(cnid4)
-    if (domainname .eq. "fim") then
-      if (modl .ne. "MPAS") then
-        draw(cnid5)
-      end if
-    else
-      if (modl .ne. "MPAS") then
-        draw(cnid5)
-      end if
-      draw(cnid6)
-    end if
+  draw(cnid5)
+  if (domainname .ne. "fim")
+    draw(cnid6)
   end if
+  draw(cnid4)
   draw(mpid)
 ;
   gsres = True
@@ -1150,4 +1248,4 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
-
+;

@@ -128,10 +128,17 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$AODTOTSFC$(:,:) ; total aerosol
-;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$AODTOTSFC$(::-1,:) ; total aerosol
+;    hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$AODTOTSFC$(:,:) ; total aerosol
+;    hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  end if
 ;
 end if
 ;

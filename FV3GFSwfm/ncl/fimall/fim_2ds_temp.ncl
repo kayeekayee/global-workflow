@@ -73,7 +73,11 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    tvar = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    tvar = grb_file->$T2M$(:,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
   tsfcvar = grb_file->$TSFC$(:,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
@@ -92,7 +96,11 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    tvar = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    tvar = grb_file->$T2M$(:,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
   tsfcvar = grb_file->$TSFC$(:,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
@@ -109,7 +117,11 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  tvar = grb_file->$T2M$(::-1,:) - 273.15
+  if (fv3) then
+    tvar = grb_file->$T2M$(0,::-1,:) - 273.15
+  else
+    tvar = grb_file->$T2M$(::-1,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
   tsfcvar = grb_file->$TSFC$(::-1,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
@@ -130,7 +142,11 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  tvar = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    tvar = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    tvar = grb_file->$T2M$(:,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
   tsfcvar = grb_file->$TSFC$(:,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
@@ -146,7 +162,11 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  tvar = grb_file->$T2M$(:,:) - 273.15
+  if (fv3) then
+    tvar = grb_file->$T2M$(0,:,:) - 273.15
+  else
+    tvar = grb_file->$T2M$(:,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
   tsfcvar = grb_file->$TSFC$(:,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
@@ -159,11 +179,18 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$T2M$(:,:) - 273.15
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$T2M$(0,::-1,:) - 273.15
+    tsfcvar = grb_file->$TSFC$(::-1,:) - 273.15
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$T2M$(:,:) - 273.15
+    tsfcvar = grb_file->$TSFC$(:,:) - 273.15
+  end if
   tvar = tvar * 9/5 + 32 ; Convert to F
-  tsfcvar = grb_file->$TSFC$(:,:) - 273.15
   tsfcvar = tsfcvar * 9/5 + 32 ; Convert to F
   tvar = tvar - tsfcvar
 ;

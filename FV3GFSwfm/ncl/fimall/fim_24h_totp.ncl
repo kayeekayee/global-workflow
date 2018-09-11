@@ -84,8 +84,16 @@ if (domainname .eq. "fim") then
 ;
     lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    zz = TPACC + fctm + "h"
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fctm + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
     if (isfilevar(back24_grb_file,TPACC)) then
       zz = TPACC
     else
@@ -128,8 +136,16 @@ if (domainname .eq. "83") then
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  if ( fctm .gt. 0 ) then
+    if (isfilevar(grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + fctm + "h"
+    end if
+    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  else
+    exit
+  end if
   if (isfilevar(back24_grb_file,TPACC)) then
     zz = TPACC
   else
@@ -155,8 +171,16 @@ if (domainname .eq. "130") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  if ( fctm .gt. 0 ) then
+    if (isfilevar(grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + fctm + "h"
+    end if
+    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  else
+    exit
+  end if
   if (isfilevar(back24_grb_file,TPACC)) then
     zz = TPACC
   else
@@ -180,8 +204,16 @@ if (domainname .eq. "174") then
   lon = grb_file->$LON$(:)
   lonorig = lon
   fliplon = lonFlip(lon)
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+  if ( fctm .gt. 0 ) then
+    if (isfilevar(grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + fctm + "h"
+    end if
+    tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+  else
+    exit
+  end if
   if (isfilevar(back24_grb_file,TPACC)) then
     zz = TPACC
   else
@@ -209,8 +241,16 @@ if (domainname .eq. "236") then
   latin1 = grb_file->$LON$@Latin1
   latin2 = grb_file->$LON$@Latin2
   lov = grb_file->$LON$@Lov
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  if ( fctm .gt. 0 ) then
+    if (isfilevar(grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + fctm + "h"
+    end if
+    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  else
+    exit
+  end if
   if (isfilevar(back24_grb_file,TPACC)) then
     zz = TPACC
   else
@@ -233,8 +273,16 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  if ( fctm .gt. 0 ) then
+    if (isfilevar(grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + fctm + "h"
+    end if
+    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+  else
+    exit
+  end if
   if (isfilevar(back24_grb_file,TPACC)) then
     zz = TPACC
   else
@@ -254,21 +302,55 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  zz = TPACC + fctm + "h"
-  tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  if (isfilevar(back24_grb_file,TPACC)) then
-    zz = TPACC
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fctm + "h"
+      end if
+      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
+    if (isfilevar(back24_grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + back24fctm + "h"
+    end if
+    if (fctm .ne. 24) then
+      back24tvar = back24_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    else
+      back24tvar = 0
+    end if
+    tvar = tvar - back24tvar
   else
-    zz = TPACC + back24fctm + "h"
+    lat = grb_file->$LAT$(:)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fctm + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
+    if (isfilevar(back24_grb_file,TPACC)) then
+      zz = TPACC
+    else
+      zz = TPACC + back24fctm + "h"
+    end if
+    if (fctm .ne. 24) then
+      back24tvar = back24_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      back24tvar = 0
+    end if
+    tvar = tvar - back24tvar
   end if
-  if (fctm .ne. 24) then
-    back24tvar = back24_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    back24tvar = 0
-  end if
-  tvar = tvar - back24tvar
 ;
 end if
 ;

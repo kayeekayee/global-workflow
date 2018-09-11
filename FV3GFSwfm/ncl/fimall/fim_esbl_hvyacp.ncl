@@ -371,39 +371,76 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + interval + "h"
-    end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  else
-    exit
-  end if
 ;
-  tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
-  tvarback1 = tvar * 0.
-  tvarback2 = tvar * 0.
-  if (fnameback1test .eq. 1) then
-    if ( isfilevar(grb_file_back1,TPACC) ) then
-      zz = TPACC
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
     else
-      zz = TPACC + interval + "h"
+      exit
     end if
-    tvarback1 = grb_file_back1->$zz$(:,:) * 0.03937 ; convert to inches
-    tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
-  end if
-  if (fnameback2test .eq. 1) then
-    if ( isfilevar(grb_file_back2,TPACC) ) then
-      zz = TPACC
+;
+    tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
+    tvarback1 = tvar * 0.
+    tvarback2 = tvar * 0.
+    if (fnameback1test .eq. 1) then
+      if ( isfilevar(grb_file_back1,TPACC) ) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvarback1 = grb_file_back1->$zz$(::-1,:) * 0.03937 ; convert to inches
+      tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
+    end if
+    if (fnameback2test .eq. 1) then
+      if ( isfilevar(grb_file_back2,TPACC) ) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvarback2 = grb_file_back2->$zz$(::-1,:) * 0.03937 ; convert to inches
+      tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
+    end if
+  else
+    lat = grb_file->$LAT$(:)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
     else
-      zz = TPACC + interval + "h"
+      exit
     end if
-    tvarback2 = grb_file_back2->$zz$(:,:) * 0.03937 ; convert to inches
-    tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
+;
+    tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
+    tvarback1 = tvar * 0.
+    tvarback2 = tvar * 0.
+    if (fnameback1test .eq. 1) then
+      if ( isfilevar(grb_file_back1,TPACC) ) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvarback1 = grb_file_back1->$zz$(:,:) * 0.03937 ; convert to inches
+      tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
+    end if
+    if (fnameback2test .eq. 1) then
+      if ( isfilevar(grb_file_back2,TPACC) ) then
+        zz = TPACC
+      else
+        zz = TPACC + interval + "h"
+      end if
+      tvarback2 = grb_file_back2->$zz$(:,:) * 0.03937 ; convert to inches
+      tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
+    end if
   end if
 ;
 end if

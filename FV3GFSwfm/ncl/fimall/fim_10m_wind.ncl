@@ -98,8 +98,13 @@ if (domainname .eq. "83") then
   lon = grb_file->$LON$(:,:)
   wstrid = 10
 ;
-  uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+  else
+    uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -116,8 +121,13 @@ if (domainname .eq. "130") then
   lov = grb_file->$LON$@Lov
   wstrid = 7
 ;
-  uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+  else
+    uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -132,10 +142,15 @@ if (domainname .eq. "174") then
   fliplon = lonFlip(lon)
   wstrid = 50
 ;
-  uvarorig = grb_file->$U10M$(::-1,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvarorig = grb_file->$U10M$(0,::-1,:) * 1.9429 ; convert to knots
+    vvarorig = grb_file->$V10M$(0,::-1,:) * 1.9429 ; convert to knots
+  else
+    uvarorig = grb_file->$U10M$(::-1,:) * 1.9429 ; convert to knots
+    vvarorig = grb_file->$V10M$(::-1,:) * 1.9429 ; convert to knots
+  end if
   uvar = uvarorig
   flipuvar = lonFlip(uvar)
-  vvarorig = grb_file->$V10M$(::-1,:) * 1.9429 ; convert to knots
   vvar = vvarorig
   flipvvar = lonFlip(vvar)
 ;
@@ -154,8 +169,13 @@ if (domainname .eq. "236") then
   lov = grb_file->$LON$@Lov
   wstrid = 3
 ;
-  uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    uvar = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+  else
+    uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;
@@ -167,20 +187,25 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
 ;
   lat = grb_file->$LAT$(:,:)
   lon = grb_file->$LON$(:,:)
-  uvartmp = grb_file->$U10M$(:,:)
-  vvartmp = grb_file->$V10M$(:,:)
-  rot = grb_file->$ROT$(:,:)
-  if (domainname .eq. "224") then
-    rot = -rot
-    uvartmp = -uvartmp
-    vvartmp = -vvartmp
+  if (fv3) then
+    uvartmp = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
+    vvartmp = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+    uvar = uvartmp * 1.9429 ; convert to knots
+    vvar = vvartmp * 1.9429 ; convert to knots
+  else
+    uvartmp = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+    vvartmp = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+    rot = grb_file->$ROT$(:,:)
+    if (domainname .eq. "224") then
+      rot = -rot
+      uvartmp = -uvartmp
+      vvartmp = -vvartmp
+    end if
+    ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
+    vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
+    uvar = ugrid * 1.9429 ; convert to knots
+    vvar = vgrid * 1.9429 ; convert to knots
   end if
-;
-  ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
-  vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
-;
-  uvar = ugrid * 1.9429 ; convert to knots
-  vvar = vgrid * 1.9429 ; convert to knots
 ;
   wstrid = 4
 ;
@@ -191,12 +216,18 @@ if (domainname .eq. "244") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
   wstrid = 5
 ;
-  uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
-  vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    uvar = grb_file->$U10M$(0,::-1,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(0,::-1,:) * 1.9429 ; convert to knots
+  else
+    lat = grb_file->$LAT$(:)
+    uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+    vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+  end if
 ;
 end if
 ;

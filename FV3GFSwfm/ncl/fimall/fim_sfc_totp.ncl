@@ -232,17 +232,32 @@ if (domainname .eq. "244") then
   nx = filevardimsizes(grb_file,LON)
 ;
   fcst1 = fctm
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if ( fctm .gt. 0 ) then
-    if (isfilevar(grb_file,TPACC)) then
-      zz = TPACC
+;
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fcst1 + "h"
+      end if
+      tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
     else
-      zz = TPACC + fcst1 + "h"
+      exit
     end if
-    tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
   else
-    exit
+    lat = grb_file->$LAT$(:)
+    if ( fctm .gt. 0 ) then
+      if (isfilevar(grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + fcst1 + "h"
+      end if
+      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    else
+      exit
+    end if
   end if
 ;
 end if
