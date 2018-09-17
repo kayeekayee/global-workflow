@@ -22,12 +22,12 @@
   %metatasks;
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="4">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="8">
   <log>
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_ncl.log</cyclestr>
   </log>
 
-  <cycledef>201806010000 202806190000 24:00:00</cycledef>
+  <cycledef>201807290000 202806190000 24:00:00</cycledef>
 
   <metatask throttle="25">
     &fcst_168hr_metatask;

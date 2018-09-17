@@ -6,5 +6,15 @@ RETRO
 rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_img.db
 rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_img.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_img.db
 
+  07/29 select fhours
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/tmp_img24fim.xml -d /home/rtfim/retro_dbfiles/fv3chem_img24fim.db
+
+7/21 - 7/30
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/tmp_img24all.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img24all.db
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/tmp_img24fim.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img24fim.db
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/img24fim_sub.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img24fim.db 
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/xml/img24fim_sub24.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_img24fim24.db 
+
+
 
 

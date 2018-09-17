@@ -7,9 +7,13 @@
   <!ENTITY SERVICE "service">
   <!ENTITY MPIRUN       "mpirun -n">
 
+  <!ENTITY MET_MODULE "/contrib/modulefiles">
+  <!ENTITY MET_VERSION "met/7.0">
+
   <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
   <!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
   <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
+  <!ENTITY FV3GFS_POST_DIR "post/fim">
   <!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
   <!ENTITY RTFIM_HOME "/home/rtfim">
   <!ENTITY SCRATCH4_ROOT "/scratch4/BMC/fim">
@@ -22,7 +26,7 @@
   <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">
   <!ENTITY NCL_DIFF_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimalldiff">
   <!ENTITY COPYGB "/home/rtfim/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
-  <!ENTITY CNVGRIB "cnvgrib">
+  <!ENTITY CNVGRIB "/apps/cnvgrib/1.4.0/bin/cnvgrib">
   <!ENTITY WGRIB "wgrib">
   <!ENTITY WGRIB2 "wgrib2">
 
@@ -35,3 +39,5 @@
 
   <!ENTITY CDUMP  "gfs">
   <!ENTITY CASE   "C384">
+
+  <!ENTITY PARTITION_JET "">
