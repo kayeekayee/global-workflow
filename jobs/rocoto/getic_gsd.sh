@@ -39,7 +39,7 @@ status=$?
 [[ $status -ne 0 ]] && exit $status
 
 ###############################################################
-# Set script and dependency variablesyyyymmdd=`echo $CDATE | cut -c1-8`
+# Set script and dependency variables
 yyyymmdd=$(echo $CDATE | cut -c1-8)
 hh=$(echo $CDATE | cut -c9-10)
 yyyy=$(echo $CDATE | cut -c1-4)
@@ -59,9 +59,6 @@ echo "PSLOT = $PSLOT"
 echo
 
 ## initialize
-yyyymmdd=`echo $CDATE | cut -c1-8`
-hh=`echo $CDATE | cut -c9-10`
-yyddd=`date +%y%j -u -d $yyyymmdd`
 fv3ic_dir=$ICSDIR/${CDATE}/${CDUMP}
 
 ## create links in FV3ICS directory
@@ -72,19 +69,19 @@ if [[ -f $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio ]]
 then
   ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio sfcanl.gfs.${CDATE}
   ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.atmanl.nemsio siganl.gfs.${CDATE}
-  if [[ -f $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
-  then 
-    ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
-  fi
+#  if [[ -f $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
+#  then 
+#    ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
+#  fi
 else 
   if [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio ]]
   then
     ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio sfcanl.gfs.${CDATE}
     ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.atmanl.nemsio siganl.gfs.${CDATE}
-    if [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
-    then
-      ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
-    fi 
+#    if [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
+#    then
+#      ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
+#    fi 
   fi
 fi
 
@@ -107,8 +104,3 @@ mv ./gdas.${yyyymmdd}/${hh}/gdas.t${hh}z.atmanl.nemsio .
 rm -rf ./gdas.${yyyymmdd}
 echo $hpss_dir
 echo $gdasfile
-
-
- 
-
-
