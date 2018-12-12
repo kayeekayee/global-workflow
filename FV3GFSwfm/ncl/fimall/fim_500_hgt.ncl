@@ -52,11 +52,18 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; convert to decameters
-    uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
-    vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
+    if (fv3) then
+      lat = grb_file->$LAT$(::-1)
+      hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; convert to decameters
+      uvar = grb_file->$UISBL$(level,::-1,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$VISBL$(level,::-1,:) * 1.9429 ; convert to knots
+    else
+      lat = grb_file->$LAT$(:)
+      hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; convert to decameters
+      uvar = grb_file->$UISBL$(level,:,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$VISBL$(level,:,:) * 1.9429 ; convert to knots
+    end if
     uv2 = uvar * uvar
     vv2 = vvar * vvar
     wind = sqrt(uv2 + vv2)
@@ -308,6 +315,107 @@ setvalues NhlGetWorkspaceObjectId()
 end setvalues
 ;
 ; Create ScalarField and VectorField objects.
+;
+;tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+;  tvar = tvarsave
+;
+;  if (max(tvar(lly:ury,llx:urx)) .le. 20) then
+;    tvar(lly,llx) = 21
+;  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  hfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : hvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : hvar@_FillValue
+  end create
+;
+  vfield = create "VectorField" vectorFieldClass appid
+      "vfUDataArray" : uvar
+      "vfVDataArray" : vvar
+      "vfXCStartSubsetV" : llx
+      "vfYCStartSubsetV" : lly
+      "vfXCEndSubsetV" : urx
+      "vfYCEndSubsetV" : ury
+      "vfMissingVValueV" : vvar@_FillValue
+      "vfMissingUValueV" : uvar@_FillValue
+      "vfXCStride" : wstrid       ; i.e., plot a vector at every (n+1)th point.
+      "vfYCStride" : wstrid
+  end create
+;
+  vcid = create "vectorplot" vectorPlotClass wid
+      "vcVectorFieldData":  vfield
+      "vcGlyphStyle" : "WindBarb"
+      "vcWindBarbLineThicknessF" : 1.2
+      "vcWindBarbColor" : 0
+      "vcRefAnnoOn" : False
+      "vcWindBarbTickSpacingF" : 0.1875
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  setvalues vcid
+    "vcMinMagnitudeF" : 0
+  end setvalues
+;
+  load "$NCL_HOME/obj/height_colorfill_60m.ncl"
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnRasterModeOn" : False
+    end setvalues
+  end if
+;
+  titlestring = "500mb Height (dm), Wind (kt)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel_vcid.ncl"
+;
+  draw(cnid)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  draw(vcid)
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
 ;
 if (domainname .eq. "130") then
 ;
@@ -574,7 +682,7 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
@@ -689,7 +797,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

@@ -414,6 +414,163 @@ if [ "${ISDIR}" == "NAT" ]; then
                 pv2_wind.png    \
                 pv2_pres.png
 
+    set -A pngsfim sfc_temp-0.png    \
+                   sfc_temp-1.png    \
+                   850_wind-0.png    \
+                   850_wind-1.png    \
+                   250_wind-0.png    \
+                   250_wind-1.png    \
+                   25_wind.-0png     \
+                   25_wind-1.png     \
+                   20_wind-0.png     \
+                   20_wind-1.png     \
+                   10_wind-0.png     \
+                   10_wind-1.png     \
+                   5_wind-0.png      \
+                   5_wind-1.png      \
+                   850_wmag-0.png    \
+                   850_wmag-1.png    \
+                   250_wmag-0.png    \
+                   250_wmag-1.png    \
+                   25_wmag-0.png     \
+                   25_wmag-1.png     \
+                   20_wmag-0.png     \
+                   20_wmag-1.png     \
+                   10_wmag-0.png     \
+                   10_wmag-1.png     \
+                   5_wmag-0.png      \
+                   5_wmag-1.png      \
+                   sfc_pwtr-0.png    \
+                   sfc_pwtr-1.png    \
+                   sfc_cwat-0.png    \
+                   sfc_cwat-1.png    \
+                   sfc_mslp-0.png    \
+                   sfc_mslp-1.png    \
+                   10_temp-0.png     \
+                   10_temp-1.png     \
+                   500_temp-0.png    \
+                   500_temp-1.png    \
+                   700_temp-0.png    \
+                   700_temp-1.png    \
+                   850_temp-0.png    \
+                   850_temp-1.png    \
+                   925_temp-0.png    \
+                   925_temp-1.png    \
+                   500_hgt-0.png     \
+                   500_hgt-1.png     \
+                   ua_rh-0.png       \
+                   ua_rh-1.png       \
+                   850_rh-0.png      \
+                   850_rh-1.png      \
+                   500_vort-0.png    \
+                   500_vort-1.png    \
+                   700_vvel-0.png    \
+                   700_vvel-1.png    \
+                   sfc_shtfl-0.png   \
+                   sfc_shtfl-1.png   \
+                   sfc_lhtfl-0.png   \
+                   sfc_lhtfl-1.png   \
+                   sfc_dswrf-0.png   \
+                   sfc_dswrf-1.png   \
+                   sfc_dlwrf-0.png   \
+                   sfc_dlwrf-1.png   \
+                   sfc_uswrf-0.png   \
+                   sfc_uswrf-1.png   \
+                   sfc_ulwrf-0.png   \
+                   sfc_ulwrf-1.png   \
+                   nta_ulwrf-0.png   \
+                   nta_ulwrf-1.png   \
+                   2m_temp-0.png     \
+                   2m_temp-1.png     \
+                   2ds_temp-0.png    \
+                   2ds_temp-1.png    \
+                   2m_dewp-0.png     \
+                   2m_dewp-1.png     \
+                   10m_wind-0.png    \
+                   10m_wind-1.png    \
+                   80m_wind-0.png    \
+                   80m_wind-1.png    \
+                   sfc_totp-0.png    \
+                   sfc_totp-1.png    \
+                   12h_totp-0.png    \
+                   12h_totp-1.png    \
+                   24h_totp-0.png    \
+                   24h_totp-1.png    \
+                   sfc_acp-0.png     \
+                   sfc_acp-1.png     \
+                   esbl_hvyacp-0.png \
+                   esbl_hvyacp-1.png \
+                   sfc_acpcp-0.png   \
+                   sfc_acpcp-1.png   \
+                   sfc_weasd-0.png   \
+                   sfc_weasd-1.png   \
+                   sfc_acsnw-0.png   \
+                   sfc_acsnw-1.png   \
+                   sfc_totsn-0.png   \
+                   sfc_totsn-1.png   \
+                   12h_totsn-0.png   \
+                   12h_totsn-1.png   \
+                   24h_totsn-0.png   \
+                   24h_totsn-1.png   \
+                   ua_ceil-0.png     \
+                   ua_ceil-1.png     \
+                   ua_ctop-0.png     \
+                   ua_ctop-1.png     \
+                   sfc_rhpw-0.png    \
+                   sfc_rhpw-1.png    \
+                   sfc_fd-0.png      \
+                   sfc_fd-1.png      \
+                   sfc_bc-0.png      \
+                   sfc_bc-1.png      \
+                   sfc_oc-0.png      \
+                   sfc_oc-1.png      \
+                   sfc_sulf-0.png    \
+                   sfc_sulf-1.png    \
+                   sfc_seasalt-0.png \
+                   sfc_seasalt-1.png \
+                   sfc_PM10-0.png    \
+                   sfc_PM10-1.png    \
+                   sfc_PM25-0.png    \
+                   sfc_PM25-1.png    \
+                   col_fd-0.png      \
+                   col_fd-1.png      \
+                   col_bc-0.png      \
+                   col_bc-1.png      \
+                   col_oc-0.png      \
+                   col_oc-1.png      \
+                   col_sulf-0.png    \
+                   col_sulf-1.png    \
+                   col_seasalt-0.png \
+                   col_seasalt-1.png \
+                   col_PM10-0.png    \
+                   col_PM10-1.png    \
+                   col_PM25-0.png    \
+                   col_PM25-1.png    \
+                   col_tozne-0.png   \
+                   col_tozne-1.png   \
+                   sfc_aodfd-0.png   \
+                   sfc_aodfd-1.png   \
+                   sfc_aodbc-0.png   \
+                   sfc_aodbc-1.png   \
+                   sfc_aodoc-0.png   \
+                   sfc_aodoc-1.png   \
+                   sfc_aodsulf-0.png \
+                   sfc_aodsulf-1.png \
+                   sfc_aodseasalt-0.png \
+                   sfc_aodseasalt-1.png \
+                   sfc_aodtot-0.png  \
+                   sfc_aodtot-1.png  \
+                   sfc_aod-0.png     \
+                   sfc_aod-1.png     \
+                   h50_ozone-0.png   \
+                   h50_ozone-1.png   \
+                   pv2_ptemp-0.png   \
+                   pv2_ptemp-1.png   \
+                   pv2_wind-0.png    \
+                   pv2_wind-1.png    \
+                   pv2_pres-0.png    \
+                   pv2_pres-1.png
+
     set -A pngs130 sfc_temp-0.png    \
                    sfc_temp-1.png    \
                    sfc_temp-2.png    \
@@ -2010,6 +2167,34 @@ if [[ "$MODL" = *FV3* ]] && [[ "$GRID_NAME" = "fim" ]]; then
   fi
 fi
 
+if [[ "$GRID_NAME" = "fim" ]]; then
+
+# Create output directories
+  fimdir=${FV3GFS_RUN}/ncl/fim
+  ${MKDIR} -p ${fimdir}
+  taiwandir=${FV3GFS_RUN}/ncl/taiwan
+  ${MKDIR} -p ${taiwandir}
+
+# Copy png files to their proper names
+  i=0
+  j=0
+  while [ ${i} -lt ${#pngsfim[@]} ]; do
+
+    pngfile=${pngsfim[${i}]}
+    webfile=${fimdir}/${webnames[${j}]}_f${FCST_TIME}.png
+    ${MV} ${pngfile} ${webfile}
+    (( i=i + 1 ))
+    pngfile=${pngsfim[${i}]}
+    webfile=${taiwandir}/${webnames[${j}]}_f${FCST_TIME}.png
+    ${MV} ${pngfile} ${webfile}
+    (( i=i + 1 ))
+
+    (( j=j + 1 ))
+
+  done
+
+fi
+
 if [[ "$GRID_NAME" = "130" ]]; then
 
 # Create output directories
@@ -2197,7 +2382,7 @@ if [[ "$GRID_NAME" = "242" ]]; then
 
 fi
 
-if [[ "$GRID_NAME" != "130" && "$GRID_NAME" != "174" && "$GRID_NAME" != "242" ]]; then
+if [[ "$GRID_NAME" != "fim" && "$GRID_NAME" != "130" && "$GRID_NAME" != "174" && "$GRID_NAME" != "242" ]]; then
 
 # Create output directory
   dir=${FV3GFS_RUN}/ncl/${GRID_NAME}

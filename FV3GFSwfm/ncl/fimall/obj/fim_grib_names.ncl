@@ -14,6 +14,11 @@ if (domainname .eq. "fim") then
   LAT="lat_4"
   LON="lon_4"
 end if
+if (domainname .eq. "193") then
+  gridname = "193"
+  LAT="lat_0"
+  LON="lon_0"
+end if
 if (domainname .eq. "129" .or. domainname .eq. "174" .or. \
     domainname .eq. "244") then 
   gridname = domainname
@@ -105,14 +110,19 @@ if (.not.grib1file) then
   VISBL="VGRD_P0_L100"+sufx
   V10M="VGRD_P0_L103"+sufx
   WS80M="WIND_P0_L103"+sufx
-  VVEL="VVEL_P0_L100"+sufx  ; this is vertical velocity
+  if (fv3) then
+    VVEL="DZDT_P0_L100"+sufx  ; this is vertical velocity
+  else
+    VVEL="VVEL_P0_L100"+sufx  ; this is vertical velocity
+  end if
   PVPRES="PRES_P0_L7"+sufx
   CEIL="HGT_P0_L2"+sufx
   CTOP="HGT_P0_L3"+sufx
   GHISBL="HGT_P0_L100"+sufx
   GHNAT="HGT_P0_L105"+sufx
   if (fv3) then
-    MSLP="PRMSL_P0_L101"+sufx
+;    MSLP="PRMSL_P0_L101"+sufx
+    MSLP="MSLET_P0_L101"+sufx
     DSWRF="DSWRF_P8_L1"+sufx+"_avg6h"
     DLWRF="DLWRF_P8_L1"+sufx+"_avg6h"
     ULWRF="ULWRF_P8_L1"+sufx+"_avg6h"
@@ -149,6 +159,29 @@ if (.not.grib1file) then
   PV2U="UGRD_P0_L7"+sufx
   PV2V="VGRD_P0_L7"+sufx
   AOD="MCONV_P0_L1"+sufx
+  AODBCSFC="AOTK_P48_L10"+sufx+"_A62009"
+  AODOCSFC="AOTK_P48_L10"+sufx+"_A62010"
+  AODFDSFC="AOTK_P48_L10"+sufx+"_A62001"
+  AODSULFSFC="AOTK_P48_L10"+sufx+"_A62006"
+  AODSEASALTSFC="AOTK_P48_L10"+sufx+"_A62008"
+  AODTOTSFC="AOTK_P48_L10"+sufx+"_A62000"
+  BCCOL="COLMD_P48_L10"+sufx+"_A62009"
+  FDCOL="COLMD_P48_L10"+sufx+"_A62001"
+  OCCOL="COLMD_P48_L10"+sufx+"_A62010"
+  PM10COL="COLMD_P48_L10"+sufx+"_A62000"  ; Total Aerosol size <1e-05
+  PM25COL="COLMD_P48_L10"+sufx+"_A62000_1"  ; Total Aerosol size <2.5e-06
+  SEASALTCOL="COLMD_P48_L10"+sufx+"_A62008"
+  SULFCOL="COLMD_P48_L10"+sufx+"_A62006"
+  TOZNECOL="TOZNE_P0_L200"+sufx
+  FDSFC="PMTF_P48_L1"+sufx+"_A62001"
+  BC1SFC="PMTF_P48_L105"+sufx+"_A62014"
+  BC2SFC="PMTF_P48_L105"+sufx+"_A62013"
+  OC1SFC="PMTF_P48_L105"+sufx+"_A62016"
+  OC2SFC="PMTF_P48_L105"+sufx+"_A62015"
+  SEASALTSFC="PMTF_P48_L1"+sufx+"_A62008"
+  SULFSFC="PMTF_P48_L105"+sufx+"_A62006"
+  PM10SFC="PMTC_P48_L1"+sufx+"_A62000"
+  PM25SFC="PMTF_P48_L1"+sufx+"_A62000"
 else
   ;LAT defined above
   ;LON defined above
@@ -215,3 +248,4 @@ else
   AOD="MCONV_"+gridname+"_SFC"
 end if
 ;
+

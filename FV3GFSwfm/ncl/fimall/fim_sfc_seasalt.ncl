@@ -17,8 +17,8 @@ domainname = asciiread("domain.txt",-1,"string")
 ;
 load "$NCL_HOME/obj/fim_grib_names.ncl"
 ;
-isolev = 500
-load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
+;isolev = 500
+;load "$NCL_HOME/obj/get_iso_level_indexes.ncl"
 ;
 intm = grb_file->$TISBL$@initial_time
 fctm = grb_file->$TISBL$@forecast_time
@@ -32,10 +32,16 @@ if (domainname .eq. "fim") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$SEASALTSFC$(:,:)
-;  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$SEASALTSFC$(::-1,:)
+;    hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$SEASALTSFC$(:,:)
+;    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+  end if
 ;
 end if
 ;
@@ -157,7 +163,9 @@ tvarsave = tvar
 ;end do
 ;tvar = log10(tvar)
 ;
+print("gets here 2")
 load "$NCL_HOME/obj/get_date_str_FIM.ncl"
+print("gets here 3")
 ;
 print(date_str) 
 print("Sfc sea salt")
@@ -241,6 +249,93 @@ setvalues NhlGetWorkspaceObjectId()
 end setvalues
 ;
 ; Create a ScalarField object.
+;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+;
+;  if (max(tvar(lly:ury,llx:urx)) .le. 20) then
+;    tvar(lly,llx) = 21
+;  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+;  hfield = create "ScalarField" scalarFieldClass appid
+;      "sfDataArray" : hvar
+;      "sfXCStartSubsetV" : llx
+;      "sfYCStartSubsetV" : lly
+;      "sfXCEndSubsetV" : urx
+;      "sfYCEndSubsetV" : ury
+;      "sfMissingValueV" : hvar@_FillValue
+;  end create
+;
+  load "$NCL_HOME/obj/pwtr.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+;    "cnLevels" : (/ 2.5,5,7.5,10,15,20,25,30,40,50,75,100,150,200 /)
+    "cnLevels" : (/  1,2,3,4,5,6,7,8,10,13,17,25,33,50 /)
+  end setvalues
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+;  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  titlestring = "Surface Sea Salt (~F33~m~F22~g/m~S~3~N~)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+  draw(cnid)
+  draw(mpid)
+;  draw(cnid4)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
 ;
 if (domainname .eq. "130") then
 ;
@@ -438,13 +533,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create a ScalarField object.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -547,7 +642,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 

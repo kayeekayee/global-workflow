@@ -50,10 +50,16 @@ if (domainname .eq. "fim") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
-;  hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    tvar = grb_file->$OCCOL$(::-1,:) ; Column organic carbon
+;    hvar = grb_file->$GHISBL$(level,::-1,:) / 10. ; use decameters
+  else
+    lat = grb_file->$LAT$(:)
+    tvar = grb_file->$OCCOL$(:,:) ; Column organic carbon
+;    hvar = grb_file->$GHISBL$(level,:,:) / 10. ; use decameters
+  end if
 ;
 end if
 ;
@@ -253,12 +259,104 @@ end setvalues
 ;
 ; Create a ScalarField object.
 ;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+  if (min(tvar(lly:ury,llx:urx)) .eq. max(tvar(lly:ury,llx:urx))) then
+    tvar(lly,llx) = .0000006
+  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+;  hfield = create "ScalarField" scalarFieldClass appid
+;      "sfDataArray" : hvar
+;      "sfXCStartSubsetV" : llx
+;      "sfYCStartSubsetV" : lly
+;      "sfXCEndSubsetV" : urx
+;      "sfYCEndSubsetV" : ury
+;      "sfMissingValueV" : hvar@_FillValue
+;  end create
+;
+  load "$NCL_HOME/obj/intfd.ncl"
+;
+  setvalues cnid
+    "cnRasterModeOn" : False
+    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
+;    "cnLevels" : (/ .0000005,.000001,.0000015,.000002,.000005,.00001,.00002,.00003,.00004,.00005,.000075,.0001,.00015,.0002 /)
+    "cnLevels" : (/ 5e-8,1e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,2e-5,3e-5,4e-5 /)
+    "cnExplicitLabelBarLabelsOn" : True
+    "lbLabelStrings" : (/ 5e-8,1e-7,2e-7,5e-7,1e-6,2e-6,3e-6,4e-6,5e-6,7.5e-6,1e-5,2e-5,3e-5,4e-5 /)
+    "lbAutoManage" : False
+    "lbLabelFontHeightF" : 0.008
+  end setvalues
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+;  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  titlestring = "Column Organic Carbon (kg/m~S~2~N~)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+; Draw map
+;
+  draw(cnid)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
 ;
   tvar = tvarsave
-  if (min(tvar(lly,llx)) .eq. max(tvar(lly,llx))) then
+  if (min(tvar(lly:ury,llx:urx)) .eq. max(tvar(lly:ury,llx:urx))) then
     tvar(lly,llx) = .0000006
   end if
 ;
@@ -457,13 +555,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create a ScalarField object.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -571,7 +669,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 

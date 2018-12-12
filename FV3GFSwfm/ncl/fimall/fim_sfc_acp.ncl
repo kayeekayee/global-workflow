@@ -88,49 +88,81 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
+    if (fv3) then
+      lat = grb_file->$LAT$(::-1)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + fctm + "h"
+        end if
+        tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+      else
+        exit
+      end if
+      if (isfilevar(back6_grb_file,TPACC)) then
         zz = TPACC
       else
-        zz = TPACC + fctm + "h"
+        zz = TPACC + back6fctm + "h"
       end if
-      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      if (back6fctm .eq. 0) then
+        back6tvar = tvar * 0
+      else
+        back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+      end if
+      tvar = tvar - back6tvar
+      t32 = grb_file->$T2M$(0,::-1,:) - 273.15
+      t32 = t32 * 9/5 + 32 ; Convert to F
+      mvar = grb_file->$MSLP$(::-1,:) / 100. ; convert from Pa to mb
+      mint = 8
+      mdens = 0.8
+      mlinethick = 1.0
+;
+      h5 = grb_file->$GHISBL$(level500,::-1,:) / 10. ; use decameters
+      h10 = grb_file->$GHISBL$(level1000,::-1,:) / 10. ; use decameters
+      thick = h5 - h10
+      thint = 6
+      thdens = 0.1
+      thlinethick = 1.0
     else
-      exit
+      lat = grb_file->$LAT$(:)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + fctm + "h"
+        end if
+        tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      else
+        exit
+      end if
+      if (isfilevar(back6_grb_file,TPACC)) then
+        zz = TPACC
+      else
+        zz = TPACC + back6fctm + "h"
+      end if
+      if (back6fctm .eq. 0) then
+        back6tvar = tvar * 0
+      else
+        back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      end if
+      tvar = tvar - back6tvar
+      t32 = grb_file->$T2M$(:,:) - 273.15
+      t32 = t32 * 9/5 + 32 ; Convert to F
+      mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
+      mint = 8
+      mdens = 0.8
+      mlinethick = 1.0
+;
+      h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
+      h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
+      thick = h5 - h10
+      thint = 6
+      thdens = 0.1
+      thlinethick = 1.0
     end if
-    if (isfilevar(back6_grb_file,TPACC)) then
-      zz = TPACC
-    else
-      zz = TPACC + back6fctm + "h"
-    end if
-    if (back6fctm .eq. 0) then
-      back6tvar = tvar * 0
-    else
-      back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    end if
-    tvar = tvar - back6tvar
   end if
-;
-  if (fv3) then
-    t32 = grb_file->$T2M$(0,:,:) - 273.15
-  else
-    t32 = grb_file->$T2M$(:,:) - 273.15
-  end if
-  t32 = t32 * 9/5 + 32 ; Convert to F
-;
-  mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
-  mint = 8
-  mdens = 0.8
-  mlinethick = 1.0
-;
-  h5 = grb_file->$GHISBL$(level500,:,:) / 10. ; use decameters
-  h10 = grb_file->$GHISBL$(level1000,:,:) / 10. ; use decameters
-  thick = h5 - h10
-  thint = 6
-  thdens = 0.1
-  thlinethick = 1.0
 ;
 end if
 ;
@@ -587,6 +619,176 @@ setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
 end setvalues
 ;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+;
+  if (max(tvar(lly:ury,llx:urx)) .le. 0) then
+    tvar(lly,llx) = .11
+  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+  t32field = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : t32
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : t32@_FillValue
+  end create
+;
+  mfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : mvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : mvar@_FillValue
+  end create
+;
+  zfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : thick
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : thick@_FillValue
+  end create
+;
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+;
+  setvalues cnid
+    "cnRasterModeOn" : False
+  end setvalues
+;
+; 32F isotherm
+;
+  load "$NCL_HOME/obj/32F_isotherm.ncl"
+;
+  setvalues cnid5
+      "cnLineColors" : (/24/)
+  end setvalues
+;
+  if (iq .ne. 0) then
+    mlinethick = 2.0
+    thlinethick = 2.0
+    setvalues cnid5
+      "cnLineThicknessF" : 3.0
+    end setvalues
+  end if
+;
+  cnid4 = create "contourplot" contourPlotClass wid
+      "cnScalarFieldData":  mfield
+      "cnFillOn" : False
+      "cnLevelSelectionMode" : "ManualLevels"
+      "cnMinLevelValF" : 900
+      "cnMaxLevelValF" : 1100
+      "cnLevelSpacingF" : mint
+      "cnLevelFlags" : (/"LineAndLabel"/)
+      "cnInfoLabelOn" : False
+      "cnLinesOn" : True
+      "cnLineColor" : 23
+      "cnLineLabelsOn" : True
+      "cnLineLabelInterval" : 1
+      "cnLineLabelFont" : 21
+      "cnLineLabelFontHeightF" : 0.01
+      "cnLineLabelFontColor" : 23 ; "Background"
+      "cnLineLabelBackgroundColor" : 1
+      "cnLineLabelPlacementMode" : "Computed"
+      "cnLineLabelDensityF" : mdens
+      "cnLineThicknessF" : mlinethick
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  cnid6 = create "contourplot" contourPlotClass wid
+      "cnScalarFieldData":  zfield
+      "cnFillOn" : False
+      "cnLevelSelectionMode" : "ManualLevels"
+      "cnMinLevelValF" : 402
+      "cnMaxLevelValF" : 600
+      "cnLevelSpacingF" : thint
+      "cnLevelFlags" : (/"LineAndLabel"/)
+      "cnInfoLabelOn" : False
+      "cnLinesOn" : True
+      "cnLineColor" : 2
+;      "cnLineDashPattern" : 5
+      "cnLineLabelsOn" : True
+      "cnLineLabelInterval" : 1
+      "cnLineLabelFont" : 21
+      "cnLineLabelFontHeightF" : 0.01
+      "cnLineLabelFontColor" : 2 ; "Foreground"
+      "cnLineLabelBackgroundColor" : 1
+      "cnLineLabelPlacementMode" : "Computed"
+      "cnLineLabelDensityF" : thdens
+      "cnLineThicknessF" : thlinethick
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  titlestring = interval + "h Precip (in), MSLP (mb), 1000-500 Thickness (dm)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+; Draw map
+;
+  draw(cnid)
+  draw(cnid5)
+  draw(cnid6)
+  draw(cnid4)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -1042,13 +1244,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create ScalarField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -1150,14 +1352,12 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
       "cnLineColors" : (/24/)
   end setvalues
 ;
-  if (domainname .ne. "fim") then
-    if (iq .ne. 0) then
-      mlinethick = 2.0
-      thlinethick = 2.0
-      setvalues cnid5
-        "cnLineThicknessF" : 3.0
-      end setvalues
-    end if
+  if (iq .ne. 0) then
+    mlinethick = 2.0
+    thlinethick = 2.0
+    setvalues cnid5
+      "cnLineThicknessF" : 3.0
+    end setvalues
   end if
 ;
   cnid4 = create "contourplot" contourPlotClass wid
@@ -1223,9 +1423,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   draw(cnid)
   draw(cnid5)
-  if (domainname .ne. "fim")
-    draw(cnid6)
-  end if
+  draw(cnid6)
   draw(cnid4)
   draw(mpid)
 ;
@@ -1245,7 +1443,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

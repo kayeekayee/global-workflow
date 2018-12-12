@@ -52,38 +52,73 @@ if (domainname .eq. "fim") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  if (fctm .gt. 0) then
-    if (isfilevar(grb_file,WEASDACC)) then
-      zz = WEASDACC
-      tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
-    else
-      zz = WEASDACC + interval + "h"
-      if (isfilevar(grb_file,zz)) then
-        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    if (fctm .gt. 0) then
+      if (isfilevar(grb_file,WEASDACC)) then
+        zz = WEASDACC
+        tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches  
       else
-        if (fv3) then
-          tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+        zz = WEASDACC + interval + "h"
+        if (isfilevar(grb_file,zz)) then
+          tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches  
         else
-          zz = WEASDACC + fctm + "h" ; use total snowfall
-          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
-          back6fname = asciiread("back6_file.txt",-1,"string")
-          back6_grb_file = addfile(back6fname,"r")
-          back6fctm = back6_grb_file->$TSFC$@forecast_time
-          back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
-          if (back6fctmunits .ne. "hours") then
-            back6fctm = back6fctm * tointeger(back6fctmunits)
+          if (fv3) then
+            tvar = grb_file->$WEASD$(::-1,:) * 0.03937; convert to inches
+          else
+            zz = WEASDACC + fctm + "h" ; use total snowfall
+            tvar = grb_file->$zz$(::-1,:) * 0.03937; convert to inches  
+            back6fname = asciiread("back6_file.txt",-1,"string")
+            back6_grb_file = addfile(back6fname,"r")
+            back6fctm = back6_grb_file->$TSFC$@forecast_time
+            back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+            if (back6fctmunits .ne. "hours") then
+              back6fctm = back6fctm * tointeger(back6fctmunits)
+            end if
+            back6fcst1 = back6fctm
+            zz = WEASDACC + back6fcst1 + "h"
+            back6tvar = back6_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+            tvar = tvar - back6tvar
           end if
-          back6fcst1 = back6fctm
-          zz = WEASDACC + back6fcst1 + "h"
-          back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-          tvar = tvar - back6tvar
         end if
       end if
+    else
+      exit
     end if
   else
-    exit
+    lat = grb_file->$LAT$(:)
+    if (fctm .gt. 0) then
+      if (isfilevar(grb_file,WEASDACC)) then
+        zz = WEASDACC
+        tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
+      else
+        zz = WEASDACC + interval + "h"
+        if (isfilevar(grb_file,zz)) then
+          tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
+        else
+          if (fv3) then
+            tvar = grb_file->$WEASD$(:,:) * 0.03937; convert to inches
+          else
+            zz = WEASDACC + fctm + "h" ; use total snowfall
+            tvar = grb_file->$zz$(:,:) * 0.03937; convert to inches  
+            back6fname = asciiread("back6_file.txt",-1,"string")
+            back6_grb_file = addfile(back6fname,"r")
+            back6fctm = back6_grb_file->$TSFC$@forecast_time
+            back6fctmunits = back6_grb_file->$TSFC$@forecast_time_units
+            if (back6fctmunits .ne. "hours") then
+              back6fctm = back6fctm * tointeger(back6fctmunits)
+            end if
+            back6fcst1 = back6fctm
+            zz = WEASDACC + back6fcst1 + "h"
+            back6tvar = back6_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+            tvar = tvar - back6tvar
+          end if
+        end if
+      end if
+    else
+      exit
+    end if
   end if
 ;
 end if
@@ -488,6 +523,79 @@ end setvalues
 ;
 ; Create a ScalarField object.
 ;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+;
+  if (max(tvar(lly:ury,llx:urx)) .le. 0) then
+    tvar(lly,llx) = 0.011
+  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+  load "$NCL_HOME/obj/acsnw.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/ 1,20,3,4,5,6,7,8,9,10,11,12,13,22 /)
+  end setvalues
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+  titlestring = fctm + "hr Accumulated Snow/Sleet Using 10:1 Ratio (in)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+  draw(cnid)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -655,13 +763,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create a ScalarField object.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -728,6 +836,6 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end

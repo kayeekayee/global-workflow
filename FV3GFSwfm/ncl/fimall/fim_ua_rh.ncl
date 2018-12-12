@@ -153,30 +153,56 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    wstrid = 10
+    if (fv3) then
+      lat = grb_file->$LAT$(::-1)
+      wstrid = 10
 ;
-    uvar = grb_file->$UISBL$(level700,:,:) * 1.9429 ; convert to knots
-    vvar = grb_file->$VISBL$(level700,:,:) * 1.9429 ; convert to knots
-    rh85 = grb_file->$RHISBL$(level850,:,:)
-;    rh82 = grb_file->$RHISBL$(level825,:,:)
-;    rh80 = grb_file->$RHISBL$(level800,:,:)
-;    rh77 = grb_file->$RHISBL$(level775,:,:)
-;    rh75 = grb_file->$RHISBL$(level750,:,:)
-;    rh72 = grb_file->$RHISBL$(level725,:,:)
-    rh70 = grb_file->$RHISBL$(level700,:,:)
-;    rh67 = grb_file->$RHISBL$(level675,:,:)
-;    rh65 = grb_file->$RHISBL$(level650,:,:)
-;    rh62 = grb_file->$RHISBL$(level625,:,:)
-;    rh60 = grb_file->$RHISBL$(level600,:,:)
-;    rh57 = grb_file->$RHISBL$(level575,:,:)
-;    rh55 = grb_file->$RHISBL$(level550,:,:)
-;    rh52 = grb_file->$RHISBL$(level525,:,:)
-    rh50 = grb_file->$RHISBL$(level500,:,:)
-;    tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
-;            rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
-    tvar = (rh85 + rh70 + rh50) / 3
+      uvar = grb_file->$UISBL$(level700,::-1,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$VISBL$(level700,::-1,:) * 1.9429 ; convert to knots
+      rh85 = grb_file->$RHISBL$(level850,::-1,:)
+;      rh82 = grb_file->$RHISBL$(level825,::-1,:)
+;      rh80 = grb_file->$RHISBL$(level800,::-1,:)
+;      rh77 = grb_file->$RHISBL$(level775,::-1,:)
+;      rh75 = grb_file->$RHISBL$(level750,::-1,:)
+;      rh72 = grb_file->$RHISBL$(level725,::-1,:)
+      rh70 = grb_file->$RHISBL$(level700,::-1,:)
+;      rh67 = grb_file->$RHISBL$(level675,::-1,:)
+;      rh65 = grb_file->$RHISBL$(level650,::-1,:)
+;      rh62 = grb_file->$RHISBL$(level625,::-1,:)
+;      rh60 = grb_file->$RHISBL$(level600,::-1,:)
+;      rh57 = grb_file->$RHISBL$(level575,::-1,:)
+;      rh55 = grb_file->$RHISBL$(level550,::-1,:)
+;      rh52 = grb_file->$RHISBL$(level525,::-1,:)
+      rh50 = grb_file->$RHISBL$(level500,::-1,:)
+;      tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
+;              rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
+      tvar = (rh85 + rh70 + rh50) / 3
+    else
+      lat = grb_file->$LAT$(:)
+      wstrid = 10
+;
+      uvar = grb_file->$UISBL$(level700,:,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$VISBL$(level700,:,:) * 1.9429 ; convert to knots
+      rh85 = grb_file->$RHISBL$(level850,:,:)
+;      rh82 = grb_file->$RHISBL$(level825,:,:)
+;      rh80 = grb_file->$RHISBL$(level800,:,:)
+;      rh77 = grb_file->$RHISBL$(level775,:,:)
+;      rh75 = grb_file->$RHISBL$(level750,:,:)
+;      rh72 = grb_file->$RHISBL$(level725,:,:)
+      rh70 = grb_file->$RHISBL$(level700,:,:)
+;      rh67 = grb_file->$RHISBL$(level675,:,:)
+;      rh65 = grb_file->$RHISBL$(level650,:,:)
+;      rh62 = grb_file->$RHISBL$(level625,:,:)
+;      rh60 = grb_file->$RHISBL$(level600,:,:)
+;      rh57 = grb_file->$RHISBL$(level575,:,:)
+;      rh55 = grb_file->$RHISBL$(level550,:,:)
+;      rh52 = grb_file->$RHISBL$(level525,:,:)
+      rh50 = grb_file->$RHISBL$(level500,:,:)
+;      tvar = (rh85 + rh82 + rh80 + rh77 + rh75 + rh72 + rh70 + \
+;              rh67 + rh65 + rh62 + rh60 + rh57 + rh55 + rh52 + rh50) / 15
+      tvar = (rh85 + rh70 + rh50) / 3
+    end if
   end if
 ;
 end if
@@ -542,6 +568,107 @@ end setvalues
 ;
 ; Create ScalarField and VectorField objects.
 ;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+;
+;  if (max(tvar(lly:ury,llx:urx)) .le. 20) then
+;    tvar(lly,llx) = 21
+;  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+  vfield = create "VectorField" vectorFieldClass appid
+      "vfUDataArray" : uvar
+      "vfVDataArray" : vvar
+      "vfXCStartSubsetV" : llx
+      "vfYCStartSubsetV" : lly
+      "vfXCEndSubsetV" : urx
+      "vfYCEndSubsetV" : ury
+      "vfMissingVValueV" : vvar@_FillValue
+      "vfMissingUValueV" : uvar@_FillValue
+      "vfXCStride" : wstrid       ; i.e., plot a vector at every (n+1)th point.
+      "vfYCStride" : wstrid
+  end create
+;
+  vcid = create "vectorplot" vectorPlotClass wid
+      "vcVectorFieldData":  vfield
+      "vcGlyphStyle" : "WindBarb"
+      "vcWindBarbLineThicknessF" : 1.2
+      "vcWindBarbColor" : 0
+      "vcRefAnnoOn" : False
+      "vcWindBarbTickSpacingF" : 0.1875
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  setvalues vcid
+    "vcMinMagnitudeF" : 0
+  end setvalues
+;
+  load "$NCL_HOME/obj/rh.ncl"
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+  titlestring = "850-500mb mean Rel Hum (%), 700mb Wind (kt)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel_vcid.ncl"
+;
+  draw(cnid)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  draw(vcid)
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -815,13 +942,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create ScalarField and VectorField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -925,7 +1052,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
   draw(vcid)
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

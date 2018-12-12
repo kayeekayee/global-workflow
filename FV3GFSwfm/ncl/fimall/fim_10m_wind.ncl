@@ -58,17 +58,17 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
-    lon = grb_file->$LON$(:)
-    wstrid = 10
-;
     if (fv3) then
-      uvar = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
-      vvar = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+      lat = grb_file->$LAT$(::-1)
+      uvar = grb_file->$U10M$(0,::-1,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$V10M$(0,::-1,:) * 1.9429 ; convert to knots
     else
+      lat = grb_file->$LAT$(:)
       uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
       vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
     end if
+    lon = grb_file->$LON$(:)
+    wstrid = 10
 ;
   end if
 ;
@@ -318,6 +318,183 @@ setvalues NhlGetWorkspaceObjectId()
 end setvalues
 ;
 ; Create ScalarField and VectorField objects.
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : wind
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : wind@_FillValue
+  end create
+;
+  vfield = create "VectorField" vectorFieldClass appid
+      "vfUDataArray" : uvar
+      "vfVDataArray" : vvar
+      "vfXCStartSubsetV" : llx
+      "vfYCStartSubsetV" : lly
+      "vfXCEndSubsetV" : urx
+      "vfYCEndSubsetV" : ury
+      "vfMissingVValueV" : vvar@_FillValue
+      "vfMissingUValueV" : uvar@_FillValue
+      "vfXCStride" : wstrid       ; i.e., plot a vector at every (n+1)th point.
+      "vfYCStride" : wstrid
+  end create
+;
+  vcid = create "vectorplot" vectorPlotClass wid
+      "vcVectorFieldData":  vfield
+      "vcGlyphStyle" : "WindBarb"
+      "vcWindBarbLineThicknessF" : 1.2
+      "vcWindBarbColor" : 0
+      "vcRefAnnoOn" : False
+      "vcWindBarbTickSpacingF" : 0.1875
+      "pmTickMarkDisplayMode" : "NoCreate"
+      "vpXF"      : vpx        ; set viewport
+      "vpYF"      : vpy
+      "vpWidthF"  : vpwidth
+      "vpHeightF" : vpheight
+  end create
+;
+  setvalues vcid
+    "vcMinMagnitudeF" : 0
+  end setvalues
+;
+  load "$NCL_HOME/obj/wind_5-90by5.ncl"
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+  titlestring = "10m Wind (kt)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel_vcid.ncl"
+;
+  if (fileexists("track_file.txt")) then
+    trkfname = asciiread("track_file.txt",-1,"string")
+    print("trkfname = "+trkfname)
+    trkpts = asciiread(trkfname,-1,"string")
+;    print("trkpts = "+trkpts)
+;    print(trkpts(0:40))
+    trklat = new((/500,dimsizes(trkpts)/),float)
+    tmplat = new((/dimsizes(trkpts)/),float)
+    trklon = new((/500,dimsizes(trkpts)/),float)
+    tmplon = new((/dimsizes(trkpts)/),float)
+    latptcnt = new(500,integer)
+    lonptcnt = new(500,integer)
+    do i = 0, 499
+      latptcnt(i) = 0
+      lonptcnt(i) = 0
+    end do
+    print("dimsizes(trkpts) = "+dimsizes(trkpts))
+    element = 0
+    do while (element .lt. dimsizes(trkpts))
+      storm = stringtoint(getSubString(trkpts(element),3,5))
+      trk_region = getSubString(trkpts(element),0,1)
+      if (trk_region .eq. "EP") then
+        storm = storm + 100
+      end if
+      if (trk_region .eq. "AL") then
+        storm = storm + 200
+      end if
+      if (trk_region .eq. "WP") then
+        storm = storm + 300
+      end if
+;      print("storm "+storm)
+      fhour = stringtoint(getSubString(trkpts(element),30,32))
+      if (fhour .le. fctm) then
+        trklat(storm,latptcnt(storm)) = stringtoint(getSubString(trkpts(element),34,37)) / 10.
+        trklat_ns = getSubString(trkpts(element),38,38)
+        if (trklat_ns .eq. "S") then
+          trklat(storm,latptcnt(storm)) = -trklat(storm,latptcnt(storm))
+        end if
+;        print("lat = "+trklat(storm,latptcnt(storm)))
+        latptcnt(storm) = latptcnt(storm) + 1
+        trklon(storm,lonptcnt(storm)) = stringtoint(getSubString(trkpts(element),41,44)) / 10.
+        trklon_ew = getSubString(trkpts(element),45,45)
+        if (trklon_ew .eq. "W") then
+          trklon(storm,lonptcnt(storm)) = 360. - trklon(storm,lonptcnt(storm))
+        end if
+;        print("lon = "+trklon(storm,lonptcnt(storm)))
+        lonptcnt(storm) = lonptcnt(storm) + 1
+      end if
+      element = element + 1 ; skip to next line
+    end do
+    end if
+;
+; Draw map
+;
+  draw(cnid)
+;
+  if (fileexists("track_file.txt")) then
+    gsres = True
+    gsres@gsMarkerIndex = 1
+    gsres@gsMarkerSizeF = 0.04
+    gsres@gsMarkerColor = 23
+    gsres@gsLineColor = 23
+    gsres@gsLineThicknessF = 3
+    txres = True
+    txres@txFont = 37
+    txres@txFontColor = 1
+    txres@txFontHeightF = 0.015
+    txres@txFontThicknessF = 1.5
+;
+    do i = 0, 399
+      if (.not.ismissing(trklon(i,0))) then
+        firstlat = trklat(i,0)
+        firstlon = trklon(i,0)
+        gsn_text(wid,mpid,"p",firstlon,firstlat,txres)
+        delete(firstlat)
+        delete(firstlon)
+        tmplat = trklat(i,:)
+        tmplon = trklon(i,:)
+        gsn_polyline(wid,mpid,tmplon,tmplat,gsres)
+        delete(tmplat)
+        delete(tmplon)
+      end if
+    end do
+  end if
+;
+  draw(mpid)
+  draw(vcid)
+;
+  gsres = True 
+  if (iq .eq. 0) then 
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16 
+;      gsres@gsMarkerColor = 20 
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16 
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else 
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16 
+      gsres@gsMarkerColor = 20 
+      gsres@gsMarkerSizeF = 0.01 
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16 
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
 ;
 if (domainname .eq. "130") then
 ;
@@ -795,13 +972,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create ScalarField and VectorField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : wind
@@ -887,8 +1064,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174") then
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. \
-      domainname .eq. "83" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "83" .or. domainname .eq. "129") then
     if (fileexists("track_file.txt")) then
       trkfname = asciiread("track_file.txt",-1,"string")
       print("trkfname = "+trkfname)
@@ -946,7 +1122,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174") then
 ;
   draw(cnid)
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+  if (domainname .eq. "129") then
     if (fileexists("track_file.txt")) then
       gsres = True
       gsres@gsMarkerIndex = 1
@@ -1027,7 +1203,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174") then
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

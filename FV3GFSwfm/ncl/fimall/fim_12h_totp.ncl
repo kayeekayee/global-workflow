@@ -82,25 +82,46 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
-        zz = TPACC
+    if (fv3) then
+      lat = grb_file->$LAT$(::-1)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + fctm + "h"
+        end if
+        tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
       else
-        zz = TPACC + fctm + "h"
+        exit
       end if
-      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+;      zz = TPACC + back12fctm + "h"
+      if (back12fctm .ne. 12) then
+        back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+      else
+        back12tvar = 0
+      end if
+      tvar = tvar - back12tvar
     else
-      exit
+      lat = grb_file->$LAT$(:)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + fctm + "h"
+        end if
+        tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      else
+        exit
+      end if
+;      zz = TPACC + back12fctm + "h"
+      if (back12fctm .ne. 12) then
+        back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      else
+        back12tvar = 0
+      end if
+      tvar = tvar - back12tvar
     end if
-;    zz = TPACC + back12fctm + "h"
-    if (back12fctm .ne. 12) then
-      back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      back12tvar = 0
-    end if
-    tvar = tvar - back12tvar
   end if
 ;
 end if
@@ -395,6 +416,69 @@ setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
 end setvalues
 ;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+  load "$NCL_HOME/obj/precip_0-40_whtbkg.ncl"
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+  titlestring = "Last 12h Total Precip (in)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+; Draw map
+;
+  draw(cnid)
+  draw(mpid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -550,13 +634,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create ScalarField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvar
@@ -619,7 +703,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

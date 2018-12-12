@@ -34,6 +34,21 @@ do
 
   echo processing ${GRID_NAME}...
 
+  if [[ "$GRID_NAME" = "fim" ]]; then
+    for SUB_DIR in fim taiwan 
+    do
+      dir=${FV3GFS_RUN}/${PSLOT}/${CDUMP}.${yyyymmdd}/${hh}/ncl/$SUB_DIR
+      echo "dir is $dir" 
+      if [[ -d ${dir} ]]; then
+        echo "zipping  $GRID_NAME"
+        cd ${dir} 
+        if [ -f *.png ]; then zip -n .png files.zip * -i \*.png; fi
+      else
+        echo "$dir not found!"
+      fi
+    done
+  fi
+
   if [[ "$GRID_NAME" = "242" ]]; then
     for SUB_DIR in 242 a1 a2 
     do
@@ -79,7 +94,7 @@ do
     done
   fi
 
-  if [[ "$GRID_NAME" != "130" && "$GRID_NAME" != "174" && "$GRID_NAME" != "242" ]]; then
+  if [[ "$GRID_NAME" != "fim" && "$GRID_NAME" != "130" && "$GRID_NAME" != "174" && "$GRID_NAME" != "242" ]]; then
     dir=${FV3GFS_RUN}/${PSLOT}/${CDUMP}.${yyyymmdd}/${hh}/ncl/${GRID_NAME}
     echo "dir is $dir" 
     if [[ -d ${dir} ]]; then

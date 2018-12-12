@@ -4,6 +4,13 @@ load "$NCARG_LIB/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 modl = getenv("MODL")
 ;
+str = str_match(modl, "FV3")
+if (.not.ismissing(str)) then
+  fv3 = True
+else
+  fv3 = False
+end if
+;
 load "$NCL_HOME/obj/cmap1_track.ncl"
 ;
 begin
@@ -59,8 +66,13 @@ if (domainname .eq. "fim") then
     lon = grb_file->$LON$(:)
     wstrid = 7
 ;
-    uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
-    vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+    if (fv3) then
+      uvar = grb_file->$U10M$(0,:,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$V10M$(0,:,:) * 1.9429 ; convert to knots
+    else
+      uvar = grb_file->$U10M$(:,:) * 1.9429 ; convert to knots
+      vvar = grb_file->$V10M$(:,:) * 1.9429 ; convert to knots
+    end if
 ;
   end if
 ;

@@ -32,26 +32,33 @@ if (domainname .eq. "fim") then
   ny = filevardimsizes(grb_file,LAT)
   nx = filevardimsizes(grb_file,LON)
 ;
-  lat = grb_file->$LAT$(:)
   lon = grb_file->$LON$(:)
-  hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
-  uvar = grb_file->$UISBL$(level,:,:) 
-  vvar = grb_file->$VISBL$(level,:,:)
+  if (fv3) then
+    lat = grb_file->$LAT$(::-1)
+    hvar = grb_file->$GHISBL$(levelh,::-1,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,::-1,:) 
+    vvar = grb_file->$VISBL$(level,::-1,:)
+  else
+    lat = grb_file->$LAT$(:)
+    hvar = grb_file->$GHISBL$(levelh,:,:) / 10. ; use decameters
+    uvar = grb_file->$UISBL$(level,:,:) 
+    vvar = grb_file->$VISBL$(level,:,:)
+  end if
   vort = new((/ny,nx/),float)
-  flipuvar = new((/ny,nx/),float)
-  flipvvar = new((/ny,nx/),float)
-  fliplat = new((/ny/),float)
-  do j = 0,ny-1
-    do k = 0,nx-1
-      fj = (ny-1) - j
-      fliplat(j) = lat(fj)
-      flipuvar(j,k) = uvar(fj,k)
-      flipvvar(j,k) = vvar(fj,k)
-    end do
-  end do
-  lat = fliplat
-  uvar = flipuvar
-  vvar = flipvvar
+;  flipuvar = new((/ny,nx/),float)
+;  flipvvar = new((/ny,nx/),float)
+;  fliplat = new((/ny/),float)
+;  do j = 0,ny-1
+;    do k = 0,nx-1
+;      fj = (ny-1) - j
+;      fliplat(j) = lat(fj)
+;      flipuvar(j,k) = uvar(fj,k)
+;      flipvvar(j,k) = vvar(fj,k)
+;    end do
+;  end do
+;  lat = fliplat
+;  uvar = flipuvar
+;  vvar = flipvvar
 ;
   uv2vrf(uvar,vvar,vort)
 ;
@@ -428,6 +435,96 @@ end setvalues
 ;
 ; Create a ScalarField object.
 ;
+;tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+;  tvar = tvarsave
+;
+;  if (max(tvar(lly:ury,llx:urx)) .le. 20) then
+;    tvar(lly,llx) = 21
+;  end if
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : vort
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : vort@_FillValue
+  end create
+;
+  hfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : hvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : hvar@_FillValue
+  end create
+;
+  load "$NCL_HOME/obj/diff_-16-16by2.ncl"
+;
+  setvalues cnid
+    "cnFillColors" : (/2,3,4,5,6,7,8,9,20,11,12,13,14,15,16,17,18/)
+    "cnRasterModeOn" : False
+  end setvalues
+;
+  load "$NCL_HOME/obj/height_60m.ncl"
+;
+  setvalues cnid4
+    "cnLineColor" : 1
+  end setvalues
+;
+  if (iq .ne. 0) then
+    setvalues cnid4
+      "cnLineThicknessF" : 2.5
+    end setvalues
+  end if
+;
+  titlestring = "500mb Rel Vort (10E-5/s), Height (dm)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel_cnid4.ncl"
+;
+  draw(cnid)
+  draw(mpid)
+  draw(cnid4)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -639,13 +736,13 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
 ; Create ScalarField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+  if (domainname .eq. "129") then
 ;
     tfield = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : vort
@@ -736,7 +833,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
     "cnLineColor" : 1
   end setvalues
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "129") then
+  if (domainname .eq. "129") then
     setvalues cnid4
       "cnLineThicknessF" : 1
       "cnLineLabelDensityF" : 0.001
@@ -775,7 +872,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 ;

@@ -55,39 +55,75 @@ if (domainname .eq. "fim") then
     ny = filevardimsizes(grb_file,LAT)
     nx = filevardimsizes(grb_file,LON)
 ;
-    lat = grb_file->$LAT$(:)
     lon = grb_file->$LON$(:)
-    if ( fctm .gt. 0 ) then
-      if (isfilevar(grb_file,TPACC)) then
-        zz = TPACC
+    if (fv3) then
+      lat = grb_file->$LAT$(::-1)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvar = grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
       else
-        zz = TPACC + interval + "h"
+        exit
       end if
-      tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-    else
-      exit
-    end if
 ;
-    tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
-    tvarback1 = tvar * 0.
-    tvarback2 = tvar * 0.
-    if (fnameback1test .eq. 1) then
-      if ( isfilevar(grb_file_back1,TPACC) ) then
-        zz = TPACC
-      else
-        zz = TPACC + interval + "h"
+      tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
+      tvarback1 = tvar * 0.
+      tvarback2 = tvar * 0.
+      if (fnameback1test .eq. 1) then
+        if ( isfilevar(grb_file_back1,TPACC) ) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvarback1 = grb_file_back1->$zz$(::-1,:) * 0.03937 ; convert to inches
+        tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
       end if
-      tvarback1 = grb_file_back1->$zz$(:,:) * 0.03937 ; convert to inches
-      tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
-    end if
-    if (fnameback2test .eq. 1) then
-      if ( isfilevar(grb_file_back2,TPACC) ) then
-        zz = TPACC
-      else
-        zz = TPACC + interval + "h"
+      if (fnameback2test .eq. 1) then
+        if ( isfilevar(grb_file_back2,TPACC) ) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvarback2 = grb_file_back2->$zz$(::-1,:) * 0.03937 ; convert to inches
+        tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
       end if
-      tvarback2 = grb_file_back2->$zz$(:,:) * 0.03937 ; convert to inches
-      tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
+    else
+      lat = grb_file->$LAT$(:)
+      if ( fctm .gt. 0 ) then
+        if (isfilevar(grb_file,TPACC)) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvar = grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+      else
+        exit
+      end if
+;
+      tvar = where (.not. ismissing(tvar) .and. tvar .lt. 0, 0, tvar)
+      tvarback1 = tvar * 0.
+      tvarback2 = tvar * 0.
+      if (fnameback1test .eq. 1) then
+        if ( isfilevar(grb_file_back1,TPACC) ) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvarback1 = grb_file_back1->$zz$(:,:) * 0.03937 ; convert to inches
+        tvarback1 = where (.not. ismissing(tvarback1) .and. tvarback1 .lt. 0, 0, tvarback1)
+      end if
+      if (fnameback2test .eq. 1) then
+        if ( isfilevar(grb_file_back2,TPACC) ) then
+          zz = TPACC
+        else
+          zz = TPACC + interval + "h"
+        end if
+        tvarback2 = grb_file_back2->$zz$(:,:) * 0.03937 ; convert to inches
+        tvarback2 = where (.not. ismissing(tvarback2) .and. tvarback2 .lt. 0, 0, tvarback2)
+      end if
     end if
 ;
   end if
@@ -521,6 +557,134 @@ end setvalues
 ;
 ; Create a ScalarField object.
 ;
+tvarsave = tvar
+;
+if (domainname .eq. "fim") then
+;
+  load "$NCL_HOME/obj/4_tiles_loop.ncl"
+;
+  tvar = tvarsave
+;
+  load "$NCL_HOME/obj/fim_maps_blk.ncl"
+;
+  tvarbkg = tvar * 0.
+  tvarbkg(lly,llx) = .1
+;
+  tfieldbkg = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvarbkg
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvarbkg@_FillValue
+  end create
+;
+  tfield = create "ScalarField" scalarFieldClass appid
+      "sfDataArray" : tvar
+      "sfXCStartSubsetV" : llx
+      "sfYCStartSubsetV" : lly
+      "sfXCEndSubsetV" : urx
+      "sfYCEndSubsetV" : ury
+      "sfMissingValueV" : tvar@_FillValue
+  end create
+;
+  if (fnameback1test .eq. 1) then
+    tfieldback1 = create "ScalarField" scalarFieldClass appid
+        "sfDataArray" : tvarback1
+        "sfXCStartSubsetV" : llx
+        "sfYCStartSubsetV" : lly
+        "sfXCEndSubsetV" : urx
+        "sfYCEndSubsetV" : ury
+        "sfMissingValueV" : tvarback1@_FillValue
+    end create
+  end if
+;
+  if (fnameback2test .eq. 1) then
+    tfieldback2 = create "ScalarField" scalarFieldClass appid
+        "sfDataArray" : tvarback2
+        "sfXCStartSubsetV" : llx
+        "sfYCStartSubsetV" : lly
+        "sfXCEndSubsetV" : urx
+        "sfYCEndSubsetV" : ury
+        "sfMissingValueV" : tvarback2@_FillValue
+    end create
+  end if
+;
+  cl0 = .1
+  cl1 = .25
+  cl2 = .5
+  cl3 = 1.0
+  cl4 = 2.0
+;
+  load "$NCL_HOME/obj/esbl.ncl"
+;
+  if (iq .ne. 0) then
+    setvalues cnid
+      "cnFillMode" : "AreaFill"
+    end setvalues
+  end if
+;
+  titlestring = "TL-Ensemble " + interval + "h Precip (in)"
+  load "$NCL_HOME/obj/add_titles.ncl"
+  load "$NCL_HOME/obj/add_explabel.ncl"
+;
+; Draw map
+;
+  draw(cnidbkg)
+;
+  if (fnameback2test .eq. 1) then
+    draw(cnidback2abv5)
+  end if
+  if (fnameback1test .eq. 1) then
+    draw(cnidback1abv5)
+  end if
+  draw(cnidcurrentabv5)
+;
+  if (fnameback2test .eq. 1) then
+    draw(cnidback2)
+  end if
+  if (fnameback1test .eq. 1) then
+    draw(cnidback1)
+  end if
+  draw(cnid)
+  draw(mpid)
+  draw(lbid)
+;
+  load "$NCL_HOME/obj/esbl2.ncl"
+;
+  draw(lbid)
+;
+  gsres = True
+  if (iq .eq. 0) then
+;    do i = 0,dimsizes(airport_id)-1
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerSizeF = 0.004
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;      gsres@gsMarkerIndex = 16
+;      gsres@gsMarkerColor = 1
+;      gsres@gsMarkerSizeF = 0.002
+;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+;    end do
+  else
+    do i = 0,dimsizes(airport_id)-1
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 20
+      gsres@gsMarkerSizeF = 0.01
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+      gsres@gsMarkerIndex = 16
+      gsres@gsMarkerColor = 1
+      gsres@gsMarkerSizeF = 0.005
+      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
+    end do
+  end if
+;
+  frame(wid)
+;
+  end do  ; loop begins in 4_tiles_loop.ncl
+;
+end if  ; domainname .eq. "fim"
+;
 if (domainname .eq. "130") then
 ;
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
@@ -857,7 +1021,7 @@ if (domainname .eq. "242") then
 ;
 end if  ; domainname .eq. "242"
 ;
-if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
+if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242") then
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
@@ -866,7 +1030,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
 ; Create ScalarField objects.
 ;
-  if (domainname .eq. "fim" .or. domainname .eq. "244" .or. domainname .eq. "129") then
+  if (domainname .eq. "244" .or. domainname .eq. "129") then
 ;
     tfieldbkg = create "ScalarField" scalarFieldClass appid
         "sfDataArray" : tvarbkg
@@ -1018,7 +1182,7 @@ if (domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242
 ;
   frame(wid)
 ;
-end if  ; domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
+end if  ; domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174" .and. domainname .ne. "242"
 ;
 end
 

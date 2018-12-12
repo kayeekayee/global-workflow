@@ -1,4 +1,43 @@
-if (domainname .eq. "fim" .or. domainname .eq. "129" .or. domainname .eq. "228") then
+if (domainname .eq. "fim") then
+;
+  mpid = create "mapplot" mapPlotClass wid
+;
+    "mpProjection" : "CylindricalEquidistant"
+    "mpCenterLatF" : 0.
+    "mpCenterLonF" : 180.
+;
+    "mpLimitMode" : "Corners"    ; Limit the map view.
+    "mpLeftCornerLonF" : LcLon
+    "mpLeftCornerLatF" : LcLat
+    "mpRightCornerLonF" : RcLon
+    "mpRightCornerLatF" : RcLat
+    "mpDataBaseVersion" : "Ncarg4_1"
+    "mpOutlineBoundarySets" : "Geophysical"
+    "mpNationalLineColor" : "background"
+    "mpNationalLineThicknessF" : 1.5
+    "mpGridAndLimbOn" : False
+    "mpGeophysicalLineColor" : "background"
+    "mpGeophysicalLineThicknessF" : 1.5
+    "vpXF"      : vpx        ; set viewport
+    "vpYF"      : vpy
+    "vpWidthF"  : vpwidth
+    "vpHeightF" : vpheight
+;
+  end create
+;
+  txres = True
+  txres@txFont = 4
+  txres@txFontColor = 0
+  txres@txFontHeightF = 0.008
+  labels = new(4,graphic)
+  labels(0) = gsn_add_text(wid,mpid,"90W",-90,-85,txres)
+  labels(1) = gsn_add_text(wid,mpid,"90E",90,-85,txres)
+  labels(2) = gsn_add_text(wid,mpid,"30N",5,30,txres)
+  labels(3) = gsn_add_text(wid,mpid,"30S",5,-30,txres)
+;
+end if
+;
+if (domainname .eq. "129" .or. domainname .eq. "228") then
 ;
   mpid = create "mapplot" mapPlotClass wid
 ;

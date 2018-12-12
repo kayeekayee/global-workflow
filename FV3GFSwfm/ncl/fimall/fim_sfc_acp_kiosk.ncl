@@ -5,6 +5,13 @@ modl = getenv("MODL")
 interval = getenv("FCST_INTERVAL")
 interval = 6
 ;
+str = str_match(modl, "FV3")
+if (.not.ismissing(str)) then
+  fv3 = True
+else
+  fv3 = False
+end if
+;
 load "$NCL_HOME/obj/cmap1_track2.ncl"
 ;
 begin
@@ -109,7 +116,11 @@ if (domainname .eq. "fim") then
       exit
     end if
 ;
-    t32 = grb_file->$T2M$(:,:) - 273.15
+    if (fv3) then
+      t32 = grb_file->$T2M$(0,:,:) - 273.15
+    else
+      t32 = grb_file->$T2M$(:,:) - 273.15
+    end if
     t32 = t32 * 9/5 + 32 ; Convert to F
 ;
     mvar = grb_file->$MSLP$(:,:) / 100. ; convert from Pa to mb
