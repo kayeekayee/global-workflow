@@ -52,7 +52,8 @@
               tcucns, train, el_pbl, exch_h, vdifftt, vdiffmois, dconvmois, nradtt,             &
               o3vdiff, o3prod, o3tndy, mwpv, qqg, vdiffzacce, zgdrag,cnvctummixing,         &
               vdiffmacce, mgdrag, cnvctvmmixing, ncnvctcfrac, cnvctumflx, cnvctdmflx,           &
-              cnvctzgdrag, sconvmois, cnvctmgdrag, cnvctdetmflx, duwt, duem, dusd, dudp
+              cnvctzgdrag, sconvmois, cnvctmgdrag, cnvctdetmflx, duwt, duem, dusd, dudp,   &
+              ref_10cm
       use vrbls2d, only: f, pd, fis, pblh, ustar, z0, ths, qs, twbs, qwbs, avgcprate,           &
               cprate, avgprec, prec, lspa, sno, si, cldefi, th10, q10, tshltr, pshltr,          &
               tshltr, albase, avgalbedo, avgtcdc, czen, czmean, mxsnal, radot, sigt4,           &
@@ -1025,6 +1026,29 @@
         endif
        if(debugprint)print*,'sample l ',VarName,' = ',ll,q2(isa,jsa,ll)
 
+! Read model derived radar ref.
+       VarName='ref3D'
+        recn = 0
+        call getrecn(recname,reclevtyp,reclev,nrec,varname,VcoordName,l,recn)
+        if(recn /=0 ) then
+!$omp parallel do private(i,j,js)
+          do j=jsta,jend
+            js = fldst + (j-jsta)*im
+            do i=1,im
+              ref_10cm(i,j,ll) = tmp(i+js)
+            enddo
+          enddo
+        else
+!$omp parallel do private(i,j)
+          do j=jsta,jend
+            do i=1,im
+              ref_10cm(i,j,ll) = spval
+            end do
+          end do
+          if(me==0)print*,'fail to read ', varname,' at lev ',ll
+        endif
+       if(debugprint)print*,'sample l ',VarName,' = ',ll,ref_10cm(isa,jsa,ll)
+
 
       end do ! do loop for l
 
@@ -1337,7 +1361,7 @@
           ,l,nrec,fldsize,spval,tmp &
           ,recname,reclevtyp,reclev,VarName,VcoordName &
           ,dust(1:im,jsta_2l:jend_2u,ll,1))
-           
+
 !        if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,1)
         end do ! do loop for l      
       
@@ -1429,7 +1453,7 @@
         end do ! do loop for l
 
         !VarName='ss002'
-        VarName='seas1'
+        VarName='seas2'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1442,7 +1466,7 @@
         end do ! do loop for l
 
         !VarName='ss003'
-        VarName='seas2'
+        VarName='seas3'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1459,7 +1483,7 @@
         end do ! do loop for l
 
         !VarName='ss004'
-        VarName='seas3'
+        VarName='seas4'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1470,7 +1494,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,4)
         end do ! do loop for l
 
-        VarName='seas4'
+        VarName='seas5'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1480,8 +1504,9 @@
           ,salt(1:im,jsta_2l:jend_2u,ll,5))
             
           ssallcb(1:im,jsta_2l:jend_2u)=ssallcb(1:im,jsta_2l:jend_2u)+ &
-         (salt(1:im,jsta_2l:jend_2u,ll,2)+salt(1:im,jsta_2l:jend_2u,ll,3)+ &
-          salt(1:im,jsta_2l:jend_2u,ll,4)+salt(1:im,jsta_2l:jend_2u,ll,5))* &
+         (salt(1:im,jsta_2l:jend_2u,ll,1)+salt(1:im,jsta_2l:jend_2u,ll,2)+ &
+          salt(1:im,jsta_2l:jend_2u,ll,3)+ &
+          salt(1:im,jsta_2l:jend_2u,ll,4)*0.83)* &
            dpres(1:im,jsta_2l:jend_2u,ll)/grav
 
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,5)
@@ -1720,18 +1745,20 @@
 
 !      PM10 concentration
        dusmass(i,j)=(dust(i,j,l,1)+dust(i,j,l,2)+dust(i,j,l,3)+ &
-       0.74*dust(i,j,l,4)+salt(i,j,l,2)+salt(i,j,l,3)+salt(i,j,l,4) + &
+       0.74*dust(i,j,l,4)+salt(i,j,l,1)+salt(i,j,l,2)+salt(i,j,l,3)+ &
+       salt(i,j,l,4) + &
        salt(i,j,l,5)+soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
        waso(i,j,l,2) +suso(i,j,l,1)+pp25(i,j,l,1)+pp10(i,j,l,1)) &
        *RHOMID(i,j,l)  !ug/m3
 
 !      PM25 dust and seasalt      
        dustpm(i,j)=(dust(i,j,l,1)+0.38*dust(i,j,l,2))*RHOMID(i,j,l) !ug/m3
-       sspm(i,j)=(salt(i,j,l,2)+0.83*salt(i,j,l,3))*RHOMID(i,j,l)  !ug/m3 
+       sspm(i,j)=(salt(i,j,l,1)+salt(i,j,l,2)+ &
+       0.83*salt(i,j,l,3))*RHOMID(i,j,l)  !ug/m3 
 
 !      PM25 concentration       
        dusmass25(i,j)=(dust(i,j,l,1)+0.38*dust(i,j,l,2)+ &
-       salt(i,j,l,2)+0.83*salt(i,j,l,3) + &
+       salt(i,j,l,1)+salt(i,j,l,2)+0.83*salt(i,j,l,3) + &
        soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
        waso(i,j,l,2) +suso(i,j,l,1)+pp25(i,j,l,1))*RHOMID(i,j,l)  !ug/m3
 
@@ -2247,36 +2274,6 @@
 
 ! TG is not used, skip it for now
 
-      allocate(p2d(im,lm),t2d(im,lm),q2d(im,lm),cw2d(im,lm),          &
-               qs2d(im,lm),cfr2d(im,lm))
-      do j=jsta,jend
-!$omp parallel do private(i,k,es)
-        do k=1,lm
-          do i=1,im
-          p2d(i,k)  = pmid(i,j,k)*0.01
-          t2d(i,k)  = t(i,j,k)
-          q2d(i,k)  = q(i,j,k)
-          cw2d(i,k) = cwm(i,j,k)
-          es = min(fpvsnew(t(i,j,k)),pmid(i,j,k))
-          qs2d(i,k) = eps*es/(pmid(i,j,k)+epsm1*es)!saturation q for GFS
-          enddo
-        enddo
-        call progcld1                                                 &
-!...................................
-!  ---  inputs:
-             ( p2d,t2d,q2d,qs2d,cw2d,im,lm,0,                         &
-!  ---  outputs:
-               cfr2d                                                  &
-              )
-!$omp parallel do private(i,k)
-        do k=1,lm
-          do i=1,im
-            cfr(i,j,k) = cfr2d(i,k)
-          enddo
-        end do
-      end do
-      deallocate(p2d,t2d,q2d,qs2d,cw2d,cfr2d)
-       
 ! GFS does not have inst cloud fraction for high, middle, and low cloud
 !$omp parallel do private(i,j)
       do j=jsta_2l,jend_2u

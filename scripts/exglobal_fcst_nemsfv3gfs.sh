@@ -35,8 +35,8 @@ machine=${machine:-"WCOSS_C"}
 machine=$(echo $machine | tr '[a-z]' '[A-Z]')
 
 # Cycling and forecast hour specific parameters
-CASE=${CASE:-C96}
-CDATE=${CDATE:-2016100300}
+CASE=${CASE:-C768}
+CDATE=${CDATE:-2017032500}
 CDUMP=${CDUMP:-gdas}
 FHMIN=${FHMIN:-0}
 FHMAX=${FHMAX:-9}
@@ -141,8 +141,8 @@ if [ $MEMBER -lt 0 ]; then
   rprefix=$rCDUMP
   memchar=""
 else
-  prefix=enkf.$CDUMP
-  rprefix=enkf.$rCDUMP
+  prefix=enkf$CDUMP
+  rprefix=enkf$rCDUMP
   memchar=mem$(printf %03i $MEMBER)
 fi
 PDY=$(echo $CDATE | cut -c1-8)
@@ -241,6 +241,8 @@ fi
 nfiles=$(ls -1 $DATA/INPUT/* | wc -l)
 if [ $nfiles -le 0 ]; then
   echo "Initial conditions must exist in $DATA/INPUT, ABORT!"
+  msg=”"Initial conditions must exist in $DATA/INPUT, ABORT!"
+  postmsg "$jlogfile" "$msg"
   exit 1
 fi
 
@@ -736,7 +738,7 @@ cat > input.nml <<EOF
   dspheat      = ${dspheat:-".true."}
   hybedmf      = ${hybedmf:-".true."}
   random_clds  = ${random_clds:-".true."}
-  trans_trac   = ${trans_trac:-".true."}
+  trans_trac   = ${trans_trac:-".false."}
   cnvcld       = ${cnvcld:-".true."}
   imfshalcnv   = ${imfshalcnv:-"2"}
   imfdeepcnv   = ${imfdeepcnv:-"2"}
@@ -751,6 +753,8 @@ cat > input.nml <<EOF
   nst_anl      = $nst_anl
   psautco      = ${psautco:-"0.0008,0.0005"}
   prautco      = ${prautco:-"0.00015,0.00015"}
+  lgfdlmprad   = ${lgfdlmprad:-".false."}
+  effr_in      = ${effr_in:-".false."}
   $gfs_physics_nml
 /
 
@@ -875,7 +879,7 @@ cat > input.nml <<EOF
   phot_opt=1
   photdt=60
   plumerisefire_frq=30
-  seas_opt=1
+  seas_opt=2
   vertmix_onoff=1
   gfdlmp_onoff=$NTRACER
   archive_step = $OUTTIME

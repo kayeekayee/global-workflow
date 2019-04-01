@@ -168,7 +168,10 @@ contains
 
     call nemsio_open(gfile,trim(adjustl(filename)),'read',              &
          & iret=nemsio_iret)
-    if ( nemsio_iret /= 0 ) stop 2
+    if ( nemsio_iret /= 0 ) then
+       write(0,*) 'cannot open for read: ',trim(adjustl(filename))
+       stop 2
+    end if
     call nemsio_getfilehead(gfile,iret=nemsio_iret,                     &
          & dimx=meta_nemsio%dimx,                                       &
          & dimy=meta_nemsio%dimy,                                       &
@@ -192,12 +195,14 @@ contains
          & nfsecondn=meta_nemsio%nfsecondn,                             &
          & nfsecondd=meta_nemsio%nfsecondd)
     if ( nemsio_iret /= 0 ) stop 4
-    if (.not. allocated(meta_nemsio%recname)) &
+    !if (.not. allocated(meta_nemsio%recname)) & !lzhang
+    if ( allocated(meta_nemsio%recname)) deallocate(meta_nemsio%recname)
         allocate(meta_nemsio%recname(meta_nemsio%nrec))
     call nemsio_getfilehead(gfile,iret=nemsio_iret,                     &
          & recname=meta_nemsio%recname)
     if ( nemsio_iret /= 0 ) stop 5
-    if (.not. allocated(meta_nemsio%reclev)) &
+    !if (.not. allocated(meta_nemsio%reclev)) & !lzhang
+    if ( allocated(meta_nemsio%reclev)) deallocate(meta_nemsio%reclev)
         allocate(meta_nemsio%reclev(meta_nemsio%nrec))
     call nemsio_getfilehead(gfile,iret=nemsio_iret,                     &
          & reclev=meta_nemsio%reclev)

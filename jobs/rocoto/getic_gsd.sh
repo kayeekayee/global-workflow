@@ -53,7 +53,10 @@ echo "CDATE = $CDATE"
 echo "CDUMP = $CDUMP"
 echo "ICSDIR = $ICSDIR"
 echo "PUBDIR = $PUBDIR"
+echo "GFSDIR = $GFSDIR"
+echo "ARCDIR = $ARCDIR"
 echo "GDASDIR = $GDASDIR"
+echo "GDASDIR1 = $GDASDIR1" ##for retro run path
 echo "ROTDIR = $ROTDIR"
 echo "PSLOT = $PSLOT"
 echo
@@ -64,43 +67,48 @@ fv3ic_dir=$ICSDIR/${CDATE}/${CDUMP}
 ## create links in FV3ICS directory
 mkdir -p $fv3ic_dir
 cd $fv3ic_dir
+echo "YYYYMMDDHH:  ${yyyymmdd}${hh}"
 echo "making link to nemsio files under $fv3ic_dir"
+
 if [[ -f $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio ]]
 then
   ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio sfcanl.gfs.${CDATE}
   ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.atmanl.nemsio siganl.gfs.${CDATE}
-#  if [[ -f $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
-#  then 
-#    ln -fs $PUBDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
-#  fi
-else 
-  if [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio ]]
+elif  [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio ]]
   then
     ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.sfcanl.nemsio sfcanl.gfs.${CDATE}
     ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.atmanl.nemsio siganl.gfs.${CDATE}
-#    if [[ -f $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio ]] 
-#    then
-#      ln -fs $ARCDIR/${yyddd}${hh}00.${CDUMP}.t${hh}z.nstanl.nemsio nstanl.gfs.${CDATE}
-#    fi 
+  fi
+else
+  gfsfile=$GFSDIR/${yyyy}/${mm}/${dd}/data/grids/gfs/nemsio/${yyyymmdd}${hh}00.zip
+  hsi -q list $gfsfile
+  status=$?
+  if [[ $status -ne 0 ]]; then
+    echo "missing $gfsfile on mass store..."
+    exit 1
+  fi
+  hsi get $gfsfile
+  unzip -o ${yyyymmdd}${hh}00.zip ${yyddd}${hh}00.gfs.t${hh}z.atmanl.nemsio ${yyddd}${hh}00.gfs.t${hh}z.sfcanl.nemsio
+  rc=$?
+  if [ $rc -ne 0 ]; then
+      echo "unzipping ${yyyymmdd}${hh}00.zip failed, ABORT!"
+      exit $rc
+  fi
+  rm -rf ${yyyymmdd}${hh}00.zip
+  if [[ -f ${yyddd}${hh}00.gfs.t${hh}z.sfcanl ]]; then
+    ln -fs ${yyddd}${hh}00.gfs.t${hh}z.sfcanl.nemsio sfcanl.gfs.${CDATE}
+    ln -fs ${yyddd}${hh}00.gfs.t${hh}z.atmanl.nemsio siganl.gfs.${CDATE}
   fi
 fi
 
-echo "YYYYMMDDHH:  ${yyyymmdd}${hh}"
-gdasfile=$GDASDIR/${yyyymmdd}${hh}/gdas.tar
-hsi -q list $gdasfile
-status=$?
-if [[ $status -ne 0 ]]; then
-  echo "missing $gdasfile on mass store..."
-  exit 1
-fi
-htar -xvf ${gdasfile} ./gdas.${yyyymmdd}/${hh}/gdas.t${hh}z.atmanl.nemsio
 
-        rc=$?
-        if [ $rc -ne 0 ]; then
-            echo "untarring $tarball failed, ABORT!"
-            exit $rc
-        fi
-mv ./gdas.${yyyymmdd}/${hh}/gdas.t${hh}z.atmanl.nemsio .
-rm -rf ./gdas.${yyyymmdd}
-echo $hpss_dir
+# /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1/201804110/gdas.tar 
+#      ./gdas.20180411/00/gdas.t00z.atmanl.nemsio
+#      ./gdas.20180411/00/gdas.t00z.sfcanl.nemsio
+#
+if [[ -f $GDASDIR/${yyddd}${hh}00.gdas.t${hh}z.atmanl.nemsio ]]; then
+  ln -fs $GDASDIR/${yyddd}${hh}00.gdas.t${hh}z.atmanl.nemsio gdas.t${hh}z.atmanl.nemsio
+fi
+
+echo $GDASDIR
 echo $gdasfile

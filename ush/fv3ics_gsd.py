@@ -1,11 +1,4 @@
 #!/usr/bin/env python
-###############################################################
-# < next few lines under version control, D O  N O T  E D I T >
-# $Date$
-# $Revision$
-# $Author$
-# $Id$
-###############################################################
 
 
 import os
@@ -27,8 +20,10 @@ def set_machine():
 
     if os.path.isdir('/scratch4'):
         return 'THEIA'
-    elif os.path.isdir('/gpfs'):
+    elif os.path.isdir('/gpfs/hps2'):
         return 'WCOSS_C'
+    elif os.path.isdir('/gpfs/dell2'):
+        return 'WCOSS_DELL_P3'
     else:
         raise NotImplementedError('Unknown machine')
 
@@ -41,6 +36,9 @@ def set_paths():
     elif machine in ['WCOSS_C']:
         homegfs = "/gpfs/hps3/emc/global/noscrub/emc.glopara/git/fv3gfs/gfs.v15.0.0"
         stmp = "/gpfs/hps3/stmp/%s" % os.environ['USER']
+    elif machine in ['WCOSS_DELL_P3']:
+        homegfs = "/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/fv3gfs/gfs.v15.0.0"
+        stmp = "/gpfs/dell2/stmp/%s" % os.environ['USER']
 
     return homegfs, stmp
 
@@ -50,6 +48,8 @@ def get_accountinfo():
     if machine in ['THEIA']:
         queue, account = 'batch', 'gsd-fv3'
     elif machine in ['WCOSS_C']:
+        queue, account = 'dev', 'FV3GFS-T2O'
+    elif machine in ['WCOSS_DELL_P3']:
         queue, account = 'dev', 'FV3GFS-T2O'
 
     return queue, account
@@ -61,7 +61,7 @@ def get_jobcard():
 
     mdict = {'queue':queue, 'account': account, 'icsdir':icsdir, 'date':date, 'pwd':os.environ['PWD'], 'nthreads':nthreads}
 
-    if machine in ['WCOSS_C']:
+    if machine in ['WCOSS_C', 'WCOSS_DELL_P3']:
 
         strings = '''
 #BSUB -J fv3ics_<TEMPLATE_MEMBER>
@@ -69,11 +69,21 @@ def get_jobcard():
 #BSUB -q {queue}
 #BSUB -W 0:30
 #BSUB -M 3072
-#BSUB -extsched 'CRAYLINUX[]' -R '1*{{select[craylinux && !vnode]}} + 24*{{select[craylinux && vnode]span[ptile=24] cu[type=cabinet]}}'
 #BSUB -e {icsdir}/{date}/<TEMPLATE_CASE>/<TEMPLATE_MEMBER>/fv3ics.log
 #BSUB -o {icsdir}/{date}/<TEMPLATE_CASE>/<TEMPLATE_MEMBER>/fv3ics.log
 #BSUB -cwd {pwd}
 '''.format(**mdict)
+
+        if machine in ['WCOSS_C']:
+            strings += '''
+#BSUB -extsched 'CRAYLINUX[]' -R '1*{{select[craylinux && !vnode]}} + 24*{{select[craylinux && vnode]span[ptile=24] cu[type=cabinet]}}'
+'''
+        elif machine in ['WCOSS_DELL_P3']:
+            strings += '''
+#BSUB -n 1
+#BSUB -R span[ptile=1]
+#BSUB -R affinity[core(28):distribute=balance]
+'''
 
     elif machine in ['THEIA']:
 
@@ -96,12 +106,9 @@ def get_jobtemplate():
 
     strings += get_jobcard()
 
-    mdict = {'machine':machine, 'homegfs':homegfs, 'stmp':stmp, 'date':date, 'icsdir':icsdir, 'nthreads':nthreads
-    }
+    mdict = {'homegfs':homegfs, 'stmp':stmp, 'date':date, 'icsdir':icsdir, 'nthreads':nthreads}
     strings += '''
 set -x
-export machine={machine}
-target=$(echo $machine | tr '[A-Z]' '[a-z]')
 
 export HOMEgfs={homegfs}
 export STMP={stmp}
@@ -126,7 +133,11 @@ export SFCANL=$INIDIR/<TEMPLATE_SFC>
     if machine in ['WCOSS_C']:
         strings += '''
 export APRUNC="aprun -j 1 -n 1 -N 1 -d $OMP_NUM_THREADS_CH -cc depth"
-target="cray"
+'''
+
+    if machine in ['WCOSS_DELL_P3']:
+        strings += '''
+export APRUNC="mpirun -n 1"
 '''
 
     strings += '''
@@ -134,11 +145,8 @@ target="cray"
 [[ -d $OUTDIR ]] && rm -rf $OUTDIR
 mkdir -p $OUTDIR
 
-# Load appropriate modulefiles for global_chgres
-source $HOMEgfs/modulefiles/module-setup.sh.inc
-module use $HOMEgfs/modulefiles/fv3gfs
-module load $HOMEgfs/modulefiles/module_base.wcoss_c
-module load global_chgres.$target
+# Load fv3gfs modules
+source $HOMEgfs/ush/load_fv3gfs_modules.sh
 module list
 
 $HOMEgfs/ush/global_chgres_driver.sh
@@ -167,7 +175,7 @@ def get_submitcmd():
 
     if machine in ['THEIA']:
         cmd = 'qsub'
-    elif machine in ['WCOSS_C']:
+    elif machine in ['WCOSS_C', 'WCOSS_DELL_P3']:
         cmd = 'bsub <'
 
     return cmd
@@ -237,6 +245,7 @@ def main():
     icsdirdoc.append('\t\t\t\t\t...\n')
 
     parser = argparse.ArgumentParser(usage=''.join(icsdirdoc), formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--homegfs', help='full path to HOMEgfs', type=str, required=False, default='glopara')
     parser.add_argument('--date', help='date of initial conditions to convert from GFS to FV3', type=str, metavar='YYYYMMDDHH', required=True)
     parser.add_argument('--icsdir', help='full path to initial conditions directory', type=str, required=True)
     parser.add_argument('--cdump', help='cycle', type=str, required=False, default='gdas')
@@ -255,6 +264,7 @@ def main():
         print '\n'
         sys.exit(1)
 
+    homegfs_inp = input_args.homegfs
     date = input_args.date
     icsdir = input_args.icsdir
     CASE_det = input_args.CASE_det
@@ -275,7 +285,8 @@ def main():
     chgres_ens = False if CASE_ens is None else True
 
     machine = set_machine()
-    homegfs, stmp = set_paths()
+    homegfs_def, stmp = set_paths()
+    homegfs = homegfs_def if homegfs_inp == 'glopara' else homegfs_inp
 
     nsst = True if os.path.exists('%s/%s/T%s/%s.nstanl.%s' % (icsdir, date, JCAP_det, prefix, suffix)) else False
 

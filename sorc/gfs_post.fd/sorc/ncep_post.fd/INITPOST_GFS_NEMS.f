@@ -1009,7 +1009,7 @@
         end do ! do loop for l
 
         !VarName='ss002'
-        VarName='seas1'
+        VarName='seas2'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1020,7 +1020,7 @@
         end do ! do loop for l
 
         !VarName='ss003'
-        VarName='seas2'
+        VarName='seas3'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1031,7 +1031,7 @@
         end do ! do loop for l
 
         !VarName='ss004'
-        VarName='seas3'
+        VarName='seas4'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1
@@ -1041,7 +1041,7 @@
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,4)
         end do ! do loop for l
 
-        VarName='seas4'
+        VarName='seas5'
         VcoordName='mid layer'
         do l=1,lm
           ll=lm-l+1

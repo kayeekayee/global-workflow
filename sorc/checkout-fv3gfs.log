@@ -1,0 +1,17 @@
+Cloning into 'fv3gfs.fd'...
+Total 11043 (delta 6465), reused 11017 (delta 6465)
+Submodule 'FMS' (git://github.com/NOAA-EMC/FMS) registered for path 'FMS'
+Submodule 'FV3' (gerrit:FV3) registered for path 'FV3'
+Submodule 'NEMS' (gerrit:NEMS) registered for path 'NEMS'
+Cloning into 'FMS'...
+Submodule path 'FMS': checked out 'd4937c8aeb927f0ff33fc59845da386502350d16'
+Cloning into 'FV3'...
+Total 7746 (delta 5180), reused 7728 (delta 5180)
+Submodule path 'FV3': checked out '0458a97ba2e5fb183e46707813631c29e9f85f95'
+Cloning into 'NEMS'...
+Total 29042 (delta 3), reused 29033 (delta 3)
+Submodule path 'NEMS': checked out 'f84e9836d39ee47f292f22e0f52fdb17231367c9'
+Submodule 'tests/produtil/NCEPLIBS-pyprodutil' (gerrit:NCEPLIBS-pyprodutil) registered for path 'tests/produtil/NCEPLIBS-pyprodutil'
+Cloning into 'tests/produtil/NCEPLIBS-pyprodutil'...
+Total 140 (delta 0), reused 140 (delta 0)
+Submodule path 'NEMS/tests/produtil/NCEPLIBS-pyprodutil': checked out '231628a66feeb00594dca973308c182add86e0a9'

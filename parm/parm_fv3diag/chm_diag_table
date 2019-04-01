@@ -42,6 +42,7 @@
  "gfs_dyn",    "seas2",       "seas2",        "fv3_history",    "all",  .false.,  "none",  2
  "gfs_dyn",    "seas3",       "seas3",        "fv3_history",    "all",  .false.,  "none",  2
  "gfs_dyn",    "seas4",       "seas4",        "fv3_history",    "all",  .false.,  "none",  2
+ "gfs_dyn",    "seas5",       "seas5",        "fv3_history",    "all",  .false.,  "none",  2
  "gfs_dyn",    "pp10",        "pp10",         "fv3_history",    "all",  .false.,  "none",  2
 
 

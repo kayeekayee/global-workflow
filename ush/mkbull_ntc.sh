@@ -62,7 +62,13 @@ do
       pgrbfile="sstgrb"
       pgrbifile="sstgrb.index"
 #      cp $COMIN/${RUN}.${cycle}.${pgrbfile}  ${pgrbfile}
-      cp $COMIN/${RUN}.${cycle}.${pgrbfile}.grib2  .
+      cp $COMIN/${cyc}/${RUN}.${cycle}.${pgrbfile}.grib2  .
+      export err=$?
+      if [[ $err -ne 0 ]] ; then
+         echo " File ${RUN}.${cycle}.${pgrbfile}.grib2 does not exist."
+         exit $err
+      fi
+
       $CNVGRIB -g21 ${RUN}.${cycle}.${pgrbfile}.grib2  $pgrbfile
       $GRBINDEX $pgrbfile $pgrbifile
    else
@@ -72,7 +78,13 @@ do
    fi
    if test ! -f $pgrbfile
    then
-      cp $COMIN/${RUN}.${cycle}.$pgrb2file .
+      cp $COMIN/${cyc}/${RUN}.${cycle}.$pgrb2file .
+      export err=$?
+      if [[ $err -ne 0 ]] ; then
+         echo " File ${RUN}.${cycle}.$pgrb2file does not exist."
+         exit $err
+      fi
+
       $CNVGRIB -g21 ${RUN}.${cycle}.$pgrb2file $pgrbfile
    fi
 
@@ -99,7 +111,7 @@ export err=$?;err_chk
 # Post Files to ${COMOUTwmo}
 ##############################
 
-make_ntc_bull.pl WMOBH NONE KWBC NONE $DATA/$out ${COMOUTwmo}/$out
+$UTILgfs/ush/make_ntc_bull.pl WMOBH NONE KWBC NONE $DATA/$out ${COMOUTwmo}/$out
 
 msg="mkbull_ntc.sh completed normally"
 postmsg "$jlogfile" "$msg"

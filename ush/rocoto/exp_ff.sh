@@ -3,7 +3,7 @@ COMROT=/scratch4/BMC/fim/NCEPDEV/global/noscrub/$USER/fv3gfs/comrot ## default C
 EXPDIR=/scratch4/BMC/fim/NCEPDEV/global/save/$USER/fv3gfs/expdir    ## default EXPDIR directory
 PTMP=/scratch4/BMC/fim/NCEPDEV/stmp4/$USER                          ## default PTMP directory
 STMP=/scratch4/BMC/fim/NCEPDEV/stmp3/$USER                          ## default STMP directory
-GITDIR=/home/Judy.K.Henderson/scratch/git_local/gerrit_master_24jun18_e758bda
+GITDIR=/home/Judy.K.Henderson/scratch/git_local/gerrit_master_15Dec18_cc32f99
 
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 #         create link $COMROT/FV3ICS to point to /scratch4/BMC/rtfim/rtruns/FV3GFS/FV3ICS

@@ -100,7 +100,7 @@ then
 # produce flux file, the default will be /nwprod/parm/gfs_cntrl.parm
 
    if [ $GRIBVERSION = 'grib2' ]; then
-     export POSTGRB2TBL=${POSTGRB2TBL:-${NWROOT}/lib/g2tmpl/${g2tmpl_ver}/src/params_grib2_tbl_new}
+     export POSTGRB2TBL=${POSTGRB2TBL:-${G2TMPL_SRC}/params_grib2_tbl_new}
      export PostFlatFile=${PostFlatFile:-$PARMpost/postxconfig-NT-GFS-ANL.txt} 
      export CTLFILE=$PARMpost/postcntrl_gfs_anl.xml
    fi
@@ -121,8 +121,7 @@ then
 #   export fhr=00
     
    $POSTGPSH
-   export err=$?
-   err_chk
+   export err=$?; err_chk
 
 
    if test $GRIBVERSION = 'grib2'
@@ -133,6 +132,7 @@ then
      export FH=-1
      export downset=${downset:-1}
      $GFSDOWNSH
+     export err=$?; err_chk
 
      export fhr3=anl
     
@@ -241,7 +241,7 @@ do
     export OUTTYP=${OUTTYP:-4}
 
     if [ $GRIBVERSION = 'grib2' ] ; then
-      export POSTGRB2TBL=${POSTGRB2TBL:-${NWROOT}/lib/g2tmpl/${g2tmpl_ver}/src/params_grib2_tbl_new}
+      export POSTGRB2TBL=${POSTGRB2TBL:-${G2TMPL_SRC}/params_grib2_tbl_new}
       export PostFlatFile=$PARMpost/postxconfig-NT-GFS.txt
       if [ $RUN = gfs ] ; then
         export IGEN=$IGEN_GFS
@@ -269,10 +269,6 @@ do
       fi
     fi
     
-#    export SIGINP=sigfile
-#    export NEMSINP=${NEMSINP:-nemsfile}
-#    export SFCINPUT=sfcfile
-#    export FLXINP=${FLXINP:-flxfile}
     export FLXIOUT=flxifile
     export PGBOUT=pgbfile
     export PGIOUT=pgifile
@@ -281,8 +277,7 @@ do
     export FILTER=1
     
     $POSTGPSH
-    export err=$?
-    err_chk
+    export err=$?; err_chk
 
     if test $GRIBVERSION = 'grib2'
     then
@@ -293,6 +288,7 @@ do
     export FH=`expr $fhr + 0`
     export downset=${downset:-1}
     $GFSDOWNSH
+    export err=$?; err_chk
 
     
     if [ $SENDDBN = YES ]; then
@@ -303,8 +299,8 @@ do
       $DBNROOT/bin/dbn_alert MODEL ${run}_PGB_GB2_WIDX $job $COMOUT/${PREFIX}pgrb2.1p00.f${fhr}.idx
 #      $DBNROOT/bin/dbn_alert MODEL ${run}_PGB_GB2 $job $COMOUT/${RUN}.${cycle}.pgrb2.0p50.f${fhr3}
 #      $DBNROOT/bin/dbn_alert MODEL ${run}_PGB_GB2_WIDX $job $COMOUT/${RUN}.${cycle}.pgrb2.0p50.f${fhr3}.idx
-      $DBNROOT/bin/dbn_alert MODEL ${run}_PGB $job $COMOUT/${PREFIX}pgrbf${fhr}
-      $DBNROOT/bin/dbn_alert MODEL ${run}_PGBI $job $COMOUT/${PREFIX}pgrbif${fhr}
+#      $DBNROOT/bin/dbn_alert MODEL ${run}_PGB $job $COMOUT/${PREFIX}pgrbf${fhr}
+#      $DBNROOT/bin/dbn_alert MODEL ${run}_PGBI $job $COMOUT/${PREFIX}pgrbif${fhr}
     fi
     
 #    echo "$PDY$cyc$fhr" > $COMOUT/${RUN}.t${cyc}z.${RUN_FLAG}control

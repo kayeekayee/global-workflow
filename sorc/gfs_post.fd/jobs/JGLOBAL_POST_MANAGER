@@ -4,17 +4,37 @@
 # GFS post manager
 ########################################
 
-set -xa
+export RUN_ENVIR=${RUN_ENVIR:-"nco"}
+export PS4='$SECONDS + '
+date
+
+#############################
+# Source relevant config files
+#############################
+set -x
+configs="base post"
+export EXPDIR=${EXPDIR:-$HOMEgfs/parm/config}
+config_path=${EXPDIR:-$NWROOT/gfs.${gfs_ver}/parm/config}
+for config in $configs; do
+    . $config_path/config.$config
+    status=$?
+    [[ $status -ne 0 ]] && exit $status
+done
+
+
+##########################################
+# Source machine runtime environment
+##########################################
+. $HOMEgfs/env/${machine}.env post
+status=$?
+[[ $status -ne 0 ]] && exit $status
+
+set -xue
 # #### 07/30/1999 ###################
 # SET SHELL PROCESSING VARIABLES
 # ###################################
 export PS4='$SECONDS + ' 
 date
-
-####################################
-# Specify whether the run is production or development
-####################################
-export envir=${envir:-prod}
 
 ####################################
 # Specify NET and RUN Name and model
@@ -26,15 +46,9 @@ export RUN=${RUN:-gfs}
 # obtain unique process id (pid) and make temp directories
 ####################################
 export pid=${pid:-$$}
-export DATAROOT=${DATAROOT:-/tmpnwprd1}
-export DATA=${DATA:-$DATAROOT/${job}_${envir}.${pid}}
+export DATA=${DATA:-${DATAROOT}/${jobid:?}}
 mkdir $DATA
 cd $DATA 
-
-####################################
-# File To Log Msgs
-####################################
-export jlogfile=${jlogfile:-${COMROOT}/logs/jlogfiles/jlogfile.${job}.${pid}}
 
 ####################################
 # Determine Job Output Name on System
@@ -47,13 +61,6 @@ export pgmout="OUTPUT.${pid}"
 # Specify version numbers
 ####################################
 export gfs_ver=${gfs_ver:-v15.0.0}
-
-####################################
-# SENDCOM  - Copy Files From TMPDIR to $COMOUT
-# SENDECF  - Flag Events on ECF
-####################################
-export SENDCOM=${SENDCOM:-YES}
-export SENDECF=${SENDECF:-YES}
 
 ####################################
 # Specify Execution Areas
@@ -83,16 +90,10 @@ export cycle=t${cyc}z
 setpdy.sh
 . PDY
 
-##############################################
-# Define COM directories
-##############################################
-#export COMIN=${COMIN:-$COMROOT/${NET}/${envir}/${RUN}.${PDY}/${cyc}}
-export COMIN=${COMIN:-$(compath.py ${NET}/${envir}/${RUN}.${PDY})/${cyc}}
-export COMOUT=${COMOUT:-${COMROOT:?}/${NET}/${envir}/${RUN}.${PDY}/${cyc}}
+export ROTDIR=${COMROOT:?}/$NET/$envir
+export COMIN=${COMIN:-$ROTDIR/$RUN.$PDY/$cyc}
+export COMOUT=${COMOUT:-$ROTDIR/$RUN.$PDY/$cyc}
 
-mkdir -p $COMOUT
-
-env
 
 ########################################################
 # Execute the script.

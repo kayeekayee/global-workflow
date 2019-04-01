@@ -11,7 +11,7 @@ date
 ##########################################################
 # obtain unique process id (pid) and make temp directory
 ##########################################################
-export DATA=${DATA:-${DATAROOT}/${jobid}}
+export DATA=${DATA:-${DATAROOT}/${jobid:?}}
 mkdir -p $DATA
 cd $DATA
 
@@ -26,22 +26,13 @@ export cycle=${cycle:-t${cyc}z}
 setpdy.sh
 . PDY
 
-############################################
-# SENDCOM=YES--Copy output file to /com
-# SENDECF=YES--Allow to talk back to ECF
-# SENDDBN=YES--Alert output file to TOC
-# KEEPDATA=NO--Remove temporary working
-############################################
-export SENDCOM=${SENDCOM:-YES}
-export SENDDBN=${SENDDBN:-YES}
-export SENDECF=${SENDECF:-YES}
-
 ################################
 # Set up the HOME directory
 ################################
 export HOMEgfs=${HOMEgfs:-${NWROOT}/gfs.${gfs_ver}}
 export EXECgfs=${EXECgfs:-$HOMEgfs/exec}
 export PARMgfs=${PARMgfs:-$HOMEgfs/parm}
+export EXPDIR=${EXPDIR:-$HOMEgfs/parm/config}
 export FIXgfs=${FIXgfs:-$HOMEgfs/gempak/fix}
 export USHgfs=${USHgfs:-$HOMEgfs/gempak/ush}
 export SRCgfs=${SRCgfs:-$HOMEgfs/scripts}
@@ -77,7 +68,7 @@ export model=${model:-gfs}
 # Define COM directories
 ##############################################
 export COMIN=${COMIN:-$(compath.py ${NET}/${envir}/${RUN}.${PDY})/${cyc}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/${cyc}/nawips}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/${cyc}/gempak}
 
 if [ $SENDCOM = YES ] ; then
   mkdir -m 775 -p $COMOUT
@@ -94,6 +85,10 @@ rm -f poescript
 ##################################################################
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.1 " >>poescript
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.2 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.3 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.4 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.5 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.6 " >>poescript
 
 #################################################################
 # Execute the script for the half-degree grib
@@ -101,6 +96,9 @@ echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs 384 GFS_GEMPAK &> $DATA/gfs_1p0.$$.2 
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.1 " >>poescript
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.2 " >>poescript
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.3 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.4 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.5 " >>poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p50 384 GFS_GEMPAK &> $DATA/gfs_0p5.$$.6 " >>poescript
 
 #################################################################
 # Execute the script for the quater-degree grib
@@ -111,6 +109,10 @@ echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.4 " >> poescript
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.5 " >> poescript
 echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.6 " >> poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.7 " >> poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.8 " >> poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.9 " >> poescript
+echo "time $SRCgfs/exgfs_nawips.sh.ecf gfs_0p25 384 GFS_GEMPAK &> $DATA/gfs_0p25.$$.10 " >> poescript
 
 ####################################################################
 # Execute the script to create the 35km Pacific grids for OPC
@@ -138,13 +140,15 @@ export MP_CMDFILE=$DATA/poescript
 
 ntasks=${NTASKS_GEMPAK:-$(cat $DATA/poescript | wc -l)}
 ptile=${PTILE_GEMPAK:-4}
-threads=${NTHREADS_GEMPAK:-3}
+threads=${NTHREADS_GEMPAK:-1}
 export OMP_NUM_THREADS=$threads
+APRUN="mpirun -n $ntasks cfp "
 
-APRUN="aprun -n $ntasks -N $ptile -d $threads cfp "
+APRUN_GEMPAKCFP=${APRUN_GEMPAKCFP:-$APRUN}
+APRUNCFP=$(eval echo $APRUN_GEMPAKCFP)
 
-APRUNCFP=${APRUN_GEMPAKCFP:-$APRUN}
 $APRUNCFP $DATA/poescript
+export err=$?; err_chk
 
 cat $DATA/gfs*.$$.?
 

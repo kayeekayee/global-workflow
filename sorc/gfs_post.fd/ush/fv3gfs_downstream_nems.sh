@@ -35,6 +35,7 @@ export DATA=${DATA:-/ptmpd2/$LOGNAME/test}
 export CNVGRIB=${CNVGRIB:-${NWPROD:-/nwprod}/util/exec/cnvgrib21}
 export COPYGB2=${COPYGB2:-${NWPROD:-/nwprod}/util/exec/copygb2}
 export WGRIB2=${WGRIB2:-${NWPROD:-/nwprod}/util/exec/wgrib2}
+export GRBINDEX=${GRBINDEX:-${NWPROD:-nwprod}/util/exec/grbindex}
 export RUN=${RUN:-"gfs"}
 export cycn=`echo $CDATE |cut -c 9-10`
 export TCYC=${TCYC:-".t${cycn}z."}
@@ -42,13 +43,6 @@ export PREFIX=${PREFIX:-${RUN}${TCYC}}
 export PGB1F=${PGB1F:-"NO"}
 export FHOUT_PGB=${FHOUT_PGB:-3}
 export PGBS=${PGBS:-"NO"} #YES-- generate 1.00 and 0.50 deg pgb data
-
-if [ $machine = WCOSS_C ]; then
-  . $MODULESHOME/init/sh 2>>/dev/null
-  export IOBUF_PARAMS="*:size=32M:count=4"
-  module load iobuf 2>>/dev/null
-fi
-
 
 #--wgrib2 regrid parameters
 export option1=' -set_grib_type same -new_grid_winds earth '
@@ -233,6 +227,7 @@ date
       cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.anl
       if [ "$PGB1F" = 'YES' ]; then
         cp pgbfile_${fhr3}_1p0    $COMOUT/${PREFIX}pgrb.1p00.anl
+        $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.anl $COMOUT/${PREFIX}pgrb.1p00.anl.idx
       fi
     fi
    else
@@ -245,6 +240,7 @@ date
       cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}
       if [ "$PGB1F" = 'YES' ]; then
         cp pgbfile_${fhr3}_1p0    $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}
+        $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.f${fhr3} $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}.idx
       fi
     fi
    fi
@@ -283,6 +279,7 @@ date
 #---------------------------------------------------------------
 # R&D machine has no MPDP. Only generate 0.25 and 1 deg files
 else
+#  lzhang:  for GSD, generate 0.25, 0.5 and 1.0 deg files
 #---------------------------------------------------------------
 #---------------------------------------------------------------
   $WGRIB2 tmpfile1_$fhr3  $option1 $option21 $option22 $option23 $option24 \
@@ -297,19 +294,32 @@ else
     if [ $fhr3 = anl ]; then
      $CNVGRIB -g21 pgb2file_${fhr3}_1p0  $COMOUT/${PREFIX}pgrb.1p00.anl
      export err=$?; err_chk
+     $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.anl $COMOUT/${PREFIX}pgrb.1p00.anl.idx
     else
      $CNVGRIB -g21 pgb2file_${fhr3}_1p0  $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}
      export err=$?; err_chk
+     $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.f${fhr3} $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}.idx
     fi
   fi
 
-   $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}.idx
-   cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}
-   if [ "$PGBS" = "YES" ]; then
-     $WGRIB2 -s pgb2file_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}.idx #lzhang
-     cp pgb2file_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}     #lzhang
-     $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}.idx
-     cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}
+   if [ $fhr3 = anl ]; then
+     $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.anl.idx
+     cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.anl
+     if [ "$PGBS" = "YES" ]; then
+       $WGRIB2 -s pgb2file_${fhr3}_0p5 > $COMOUT/${PREFIX}pgrb2.0p50.anl.idx
+       cp pgb2file_${fhr3}_0p5  $COMOUT/${PREFIX}pgrb2.0p50.anl
+         $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.anl.idx
+         cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.anl
+     fi
+   else
+     $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}.idx
+     cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}
+     if [ "$PGBS" = "YES" ]; then
+       $WGRIB2 -s pgb2file_${fhr3}_0p5 > $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}.idx
+       cp pgb2file_${fhr3}_0p5  $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}
+         $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}.idx
+         cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}
+     fi
    fi
 
 #---------------------------------------------------------------

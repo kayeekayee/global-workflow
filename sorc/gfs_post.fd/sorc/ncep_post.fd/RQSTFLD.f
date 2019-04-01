@@ -663,10 +663,10 @@
      &                       'SNMR ON isobaric_sfc'/
       DATA IFILV(415),AVBL(415),IQ(415),IS(415),AVBLGRB2(415)      &
      &                      /1,'GRAUPEL ON MDL SFCS ',179,109,     &
-     &                       'GRMR ON hybrid_lvl'/                         !415
+     &                       'GRLE ON hybrid_lvl'/                         !415
       DATA IFILV(416),AVBL(416),IQ(416),IS(416),AVBLGRB2(416)      &
      &                      /1,'GRAUPEL ON P SFCS   ',179,100,     &
-     &                       'GRMR ON isobaric_sfc'/                       !416
+     &                       'GRLE ON isobaric_sfc'/                       !416
 
 ! SRD
       DATA IFILV(420),AVBL(420),IQ(420),IS(420),AVBLGRB2(420)      &
@@ -1922,8 +1922,8 @@
      &                      /1,'SEASALT 4 ON MDL SFC',248,109,     &
      &                       'SS4 ON hybrid_lvl'/
       DATA IFILV(638),AVBL(638),IQ(638),IS(638),AVBLGRB2(638)      &
-     &                      /1,'SEASALT 0 ON MDL SFC',253,109,     &
-     &                       'SS0 ON hybrid_lvl'/
+     &                      /1,'SEASALT 5 ON MDL SFC',253,109,     &
+     &                       'SS5 ON hybrid_lvl'/
       DATA IFILV(639),AVBL(639),IQ(639),IS(639),AVBLGRB2(639)      &
      &                      /1,'SULFATE ON MDL SFC  ',254,109,     &
      &                       'SO4 ON hybrid_lvl'/

@@ -191,6 +191,7 @@ fi
 if (( ${FCST_TIME} >= 12 )); then
   ${LN} -s ${FV3GFS_RUN}/post/${GRID_NAME}/${yyjjjhhmm}0${FCST_TIME_BACK12}.g2 back12file.grb
   ${ECHO} "back12file.grb" > back12_file.txt
+  ls -al back12file.grb
 fi
 if (( ${FCST_TIME} >= 24 )); then
   ${LN} -s ${FV3GFS_RUN}/post/${GRID_NAME}/${yyjjjhhmm}0${FCST_TIME_BACK24}.g2 back24file.grb

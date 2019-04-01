@@ -11,7 +11,7 @@ date
 ##########################################################
 # obtain unique process id (pid) and make temp directory
 ##########################################################
-export DATA=${DATA:-${DATAROOT}/${jobid}}
+export DATA=${DATA:-${DATAROOT}/${jobid:?}}
 mkdir -p $DATA
 cd $DATA
 
@@ -26,16 +26,6 @@ export cycle=${cycle:-t${cyc}z}
 setpdy.sh
 . PDY
 
-############################################
-# SENDCOM=YES--Copy output file to /com
-# SENDECF=YES--Allow to talk back to ECF
-# SENDDBN=YES--Alert output file to TOC
-# KEEPDATA=NO--Remove temporary working
-############################################
-export SENDCOM=${SENDCOM:-YES}
-export SENDDBN=${SENDDBN:-YES}
-export SENDECF=${SENDECF:-YES}
-
 ################################
 # Set up the HOME directory
 ################################
@@ -44,10 +34,10 @@ export EXECgfs=${EXECgfs:-$HOMEgfs/exec}
 export PARMgfs=${PARMgfs:-$HOMEgfs/parm}
 export PARMwmo=${PARMwmo:-$HOMEgfs/parm/wmo}
 export PARMproduct=${PARMproduct:-$HOMEgfs/parm/product}
-export FIXgfs=${FIXgfs:-$HOMEgfs/fix}
 export FIXgfs=${FIXgfs:-$HOMEgfs/gempak/fix}
 export USHgfs=${USHgfs:-$HOMEgfs/gempak/ush}
 export SRCgfs=${SRCgfs:-$HOMEgfs/scripts}
+export UTILgfs=${UTILgfs:-$HOMEgfs/util}
 
 ######################################
 # Set up the GEMPAK directory
@@ -78,7 +68,7 @@ export model=${model:-gdas}
 # Define COM directories
 ##############################################
 export COMIN=${COMIN:-$(compath.py ${NET}/${envir}/${RUN}.${PDY})/${cyc}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/${cyc}/nawips}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/${cyc}/gempak}
 
 if [ $SENDCOM = YES ] ; then
   mkdir -m 775 -p $COMOUT
@@ -88,33 +78,38 @@ export pgmout=OUTPUT.$$
 
 env
 
+if [ -f $DATA/poescrip ]; then
+   rm $DATA/poescript
+fi
+
 ########################################################
 # Execute the script.
-echo "$SRCgfs/exgdas_nawips.sh.ecf gdas 009 GDAS_GEMPAK" >>poescript
+echo "$SRCgfs/exgdas_nawips.sh.ecf gdas 009 GDAS_GEMPAK " >> poescript
 ########################################################
 
 ########################################################
 # Execute the script for quater-degree grib
-echo "$SRCgfs/exgdas_nawips.sh.ecf gdas_0p25 009 GDAS_GEMPAK" >>poescript
+echo "$SRCgfs/exgdas_nawips.sh.ecf gdas_0p25 009 GDAS_GEMPAK " >>poescript
 ########################################################
+
+cat poescript
 
 chmod 775 $DATA/poescript
 export MP_PGMMODEL=mpmd
 export MP_CMDFILE=$DATA/poescript
 
-export NODES=2
 ntasks=${NTASKS_GEMPAK:-$(cat $DATA/poescript | wc -l)}
-ptile=${PTILE_GEMPAK:-17}
+ptile=${PTILE_GEMPAK:-4}
 threads=${NTHREADS_GEMPAK:-1}
 export OMP_NUM_THREADS=$threads
+APRUN="mpirun -n $ntasks cfp "
 
-APRUN="aprun -n $ntasks -N $ptile -d $threads cfp "
+APRUN_GEMPAKCFP=${APRUN_GEMPAKCFP:-$APRUN}
+APRUNCFP=$(eval echo $APRUN_GEMPAKCFP)
 
-APRUNCFP=${APRUN_GEMPAKCFP:-$APRUN}
 $APRUNCFP $DATA/poescript
-
-# aprun -n 34 -N 17 cfp $DATA/poescript
 export err=$?; err_chk
+
 ########################################################
 
 msg="JOB $job HAS COMPLETED NORMALLY!"

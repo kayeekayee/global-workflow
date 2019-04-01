@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY FV3GFS_HOME "/scratch4/BMC/rtfim/rtruns/FV3-Chem">
+  <!ENTITY PSLOT  "rt_fv3gfs_chem">
+  <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
+  <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY AC_MODEL_NAME "FV3GFS_CHEM">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "FV3GFS_CHEM">
+  <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
+  <!ENTITY RES "0p50">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  <!ENTITY PROJECT "gsd-fv3-test">
+  %theia;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="4">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_ncl4.log</cyclestr>
+  </log>
+
+  <cycledef>201807210000 201807220000 24:00:00</cycledef> 
+
+  <metatask throttle="25">
+    <!--
+    &fcst_168hr_metatask;
+    &t168hr_metatask;
+     -->
+    <var name="fcst"> 0 6 12 18 24 </var>
+    <var name="T"> 000 006 012 018 024 </var>
+<!--    &remapgrib_task;
+    &nclsub_task; -->
+    &nclglobal_task;
+  </metatask>
+<!--  &nclzip_task;   -->
+
+</workflow>

@@ -5286,6 +5286,21 @@
 
     <param>
        <post_avblfldidx>634</post_avblfldidx>
+       <shortname>SEASALT1_ON_HYBRID_LVL</shortname>
+       <pdstmpl>tmpl4_48</pdstmpl>
+       <pname>PMTF</pname>
+       <aerosol_type>sea_salt_dry</aerosol_type>
+       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
+       <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
+       <scale_fact_1st_size>8</scale_fact_1st_size>
+       <scale_val_1st_size>6</scale_val_1st_size>
+       <scale_fact_2nd_size>8</scale_fact_2nd_size>
+       <scale_val_2nd_size>20</scale_val_2nd_size>
+       <scale> 11.0</scale>
+    </param>
+
+    <param>
+       <post_avblfldidx>635</post_avblfldidx>
        <shortname>SEASALT2_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname> PMTF</pname>
@@ -5300,7 +5315,7 @@
     </param>
 
     <param>
-       <post_avblfldidx>635</post_avblfldidx>
+       <post_avblfldidx>636</post_avblfldidx>
        <shortname>SEASALT3_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname> PMTC</pname>
@@ -5315,7 +5330,7 @@
     </param>
 
     <param>
-       <post_avblfldidx>636</post_avblfldidx>
+       <post_avblfldidx>637</post_avblfldidx>
        <shortname>SEASALT4_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname> PMTC</pname>
@@ -5330,7 +5345,7 @@
     </param>
 
     <param>
-       <post_avblfldidx>637</post_avblfldidx>
+       <post_avblfldidx>638</post_avblfldidx>
        <shortname>SEASALT5_ON_HYBRID_LVL</shortname>
        <pdstmpl>tmpl4_48</pdstmpl>
        <pname> PMTC</pname>
@@ -5341,21 +5356,6 @@
        <scale_val_1st_size>100</scale_val_1st_size>
        <scale_fact_2nd_size>7</scale_fact_2nd_size>
        <scale_val_2nd_size>200</scale_val_2nd_size>
-       <scale> 11.0</scale>
-    </param>
-
-    <param>
-       <post_avblfldidx>638</post_avblfldidx>
-       <shortname>SEASALT1_ON_HYBRID_LVL</shortname>
-       <pdstmpl>tmpl4_48</pdstmpl>
-       <pname>PMTF</pname>
-       <aerosol_type>sea_salt_dry</aerosol_type>
-       <fixed_sfc1_type>hybrid_lvl</fixed_sfc1_type>
-       <typ_intvl_size>between_first_second_limit_noincl2ndlmt</typ_intvl_size>
-       <scale_fact_1st_size>8</scale_fact_1st_size>
-       <scale_val_1st_size>6</scale_val_1st_size>
-       <scale_fact_2nd_size>8</scale_fact_2nd_size>
-       <scale_val_2nd_size>20</scale_val_2nd_size>
        <scale> 11.0</scale>
     </param>
 

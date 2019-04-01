@@ -873,7 +873,8 @@
         endif
       ENDIF
 !
-nmmb_clds1: IF (MODELNAME=='NMM' .AND. GRIDTYPE=='B') THEN
+nmmb_clds1: IF ((MODELNAME=='NMM' .AND. GRIDTYPE=='B') .OR. &
+             MODELNAME=='FV3R') THEN
 !   
 !-- Initialize low, middle, high, and total cloud cover; 
 !   also a method for cloud ceiling height
@@ -1433,6 +1434,13 @@ nmmb_clds1: IF (MODELNAME=='NMM' .AND. GRIDTYPE=='B') THEN
 !     write(0,*)' hbot=',hbot(i,j),' hbotd=',hbotd(i,j),'
 !     hbots=',hbots(i,j)&
 !  ,' htop=',htop(i,j),' htopd=',htopd(i,j),' htops=',htops(i,j),i,j
+! Initilize
+            IBOTCu(I,J) = 0
+            ITOPCu(I,J) = 100
+            IBOTDCu(I,J) = 0
+            ITOPDCu(I,J) = 100
+            IBOTSCu(I,J) = 0
+            ITOPSCu(I,J) = 100
             if (hbot(i,j) .ne. spval) then
               IBOTCu(I,J) = NINT(HBOT(I,J))
             endif
@@ -1533,7 +1541,7 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
         endif
     !
     !--- Combined (convective & grid-scale) cloud base & cloud top levels 
-            IF(MODELNAME .EQ. 'NCAR'.OR.MODELNAME.EQ.'RSM' .OR. MODELNAME == 'RAPR')THEN
+            IF(MODELNAME .EQ. 'NCAR' .OR. MODELNAME == 'RAPR')THEN
               IBOTT(I,J) = IBOTGr(I,J)
               ITOPT(I,J) = ITOPGr(I,J)
 	    ELSE
@@ -4483,6 +4491,7 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
         ENDDO        ! i-loop for nAero
         print *,'finish reading coef'
 
+        CLOSE(UNIT=NOAER)
 
 !!! COMPUTES RELATIVE HUMIDITY AND RDRH
 !       allocate (RH3D(im,jsta:jend,lm))
@@ -4581,7 +4590,7 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
                DO N = 1, NBIN_SU
                EXT01 = EXTRHD_SU(IH1,N,IB)                                &
      &          + RDRH(I,J,L)*(EXTRHD_SU(IH2,N,IB)-EXTRHD_SU(IH1,N,IB))
-          EXT(I,J,L) = EXT(I,J,L)+1e-9*SUSO(I,J,L,N) * EXT01/(96.07/28.)
+          EXT(I,J,L) = EXT(I,J,L)+1e-9*SUSO(I,J,L,N) * EXT01
                ENDDO   ! N-loop
                EXT(I,J,L) = EXT(I,J,L) * 1000.
              ENDDO  ! L-loop
@@ -4598,8 +4607,7 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
              DO  L=1,LM
                ih1 = ihh (I,J,L)
                ih2 = ih1 + 1
-             !DO N = 1, NBIN_SS
-             DO N = 2, NBIN_SS  !lzhang
+             DO N = 1, NBIN_SS
                EXT01 = EXTRHD_SS(IH1,N,IB) &
      &          + RDRH(I,J,L)*(EXTRHD_SS(IH2,N,IB)-EXTRHD_SS(IH1,N,IB))
                EXT(I,J,L) = EXT(I,J,L)+1e-9*SALT(I,J,L,N)*EXT01

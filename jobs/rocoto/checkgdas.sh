@@ -59,35 +59,36 @@ fv3ic_dir=$ICSDIR/$CDATE/$CDUMP
 mkdir -p $fv3ic_dir
 cd $fv3ic_dir
 
-
-
-# /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1/gdas.2018041100/gdas.tar 
-#      ./gdas.20180411/00/gdas.t00z.atmanl.nemsio
-#      ./gdas.20180411/00/gdas.t00z.sfcanl.nemsio
-# /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1/gdas.2018041100/gdas.tar 
-#      changed 26 May 2018
-#
-
-# check for correct number of parameters
-
-#if [ $# -lt 2 ]; then
-#  echo "   Usage:  $0  YYYYMMDD HH"
-#  exit 1
-#fi
-
-#yyyymmdd=$1
-#hh=$2
-
 echo "YYYYMMDDHH:  ${yyyymmdd}${hh}"
 
-gdasfile=$GDASDIR/${yyyymmdd}${hh}/gdas.tar
-#hsi -q list $gdasfile
-hsi ls -l $gdasfile
+gdasfile=$GDASDIR/${yyddd}${hh}00.gdas.t${hh}z.atmanl.nemsio
+ls  $gdasfile  #ESRL
 status=$?
 if [[ $status -ne 0 ]]; then
-  echo "missing $gdasfile on mass store..."
-  exit 1
-else
-touch gdas_available
+  echo "missing $gdasfile on /public; check on mass store..."
 
+  # /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1/gdas.2018041100/gdas.tar 
+  #      ./gdas.20180411/00/gdas.t00z.atmanl.nemsio
+  #      ./gdas.20180411/00/gdas.t00z.sfcanl.nemsio
+  # /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1/2018041100/gdas.tar 
+  #      changed 26 May 2018
+  #
+
+  HPSSDIR="/5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q2FY19/prfv3rt1/"
+  gdasfile=$HPSSDIR/${yyyymmdd}${hh}/gdas.tar
+  hsi -q list $gdasfile
+  status=$?
+  if [[ $status -ne 0 ]]; then
+    echo "missing $gdasfile on mass store..."
+    exit 1
+  else
+    cd $fv3ic_dir
+    htar xvf ${gdasfile} ./gdas.${yyyymmdd}/${hh}/gdas.t${hh}z.atmanl.nemsio 
+    mv gdas.${yyyymmdd}/${hh}/gdas.t${hh}z.atmanl.nemsio ./
+    echo removing gdas.${yyyymmdd}/${hh}....
+    rmdir gdas.${yyyymmdd}/${hh} gdas.${yyyymmdd}
+    touch gdas_available
+  fi
+else
+  touch gdas_available
 fi

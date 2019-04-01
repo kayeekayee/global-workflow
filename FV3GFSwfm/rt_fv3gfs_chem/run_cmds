@@ -1,20 +1,9 @@
 REALTIME
 ========
-rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
-rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
-rocotoboot -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
-rocotocheck -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.db
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
+rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
+rocotoboot -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
+rocotocheck -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfile/rt_fv3gfs_chem.db
 
-RETRO  (00Z 06/01 - 00Z 06/18 - grib2 0p25 and 0p5 with surface temperature variable needed for NCL)
-=====
-rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.db
-rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.db
-rocotoboot -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.db
-rocotocheck -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_retro_post.db
-
-on demand ??
-============
-rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.db
-rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.db
-rocotoboot -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.db
-rocotocheck -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.xml -d /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_gdaschk.db
+rocotorun -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/tmp_chem.xml -d /home/rtfim/retro_dbfiles/tmp_chem.db
+rocotostat -w /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/tmp_chem.xml -d /home/rtfim/retro_dbfiles/tmp_chem.db

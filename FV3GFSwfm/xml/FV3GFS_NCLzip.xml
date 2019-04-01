@@ -16,9 +16,23 @@
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/fim/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a2/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a1/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/242/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/224/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/236/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/244/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/130/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/201/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
+          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a2/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a1/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/242/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/224/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/236/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/244/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/130/aodtot_sfc_f162.png</cyclestr></datadep>
+          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/201/aodtot_sfc_f162.png</cyclestr></datadep>
         </and>
         <and>
-          <timedep><cyclestr offset="020:30:00">@Y@m@d@H@M00</cyclestr></timedep>
+          <timedep><cyclestr offset="01:12:30:00">@Y@m@d@H@M00</cyclestr></timedep>
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/fim/aodtot_sfc_f000.png</cyclestr></datadep>
         </and>
       </or>

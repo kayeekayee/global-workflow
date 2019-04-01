@@ -7,7 +7,7 @@
 module load wgrib2
 ECHO=echo
 MKDIR=mkdir
-WGRIB2=wgrib2
+WGRIB2=/scratch4/BMC/rtfim/wgrib2_v0.2.0.8/bin/wgrib2
 #GRID_NAMES=201D130D244D236D224D242
 echo entering remapgrib.ksh....
 echo "****************************"
@@ -62,12 +62,12 @@ export grid_specs_999="lambert:253:50.000000 227.500000:675:13545.000000 7.50000
 #---------
 # North Polar Stereographic
 #---------
-export grid_specs_201="nps:225:60.000000 210.000000:65:381000.000000 -20.826000:65:381000.000000"
+export grid_specs_201="nps:-105:60.000000 -150.000000:259:94512.000000 -20.826000:259:94512.000000"
 
 #---------
 # South Polar Stereographic
 #---------
-export grid_specs_224="sps:255:60.000000 120.000000:65:381000.000000 20.826000:65:381000.000000"
+export grid_specs_224="sps:75:-60.000000 120.000000:257:95250.000000 20.826000:257:95250.000000"
 
 #---------
 # North Atlantic

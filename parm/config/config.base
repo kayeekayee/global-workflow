@@ -18,7 +18,7 @@ if [ $machine = "THEIA" ]; then
     export QUEUE="batch"
     export QUEUE_ARCH="service"
 
-elif [ $machine = "WCOSS_C" ]; then
+elif [ $machine = "WCOSS_C" -o $machine = "WCOSS_DELL_P3" ]; then
 
     export ACCOUNT="FV3GFS-T2O"
     export QUEUE="dev"
@@ -59,6 +59,17 @@ elif [ $machine = "WCOSS_C" ]; then
     fi
     export RTMFIX=$CRTM_FIX
 
+elif [ $machine = "WCOSS_DELL_P3" ]; then
+
+    export NWPROD="/gpfs/dell1/nco/ops/nwprod"
+    if [ -d /gpfs/tp1 ]; then
+        export SITE="MARS"
+        export DMPDIR="/gpfs/tp1/emc/globaldump"
+    elif [ -d /gpfs/gp1 ]; then
+        export SITE="VENUS"
+        export DMPDIR="/gpfs/gp1/emc/globaldump"
+    fi
+    export RTMFIX=$CRTM_FIX
 fi
 
 
@@ -90,6 +101,18 @@ elif [ $machine = "WCOSS_C" ]; then
     # Base directories for various builds
     export BASE_GIT="/gpfs/hps3/emc/global/noscrub/emc.glopara/git"
     export BASE_SVN="/gpfs/hps3/emc/global/noscrub/emc.glopara/svn"
+
+elif [ $machine = "WCOSS_DELL_P3" ]; then
+
+    # USER specific paths
+    export HOMEDIR="/gpfs/dell2/emc/modeling/noscrub/$USER"
+    export STMP="/gpfs/dell3/stmp/$USER"
+    export PTMP="/gpfs/dell3/ptmp/$USER"
+    export NOSCRUB="/gpfs/dell2/emc/modeling/noscrub/$USER"
+
+    # Base directories for various builds
+    export BASE_GIT="/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git"
+    export BASE_SVN="/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git"
 
 fi
 
@@ -140,7 +163,8 @@ export NCP="/bin/cp -p"
 export NMV="/bin/mv"
 export NLN="/bin/ln -sf"
 export VERBOSE="YES"
-export KEEPDATA="NO"
+#export KEEPDATA="NO"  !lzhang
+export KEEPDATA="YES"
 export CHGRP_CMD="chgrp rstprod"
 export NEMSIOGET="$HOMEgfs/exec/nemsio_get"
 
@@ -151,12 +175,14 @@ export BASE_JOB="$HOMEgfs/jobs/rocoto"
 # EXPERIMENT specific environment parameters
 export SDATE=@SDATE@
 export EDATE=@EDATE@
-#export assim_freq=6
-export assim_freq=24 #lzhang
+export assim_freq=24
 export PSLOT="@PSLOT@"
 export EXPDIR="@EXPDIR@/$PSLOT"
 export ROTDIR="@ROTDIR@/$PSLOT"
+export ROTDIR_DUMP="NO"
+export DUMP_SUFFIX=""
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
+export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="@ICSDIR@"
 export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
@@ -184,7 +210,11 @@ export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 
 # Surface cycle update frequency
-export FHCYC=24
+if [[ "$CDUMP" == "gdas" ]] ; then
+   export FHCYC=1
+elif [[ "$CDUMP" == "gfs" ]] ; then
+   export FHCYC=24
+fi
 
 # Output frequency of the forecast model (for cycling)
 export FHMIN=0
@@ -201,11 +231,15 @@ export FHMAX_GFS_00=120
 export FHMAX_GFS_06=120
 export FHMAX_GFS_12=120
 export FHMAX_GFS_18=120
-export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
+#export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc}) !lzhang
 
-export FHOUT_GFS=6
-export FHMAX_HF_GFS=0
-export FHOUT_HF_GFS=1
+#export FHMAX_GFS=24  #1-day
+export FHMAX_GFS=168  #7-day
+#export FHMAX_GFS=120  #5-day
+export FHOUT_GFS=6  
+#export FHOUT_GFS=3 
+export FHMAX_HF_GFS=0 
+export FHOUT_HF_GFS=1 #lzhang
 
 #Coupling option
 export CPL=".true."
@@ -220,12 +254,16 @@ export OUTPUT_FILE="nemsio"
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
 export imp_physics=11
 
+# Convection Options: 2-SASAS, 3-GF
+export imfdeepcnv=2
+export imfshalcnv=2
+
 # Shared parameters
 # Hybrid related
 export DOHYBVAR="YES"
 export NMEM_ENKF=@NMEM_ENKF@
 export SMOOTH_ENKF="YES"
-export l4densvar=".false."
+export l4densvar=".true."
 export lwrite4danl=".false."
 
 # EnKF output frequency
@@ -240,8 +278,9 @@ if [ $DOHYBVAR = "YES" ]; then
     fi
 fi
 
-# If YES, NSST is turned on in anal and/or fcst steps
+# turned on nsst in anal and/or fcst steps, and turn off rtgsst
 export DONST="YES"
+if [ $DONST = "YES" ]; then export FNTSFA="        "; fi
 
 # The switch to apply SST elevation correction or not
 export nst_anl=.true.
@@ -251,10 +290,10 @@ export INCREMENTS_TO_ZERO="'delz_inc','clwmr_inc','icmr_inc'"
 
 
 # Archiving options
-export HPSSARCH="YES"        # save data to HPSS archive
-export ARCH_CYC=18           # Archive data at this cycle for warm_start capability. Cannot be 00
-export ARCH_WARMICFREQ=6     # Archive frequency in days for warm_start capability
-export ARCH_FCSTICFREQ=3     # Archive frequency in days for gdas and gfs forecast-only capability
+export HPSSARCH="NO"         # save data to HPSS archive
+export ARCH_CYC=00           # Archive data at this cycle for warm_start capability
+export ARCH_WARMICFREQ=4     # Archive frequency in days for warm_start capability
+export ARCH_FCSTICFREQ=1     # Archive frequency in days for gdas and gfs forecast-only capability
 
 # Analysis increments to zero in CALCINCEXEC
 export INCREMENTS_TO_ZERO="'delz_inc','clwmr_inc','icmr_inc'" #lzhang

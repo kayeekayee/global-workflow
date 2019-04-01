@@ -25,16 +25,11 @@
            "longname",     "graupel mixing ratio"
            "units",        "kg/kg"
        "profile_type", "fixed", "surface_value=1.e30" /
-# non-prognostic cloud amount
- "TRACER", "atmos_mod", "cld_amt"
-           "longname",     "cloud amount"
-           "units",        "1"
-       "profile_type", "fixed", "surface_value=1.e30" /
 # prognostic ozone mixing ratio tracer
  "TRACER", "atmos_mod", "o3mr"
            "longname",     "ozone mixing ratio"
            "units",        "kg/kg"
-       "profile_type", "fixed", "surface_value=7.5e-8" /
+       "profile_type", "fixed", "surface_value=1.e30" /
 # prognostic so2 mixing ratio tracer
  "TRACER", "atmos_mod", "so2"
            "longname",     "so2 mixing ratio"
@@ -125,8 +120,18 @@
            "longname",     "seasalt4 mixing ratio"
            "units",        "ug/kg"
        "profile_type", "fixed", "surface_value=1.e-7" /
+# prognostic seas5 mixing ratio tracer
+ "TRACER", "atmos_mod", "seas5"
+           "longname",     "seasalt5 mixing ratio"
+           "units",        "ug/kg"
+       "profile_type", "fixed", "surface_value=1.e-7" /
 # prognostic pp10 mixing ratio tracer
  "TRACER", "atmos_mod", "pp10"
            "longname",     "primary PM10 mixing ratio"
            "units",        "ug/kg"
        "profile_type", "fixed", "surface_value=1.e+0" /
+# non-prognostic cloud amount
+ "TRACER", "atmos_mod", "cld_amt"
+           "longname",     "cloud amount"
+           "units",        "1"
+       "profile_type", "fixed", "surface_value=1.e30" /

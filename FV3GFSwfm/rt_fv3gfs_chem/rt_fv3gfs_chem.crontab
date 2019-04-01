@@ -1,6 +1,0 @@
-
-#################### real_fv3_chem ####################
-MAILTO=""
-*/5 * * * * /apps/rocoto/1.2.4/bin/rocotorun -d /scratch4/BMC/fim/NCEPDEV/global/save/Kate.Zhang/fv3gfs/expdir/real_fv3_chem/real_fv3_chem.db -w /scratch4/BMC/fim/NCEPDEV/global/save/Kate.Zhang/fv3gfs/expdir/real_fv3_chem/real_fv3_chem.xml
-#################################################################
-

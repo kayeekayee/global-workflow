@@ -104,6 +104,11 @@
            "longname",     "seasalt4 mixing ratio"
            "units",        "ug/kg"
        "profile_type", "fixed", "surface_value=1.e-7" /
+# prognostic seas5 mixing ratio tracer
+ "TRACER", "atmos_mod", "seas5"
+           "longname",     "seasalt5 mixing ratio"
+           "units",        "ug/kg"
+       "profile_type", "fixed", "surface_value=1.e-7" /
 # prognostic pp10 mixing ratio tracer
  "TRACER", "atmos_mod", "pp10"
            "longname",     "primary PM10 mixing ratio"

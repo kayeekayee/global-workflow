@@ -42,13 +42,11 @@ SUBROUTINE CALRAD_WCLOUD
   use cmassi_mod, only: TRAD_ice
   use kinds, only: r_kind,r_single,r_double,i_kind
   use crtm_module, only: crtm_atmosphere_type,crtm_surface_type,crtm_geometry_type, &
-       crtm_surface_create,o3_id,co2_id,wet_soil,crtm_forward,mass_mixing_ratio_units, &
-       crtm_atmosphere_create,grass_scrub,grass_soil, meadow_grass,urban_concrete, &
-       irrigated_low_vegetation,broadleaf_pine_forest,pine_forest,compacted_soil, &
-       broadleaf_forest,broadleaf_brush,tundra,tilled_soil,scrub,scrub_soil,&
+       crtm_surface_create,o3_id,co2_id,crtm_forward,mass_mixing_ratio_units, &
+       crtm_atmosphere_create, &
        crtm_options_type,crtm_destroy,crtm_init,SPECIFIC_AMOUNT_UNITS, &
-       success,crtm_options_destroy,crtm_options_create, crtm_options_associated, &
-       invalid_land
+       success,crtm_options_destroy,crtm_options_create, crtm_options_associated
+       
   use crtm_rtsolution_define, only: crtm_rtsolution_type, crtm_rtsolution_create, &
        crtm_rtsolution_destroy, crtm_rtsolution_associated 
   use crtm_spccoeff, only: sc
@@ -89,6 +87,31 @@ SUBROUTINE CALRAD_WCLOUD
   !      &   BROADLEAF_PINE_FOREST, COMPACTED_SOIL, WET_SOIL, WET_SOIL,            &
   !      &   IRRIGATED_LOW_VEGETATION, TUNDRA, TUNDRA, TUNDRA, TUNDRA,             &
   !      &   COMPACTED_SOIL/)
+
+  ! For land, the land types
+  !INTEGER, PARAMETER :: N_VALID_LAND_TYPES = 20
+  INTEGER, PARAMETER :: INVALID_LAND             =  0
+  INTEGER, PARAMETER :: COMPACTED_SOIL           =  1
+  INTEGER, PARAMETER :: TILLED_SOIL              =  2
+  INTEGER, PARAMETER :: SAND                     =  3
+  INTEGER, PARAMETER :: ROCK                     =  4
+  INTEGER, PARAMETER :: IRRIGATED_LOW_VEGETATION =  5
+  INTEGER, PARAMETER :: MEADOW_GRASS             =  6
+  INTEGER, PARAMETER :: SCRUB                    =  7
+  INTEGER, PARAMETER :: BROADLEAF_FOREST         =  8
+  INTEGER, PARAMETER :: PINE_FOREST              =  9
+  INTEGER, PARAMETER :: TUNDRA                   = 10
+  INTEGER, PARAMETER :: GRASS_SOIL               = 11
+  INTEGER, PARAMETER :: BROADLEAF_PINE_FOREST    = 12
+  INTEGER, PARAMETER :: GRASS_SCRUB              = 13
+  INTEGER, PARAMETER :: SOIL_GRASS_SCRUB         = 14
+  INTEGER, PARAMETER :: URBAN_CONCRETE           = 15
+  INTEGER, PARAMETER :: PINE_BRUSH               = 16
+  INTEGER, PARAMETER :: BROADLEAF_BRUSH          = 17
+  INTEGER, PARAMETER :: WET_SOIL                 = 18
+  INTEGER, PARAMETER :: SCRUB_SOIL               = 19
+  INTEGER, PARAMETER :: BROADLEAF70_PINE30       = 20
+ 
 
   integer, allocatable:: model_to_crtm(:)
   integer, parameter:: ndat=100
@@ -278,7 +301,8 @@ SUBROUTINE CALRAD_WCLOUD
      jj=(jsta+jend)/2
 
      ! Initialize ozone to zeros for WRF NMM and ARW for now
-     if (MODELNAME == 'NMM' .OR. MODELNAME == 'NCAR' .OR. MODELNAME == 'RAPR')o3=0.0
+     if (MODELNAME == 'NMM' .OR. MODELNAME == 'NCAR' .OR. MODELNAME == 'RAPR' &
+      .OR. MODELNAME == 'FV3R')o3=0.0
      ! Compute solar zenith angle for GFS, ARW now computes czen in INITPOST
 !     if (MODELNAME == 'GFS')then
         jdn=iw3jdn(idat(3),idat(1),idat(2))
@@ -887,6 +911,13 @@ SUBROUTINE CALRAD_WCLOUD
                              nrain(i,j,k),qqs(i,j,k),qqg(i,j,k),qqnr(i,j,k),qqni(i,j,k),imp_physics,'G')
                           end if 
                        end do
+!Meng 09/2018 modify two model layer having identical pressure
+                       do k = 1,lm-1
+                          if (abs(atmosphere(1)%pressure(k)-atmosphere(1)%pressure(k+1)) &
+                              < 0.005) then
+                             atmosphere(1)%pressure(k)=atmosphere(1)%pressure(k)+0.005
+                          endif
+                       enddo
 
                        !bsf - start
                        !-- Add subgrid-scale convective clouds for WRF runs
@@ -1439,6 +1470,13 @@ SUBROUTINE CALRAD_WCLOUD
                              nrain(i,j,k),qqs(i,j,k),qqg(i,j,k),qqnr(i,j,k),qqni(i,j,k),imp_physics,'G')
                           end if 
                        end do
+!Meng 09/2018 modify two model layer having identical pressure
+                       do k = 1,lm-1
+                          if (abs(atmosphere(1)%pressure(k)-atmosphere(1)%pressure(k+1)) &
+                              < 0.005) then
+                             atmosphere(1)%pressure(k)=atmosphere(1)%pressure(k)+0.005
+                          endif
+                       enddo
                        !bsf - start
                        !-- Add subgrid-scale convective clouds for WRF runs
                        if(icu_physics==2) then

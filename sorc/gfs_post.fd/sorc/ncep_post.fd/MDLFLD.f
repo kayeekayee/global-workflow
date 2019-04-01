@@ -118,6 +118,7 @@
 !     
 !     LOGICAL NORTH,NEED(IM,JM), NMM_GFSmicro
       LOGICAL NMM_GFSmicro
+      LOGiCAL Model_Radar
       real, dimension(im,jm)              :: GRID1, GRID2
       real, dimension(im,jsta_2l:jend_2u) :: EGRID1, EGRID2, EGRID3, EGRID4, EGRID5,&
                                              EL0,    P1D,    T1D,    Q1D,    C1D,   &
@@ -170,6 +171,9 @@
 !
 !     ALLOCATE LOCAL ARRAYS
 !
+! Set up logical flag to indicate whether model outputs radar directly
+      IF (ABS(MAXVAL(REF_10CM)-SPVAL)>SMALL)Model_Radar=.True.
+      if(me==0)print*,'Did post read in model derived radar ref ',Model_Radar
       ALLOCATE(EL     (IM,JSTA_2L:JEND_2U,LM))     
       ALLOCATE(RICHNO (IM,JSTA_2L:JEND_2U,LM))
       ALLOCATE(PBLRI  (IM,JSTA_2L:JEND_2U))    
@@ -202,7 +206,7 @@
 !
 !--- Calculate convective cloud fractions following radiation in
 !    NMM; used in subroutine CALRAD_WCLOUD for satellite radiances
-!
+!Both FV3 regional and global output CNVCFR directly
       IF (MODELNAME=='NMM' .OR. imp_physics==5 .or. &
          imp_physics==85 .or. imp_physics==95) THEN
 !        print*,'DTQ2 in MDLFLD= ',DTQ2
@@ -340,7 +344,7 @@
 !    add bogused contribution from parameterized convection (CUREFL), and 
 !    estimate reflectivity from rain (DBZR1) & snow/graupel (DBZI1).
 !
-refl_miss:   IF (ABS(MAXVAL(REF_10CM)-SPVAL)>SMALL) THEN               
+refl_miss:   IF (Model_Radar) THEN               
                 ! - Model output DBZ is present - proceed with calc
                 DO J=JSTA,JEND
                 DO I=1,IM
@@ -524,7 +528,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
         ENDDO
        END DO  
 
-      ELSE IF(MODELNAME == 'NMM' .and. GRIDTYPE=='B' .and. imp_physics==8)THEN !NMMB+THOMPSON
+      ELSE IF(((MODELNAME == 'NMM' .and. GRIDTYPE=='B') .OR. MODELNAME == 'FV3R') &
+        .and. imp_physics==8)THEN !NMMB or FV3R +THOMPSON
        DO L=1,LM
         DO J=JSTA,JEND
          DO I=1,IM
@@ -582,7 +587,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 
         IF(IMP_PHYSICS /= 8 .AND. IMP_PHYSICS /= 9 .and. IMP_PHYSICS /= 28) THEN
 !tgs - non-Thompson schemes
-
 !$omp parallel do private(i,j,l,dens,llmh)
          DO L=1,LM
            DO J=JSTA,JEND
@@ -606,6 +610,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                  ENDIF             !-- End IF (DELZ .LE. 0.)
                 ENDIF                !-- End IF (L.GE.HTOP(I,J) .OR. L.LE.LLMH)
                 CUREFL(I,J)=FCTR*CUREFL_S(I,J)
+                DBZC(I,J,L)=CUREFL(I,J)
                ENDIF                   !-- End IF (CUREFL_S(I,J) .GT. 0.)
 
 !              IF(T(I,J,L)  <  1.0E-3) print*,'ZERO T'    
@@ -636,22 +641,30 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                  IF (QQG(I,J,L) < SPVAL)                                    &
                    DBZI(I,J,L) =  DBZI(I,J,L) + ((QQG(I,J,L)*DENS)**1.75) * &
      &                                          1.033267E-9 * 1.E18 ! Z FOR GRAUP
-                 DBZ(I,J,L) = DBZR(I,J,L) + DBZI(I,J,L) + CUREFL(I,J) 
+               IF (Model_Radar) THEN
+                 ze_nc=10.**(0.1*REF_10CM(I,J,L))
+                 DBZ(I,J,L) = ze_nc+CUREFL(I,J)
+               ELSE 
+                 DBZ(I,J,L) = DBZR(I,J,L) + DBZI(I,J,L) + CUREFL(I,J)
+               END IF
 !                IF(L.EQ.27.and.QQR(I,J,L).gt.1.e-4)print*,              &
 !                    'sample QQR DEN,DBZ= ',QQR(I,J,L),DENS,DBZ(I,J,L)
                ENDIF
                IF (DBZ(I,J,L)  > 0.) DBZ(I,J,L)  = 10.0*LOG10(DBZ(I,J,L))  ! DBZ
                IF (DBZR(I,J,L) > 0.) DBZR(I,J,L) = 10.0*LOG10(DBZR(I,J,L)) ! DBZ
                IF (DBZI(I,J,L) > 0.) DBZI(I,J,L) = 10.0*LOG10(DBZI(I,J,L)) ! DBZ
+               IF (DBZC(I,J,L) > 0.) DBZC(I,J,L) = 10.0*LOG10(DBZC(I,J,L)) ! DBZ
                LLMH = NINT(LMH(I,J))
                IF(L > LLMH) THEN
                  DBZ(I,J,L)  = DBZmin
                  DBZR(I,J,L) = DBZmin
-                DBZI(I,J,L) = DBZmin
+                 DBZI(I,J,L) = DBZmin
+                 DBZC(I,J,L) = DBZmin
                ELSE
                  DBZ(I,J,L)  = MAX(DBZmin, DBZ(I,J,L))
                  DBZR(I,J,L) = MAX(DBZmin, DBZR(I,J,L))
                  DBZI(I,J,L) = MAX(DBZmin, DBZI(I,J,L))
+                 DBZC(I,J,L) = MAX(DBZmin, DBZC(I,J,L))
                END IF 
              ENDDO
            ENDDO
@@ -2384,8 +2397,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   !GRID1(I,J) = SALT(I,J,LL,2)
-                   GRID1(I,J) = SALT(I,J,LL,2)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
+                   GRID1(I,J) = SALT(I,J,LL,1)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2414,8 +2426,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   !GRID1(I,J) = SALT(I,J,LL,3)
-                   GRID1(I,J) = SALT(I,J,LL,3)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
+                   GRID1(I,J) = SALT(I,J,LL,2)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2444,8 +2455,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   !GRID1(I,J) = SALT(I,J,LL,4)
-                   GRID1(I,J) = SALT(I,J,LL,4)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
+                   GRID1(I,J) = SALT(I,J,LL,3)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2474,8 +2484,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   !GRID1(I,J) = SALT(I,J,LL,5)
-                   GRID1(I,J) = SALT(I,J,LL,5)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
+                   GRID1(I,J) = SALT(I,J,LL,4)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -2495,7 +2504,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
              END IF
            ENDIF
 
-!          SEASALT 0
+!          SEASALT 5
            IF (IGET(638).GT.0) THEN
              IF (LVLS(L,IGET(638)).GT.0) THEN
                LL=LM-L+1 
@@ -2504,8 +2513,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=1,IM
-                   !GRID1(I,J) = SALT(I,J,LL,1)
-                   GRID1(I,J) = SALT(I,J,LL,1)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
+                   GRID1(I,J) = SALT(I,J,LL,5)*RHOMID(I,J,LL) !lzhang ug/kg-->ug/m3
                  ENDDO
                ENDDO
                if(grib=="grib1") then
@@ -3196,7 +3204,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !HC July 2012, per communication with Ferrier, modify post to add convective 
 !   contribution to visibility for all non GFS models
 
-           IF(MODELNAME/='GFS')THEN
+!           IF(MODELNAME/='GFS')THEN
+           IF(imp_physics.ne.99)THEN
             IF (CPRATE(I,J) .GT. 0. .and. CPRATE(I,J) .LT. SPVAL) THEN
 !            IF (CUPPT(I,J) .GT. 0.) THEN
                RAINRATE=(1-SR(I,J))*CPRATE(I,J)*RDTPHS
@@ -3215,12 +3224,12 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                   QS1(I,J)=QS1(I,J)+SNOCON*TERM1*TERM2*TERM3
                ENDIF
             ENDIF
-	   END IF 
+	   ELSE !imp_physics is 99 
 ! Zhao microphysics option in NMMB is identified as 9
 ! However, microphysics option 9 in WRF is Milbrandt-Yau 2-moment scheme.   
 ! 3/14/2013: Ratko comitted NEMS change (r26409) to change mp_physics from 9 to 99 for Zhao
 ! scheme used with NMMB.  Post is changing accordingly
-	   IF(imp_physics.eq.99)THEN ! use rain rate for visibility
+!	   IF(imp_physics.eq.99)THEN ! use rain rate for visibility
             IF (prec(i,j) < spval .and. prec(I,J) > 0. .and.  &
              sr(i,j)<spval) THEN
 !            IF (CUPPT(I,J) .GT. 0.) THEN
@@ -3957,7 +3966,8 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
         j=(jsta+jend)/2
         if(me == 0) print*,'sending input to GTG i,j,hgt,gust',i,j,ZINT(i,j,LP1),gust(i,j)
 
-        call gtg_algo(ZINT(1:IM,JSTA_2L:JEND_2U,LP1),GUST,gtg,catedr,mwt)
+        call gtg_algo(uh,vh,wh,zmid,pmid,t,q,qqw,qqr,qqs,qqg,qqi,q2,&
+        ZINT(1:IM,JSTA_2L:JEND_2U,LP1),GUST,catedr,mwt,gtg)
 
         i=IM/2
         j=jend ! 321,541

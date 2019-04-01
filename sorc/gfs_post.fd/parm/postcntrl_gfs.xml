@@ -104,6 +104,13 @@
     </param>
 
     <param>
+       <shortname> SEASALT1_ON_HYBRID_LVL</shortname>
+       <table_info>NCEP</table_info>
+       <level>1.</level>
+       <scale> 11.0</scale>
+    </param>
+
+    <param>
        <shortname> SEASALT2_ON_HYBRID_LVL</shortname>
        <table_info>NCEP</table_info>
        <level>1.</level>
@@ -279,6 +286,15 @@
        <shortname>AVE_CPRAT_ON_SURFACE</shortname>
        <table_info>NCEP</table_info>
        <scale>4.0</scale>
+    </param>
+    <param>
+       <shortname>ACM_APCP_ON_SURFACE</shortname>
+       <scale>-4.0</scale>
+    </param>
+
+    <param>
+       <shortname>ACM_ACPCP_ON_SURFACE</shortname>
+       <scale>-4.0</scale>
     </param>
 
     <!--  comments wherever I like -->
