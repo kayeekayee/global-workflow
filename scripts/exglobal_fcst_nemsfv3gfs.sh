@@ -67,7 +67,8 @@ layout_x=${layout_x:-8}
 layout_y=${layout_y:-16}
 LEVS=${LEVS:-65}
 
- OUTTIME=$(( $FHOUT*3600/ $DELTIM ))
+# OUTTIME=$(( $FHOUT*3600/ $DELTIM ))         #JKH
+OUTTIME=100000000
 if [ $imp_physics -eq 99 ]; then NTRACER=0; fi
 if [ $imp_physics -eq 11 ]; then NTRACER=1; fi
 
