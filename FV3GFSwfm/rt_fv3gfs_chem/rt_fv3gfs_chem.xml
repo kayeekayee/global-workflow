@@ -47,10 +47,10 @@
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY QUEUE_ARCH "service">
-	<!ENTITY SCHEDULER  "moabtorque">
+	<!ENTITY SCHEDULER  "slurm">
 
 	<!-- Toggle HPSS archiving -->
-	<!ENTITY ARCHIVE_TO_HPSS "NO">
+	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
 	<!ENTITY CYCLETHROTTLE "2">
@@ -64,49 +64,49 @@
         <!ENTITY WALLTIME_CHECKGDAS_GFS  "00:10:00">
         <!ENTITY RESOURCES_CHECKGDAS_GFS "<nodes>1:ppn=1</nodes>">
         <!ENTITY MEMORY_CHECKGDAS_GFS    "">
-        <!ENTITY NATIVE_CHECKGDAS_GFS    "-W umask=002">
+        <!ENTITY NATIVE_CHECKGDAS_GFS    "--export=NONE">
 
       	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE_ARCH;">
 	<!ENTITY WALLTIME_GETIC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_GETIC_GFS "<nodes>1:ppn=1</nodes>">
 	<!ENTITY MEMORY_GETIC_GFS    "">
-	<!ENTITY NATIVE_GETIC_GFS    "-W umask=002">
+	<!ENTITY NATIVE_GETIC_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE;">
 	<!ENTITY WALLTIME_FV3IC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_FV3IC_GFS "<nodes>1:ppn=24</nodes>">
 	<!ENTITY MEMORY_FV3IC_GFS    "">
-	<!ENTITY NATIVE_FV3IC_GFS    "-W umask=002">
+	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
         <!ENTITY QUEUE_REGRID     "&QUEUE;">
         <!ENTITY WALLTIME_REGRID  "00:30:00">
         <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
         <!ENTITY MEMORY_REGRID    "">
-        <!ENTITY NATIVE_REGRID    "-W umask=002">
+        <!ENTITY NATIVE_REGRID    "--export=NONE">
 
         <!ENTITY QUEUE_CALCINC     "&QUEUE;">
         <!ENTITY WALLTIME_CALCINC  "00:30:00">
         <!ENTITY RESOURCES_CALCINC "<nodes>1:ppn=2</nodes>">
         <!ENTITY MEMORY_CALCINC    "">
-        <!ENTITY NATIVE_CALCINC    "-W umask=002">
+        <!ENTITY NATIVE_CALCINC    "--export=NONE">
 	
         <!ENTITY QUEUE_PREP_CHEM_SRC     "&QUEUE;">
         <!ENTITY WALLTIME_PREP_CHEM_SRC  "00:15:00">
         <!ENTITY RESOURCES_PREP_CHEM_SRC "<nodes>1:ppn=2</nodes>">
         <!ENTITY MEMORY_PREP_CHEM_SRC    "">
-        <!ENTITY NATIVE_PREP_CHEM_SRC    "-W umask=002">
+        <!ENTITY NATIVE_PREP_CHEM_SRC    "--export=NONE">
 	
         <!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
 	<!ENTITY WALLTIME_FCST_GFS  "06:30:00">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>22:ppn=12</nodes>">
 	<!ENTITY MEMORY_FCST_GFS    "">
-	<!ENTITY NATIVE_FCST_GFS    "-W umask=002">
+	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
 	<!ENTITY WALLTIME_POST_GFS  "00:30:00">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>7:ppn=12</nodes>">
 	<!ENTITY MEMORY_POST_GFS    "">
-	<!ENTITY NATIVE_POST_GFS    "-W umask=002">
+	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->
 
@@ -123,7 +123,7 @@
 
         <jobname><cyclestr>&PSLOT;_checkgdas_@H</cyclestr></jobname>
         <account>&ACCOUNT;</account>
-        <queue>&QUEUE_CHECKGDAS_GFS;</queue>
+        <partition>&QUEUE_CHECKGDAS_GFS;</partition>
         &RESOURCES_CHECKGDAS_GFS;
         <walltime>&WALLTIME_CHECKGDAS_GFS;</walltime>
         <memory>&MEMORY_CHECKGDAS_GFS;</memory>
@@ -131,6 +131,7 @@
 
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/checkgdas.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
         <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
         <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
         <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -150,7 +151,7 @@
 
 	<jobname><cyclestr>&PSLOT;_gfsgetic_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>
-	<queue>&QUEUE_GETIC_GFS;</queue>
+	<partition>&QUEUE_GETIC_GFS;</partition>
 	&RESOURCES_GETIC_GFS;
 	<walltime>&WALLTIME_GETIC_GFS;</walltime>
 	<memory>&MEMORY_GETIC_GFS;</memory>
@@ -158,6 +159,7 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsgetic.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>  
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -200,6 +202,7 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfv3ic.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -239,6 +242,7 @@
         <native>&NATIVE_REGRID;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
         <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
         <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
         <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -273,6 +277,7 @@
         <native>&NATIVE_CALCINC;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/calcinc.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
         <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
         <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
         <envar><name>OUTDIR</name><value>&OUTDIR;</value></envar>
@@ -304,6 +309,7 @@
         <native>&NATIVE_PREP_CHEM_SRC;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/prepchem.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -341,6 +347,7 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfcst.log</cyclestr></join>
 
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -379,6 +386,7 @@
 
 		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfspost#grp#.log</cyclestr></join>
 
+                <envar><name>SLURM_SET</name><value>YES</value></envar>
 		<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 		<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 		<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
