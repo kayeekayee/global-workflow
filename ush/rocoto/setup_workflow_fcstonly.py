@@ -127,7 +127,11 @@ def get_definitions(base):
     strings.append('\t<!-- Machine related entities -->\n')
     strings.append('\t<!ENTITY ACCOUNT    "%s">\n' % base['ACCOUNT'])
     strings.append('\t<!ENTITY QUEUE      "%s">\n' % base['QUEUE'])
-    strings.append('\t<!ENTITY QUEUE_ARCH "%s">\n' % base['QUEUE_ARCH'])
+    if base['machine'] == 'THEIA' and wfu.check_slurm():
+        strings.append('\t<!ENTITY QUEUE_ARCH "%s">\n' % base['QUEUE'])
+        strings.append('\t<!ENTITY PARTITION_ARCH "%s">\n' % base['QUEUE_ARCH'])
+    else:
+        strings.append('\t<!ENTITY QUEUE_ARCH "%s">\n' % base['QUEUE_ARCH'])
     strings.append('\t<!ENTITY SCHEDULER  "%s">\n' % wfu.get_scheduler(base['machine']))
     strings.append('\n')
     strings.append('\t<!-- Toggle HPSS archiving -->\n')
@@ -153,6 +157,7 @@ def get_resources(dict_configs, cdump='gdas'):
     strings.append('\n')
 
     machine = dict_configs['base']['machine']
+    base = dict_configs['base']
 
     for task in taskplan:
 
@@ -163,6 +168,8 @@ def get_resources(dict_configs, cdump='gdas'):
         taskstr = '%s_%s' % (task.upper(), cdump.upper())
 
         strings.append('\t<!ENTITY QUEUE_%s     "%s">\n' % (taskstr, queuestr))
+        if base['machine'] == 'THEIA' and wfu.check_slurm() and task == 'arch':
+            strings.append('\t<!ENTITY PARTITION_%s "&PARTITION_ARCH;">\n' % taskstr )
         strings.append('\t<!ENTITY WALLTIME_%s  "%s">\n' % (taskstr, wtimestr))
         strings.append('\t<!ENTITY RESOURCES_%s "%s">\n' % (taskstr, resstr))
         strings.append('\t<!ENTITY MEMORY_%s    "%s">\n' % (taskstr, memstr))
@@ -212,6 +219,9 @@ def get_workflow(dict_configs, cdump='gdas'):
     '''
 
     envars = []
+
+    if wfu.check_slurm():
+        envars.append(rocoto.create_envar(name='SLURM_SET', value='YES'))
     envars.append(rocoto.create_envar(name='RUN_ENVIR', value='&RUN_ENVIR;'))
     envars.append(rocoto.create_envar(name='HOMEgfs', value='&HOMEgfs;'))
     envars.append(rocoto.create_envar(name='EXPDIR', value='&EXPDIR;'))

@@ -11,6 +11,7 @@
     Module containing functions all workflow setups require
 '''
 import random
+import re
 import os
 import sys
 import glob
@@ -149,13 +150,28 @@ def config_parser(files):
 
     return varbles
 
-def get_scheduler(machine):
-    """Determine the scheduler"""
-    try:
-        return SCHEDULER_MAP[machine]
-    except KeyError:
-        raise UnknownMachineError('Unknown machine: %s'%(machine,))
+def check_slurm(print_message = False):
+    if find_executable('srun'):
+        if print_message:
+           print 'Info: Using Slurm as scheduler because srun was found in your path'
+           non_decimal = re.compile(r'[^\d.]+')
+           rocoto_version =  non_decimal.sub('',find_executable('rocotorun').replace('.',''))
+           if int(rocoto_version) < 130:
+              print 'WARNING: XML workflow is being made to use Slurm because it was set in your'
+              print 'environment and the correct version of Rocoto is not loaded.'
+              print 'Make sure to use Rocoto 1.3.0rc2 or newer (example: module load rocoto/1.3.0rc2).'
+        return True
+    else:
+        return False
 
+def get_scheduler(machine):
+    if check_slurm(print_message=True):
+	    return 'slurm'
+    else:
+        try:
+            return SCHEDULER_MAP[machine]
+        except KeyError:
+            raise UnknownMachineError('Unknown machine: %s'%(machine,))
 
 def create_wf_task(task, cdump='gdas', cycledef=None, envar=None, dependency=None, \
                    metatask=None, varname=None, varval=None, vardict=None, \
@@ -188,7 +204,13 @@ def create_wf_task(task, cdump='gdas', cycledef=None, envar=None, dependency=Non
                  'log': '&ROTDIR;/logs/@Y@m@d@H/%s.log' % taskstr, \
                  'envar': envar, \
                  'dependency': dependency, \
+                 'partition' : '&PARTITION_%s_%s;' % (task.upper(),cdump.upper()), \
                  'final': final}
+
+    if task in ['arch','earc'] and check_slurm():
+        task_dict['partition'] = '&PARTITION_%s_%s;' % (task.upper(),cdump.upper())
+    else:
+        task_dict['partition'] = None
 
     if metatask is None:
         task = rocoto.create_task(task_dict)
@@ -281,6 +303,9 @@ def get_resources(machine, cfg, task, cdump='gdas'):
     memstr = '' if memory is None else str(memory)
     natstr = ''
 
+    if machine in ['THEIA'] and check_slurm():
+        natstr = '--export=NONE'
+
     if machine in ['ZEUS', 'THEIA', 'WCOSS_C', 'WCOSS_DELL_P3']:
         resstr = '<nodes>%d:ppn=%d</nodes>' % (nodes, ppn)
 
@@ -293,10 +318,18 @@ def get_resources(machine, cfg, task, cdump='gdas'):
             if task in ['arch', 'earc', 'getic']:
                  natstr = "-R 'affinity[core(1)]'"
 
+
     elif machine in ['WCOSS']:
         resstr = '<cores>%d</cores>' % tasks
 
-    queuestr = '&QUEUE_ARCH;' if task in ['arch', 'earc', 'getic'] else '&QUEUE;'
+    queuestr = '&QUEUE_ARCH;'
+    # Tricky logic added for Thiea arch queues beasue partition
+    # is a subset up queue for service queues (for now)
+    if task in ['arch', 'earc', 'getic']:
+        if machine in ['THEIA'] and check_slurm():
+            queuestr = '&QUEUE;'
+    else:
+        queuestr = '&QUEUE;'
 
     return wtimestr, resstr, queuestr, memstr, natstr
 
