@@ -3,7 +3,7 @@
     <command>&SCRIPTS;/anx_verif_file_realtime.ksh</command>
     <account>&PROJECT;</account>
     <cores>1</cores>
-    <queue>&SERVICE;</queue>
+    <partition>&SERVICE;</partition>
     &PARTITION_JET;
     <walltime>00:10:00</walltime>
     <jobname><cyclestr>ANXFile_@H</cyclestr></jobname>

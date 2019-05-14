@@ -3,7 +3,6 @@
     <account>&PROJECT;</account>
     <memory>4G</memory>
     <cores>1</cores>
-    <native>-W umask=002</native>
     <walltime>00:25:00</walltime>
     <jobname><cyclestr>ncl_#T#</cyclestr></jobname>
     <join><cyclestr>&FV3GFS_LOG;/ncl/ncl#T#_@Y@m@d@H00.log</cyclestr></join>

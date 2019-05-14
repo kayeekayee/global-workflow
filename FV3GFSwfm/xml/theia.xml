@@ -1,11 +1,11 @@
   <!-- theia -->
 
-  <!ENTITY SCHEDULER   "moabtorque">
+  <!ENTITY SCHEDULER   "slurm">
   <!ENTITY PROJECT "gsd-fv3">
   <!ENTITY SERIALPE "batch">
   <!ENTITY PE "batch">
   <!ENTITY SERVICE "service">
-  <!ENTITY MPIRUN       "mpirun -n">
+  <!ENTITY MPIRUN       "srun --export=ALL">
 
   <!ENTITY MET_MODULE "/contrib/modulefiles">
   <!ENTITY MET_VERSION "met/7.0">

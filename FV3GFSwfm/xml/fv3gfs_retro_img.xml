@@ -27,7 +27,7 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef>201903270000 201903310000 24:00:00</cycledef>
+  <cycledef>201905070000 201905110000 24:00:00</cycledef>
 
   <metatask throttle="100">
 <!--

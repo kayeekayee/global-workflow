@@ -126,7 +126,7 @@
         <partition>&QUEUE_CHECKGDAS_GFS;</partition>
         &RESOURCES_CHECKGDAS_GFS;
         <walltime>&WALLTIME_CHECKGDAS_GFS;</walltime>
-        <memory>&MEMORY_CHECKGDAS_GFS;</memory>
+<!--        <memory>&MEMORY_CHECKGDAS_GFS;</memory> -->
         <native>&NATIVE_CHECKGDAS_GFS;</native>
 
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/checkgdas.log</cyclestr></join>
@@ -154,7 +154,7 @@
 	<partition>&QUEUE_GETIC_GFS;</partition>
 	&RESOURCES_GETIC_GFS;
 	<walltime>&WALLTIME_GETIC_GFS;</walltime>
-	<memory>&MEMORY_GETIC_GFS;</memory>
+<!--	<memory>&MEMORY_GETIC_GFS;</memory> -->
 	<native>&NATIVE_GETIC_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsgetic.log</cyclestr></join>
@@ -197,7 +197,7 @@
 	<queue>&QUEUE_FV3IC_GFS;</queue>
 	&RESOURCES_FV3IC_GFS;
 	<walltime>&WALLTIME_FV3IC_GFS;</walltime>
-	<memory>&MEMORY_FV3IC_GFS;</memory>
+<!--	<memory>&MEMORY_FV3IC_GFS;</memory> -->
 	<native>&NATIVE_FV3IC_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfv3ic.log</cyclestr></join>
@@ -238,7 +238,7 @@
         <queue>&QUEUE_REGRID;</queue>
         &RESOURCES_REGRID;
         <walltime>&WALLTIME_REGRID;</walltime>
-        <memory>&MEMORY_REGRID;</memory>
+<!--        <memory>&MEMORY_REGRID;</memory> -->
         <native>&NATIVE_REGRID;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
 
@@ -273,7 +273,7 @@
         <queue>&QUEUE_CALCINC;</queue>
         &RESOURCES_CALCINC;
         <walltime>&WALLTIME_CALCINC;</walltime>
-        <memory>&MEMORY_CALCINC;</memory>
+<!--        <memory>&MEMORY_CALCINC;</memory> -->
         <native>&NATIVE_CALCINC;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/calcinc.log</cyclestr></join>
 
@@ -305,7 +305,7 @@
         <queue>&QUEUE_PREP_CHEM_SRC;</queue>
         &RESOURCES_PREP_CHEM_SRC;
         <walltime>&WALLTIME_PREP_CHEM_SRC;</walltime>
-        <memory>&MEMORY_PREP_CHEM_SRC;</memory>
+<!--        <memory>&MEMORY_PREP_CHEM_SRC;</memory> -->
         <native>&NATIVE_PREP_CHEM_SRC;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/prepchem.log</cyclestr></join>
 
@@ -342,7 +342,7 @@
 	<queue>&QUEUE_FCST_GFS;</queue>
 	&RESOURCES_FCST_GFS;
 	<walltime>&WALLTIME_FCST_GFS;</walltime>
-	<memory>&MEMORY_FCST_GFS;</memory>
+<!--	<memory>&MEMORY_FCST_GFS;</memory>   -->
 	<native>&NATIVE_FCST_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfcst.log</cyclestr></join>
@@ -381,7 +381,7 @@
 		<queue>&QUEUE_POST_GFS;</queue>
 		&RESOURCES_POST_GFS;
 		<walltime>&WALLTIME_POST_GFS;</walltime>
-		<memory>&MEMORY_POST_GFS;</memory>
+<!--		<memory>&MEMORY_POST_GFS;</memory> -->
 		<native>&NATIVE_POST_GFS;</native>
 
 		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfspost#grp#.log</cyclestr></join>

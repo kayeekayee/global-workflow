@@ -1,7 +1,7 @@
   <task name="GlobalVerif" maxtries="3">
     <command>&SCRIPTS;/ACVerif.ksh</command>
     <account>&PROJECT;</account>
-    <queue>&SERVICE;</queue>
+    <partition>&SERVICE;</partition>
     &PARTITION_JET;
     <walltime>00:40:00</walltime>
     <cores>1</cores>
