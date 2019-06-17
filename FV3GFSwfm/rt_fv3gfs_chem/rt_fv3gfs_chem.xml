@@ -20,7 +20,7 @@
 
 	<!-- Experiment parameters such as starting, ending dates -->
 	<!ENTITY SDATE    "201903200000">
-	<!ENTITY EDATE    "202003020000">
+	<!ENTITY EDATE    "202905200000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -214,10 +214,16 @@
 
 	<dependency>
 		<and>
-			<and>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
-			</and>
+			<or>
+				<and>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gfs.t@Hz.atmanl.nemsio</cyclestr></datadep>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gfs.t@Hz.sfcanl.nemsio</cyclestr></datadep>
+				</and>
+				<and>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+				</and>
+			</or>
 			<not>
 				<and>
 					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>

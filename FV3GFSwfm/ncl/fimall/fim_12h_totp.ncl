@@ -100,8 +100,10 @@ if (domainname .eq. "fim") then
       else
         zz = TPACC + back12fctm + "h"
       end if
-      back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-      tvar = tvar - back12tvar
+      if (back12fctm .ne. 0) then
+        back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+        tvar = tvar - back12tvar
+      end if
     else
       lat = grb_file->$LAT$(:)
       if ( fctm .gt. 0 ) then
@@ -140,8 +142,10 @@ if (domainname .eq. "129") then
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
 ;
 end if
 ;
@@ -168,8 +172,10 @@ if (domainname .eq. "83") then
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
 ;
 end if
 ;
@@ -199,8 +205,10 @@ if (domainname .eq. "130") then
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
 ;
 end if
 ;
@@ -228,8 +236,10 @@ if (domainname .eq. "174") then
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
   tvarorig = tvar
   fliptvar = lonFlip(tvar)
 ;
@@ -261,8 +271,10 @@ if (domainname .eq. "236") then
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
 ;
 end if
 ;
@@ -289,8 +301,10 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
   else
     zz = TPACC + back12fctm + "h"
   end if
-  back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
-  tvar = tvar - back12tvar
+  if (back12fctm .ne. 0) then
+    back12tvar = back12_grb_file->$zz$(:,:) * 0.03937 ; convert to inches
+    tvar = tvar - back12tvar
+  end if
 ;
 end if
 ;
@@ -318,7 +332,10 @@ if (domainname .eq. "244") then
     else
       zz = TPACC + back12fctm + "h"
     end if
-    back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    if (back12fctm .ne. 0) then
+      back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+      tvar = tvar - back12tvar
+    end if
   else
     lat = grb_file->$LAT$(:)
     if ( fctm .gt. 0 ) then
@@ -336,9 +353,11 @@ if (domainname .eq. "244") then
     else
       zz = TPACC + back12fctm + "h"
     end if
-    back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+    if (back12fctm .ne. 0) then
+      back12tvar = back12_grb_file->$zz$(::-1,:) * 0.03937 ; convert to inches
+      tvar = tvar - back12tvar
+    end if
   end if
-  tvar = tvar - back12tvar
 ;
 end if
 ;

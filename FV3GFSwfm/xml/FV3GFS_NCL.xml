@@ -25,6 +25,7 @@
     <envar><name>GRID_NAMES</name><value>fimD201D130D244D236D224D242</value></envar> 
     <dependency>
        <and>
+         <taskdep task="remapgrib_#T#"/>
          <datadep age="120"> <cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.&RES;.f#T#</cyclestr></datadep>
          <datadep age="120"> <cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
        </and>
