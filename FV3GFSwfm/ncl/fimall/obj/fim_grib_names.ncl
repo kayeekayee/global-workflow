@@ -82,16 +82,8 @@ if (.not.grib1file) then
   else
     DPTNAT="DPT_P0_L105"+sufx
   end if
-  if (fv3) then
-    LHTFL="LHTFL_P8_L1"+sufx+"_avg6h"
-  else
-    LHTFL="LHTFL_P0_L1"+sufx
-  end if
-  if (fv3) then
-    SHTFL="SHTFL_P8_L1"+sufx+"_avg6h"
-  else
-    SHTFL="SHTFL_P0_L1"+sufx
-  end if
+  LHTFL="LHTFL_P0_L1"+sufx
+  SHTFL="SHTFL_P0_L1"+sufx
   RHISBL="RH_P0_L100"+sufx
   RHNAT="RH_P0_L105"+sufx
   if (fv3) then
@@ -123,17 +115,13 @@ if (.not.grib1file) then
   if (fv3) then
 ;    MSLP="PRMSL_P0_L101"+sufx
     MSLP="MSLET_P0_L101"+sufx
-    DSWRF="DSWRF_P8_L1"+sufx+"_avg6h"
-    DLWRF="DLWRF_P8_L1"+sufx+"_avg6h"
-    ULWRF="ULWRF_P8_L1"+sufx+"_avg6h"
-    USWRF="USWRF_P8_L1"+sufx+"_avg6h"
   else
     MSLP="MSLMA_P0_L101"+sufx
-    DSWRF="DSWRF_P0_L1"+sufx
-    DLWRF="DLWRF_P0_L1"+sufx
-    ULWRF="ULWRF_P0_L1"+sufx
-    USWRF="USWRF_P0_L1"+sufx
   end if
+  DSWRF="DSWRF_P0_L1"+sufx
+  DLWRF="DLWRF_P0_L1"+sufx
+  ULWRF="ULWRF_P0_L1"+sufx
+  USWRF="USWRF_P0_L1"+sufx
   OLR="NLWRT_P0_L1"+sufx
   NTAULWRF="ULWRF_P8_L8_GLL0_avg6h"  ; used for FV3GFS
   CWAT="CWAT_P0_L1"+sufx

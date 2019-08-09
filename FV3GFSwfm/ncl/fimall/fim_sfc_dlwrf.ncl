@@ -260,11 +260,11 @@ if (domainname .eq. "fim") then
     end setvalues
   end if
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Downward LW Radiation Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -341,11 +341,11 @@ if (domainname .eq. "130") then
     "cnRasterModeOn" : False
   end setvalues
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Downward LW Radiation Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -414,11 +414,11 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/swr.ncl"
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Downward LW Radiation Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -470,11 +470,11 @@ if (domainname .eq. "242") then
     "cnFillMode" : "AreaFill"
   end setvalues
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Downward LW Radiation Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -533,11 +533,11 @@ if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174
 ;
   end if
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Downward LW Radiation Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Downward LW Radiation Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;

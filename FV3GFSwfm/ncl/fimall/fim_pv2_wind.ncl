@@ -213,9 +213,13 @@ if (domainname .eq. "201" .or. domainname .eq. "224" .or. domainname .eq. "242")
     uvartmp = -uvartmp
     vvartmp = -vvartmp
   end if
-;
-  ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
-  vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
+  if (fv3) then
+    ugrid = uvartmp
+    vgrid = vvartmp
+  else
+    ugrid = cos(rot)*uvartmp - sin(rot)*vvartmp
+    vgrid = sin(rot)*uvartmp + cos(rot)*vvartmp
+  end if
 ;
   uvar = ugrid * 1.9429 ; convert to knots
   vvar = vgrid * 1.9429 ; convert to knots

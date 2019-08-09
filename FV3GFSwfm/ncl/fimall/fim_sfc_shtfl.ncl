@@ -150,7 +150,7 @@ if (fctm .eq. 0) then
   exit
 end if
 ;
-tvar = -tvar
+;tvar = -tvar
 ;
 print(date_str)
 print("shtfl")
@@ -257,11 +257,11 @@ if (domainname .eq. "fim") then
     end setvalues
   end if
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Sensible Heat Net Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -327,11 +327,11 @@ if (domainname .eq. "130") then
     "cnRasterModeOn" : False
   end setvalues
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Sensible Heat Net Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -392,11 +392,11 @@ if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/lhtfl.ncl"
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Sensible Heat Net Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -446,11 +446,11 @@ if (domainname .eq. "242") then
     end setvalues
   end if
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Sensible Heat Net Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
@@ -509,11 +509,11 @@ if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174
 ;
   end if
 ;
-  if (fv3) then
-    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
-  else
+;  if (fv3) then
+;    titlestring = "6hr Avg Sensible Heat Net Flux (W/m~S~2~N~)"
+;  else
     titlestring = "Sensible Heat Net Flux (W/m~S~2~N~)"
-  end if
+;  end if
   load "$NCL_HOME/obj/add_titles.ncl"
   load "$NCL_HOME/obj/add_explabel.ncl"
 ;
