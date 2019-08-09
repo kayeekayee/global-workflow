@@ -3,7 +3,7 @@ load "$NCARG_ROOT/lib/ncarg/nclex/gsun/gsn_code.ncl"
 load "$NCARG_LIB/ncarg/nclscripts/csm/contributed.ncl"
 modl = getenv("MODL")
 ;
-load "$NCL_HOME/obj/cmap_brown.ncl"
+load "$NCL_HOME/obj/cmap_aod.ncl"
 ;
 begin
 ;
@@ -223,16 +223,16 @@ end create
     end if
 ;
 ; Assign the colormap to the workstation.
-;setvalues wid
-;   "wkColorMap" : gen_colormap()
-;end setvalues
 setvalues wid
-   "wkColorMap" : "WhiteBlueGreenYellowRed"
-   "wkBackgroundColor" : "black"
-   "wkForegroundColor" : "white"
+   "wkColorMap" : gen_colormap()
 end setvalues
-NhlSetColor(wid,255,0.55,0.14,0.80)
-NhlSetColor(wid,254,0.5,0.5,0.5)
+;setvalues wid
+;   "wkColorMap" : "WhiteBlueGreenYellowRed"
+;   "wkBackgroundColor" : "black"
+;   "wkForegroundColor" : "white"
+;end setvalues
+;NhlSetColor(wid,255,0.55,0.14,0.80)
+;NhlSetColor(wid,254,0.5,0.5,0.5)
 ;
 setvalues NhlGetWorkspaceObjectId()
    "wsMaximumSize": 247108864
@@ -247,10 +247,9 @@ if (domainname .eq. "fim") then
   load "$NCL_HOME/obj/4_tiles_loop.ncl"
 ;
   tvar = tvarsave
-;
-;  if (max(tvar(lly:ury,llx:urx)) .le. 20) then
-;    tvar(lly,llx) = 21
-;  end if
+  if (min(tvar(lly:ury,llx:urx)) .lt. 0.1 .and. max(tvar(lly:ury,llx:urx)) .lt. 0.1) then
+    tvar(lly,llx) = .12
+  end if
 ;
   load "$NCL_HOME/obj/fim_maps_blk.ncl"
 ;
@@ -276,10 +275,8 @@ if (domainname .eq. "fim") then
   load "$NCL_HOME/obj/pwtr.ncl"
 ;
   setvalues cnid
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-;    "cnLevels" : (/ .1,.2,.3,.5,1,2,3,4,5,6,7,8,9,10 /)
-;    "cnLevels" : (/ .05, .1,.15,.25,.5, 1,1.5, 2,2.5,3,3.5,  4,4.5, 5 /)
-    "cnLevels" : (/ .006,.008,.01,.02,.04,.06,.08,.1,.2,.4,.6,.8,1,1.2 /)
+    "cnFillColors" : (/ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,16 /)
+    "cnLevels" : (/ .1,.16,.23,.29,.36,.42,.49,.55,.61,.68,.74,.81,.87,1 /)
   end setvalues
 ;
   if (iq .ne. 0) then
@@ -302,7 +299,7 @@ if (domainname .eq. "fim") then
   if (iq .eq. 0) then
 ;    do i = 0,dimsizes(airport_id)-1
 ;      gsres@gsMarkerIndex = 16
-;      gsres@gsMarkerColor = 20
+;      gsres@gsMarkerColor = 17
 ;      gsres@gsMarkerSizeF = 0.004
 ;      gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
 ;      gsres@gsMarkerIndex = 16
@@ -313,7 +310,7 @@ if (domainname .eq. "fim") then
   else
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 20
+      gsres@gsMarkerColor = 17
       gsres@gsMarkerSizeF = 0.01
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -334,8 +331,8 @@ if (domainname .eq. "130") then
   load "$NCL_HOME/obj/ruc_tiles_loop.ncl"
 ;
   tvar = tvarsave
-  if (min(tvar(lly,llx)) .eq. max(tvar(lly,llx))) then
-    tvar(lly,llx) = .007
+  if (min(tvar(lly:ury,llx:urx)) .lt. 0.1 .and. max(tvar(lly:ury,llx:urx)) .lt. 0.1) then
+    tvar(lly,llx) = .12
   end if
 ;
   if (iq .eq. 0) then
@@ -370,10 +367,8 @@ if (domainname .eq. "130") then
   load "$NCL_HOME/obj/pwtr.ncl"
 ;
   setvalues cnid
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-;    "cnLevels" : (/ .1,.2,.3,.5,1,2,3,4,5,6,7,8,9,10 /)
-;    "cnLevels" : (/ .05, .1,.15,.25,.5, 1,1.5, 2,2.5,3,3.5,  4,4.5, 5 /)
-    "cnLevels" : (/ .006,.008,.01,.02,.04,.06,.08,.1,.2,.4,.6,.8,1,1.2 /)
+    "cnFillColors" : (/ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,16 /)
+    "cnLevels" : (/ .1,.16,.23,.29,.36,.42,.49,.55,.61,.68,.74,.81,.87,1 /)
     "cnRasterModeOn" : False
   end setvalues
 ;
@@ -393,7 +388,7 @@ if (domainname .eq. "130") then
   if (iq .eq. 0) then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 254
+      gsres@gsMarkerColor = 17
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -404,7 +399,7 @@ if (domainname .eq. "130") then
   else
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 254
+      gsres@gsMarkerColor = 17
       gsres@gsMarkerSizeF = 0.01
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
@@ -423,6 +418,11 @@ end if  ; domainname .eq. "130"
 if (domainname .eq. "174") then
 ;
   load "$NCL_HOME/obj/fim_174subdomain_loop.ncl"
+;
+  tvar = tvarsave
+  if (min(tvar(lly:ury,llx:urx)) .lt. 0.1 .and. max(tvar(lly:ury,llx:urx)) .lt. 0.1) then
+    tvar(lly,llx) = .12
+  end if
 ;
   if (idom .eq. 0 .or. idom .eq. 2) then
     load "$NCL_HOME/obj/fim_maps_cent0_blk.ncl"
@@ -472,6 +472,11 @@ if (domainname .eq. "242") then
 ;
   load "$NCL_HOME/obj/242_tiles_loop.ncl"
 ;
+  tvar = tvarsave
+  if (min(tvar(lly:ury,llx:urx)) .lt. 0.1 .and. max(tvar(lly:ury,llx:urx)) .lt. 0.1) then
+    tvar(lly,llx) = .12
+  end if
+;
   centerlat = 90
   centerlon = grb_file->$LON$@Lov
   load "$NCL_HOME/obj/stereographic_map_blk.ncl"
@@ -504,9 +509,8 @@ if (domainname .eq. "242") then
   load "$NCL_HOME/obj/pwtr.ncl"
 ;
   setvalues cnid
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-;    "cnLevels" : (/ .1,.2,.3,.5,1,2,3,4,5,6,7,8,9,10 /)
-    "cnLevels" : (/ .006,.008,.01,.02,.04,.06,.08,.1,.2,.4,.6,.8,1,1.2 /)
+    "cnFillColors" : (/ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,16 /)
+    "cnLevels" : (/ .1,.16,.23,.29,.36,.42,.49,.55,.61,.68,.74,.81,.87,1 /)
     "cnFillMode" : "AreaFill"
   end setvalues
 ;
@@ -583,9 +587,8 @@ if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174
   load "$NCL_HOME/obj/pwtr.ncl"
 ;
   setvalues cnid
-    "cnFillColors" : (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
-;    "cnLevels" : (/ .1,.2,.3,.5,1,2,3,4,5,6,7,8,9,10 /)
-    "cnLevels" : (/ .006,.008,.01,.02,.04,.06,.08,.1,.2,.4,.6,.8,1,1.2 /)
+    "cnFillColors" : (/ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,16 /)
+    "cnLevels" : (/ .1,.16,.23,.29,.36,.42,.49,.55,.61,.68,.74,.81,.87,1 /)
   end setvalues
 ;
   if (domainname .eq. "236" .or. domainname .eq. "244" .or. domainname .eq. "83" .or. \
@@ -626,7 +629,7 @@ if (domainname .ne. "fim" .and. domainname .ne. "130" .and. domainname .ne. "174
   if (domainname .eq. "236") then
     do i = 0,dimsizes(airport_id)-1
       gsres@gsMarkerIndex = 16
-      gsres@gsMarkerColor = 254
+      gsres@gsMarkerColor = 17
       gsres@gsMarkerSizeF = 0.004
       gsn_polymarker(wid,mpid,airport_loc(i,1),airport_loc(i,0),gsres)
       gsres@gsMarkerIndex = 16
