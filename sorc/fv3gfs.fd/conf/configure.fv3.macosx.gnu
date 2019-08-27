@@ -36,10 +36,10 @@ endif
 # commands #
 ############
 SFC             =       gfortran
-SCC             =       clang
-CCOMP           =       clang
+SCC             =       /usr/local/opt/llvm/bin/clang
+CCOMP           =       /usr/local/opt/llvm/bin/clang
 DM_FC           =       mpif90
-DM_CC           =       mpicc -DMPI2_SUPPORT
+DM_CC           =       mpicc -cc=/usr/local/opt/llvm/bin/clang -DMPI2_SUPPORT
 FC              =       $(DM_FC)
 CC              =       $(DM_CC) -DFSEEKO64_OK
 LD              =       $(FC)
@@ -54,6 +54,9 @@ VERBOSE =
 OPENMP = Y
 AVX2 = Y
 HYDRO = N
+CCPP = N
+STATIC = N
+SION = N
 
 include       $(ESMFMKFILE)
 ESMF_INC    = $(ESMF_F90COMPILEPATHS)
@@ -79,6 +82,8 @@ else
   NETCDF_LIB += -L$(NETCDF)/lib -lnetcdff -lnetcdf
 endif
 
+INCLUDE += $(MKL_INC)
+
 FPPFLAGS := -cpp -Wp,-w $(INCLUDE)
 CFLAGS := $(INCLUDE)
 
@@ -91,6 +96,10 @@ ifeq ($(HYDRO),Y)
 CPPDEFS +=
 else
 CPPDEFS += -DMOIST_CAPPA -DUSE_COND
+endif
+
+ifeq ($(NAM_phys),Y)
+CPPDEFS += -DNAM_phys
 endif
 
 ifeq ($(32BIT),Y)
@@ -108,9 +117,13 @@ FFLAGS +=
 CFLAGS +=
 endif
 
-FFLAGS_OPT = -O2 -fno-range-check
+ifeq ($(MULTI_GASES),Y)
+CPPDEFS += -DMULTI_GASES
+endif
+
+FFLAGS_OPT = -O2 -g -fno-range-check
 FFLAGS_REPRO = -O2 -g -fbacktrace -fno-range-check
-FFLAGS_DEBUG = -g -O0 -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
+FFLAGS_DEBUG = -g -O0 -ggdb -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbounds-check -fbacktrace -fno-range-check
 
 TRANSCENDENTALS :=
 FFLAGS_OPENMP = -fopenmp
@@ -118,8 +131,8 @@ FFLAGS_VERBOSE = -v -V
 
 CFLAGS += -D__IFC
 
-CFLAGS_OPT = -O2
-CFLAGS_REPRO = -O2
+CFLAGS_OPT = -O2 -g
+CFLAGS_REPRO = -O2 -g
 CFLAGS_OPENMP = -fopenmp
 CFLAGS_DEBUG = -O0 -g
 
@@ -129,17 +142,19 @@ FFLAGS_TEST = -O3
 CFLAGS_TEST = -O2
 
 LDFLAGS :=
-LDFLAGS_OPENMP := -fopenmp -L/usr/local/Cellar/llvm/5.0.0/lib -lomp
+LDFLAGS_OPENMP := -fopenmp -L/usr/local/Cellar/llvm/lib -lomp
 LDFLAGS_VERBOSE := -Wl,-V,--verbose,-cref,-M
 
 # start with blank LIBS
 LIBS :=
 
 ifeq ($(REPRO),Y)
+CPPDEFS += -DREPRO
 CFLAGS += $(CFLAGS_REPRO)
 FFLAGS += $(FFLAGS_REPRO)
 FAST :=
 else ifeq ($(DEBUG),Y)
+CPPDEFS += -DDEBUG
 CFLAGS += $(CFLAGS_DEBUG)
 FFLAGS += $(FFLAGS_DEBUG)
 FAST :=
@@ -154,6 +169,7 @@ FAST := $(TRANSCENDENTALS)
 endif
 
 ifeq ($(OPENMP),Y)
+CPPDEFS += -DOPENMP
 CFLAGS += $(CFLAGS_OPENMP)
 FFLAGS += $(FFLAGS_OPENMP)
 LDFLAGS += $(LDFLAGS_OPENMP)
@@ -165,10 +181,28 @@ FFLAGS += $(FFLAGS_VERBOSE)
 LDFLAGS += $(LDFLAGS_VERBOSE)
 endif
 
+ifeq ($(CCPP),Y)
+CPPDEFS += -DCCPP
+CFLAGS += -I$(PATH_CCPP)/include
+FFLAGS += -I$(PATH_CCPP)/include
+ifeq ($(STATIC),Y)
+CPPDEFS += -DSTATIC
+LDFLAGS += -L$(PATH_CCPP)/lib -lccppphys -lccpp $(NCEPLIBS) -lxml2
+else
+LDFLAGS += -L$(PATH_CCPP)/lib -lccpp
+endif
+endif
+
+ifeq ($(SION),Y)
+CPPDEFS += -DSION
+CFLAGS += $(SIONLIB_INC)
+FFLAGS += $(SIONLIB_INC)
+endif
+
 LDFLAGS += $(LIBS)
 
 ifdef InNemsMakefile
 FFLAGS += $(ESMF_INC)
 CPPFLAGS += -cpp -traditional
-EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
+EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB) $(MKL_LIB) $(SIONLIB_LIB)
 endif

@@ -78,14 +78,8 @@ contains
     if (deCount < 1) return
 
     ! -- get current time and set model's internal clock
-    call ESMF_ClockPrint(clock, &
-      preString="chem: run(): time step : ", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
     call ESMF_ClockPrint(clock, options="currTime", &
-      preString="chem: run(): time stamp: ", rc=rc)
+      preString=" GSDCHEM: current time: ", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -214,6 +208,30 @@ contains
         select case (trim(fieldNames(item)))
           case ("inst_tracer_mass_frac")
             call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateOut % tr3d, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail
+          case ("inst_tracer_up_surface_flx")
+            call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateOut % truf, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail
+          case ("inst_tracer_down_surface_flx")
+            call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateOut % trdf, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail
+          case ("inst_tracer_clmn_mass_dens")
+            call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateOut % trcm, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail
+          case ("inst_tracer_anth_biom_flx")
+            call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateOut % trab, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=__FILE__)) &

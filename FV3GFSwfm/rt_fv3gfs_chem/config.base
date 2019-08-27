@@ -188,6 +188,8 @@ export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS"
 export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
+export EMITYPE=2 # 1: MODIS, 2: GBBEPx !lzhang
+
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
 export NET="gfs"

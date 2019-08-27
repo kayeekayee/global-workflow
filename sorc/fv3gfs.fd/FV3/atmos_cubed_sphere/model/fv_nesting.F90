@@ -22,6 +22,8 @@
 !>@brief The module 'fv_nesting' is a collection of routines pertaining to grid nesting 
 !! \cite harris2013two.
 
+#undef MULTI_GASES
+
 module fv_nesting_mod
 
 ! Modules Included:
@@ -247,7 +249,7 @@ contains
                gridstruct%se_corner, gridstruct%sw_corner, &
                gridstruct%ne_corner, gridstruct%nw_corner, &
                gridstruct%rsin_u, gridstruct%rsin_v, &
-               gridstruct%cosa_s, gridstruct%rsin2 )
+               gridstruct%cosa_s, gridstruct%rsin2, flagstruct%regional )
           if (nested) then
              call divergence_corner_nest(u(isd,jsd,k), v(isd,jsd,k), ua, va, divg(isd,jsd,k), gridstruct, flagstruct, bd)
           else

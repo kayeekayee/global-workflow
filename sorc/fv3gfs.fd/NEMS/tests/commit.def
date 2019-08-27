@@ -1,26 +1,28 @@
 # Directory to receive the webpage with regression test results
-ON xjet           WEBPAGE samuel.trahan@dmzgw.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON svjet          WEBPAGE samuel.trahan@dmzgw.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON theia          WEBPAGE samuel.trahan@dmzgw.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON wcoss1         WEBPAGE strahan@emcrzdm.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON wcoss2         WEBPAGE strahan@emcrzdm.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON wcoss_cray     WEBPAGE strahan@emcrzdm.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON wcoss_dell_p3  WEBPAGE strahan@emcrzdm.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
-ON gaea           WEBPAGE samuel.trahan@dmzgw.ncep.noaa.gov:/home/www/emc/htdocs/projects/nems-commit/port-nems/
+#ON tujet          WEBPAGE /lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+#ON ujet.slurm     WEBPAGE /lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON theia          WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+#ON theia.intel    WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON theia.slurm.intel  WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON wcoss1         WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON wcoss2         WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON wcoss_cray     WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+ON wcoss_dell_p3  WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
+#ON gaea           WEBPAGE jetscp.rdhpcs.noaa.gov:/lfs3/projects/hfv3gfs/emc.nemspara/web/nems-commit/ccpp/
 
-USER ACCOUNT IS Samuel.Trahan
+USER ACCOUNT IS Ratko.Vasic
 ROLE ACCOUNT IS emc.nemspara
 
 # nems branch - branch of NEMS that is being tested.  Set to "default"
 # to test the app's own NEMS
-NEMS   BRANCH IS frozen-dom
+NEMS   BRANCH IS ccpp
 
 # app branch - branch to use for committing logs to each 
-APP    BRANCH IS port-nems
+APP    BRANCH IS ccpp-commit
 
 # If relevant, the starting branch that we copy to make the app
 # branch.  Default is the master branch.
-#  APP NEMSfv3gfs       CHECKOUT some-branch
+APP NEMSfv3gfs       CHECKOUT ccpp
 
 # master branch - name of the git "master" branch.  Do not change.
 MASTER BRANCH IS master

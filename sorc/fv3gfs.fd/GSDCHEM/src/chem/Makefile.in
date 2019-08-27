@@ -79,11 +79,12 @@ POST_UNINSTALL = :
 subdir = src/chem
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ar-lib.m4 \
+	$(top_srcdir)/m4/ax_compiler_vendor.m4 \
+	$(top_srcdir)/m4/fc_features.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -115,7 +116,6 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LIBRARIES = $(lib_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
@@ -141,7 +141,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+DEFAULT_INCLUDES = -I.@am__isrc@
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -231,6 +231,7 @@ am__relativize = \
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -238,7 +239,6 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CUT = @CUT@
 CYGPATH_W = @CYGPATH_W@
@@ -247,12 +247,13 @@ DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
-EGREP = @EGREP@
 ESMFMKFILE = @ESMFMKFILE@
 EXEEXT = @EXEEXT@
 FC = @FC@
 FCFLAGS = @FCFLAGS@
-FCLIBS = @FCLIBS@
+FCFLAGS_F90 = @FCFLAGS_F90@
+FC_MODEXT = @FC_MODEXT@
+FC_MODINC = @FC_MODINC@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -263,6 +264,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -284,8 +286,10 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_FC = @ac_ct_FC@
+ac_empty = @ac_empty@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -326,16 +330,13 @@ top_srcdir = @top_srcdir@
 SUBDIRS = shr plume vash dust aero dep seas opt gocart .
 lib_LIBRARIES = libgsdchem.a
 libgsdchem_a_LIBADD = shr/*.$(OBJEXT) plume/*.$(OBJEXT) vash/*.$(OBJEXT) dust/*.$(OBJEXT) dep/*.$(OBJEXT) aero/*.$(OBJEXT) seas/*.$(OBJEXT) opt/*.$(OBJEXT) gocart/*.$(OBJEXT)
-libgsdchem_a_FCFLAGS = -I . -I shr -I gocart -I plume -I vash -I dust \
-	-I dep -I aero -I seas -I opt $(ESMF_F90COMPILEOPTS) \
-	$(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) \
-	$(ESMF_F90COMPILECPPFLAGS)
+libgsdchem_a_FCFLAGS = -I . -I shr -I gocart -I plume -I vash -I dust -I dep -I aero -I seas -I opt
 libgsdchem_a_SOURCES = chemCap.F90 chem_methods.F90
 all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .F90 .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -360,9 +361,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 install-libLIBRARIES: $(lib_LIBRARIES)
@@ -702,10 +703,12 @@ uninstall-am: uninstall-libLIBRARIES
 	tags tags-am uninstall uninstall-am uninstall-libLIBRARIES
 
 
-include $(ESMFMKFILE)
+.PHONY: clean-modules
 
-clean-local:
-	-rm -f *.mod
+clean-modules:
+	-test -z "$(FC_MODEXT)" || rm -f *.$(FC_MODEXT)
+
+clean-local: clean-modules
 
 libgsdchem_a-chemCap.$(OBJEXT): libgsdchem_a-chem_methods.$(OBJEXT)
 libgsdchem_a-chem_methods.$(OBJEXT): $(builddir)/shr/libshr.a

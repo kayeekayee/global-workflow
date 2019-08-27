@@ -17,24 +17,26 @@ embed bash fv3_prep(RUNDIR,modules,CNTL) [[[
         module use $( dirname $modules )
         module load $( basename $modules )
 
+        @[plat%execution_time_modules]
+
         mkdir RESTART INPUT
 
         export MPI_TYPE_DEPTH=20
         export OMP_STACKSIZE=512M
         export ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 
-	# Set the stack limit as high as we can.
+        # Set the stack limit as high as we can.
         if [[ $( ulimit -s ) != unlimited ]] ; then
-	    for try_limit in 20000 18000 12000 9000 6000 3000 1500 1000 800 ; do
-	        if [[ ! ( $( ulimit -s ) -gt $(( try_limit * 1000 )) ) ]] ; then
-		    ulimit -s $(( try_limit * 1000 ))
-	    else
-		    break
-	        fi
-	    done
+        for try_limit in 20000 18000 12000 9000 6000 3000 1500 1000 800 ; do
+            if [[ ! ( $( ulimit -s ) -gt $(( try_limit * 1000 )) ) ]] ; then
+            ulimit -s $(( try_limit * 1000 ))
+        else
+            break
+            fi
+        done
         fi
 
-	ulimit -a
+        ulimit -a
 ]]]
 
 # Function that uses compile.sh to build.  Note the defaults are no
@@ -45,12 +47,14 @@ embed bash compile.sh(MAKE_OPTS=' ',BUILD_NR='',fv3,modules,md5) [[[
         # Run the compile.sh.  Convert wcoss.cray to wcoss_cray to
         # make the FV3 happy.
         rm -f @[fv3] @[modules]
+        
+        @[plat%execution_time_modules]
         if ( which aprun ) && [[ @[plat%PLATFORM_NAME] == wcoss.cray ]] ; then
             aprun -n 1 -j 1 -N 1 -d 24 \
                 ./compile.sh "@[plat%HOMEnems]/FV3" \
                 $( echo @[plat%MACHINE_ID] | sed 's,\.,_,g' ) \
                 @[MAKE_OPTS] @[BUILD_NR]
-        elif [[ @[plat%PLATFORM_NAME] == theia.* || @[plat%PLATFORM_NAME] == cheyenne.* ]] ; then
+        elif [[ @[plat%PLATFORM_NAME] == theia* || @[plat%PLATFORM_NAME] == cheyenne* || @[plat%PLATFORM_NAME] == gaea* || @[plat%PLATFORM_NAME] == jet* ]] ; then
             # Don't substitute the . with a _ on Theia/Cheyenne
             echo "DON'T SUBSTITUTE _ for . on @[plat%PLATFORM_NAME]"
             ./compile.sh "@[plat%HOMEnems]/FV3" \
@@ -87,6 +91,23 @@ build fv3.exe {
     build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]")
 }
 
+build fv3_ccpp_control.exe {
+    # This block builds the FV3 with CCPP in static mode for the control setup.
+    # It is otherwise identical to the fv3.exe block.
+    use plat
+
+    # Note:
+    #  plat%EXECrt = temporary directory for executables and md5 sums
+    #  plat%INCrt  = temporary directory for modulefiles
+    target="@[plat%EXECrt]/fv3_ccpp_control.exe"   # NEMS.x installation location
+    modules.nems="@[plat%INCrt]/modules.fv3_ccpp"  # modulefile for this NEMS.x
+    md5sum="@[target].md5"            # MD5SUM for this NEMS.x
+
+    # build: script to build the NEMS.x.  For now, this is an embedded
+    # bash script.
+    build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
+                     MAKE_OPTS="\'CCPP=Y STATIC=Y SUITES=FV3_GFS_2017\'")
+}
 
 build fv3_32bit.exe {
     # This block builds the FV3 in 32 bit mode.  It is otherwise
@@ -104,6 +125,24 @@ build fv3_32bit.exe {
     # bash script.
     build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
                     MAKE_OPTS='32BIT=Y')
+}
+
+build fv3_32bit_debug.exe {
+    # This block builds the FV3 in 32 bit debug mode.  It is otherwise
+    # identical to the fv3.exe block.
+    use plat
+
+    # Note:
+    #  plat%EXECrt = temporary directory for executables and md5 sums
+    #  plat%INCrt  = temporary directory for modulefiles
+    target="@[plat%EXECrt]/fv3_32bit_debug.exe"   # NEMS.x installation location
+    modules.nems="@[plat%INCrt]/modules.fv3_32bit_debug"  # modulefile for this NEMS.x
+    md5sum="@[target].md5"            # MD5SUM for this NEMS.x
+
+    # build: script to build the NEMS.x.  For now, this is an embedded
+    # bash script.
+    build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
+                    MAKE_OPTS="\'32BIT=Y DEBUG=Y\'")
 }
 
 build fv3_appbuilder.exe {
@@ -129,27 +168,13 @@ build fv3_NAM_phys.exe {
     #  plat%EXECrt = temporary directory for executables and md5 sums
     #  plat%INCrt  = temporary directory for modulefiles
     target="@[plat%EXECrt]/fv3_NAM_phys.exe"  # NEMS.x installation location
-    modules.nems="@[plat%INCrt]/modules.fv3"  # modulefile for this NEMS.x
+    modules.nems="@[plat%INCrt]/modules.fv3_nam"  # modulefile for this NEMS.x
     md5sum="@[target].md5"                    # MD5SUM for this NEMS.x
 
     # build: script to build the NEMS.x.  For now, this is an embedded
     # bash script.
     build=compile.sh(fv3="@[target]",modules="@[modules.nems]",md5="@[md5sum]",
                     MAKE_OPTS='NAM_phys=Y')
-}
-
-build fv3_gsdchem.exe {
-    # This block is similar to the fv3.exe block, but uses the
-    # NEMSAppBuilder.  We do this for one compset, just to make sure
-    # the NEMSAppBuilder does not break.
-    use plat
-    target="@[plat%EXECrt]/fv3_gsdchem.exe"
-    modules.nems="@[plat%INCrt]/modules_appbuilder.fv3"
-    md5sum="@[target].md5"
-
-    # The NEMSAppBuilder is another embedded bash script in nemscommon.input
-    build=NEMSAppBuilder(NEMS.x="@[target]",modules.nems="@[modules.nems]",
-                         OPTS="app=coupledFV3_GSDCHEM",md5sum="@[md5sum]")
 }
 
 ########################################################################
@@ -164,6 +189,13 @@ fv3_defaults = {
     MOUNTAIN='.F.'
     SATMEDMF='.F.'
     HYBEDMF='.T.'
+    LHEATSTRG='.F.'
+    LGFDLMPRAD='.F.'
+    EFFR_IN='.F.'
+    LDIAG_UGWP='.F.'
+    DO_UGWP='.F.'
+    DO_TOFD='.F.'
+    LSM='1'
     NA_INIT='1'
     READ_INCREMENT='.F.'
     FDIAG='0,1,2,3,4,5,6,7,8,9,10,11,12,15,18,21,24'
@@ -173,6 +205,7 @@ fv3_defaults = {
     FNSOTC="'global_soiltype.statsgo.t126.384.190.rg.grb',"
     FNSMCC="'global_soilmgldas.t126.384.190.grb',"
     FNABSC="'global_mxsnoalb.uariz.t126.384.190.rg.grb',"
+    LANDICE='.T.'
 
     ENS_NUM='1'
     SYEAR='2016'
@@ -202,13 +235,20 @@ fv3_defaults = {
     IMO='384'
     JMO='190'
 
+    H2O_PHYS='.F.'
+
+    DO_SPPT='.F.'
+    DO_SHUM='.F.'
+    DO_SKEB='.F.'
+    DO_SFCPERTS='.F.'
     SPPT='-999.0'
     SHUM='-999.0'
     SKEB='-999.0'
 
-    IAU_INC_FILES=''
+    IAU_INC_FILES="''"
 
     CPLFLX='.F.'
+    CPLWAV='.F.'
     CPL='.false.'
 }
 
@@ -371,6 +411,123 @@ test fv3_decomp: fv3.exe {
 
     INPES='6'
     JNPES='4'
+}
+
+########################################################################
+
+test fv3_ccpp_control: fv3_ccpp_control.exe {
+    use fv3_control
+    TEST_DESCR="Compare FV3 CCPP control results with previous trunk version"
+
+    # Use CCPP PROD control directory
+    CNTL_NAME='fv3_control_ccpp'
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+    CNTL="@[plat%BASELINE]/@[CNTL_NAME]"      # Control baseline area
+    FV3_input_data="@[plat%INPUTS]/FV3_input_data"
+
+    # Set additional namelist variables for CCPP
+    OZ_PHYS_OLD='.T.'
+    OZ_PHYS_NEW='.F.'
+    CCPP_SUITE='FV3_GFS_2017'
+
+    # The build variable is the fv3.exe or fv3_appbuild.fv3, which
+    # provides the path to the build target, md5 sum, and modulefile.
+    build=fv3_ccpp_control.exe
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_ccpp_control.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Specify input files.
+    filters input {
+      #    WORK FILE  <=filter=   SOURCE FILE
+          'input.nml' <=atparse=  "@[PARMnems]/ccpp_control.nml.IN"
+    'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
+                 'aerosol.dat' <=copyfrom= "@[FV3_input_data]/INPUT"
+  'co2historicaldata_201*.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+      'sfc_emissivity_idx.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+   'solarconstant_noaa_an.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+                 '*grb' <=copyfrom= "@[FV3_input_data]"
+              '*_table' <=copyfrom= "@[FV3_input_data]"
+           '*configure' <=copyfrom= "@[FV3_input_data]"
+                'INPUT' <=copy=     "@[FV3_input_data]/INPUT"
+  'global_o3prdlos.f77' <=copy= "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
+       'ccpp_suite.xml' <=copy= "@[HOMEnems]/ccpp/suites/suite_FV3_GFS_2017.xml"
+    }
+
+    # Specify output files:
+    criteria output {
+        # WORKFILE                            .comparison. TARGET
+        'atmos_4xdaily.tile1.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile2.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile3.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]"
+        'phyf000.tile1.nc'      .bitcmp. "@[CNTL]"
+        'phyf000.tile2.nc'      .bitcmp. "@[CNTL]"
+        'phyf000.tile3.nc'      .bitcmp. "@[CNTL]"
+        'phyf000.tile4.nc'      .bitcmp. "@[CNTL]"
+        'phyf000.tile5.nc'      .bitcmp. "@[CNTL]"
+        'phyf000.tile6.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile1.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile2.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile3.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile4.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile5.nc'      .bitcmp. "@[CNTL]"
+        'phyf024.tile6.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile1.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile2.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile3.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile4.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile5.nc'      .bitcmp. "@[CNTL]"
+        'dynf000.tile6.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile1.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile2.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile3.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile4.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile5.nc'      .bitcmp. "@[CNTL]"
+        'dynf024.tile6.nc'      .bitcmp. "@[CNTL]"
+        'RESTART/coupler.res'                   .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.nc'                .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile1.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile2.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile3.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile4.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile5.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile6.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile1.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile2.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile3.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile4.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile5.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile6.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile1.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile2.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile3.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile4.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile5.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile6.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
+
+      # Executable validation.  This makes an MD5 sum of the fv3.exe
+      # for comparison against the MD5 sum made in the build job.
+      # This is to ensure the executable did not change during the
+      # test suite.
+        "@[build%target]" .md5cmp. "@[build%md5sum]"
+    }
 }
 
 ########################################################################
@@ -852,6 +1009,10 @@ test fv3_gfdlmp: fv3.exe {
     CNTL_NAME='fv3_gfdlmp'
 
     DT_ATMOS='1200'
+    OUTPUT_GRID="'gaussian_grid'"
+    OUTPUT_FILE="'nemsio'"
+    WRITE_NEMSIOFLIP='.true.'
+    WRITE_FSYNCFLAG='.true.'
 
     COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
     RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
@@ -893,30 +1054,10 @@ test fv3_gfdlmp: fv3.exe {
         'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]"
         'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]"
         'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]"
-        'phyf000.tile1.nc'       .bitcmp. "@[CNTL]"
-        'phyf000.tile2.nc'       .bitcmp. "@[CNTL]"
-        'phyf000.tile3.nc'       .bitcmp. "@[CNTL]"
-        'phyf000.tile4.nc'       .bitcmp. "@[CNTL]"
-        'phyf000.tile5.nc'       .bitcmp. "@[CNTL]"
-        'phyf000.tile6.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile1.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile2.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile3.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile4.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile5.nc'       .bitcmp. "@[CNTL]"
-        'phyf024.tile6.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile1.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile2.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile3.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile4.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile5.nc'       .bitcmp. "@[CNTL]"
-        'dynf000.tile6.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile1.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile2.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile3.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile4.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile5.nc'       .bitcmp. "@[CNTL]"
-        'dynf024.tile6.nc'       .bitcmp. "@[CNTL]"
+        'phyf000.nemsio'         .bitcmp. "@[CNTL]"
+        'phyf024.nemsio'         .bitcmp. "@[CNTL]"
+        'dynf000.nemsio'         .bitcmp. "@[CNTL]"
+        'dynf024.nemsio'         .bitcmp. "@[CNTL]"
         'RESTART/coupler.res'                   .bitcmp. "@[CNTL]/RESTART/"
         'RESTART/fv_core.res.nc'                .bitcmp. "@[CNTL]/RESTART/"
         'RESTART/fv_core.res.tile1.nc'          .bitcmp. "@[CNTL]/RESTART/"
@@ -961,6 +1102,44 @@ test fv3_gfdlmp: fv3.exe {
         # Run the
         {"@[build%target]", ranks="@[TASKS]" }
     }
+}
+
+########################################################################
+
+test fv3_gfdlmprad: fv3.exe {
+    use fv3_gfdlmp
+
+    TEST_DESCR="Compare FV3 GFDL mircrophysics radiation change results  with previous trunk version"
+    CNTL_NAME='fv3_gfdlmprad'
+
+    LGFDLMPRAD='.true.'
+    EFFR_IN='.true.'
+}
+
+test fv3_gfdlmprad_gwd: fv3.exe {
+    use fv3_gfdlmp
+
+    TEST_DESCR="Compare FV3 GFDL radiation interaction option and gravity wve drag results with previous trunk version"
+    CNTL_NAME='fv3_gfdlmprad_gwd'
+
+    LGFDLMPRAD='.true.'
+    EFFR_IN='.true.'
+    DO_UGWP='.true.'
+    DO_TOFD='.true.'
+
+}
+
+test fv3_gfdlmprad_noahmp: fv3.exe {
+    use fv3_gfdlmp
+
+    TEST_DESCR="Compare FV3 GFDL radiation interaction option and Noah MP results with previous trunk version"
+    CNTL_NAME='fv3_gfdlmprad_noahmp'
+
+    LGFDLMPRAD='.true.'
+    EFFR_IN='.true.'
+    LSM='2'  
+    LANDICE='.false.'
+
 }
 
 ########################################################################
@@ -1151,6 +1330,79 @@ test fv3_satmedmf: fv3.exe {
          'global_o3prdlos.f77' <=copy= "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
     }
 
+
+    # Specify output files:
+    criteria output {
+        # WORKFILE                            .comparison. TARGET
+        'atmos_4xdaily.tile1.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile2.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile3.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]"
+        'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]"
+        'phyf000.nemsio'         .bitcmp. "@[CNTL]"
+        'phyf024.nemsio'         .bitcmp. "@[CNTL]"
+        'dynf000.nemsio'         .bitcmp. "@[CNTL]"
+        'dynf024.nemsio'         .bitcmp. "@[CNTL]"
+        'RESTART/coupler.res'                   .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.nc'                .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile1.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile2.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile3.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile4.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile5.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_core.res.tile6.nc'          .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile1.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile2.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile3.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile4.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile5.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_srf_wnd.res.tile6.nc'       .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile1.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile2.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile3.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile4.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile5.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/fv_tracer.res.tile6.nc'        .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/phy_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
+        'RESTART/sfc_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
+
+      # Executable validation.  This makes an MD5 sum of the fv3.exe
+      # for comparison against the MD5 sum made in the build job.
+      # This is to ensure the executable did not change during the
+      # test suite.
+        "@[build%target]" .md5cmp. "@[fv3.exe%md5sum]"
+
+    }
+}
+
+########################################################################
+
+test fv3_lheatstrg: fv3.exe {
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 control with lheatstrg on Gaussian grid nemsio output results with previous trunk version"
+    CNTL_NAME="fv3_lheatstrg"
+
+    LHEATSTRG='.true.'
+    OUTPUT_GRID="'gaussian_grid'"
+    OUTPUT_FILE="'nemsio'"
+    WRITE_NEMSIOFLIP='.true.'
+    WRITE_FSYNCFLAG ='.true.'
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+    CNTL="@[plat%BASELINE]/@[CNTL_NAME]"      # Control baseline area
 
     # Specify output files:
     criteria output {
@@ -1869,9 +2121,9 @@ test fv3_stretched: fv3_32bit.exe {
     JNPES_NEST='8'
     MAKE_NH_NEST='.F.'
 
-    SYEAR="2017"
-    SMONTH="03"
-    SDAY="28"
+    SYEAR="2018"
+    SMONTH="10"
+    SDAY="15"
     SHOUR="00"
     FHMAX="48"
     DT_ATMOS="450"
@@ -1881,7 +2133,7 @@ test fv3_stretched: fv3_32bit.exe {
     filters input {
        #    WORK FILE  <=filter=   SOURCE FILE
            'input.nml' <=atparse=  "@[PARMnems]/stretched-input.nml.IN"
-     'model_configure' <=atparse=  "@[PARMnems]/stretched-model_configure.IN"
+     'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
                    '*' <=copyfrom= "@[plat%INPUTS]/FV3_nest_input_data"
                'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
  'global_o3prdlos.f77' <=copy=     "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
@@ -1895,18 +2147,18 @@ test fv3_stretched: fv3_32bit.exe {
                      'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile4.nc"
                      'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile5.nc"
                      'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile6.nc"
-                           'nggps2d.tile1.nc' .bitcmp. "@[CNTL]/nggps2d.tile1.nc"
-                           'nggps2d.tile2.nc' .bitcmp. "@[CNTL]/nggps2d.tile2.nc"
-                           'nggps2d.tile3.nc' .bitcmp. "@[CNTL]/nggps2d.tile3.nc"
-                           'nggps2d.tile4.nc' .bitcmp. "@[CNTL]/nggps2d.tile4.nc"
-                           'nggps2d.tile5.nc' .bitcmp. "@[CNTL]/nggps2d.tile5.nc"
-                           'nggps2d.tile6.nc' .bitcmp. "@[CNTL]/nggps2d.tile6.nc"
-                   'nggps3d_4xdaily.tile1.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile1.nc"
-                   'nggps3d_4xdaily.tile2.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile2.nc"
-                   'nggps3d_4xdaily.tile3.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile3.nc"
-                   'nggps3d_4xdaily.tile4.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile4.nc"
-                   'nggps3d_4xdaily.tile5.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile5.nc"
-                   'nggps3d_4xdaily.tile6.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile6.nc"
+                     'fv3_history2d.tile1.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile1.nc"
+                     'fv3_history2d.tile2.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile2.nc"
+                     'fv3_history2d.tile3.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile3.nc"
+                     'fv3_history2d.tile4.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile4.nc"
+                     'fv3_history2d.tile5.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile5.nc"
+                     'fv3_history2d.tile6.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile6.nc"
+                       'fv3_history.tile1.nc' .bitcmp. "@[CNTL]/fv3_history.tile1.nc"
+                       'fv3_history.tile2.nc' .bitcmp. "@[CNTL]/fv3_history.tile2.nc"
+                       'fv3_history.tile3.nc' .bitcmp. "@[CNTL]/fv3_history.tile3.nc"
+                       'fv3_history.tile4.nc' .bitcmp. "@[CNTL]/fv3_history.tile4.nc"
+                       'fv3_history.tile5.nc' .bitcmp. "@[CNTL]/fv3_history.tile5.nc"
+                       'fv3_history.tile6.nc' .bitcmp. "@[CNTL]/fv3_history.tile6.nc"
                         'RESTART/coupler.res' .bitcmp. "@[CNTL]/RESTART/coupler.res"
                      'RESTART/fv_core.res.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.nc"
                'RESTART/fv_core.res.tile1.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile1.nc"
@@ -1977,9 +2229,9 @@ test fv3_stretched_nest: fv3_32bit.exe {
     JNPES_NEST='8'
     MAKE_NH_NEST='.F.'
 
-    SYEAR="2017"
-    SMONTH="03"
-    SDAY="28"
+    SYEAR="2018"
+    SMONTH="10"
+    SDAY="15"
     SHOUR="00"
     FHMAX="48"
     DT_ATMOS="450"
@@ -1990,7 +2242,7 @@ test fv3_stretched_nest: fv3_32bit.exe {
        #    WORK FILE  <=filter=   SOURCE FILE
            'input.nml' <=atparse=  "@[PARMnems]/stretched-nest-input.nml.IN"
     'input_nest02.nml' <=atparse=  "@[PARMnems]/input_nest02.nml.IN"
-     'model_configure' <=atparse=  "@[PARMnems]/stretched-nest-model_configure.IN"
+     'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
                    '*' <=copyfrom= "@[plat%INPUTS]/FV3_nest_input_data"
                'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
  'global_o3prdlos.f77' <=copy=     "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
@@ -2003,18 +2255,18 @@ test fv3_stretched_nest: fv3_32bit.exe {
                      'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile4.nc"
                      'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile5.nc"
                      'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile6.nc"
-                           'nggps2d.tile1.nc' .bitcmp. "@[CNTL]/nggps2d.tile1.nc"
-                           'nggps2d.tile2.nc' .bitcmp. "@[CNTL]/nggps2d.tile2.nc"
-                           'nggps2d.tile3.nc' .bitcmp. "@[CNTL]/nggps2d.tile3.nc"
-                           'nggps2d.tile4.nc' .bitcmp. "@[CNTL]/nggps2d.tile4.nc"
-                           'nggps2d.tile5.nc' .bitcmp. "@[CNTL]/nggps2d.tile5.nc"
-                           'nggps2d.tile6.nc' .bitcmp. "@[CNTL]/nggps2d.tile6.nc"
-                   'nggps3d_4xdaily.tile1.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile1.nc"
-                   'nggps3d_4xdaily.tile2.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile2.nc"
-                   'nggps3d_4xdaily.tile3.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile3.nc"
-                   'nggps3d_4xdaily.tile4.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile4.nc"
-                   'nggps3d_4xdaily.tile5.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile5.nc"
-                   'nggps3d_4xdaily.tile6.nc' .bitcmp. "@[CNTL]/nggps3d_4xdaily.tile6.nc"
+                     'fv3_history2d.tile1.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile1.nc"
+                     'fv3_history2d.tile2.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile2.nc"
+                     'fv3_history2d.tile3.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile3.nc"
+                     'fv3_history2d.tile4.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile4.nc"
+                     'fv3_history2d.tile5.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile5.nc"
+                     'fv3_history2d.tile6.nc' .bitcmp. "@[CNTL]/fv3_history2d.tile6.nc"
+                       'fv3_history.tile1.nc' .bitcmp. "@[CNTL]/fv3_history.tile1.nc"
+                       'fv3_history.tile2.nc' .bitcmp. "@[CNTL]/fv3_history.tile2.nc"
+                       'fv3_history.tile3.nc' .bitcmp. "@[CNTL]/fv3_history.tile3.nc"
+                       'fv3_history.tile4.nc' .bitcmp. "@[CNTL]/fv3_history.tile4.nc"
+                       'fv3_history.tile5.nc' .bitcmp. "@[CNTL]/fv3_history.tile5.nc"
+                       'fv3_history.tile6.nc' .bitcmp. "@[CNTL]/fv3_history.tile6.nc"
                         'RESTART/coupler.res' .bitcmp. "@[CNTL]/RESTART/coupler.res"
                      'RESTART/fv_core.res.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.nc"
                'RESTART/fv_core.res.tile1.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile1.nc"
@@ -2048,10 +2300,8 @@ test fv3_stretched_nest: fv3_32bit.exe {
                   'RESTART/sfc_data.tile5.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile5.nc"
                   'RESTART/sfc_data.tile6.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile6.nc"
               "atmos_4xdaily.nest02.tile7.nc" .bitcmp. "@[CNTL]/atmos_4xdaily.nest02.tile7.nc"
-               "atmos_static.nest02.tile7.nc" .bitcmp. "@[CNTL]/atmos_static.nest02.tile7.nc"
-                  "grid_spec.nest02.tile7.nc" .bitcmp. "@[CNTL]/grid_spec.nest02.tile7.nc"
-                    "nggps2d.nest02.tile7.nc" .bitcmp. "@[CNTL]/nggps2d.nest02.tile7.nc"
-            "nggps3d_4xdaily.nest02.tile7.nc" .bitcmp. "@[CNTL]/nggps3d_4xdaily.nest02.tile7.nc"
+              "fv3_history2d.nest02.tile7.nc" .bitcmp. "@[CNTL]/fv3_history2d.nest02.tile7.nc"
+                "fv3_history.nest02.tile7.nc" .bitcmp. "@[CNTL]/fv3_history.nest02.tile7.nc"
              "RESTART/fv_BC_ne.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_BC_ne.res.nest02.nc"
              "RESTART/fv_BC_sw.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_BC_sw.res.nest02.nc"
               "RESTART/fv_core.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_core.res.nest02.nc"
@@ -2068,7 +2318,404 @@ test fv3_stretched_nest: fv3_32bit.exe {
     }
 }
 
+test fv3_stretched_nest_quilt: fv3_32bit.exe {
+    use fv3_stretched
+    use plat%default_nested_resources
+
+    TEST_DESCR="Stretched grid with nest using quilting; compare against previous baseline"
+    CNTL_NAME="fv3_stretched_nest_quilt"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    INPES='2'
+    JNPES='4'
+    MAKE_NH='.T.'
+    NA_INIT='1'
+    EXTERNAL_IC='.T.'
+    NGGPS_IC='.T.'
+    MOUNTAIN='.F.'
+    WARM_START='.F.'
+    FDIAG='3'
+
+    INPES_NEST='6'
+    JNPES_NEST='8'
+    MAKE_NH_NEST='.F.'
+
+    SYEAR="2018"
+    SMONTH="10"
+    SDAY="15"
+    SHOUR="00"
+    FHMAX="48"
+    DT_ATMOS="450"
+
+    QUILTING='.true.'
+
+    filters input {
+       #    WORK FILE  <=filter=   SOURCE FILE
+           'input.nml' <=atparse=  "@[PARMnems]/stretched-nest-input.nml.IN"
+    'input_nest02.nml' <=atparse=  "@[PARMnems]/input_nest02.nml.IN"
+     'model_configure' <=atparse=  "@[PARMnems]/stretched-nest-quilt-model_configure.IN"
+                   '*' <=copyfrom= "@[plat%INPUTS]/FV3_nest_input_data"
+               'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
+    }
+
+    criteria output {
+                     'atmos_4xdaily.tile1.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile1.nc"
+                     'atmos_4xdaily.tile2.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile2.nc"
+                     'atmos_4xdaily.tile3.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile3.nc"
+                     'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile4.nc"
+                     'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile5.nc"
+                     'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.tile6.nc"
+              'atmos_4xdaily.nest02.tile7.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.nest02.tile7.nc"
+                                 'dynf000.nc' .bitcmp. "@[CNTL]/dynf000.nc"
+                                 'dynf001.nc' .bitcmp. "@[CNTL]/dynf001.nc"
+                                 'dynf006.nc' .bitcmp. "@[CNTL]/dynf006.nc"
+                                 'dynf012.nc' .bitcmp. "@[CNTL]/dynf012.nc"
+                                 'dynf024.nc' .bitcmp. "@[CNTL]/dynf024.nc"
+                                 'dynf048.nc' .bitcmp. "@[CNTL]/dynf048.nc"
+                                 'phyf000.nc' .bitcmp. "@[CNTL]/phyf000.nc"
+                                 'phyf001.nc' .bitcmp. "@[CNTL]/phyf001.nc"
+                                 'phyf006.nc' .bitcmp. "@[CNTL]/phyf006.nc"
+                                 'phyf012.nc' .bitcmp. "@[CNTL]/phyf012.nc"
+                                 'phyf024.nc' .bitcmp. "@[CNTL]/phyf024.nc"
+                                 'phyf048.nc' .bitcmp. "@[CNTL]/phyf048.nc"
+                        'RESTART/coupler.res' .bitcmp. "@[CNTL]/RESTART/coupler.res"
+                     'RESTART/fv_core.res.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.nc"
+              "RESTART/fv_core.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_core.res.nest02.nc"
+             "RESTART/fv_BC_ne.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_BC_ne.res.nest02.nc"
+             "RESTART/fv_BC_sw.res.nest02.nc" .bitcmp. "@[CNTL]/RESTART/fv_BC_sw.res.nest02.nc"
+               'RESTART/fv_core.res.tile1.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile1.nc"
+               'RESTART/fv_core.res.tile2.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile2.nc"
+               'RESTART/fv_core.res.tile3.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile3.nc"
+               'RESTART/fv_core.res.tile4.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile4.nc"
+               'RESTART/fv_core.res.tile5.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile5.nc"
+               'RESTART/fv_core.res.tile6.nc' .bitcmp. "@[CNTL]/RESTART/fv_core.res.tile6.nc"
+        "RESTART/fv_core.res.nest02.tile7.nc" .bitcmp. "@[CNTL]/RESTART/fv_core.res.nest02.tile7.nc"
+            'RESTART/fv_srf_wnd.res.tile1.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile1.nc"
+            'RESTART/fv_srf_wnd.res.tile2.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile2.nc"
+            'RESTART/fv_srf_wnd.res.tile3.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile3.nc"
+            'RESTART/fv_srf_wnd.res.tile4.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile4.nc"
+            'RESTART/fv_srf_wnd.res.tile5.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile5.nc"
+            'RESTART/fv_srf_wnd.res.tile6.nc' .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.tile6.nc"
+     "RESTART/fv_srf_wnd.res.nest02.tile7.nc" .bitcmp. "@[CNTL]/RESTART/fv_srf_wnd.res.nest02.tile7.nc"
+             'RESTART/fv_tracer.res.tile1.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile1.nc"
+             'RESTART/fv_tracer.res.tile2.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile2.nc"
+             'RESTART/fv_tracer.res.tile3.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile3.nc"
+             'RESTART/fv_tracer.res.tile4.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile4.nc"
+             'RESTART/fv_tracer.res.tile5.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile5.nc"
+             'RESTART/fv_tracer.res.tile6.nc' .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.tile6.nc"
+      "RESTART/fv_tracer.res.nest02.tile7.nc" .bitcmp. "@[CNTL]/RESTART/fv_tracer.res.nest02.tile7.nc"
+                  'RESTART/phy_data.tile1.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile1.nc"
+                  'RESTART/phy_data.tile2.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile2.nc"
+                  'RESTART/phy_data.tile3.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile3.nc"
+                  'RESTART/phy_data.tile4.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile4.nc"
+                  'RESTART/phy_data.tile5.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile5.nc"
+                  'RESTART/phy_data.tile6.nc' .bitcmp. "@[CNTL]/RESTART/phy_data.tile6.nc"
+           "RESTART/phy_data.nest02.tile7.nc" .bitcmp. "@[CNTL]/RESTART/phy_data.nest02.tile7.nc"
+                  'RESTART/sfc_data.tile1.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile1.nc"
+                  'RESTART/sfc_data.tile2.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile2.nc"
+                  'RESTART/sfc_data.tile3.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile3.nc"
+                  'RESTART/sfc_data.tile4.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile4.nc"
+                  'RESTART/sfc_data.tile5.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile5.nc"
+                  'RESTART/sfc_data.tile6.nc' .bitcmp. "@[CNTL]/RESTART/sfc_data.tile6.nc"
+           "RESTART/sfc_data.nest02.tile7.nc" .bitcmp. "@[CNTL]/RESTART/sfc_data.nest02.tile7.nc"
+
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks=108, threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
 ########################################################################
+
+test fv3_regional_control: fv3_32bit.exe {
+
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 regional control results with previous trunk version"
+    CNTL_NAME="fv3_regional_control"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    TASKS='24'
+
+    filters input {
+       #    WORK FILE  <=filter=   SOURCE FILE
+                   '*' <=copyfrom= "@[plat%INPUTS]/FV3_regional_input_data"
+     'model_configure' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/model_configure"
+           'input.nml' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/input.nml"
+               'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
+    }
+
+    criteria output {
+                     'atmos_4xdaily.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.nc"
+                     'fv3_history2d.nc' .bitcmp. "@[CNTL]/fv3_history2d.nc"
+                       'fv3_history.nc' .bitcmp. "@[CNTL]/fv3_history.nc"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
+test fv3_regional_restart: fv3_regional_control {
+
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 regional restart results with previous trunk version"
+    CNTL_NAME="fv3_regional_restart"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    TASKS='24'
+    WARM_START='.T.'
+
+    filters input {
+                      #    WORK FILE  <=filter=   SOURCE FILE
+                                  '*' <=copyfrom= "@[plat%INPUTS]/FV3_regional_input_data"
+                    'model_configure' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/model_configure"
+                          'input.nml' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/input.nml"
+                              'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
+                  'INPUT/coupler.res' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.coupler.res'
+               'INPUT/fv_core.res.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.fv_core.res.nc'
+         'INPUT/fv_core.res.tile1.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.fv_core.res.tile1.nc'
+      'INPUT/fv_srf_wnd.res.tile1.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.fv_srf_wnd.res.tile1.nc'
+       'INPUT/fv_tracer.res.tile1.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.fv_tracer.res.tile1.nc'
+                  'INPUT/phy_data.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.phy_data.nc'
+                  'INPUT/sfc_data.nc' <=copy=     '../fv3_regional_control/RESTART/20181015.120000.sfc_data.nc'
+    }
+
+    criteria output {
+                     'atmos_4xdaily.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.nc"
+                     'fv3_history2d.nc' .bitcmp. "@[CNTL]/fv3_history2d.nc"
+                       'fv3_history.nc' .bitcmp. "@[CNTL]/fv3_history.nc"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
+test fv3_regional_quilt: fv3_32bit.exe {
+
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 regional quilt results with previous trunk version"
+    CNTL_NAME="fv3_regional_quilt"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    TASKS='28'
+
+    filters input {
+       #    WORK FILE  <=filter=   SOURCE FILE
+                   '*' <=copyfrom= "@[plat%INPUTS]/FV3_regional_input_data"
+     'model_configure' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/model_configure"
+           'input.nml' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/input.nml"
+               'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
+    }
+
+    criteria output {
+                     'atmos_4xdaily.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.nc"
+                           'dynf000.nc' .bitcmp. "@[CNTL]/dynf000.nc"
+                           'dynf024.nc' .bitcmp. "@[CNTL]/dynf024.nc"
+                           'phyf000.nc' .bitcmp. "@[CNTL]/phyf000.nc"
+                           'phyf024.nc' .bitcmp. "@[CNTL]/phyf024.nc"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
+test fv3_regional_c768: fv3_32bit.exe {
+
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 regional c768 results with previous trunk version"
+    CNTL_NAME="fv3_regional_c768"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    TASKS='480'
+    WLCLK='30'
+
+    filters input {
+       #    WORK FILE  <=filter=   SOURCE FILE
+                   '*' <=copyfrom= "@[plat%INPUTS]/FV3_regional_input_data"
+     'model_configure' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/model_configure"
+           'input.nml' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/input.nml"
+               'INPUT' <=copy=     "@[plat%INPUTS]/@[TEST_NAME]/INPUT"
+    }
+
+    criteria output {
+                     'atmos_4xdaily.nc' .bitcmp. "@[CNTL]/atmos_4xdaily.nc"
+                     'fv3_history2d.nc' .bitcmp. "@[CNTL]/fv3_history2d.nc"
+                       'fv3_history.nc' .bitcmp. "@[CNTL]/fv3_history.nc"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
+test fv3_control_debug: fv3_32bit_debug.exe {
+
+    use fv3_control
+
+    TEST_DESCR="Compare FV3 control/debug results with previous trunk version"
+    CNTL_NAME="fv3_control"
+
+    FHMAX="06"
+
+    build=fv3_32bit_debug.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit_debug.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+
+    # Specify input files.
+    filters input {
+               #    WORK FILE  <=filter=   SOURCE FILE
+                   'input.nml' <=atparse=  "@[PARMnems]/input.nml.IN"
+             'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
+                 'aerosol.dat' <=copyfrom= "@[FV3_input_data]/INPUT"
+  'co2historicaldata_201*.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+      'sfc_emissivity_idx.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+   'solarconstant_noaa_an.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
+                        '*grb' <=copyfrom= "@[FV3_input_data]"
+                     '*_table' <=copyfrom= "@[FV3_input_data]"
+                  '*configure' <=copyfrom= "@[FV3_input_data]"
+                       'INPUT' <=copy=     "@[FV3_input_data]/INPUT"
+         'global_o3prdlos.f77' <=copy=     "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
+    }
+
+    criteria output {
+                  'global_o3prdlos.f77' .bitcmp. "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
+test fv3_stretched_nest_debug: fv3_32bit_debug.exe {
+    use fv3_stretched
+    use plat%default_nested_resources
+
+    TEST_DESCR="Stretched grid with nest - debug; compare against previous baseline"
+    CNTL_NAME="fv3_stretched_nest"
+
+    build=fv3_32bit.exe
+
+    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
+    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
+
+    prep=fv3_prep(
+        RUNDIR="@[RUNDIR]",modules="@[fv3_32bit.exe%modules.nems]",
+        CNTL="@[CNTL]")
+
+    # Override settings from control
+    INPES='2'
+    JNPES='4'
+    MAKE_NH='.T.'
+    NA_INIT='1'
+    EXTERNAL_IC='.T.'
+    NGGPS_IC='.T.'
+    MOUNTAIN='.F.'
+    WARM_START='.F.'
+    FDIAG='3'
+
+    INPES_NEST='6'
+    JNPES_NEST='8'
+    MAKE_NH_NEST='.F.'
+
+    SYEAR="2018"
+    SMONTH="10"
+    SDAY="15"
+    SHOUR="00"
+    FHMAX="48"
+    DT_ATMOS="450"
+
+    QUILTING='.false.'
+
+    filters input {
+       #    WORK FILE  <=filter=   SOURCE FILE
+           'input.nml' <=atparse=  "@[PARMnems]/stretched-nest-input.nml.IN"
+    'input_nest02.nml' <=atparse=  "@[PARMnems]/input_nest02.nml.IN"
+     'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
+                   '*' <=copyfrom= "@[plat%INPUTS]/FV3_nest_input_data"
+               'INPUT' <=copy=     "@[plat%INPUTS]/fv3_stretched_nest/INPUT"
+ 'global_o3prdlos.f77' <=copy=     "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
+    }
+
+    criteria output {
+                  'global_o3prdlos.f77' .bitcmp. "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
+    }
+
+    spawn execute {
+        {"@[build%target]", ranks="@[TASKS]", threads="@[THRD]", ppn="@[TPN]" }
+    }
+}
+
+########################################################################
+
 
 test fv3_csawmgshoc: fv3.exe {
     use plat
@@ -2648,137 +3295,3 @@ test fv3_NAM_phys: fv3_NAM_phys.exe {
         {"@[build%target]", ranks="@[TASKS]" }
     }
 }
-
-########################################################################
-
-test cpld_fv3_gsdchem_between: fv3_gsdchem.exe {
-    use plat
-    use plat%default_resources
-    use fv3_defaults
-
-    TEST_DESCR="Compare FV3 control results with previous trunk version"
-    CNTL_NAME='fv3_control'
-
-    COM="@[plat%COMrt]/@[TEST_NAME]"          # Test result area
-    RUNDIR="@[plat%TMPrt]/@[TEST_NAME]"       # Test work area
-    CNTL="@[plat%BASELINE]/@[CNTL_NAME]"      # Control baseline area
-    FV3_input_data="@[plat%INPUTS]/FV3_input_data"
-
-    # The build variable is the fv3.exe or fv3_appbuild.fv3, which
-    # provides the path to the build target, md5 sum, and modulefile.
-    build=fv3_gsdchem.exe
-
-    prep=fv3_prep(
-        RUNDIR="@[RUNDIR]",modules="@[fv3_gsdchem.exe%modules.nems]",
-        CNTL="@[CNTL]")
-
-    # - nems.configure ---
-    nems_configure='atm_chm_between'
-    atm_model='fv3'
-    atm_petlist_bounds="-1 -1"
-    chm_model='gsdchem'
-    chm_petlist_bounds="-1 -1"
-    coupling_interval_sec="@[DT_ATMOS]" # fv3 time step
-    # - model_configure ---
-    CPL='.true.'
-    # - job script ---
-#   walltime=3600
-
-    # Specify input files.
-    filters input {
-      #    WORK FILE  <=filter=   SOURCE FILE
-          'input.nml' <=atparse=  "@[PARMnems]/chm.nml.IN"
-    'model_configure' <=atparse=  "@[PARMnems]/model_configure.IN"
-                 'aerosol.dat' <=copyfrom= "@[FV3_input_data]/INPUT"
-  'co2historicaldata_201*.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
-      'sfc_emissivity_idx.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
-   'solarconstant_noaa_an.txt' <=copyfrom= "@[FV3_input_data]/INPUT"
-                 '*grb' <=copyfrom= "@[FV3_input_data]"
-              '*_table' <=copyfrom= "@[FV3_input_data]"
-           '*configure' <=copyfrom= "@[FV3_input_data]"
-                'INPUT' <=copy=     "@[FV3_input_data]/INPUT"
-  'global_o3prdlos.f77' <=copy=     "@[FV3_input_data]/INPUT/global_o3prdlos.f77"
-          'field_table' <=copy=     "@[PARMnems]/chm_field_table"
-           'diag_table' <=copy=     "@[PARMnems]/chm_diag_table"
-       'nems.configure' <=atparse=  "@[PARMnems]/nems.configure.@[nems_configure].IN"
-    }
-
-    # Specify output files:
-    criteria output {
-        # WORKFILE                            .comparison. TARGET
-        'atmos_4xdaily.tile1.nc' .bitcmp. "@[CNTL]"
-        'atmos_4xdaily.tile2.nc' .bitcmp. "@[CNTL]"
-        'atmos_4xdaily.tile3.nc' .bitcmp. "@[CNTL]"
-        'atmos_4xdaily.tile4.nc' .bitcmp. "@[CNTL]"
-        'atmos_4xdaily.tile5.nc' .bitcmp. "@[CNTL]"
-        'atmos_4xdaily.tile6.nc' .bitcmp. "@[CNTL]"
-        'phyf000.tile1.nc'      .bitcmp. "@[CNTL]"
-        'phyf000.tile2.nc'      .bitcmp. "@[CNTL]"
-        'phyf000.tile3.nc'      .bitcmp. "@[CNTL]"
-        'phyf000.tile4.nc'      .bitcmp. "@[CNTL]"
-        'phyf000.tile5.nc'      .bitcmp. "@[CNTL]"
-        'phyf000.tile6.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile1.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile2.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile3.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile4.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile5.nc'      .bitcmp. "@[CNTL]"
-        'phyf024.tile6.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile1.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile2.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile3.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile4.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile5.nc'      .bitcmp. "@[CNTL]"
-        'dynf000.tile6.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile1.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile2.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile3.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile4.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile5.nc'      .bitcmp. "@[CNTL]"
-        'dynf024.tile6.nc'      .bitcmp. "@[CNTL]"
-        'RESTART/coupler.res'                   .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.nc'                .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile1.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile2.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile3.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile4.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile5.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_core.res.tile6.nc'          .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile1.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile2.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile3.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile4.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile5.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_srf_wnd.res.tile6.nc'       .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile1.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile2.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile3.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile4.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile5.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/fv_tracer.res.tile6.nc'        .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/phy_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile1.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile2.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile3.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile4.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile5.nc'             .bitcmp. "@[CNTL]/RESTART/"
-        'RESTART/sfc_data.tile6.nc'             .bitcmp. "@[CNTL]/RESTART/"
-
-      # Executable validation.  This makes an MD5 sum of the fv3.exe
-      # for comparison against the MD5 sum made in the build job.
-      # This is to ensure the executable did not change during the
-      # test suite.
-        "@[build%target]" .md5cmp. "@[build%md5sum]"
-    }
-
-    spawn execute {
-        # Run the
-        {"@[build%target]", ranks="@[TASKS]" }
-    }
-}
-

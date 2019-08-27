@@ -10,6 +10,7 @@
       real, allocatable :: SOOT(:,:,:,:)        ! black carbon
       real, allocatable :: WASO(:,:,:,:)        ! organic carbon
       real, allocatable :: SUSO(:,:,:,:)        ! sulfate
+      real, allocatable :: SMOKE(:,:,:,:)
       real, allocatable :: PP25(:,:,:,:)        ! PP25
       real, allocatable :: PP10(:,:,:,:)        ! PP10
 !

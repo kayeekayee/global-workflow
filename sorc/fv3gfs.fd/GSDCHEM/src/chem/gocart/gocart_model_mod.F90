@@ -40,6 +40,11 @@ contains
     if (chem_rc_check(localrc, msg="Failed to set tracer pointers", &
       file=__FILE__, line=__LINE__, rc=rc)) return
 
+    ! -- initialize GOCART modules
+    call gocart_init(config, rc=localrc)
+    if (chem_rc_check(localrc, msg="Failed to initialize GOCART modules", &
+      file=__FILE__, line=__LINE__, rc=rc)) return
+
     ! -- print out model configuration
     if (chem_comm_isroot()) then
       write(6,'(28("-"))')
@@ -98,12 +103,12 @@ contains
       if (chem_rc_check(localrc, msg="Failed to retrieve model domain on local DE", &
         file=__FILE__, line=__LINE__, rc=rc)) return
 
-      print *,'gocart_model_advance(rc) -- before gocart_advance(), de=',de, deCount
       call gocart_advance(config % readrestart, config % chem_opt,&
         config % chem_in_opt, config % chem_conv_tr,config % biomass_burn_opt, &
         config % seas_opt, config % dust_opt, config % dmsemis_opt, &
         config % aer_ra_feedback, &
-        config % call_biomass, config % call_chemistry, config % call_radiation, &
+        config % call_chemistry, config % call_radiation, &
+        config % plumerise_flag, config % plumerisefire_frq, &
         config % kemit, &
         advanceCount, dts, mm, tz, julday, &
         ! -- background data 
@@ -121,15 +126,14 @@ contains
         data % ero1, &
         data % ero2, &
         data % ero3, &
+        data % ssm,  &
         data % h2o2_backgd, &
         data % no3_backgd, &
         data % oh_backgd, &
+        data % plumefrp, &
         data % plumestuff, &
         data % sandfrac, &
         data % th_pvsrf, &
-        data % rcav_save, &
-        data % rnav_save, &
-        data % ebu_save, &
         ! -- imported atmospheric fields
         stateIn % area, &
         stateIn % hf2d, &
@@ -156,20 +160,13 @@ contains
         stateIn % vs3d, &
         stateIn % ws3d, &
         stateIn % tr3d, &
-        ! -- output tracers
+        ! -- output tracers and tracer diagnostics
         stateOut % tr3d, &
+        stateOut % trcm, &
+        stateOut % trab, &
+        stateOut % truf, &
+        stateOut % trdf, &
         data % trdp, &
-        data % emi_d1, &
-        data % emi_d2, &
-        data % emi_d3, &
-        data % emi_d4, &
-        data % emi_d5, &
-        data % intaer, &
-        data % intbc, &
-        data % intoc, &
-        data % intsulf, &
-        data % intdust, &
-        data % intsea, &
         data % ext_cof, &
         data % sscal, &
         data % asymp, &
@@ -181,6 +178,10 @@ contains
         data % h2o2_bg, &
         data % no3_bg, &
         data % wet_dep, &
+        ! -- buffers
+        data % rainl, &
+        data % rainc, &
+        data % eburn, &
         ! -- array size
         nl, ni, &
         config % ntra, config % ntrb, config % nvl_gocart, config % nbands, &
@@ -191,11 +192,11 @@ contains
         config % num_asym_par, config % num_bscat_coef, &
         config % num_ext_coef, &
         ! -- domain
-!       real(lon, CHEM_KIND_R4), real(lat, CHEM_KIND_R4), &
         lon, lat, &
         is, ie, js, je, 1, nl, &
         is, ie, js, je, 1, ni, &
-        tile,rc=localrc)
+        tile, &
+        verbose=chem_comm_isroot(), rc=localrc)
 
         if (chem_rc_check(localrc, msg="Failure advancing GOCART", &
           file=__FILE__, line=__LINE__, rc=rc)) return
@@ -203,6 +204,5 @@ contains
 
 
   end subroutine gocart_model_advance
-
 
 end module gocart_model_mod

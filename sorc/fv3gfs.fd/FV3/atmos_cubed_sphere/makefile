@@ -15,9 +15,15 @@ else
     $(info )
 endif
 
+ifneq (,$(findstring CCPP,$(CPPDEFS)))
+    FAST_PHYSICS_SRCS_F90 =
+else
+    FAST_PHYSICS_SRCS_F90 = ./model/fv_cmp.F90
+endif
+
 LIBRARY  = libfv3core.a
 
-FFLAGS   += -I../fms -I../fms/include -I../gfsphysics -I ../ipd -I../io -I../namphysics
+FFLAGS   += -I$(FMS_DIR) -I../gfsphysics -I../ipd -I../io -I../namphysics
 
 SRCS_f   =
 
@@ -27,16 +33,18 @@ SRCS_F   =
 
 SRCS_F90 = \
 		   ./model/a2b_edge.F90                           \
+		   ./model/multi_gases.F90                        \
 		   ./model/boundary.F90                           \
 		   ./model/dyn_core.F90                           \
 		   ./model/fv_arrays.F90                          \
-		   ./model/fv_cmp.F90                             \
+		   $(FAST_PHYSICS_SRCS_F90)                       \
 		   ./model/fv_control.F90                         \
 		   ./model/fv_dynamics.F90                        \
 		   ./model/fv_fill.F90                            \
 		   ./model/fv_grid_utils.F90                      \
- 		   ./model/fv_mapz.F90                            \
+		   ./model/fv_mapz.F90                            \
 		   ./model/fv_nesting.F90                         \
+		   ./model/fv_regional_bc.F90                     \
 		   ./model/fv_sg.F90                              \
 		   ./model/fv_tracer2d.F90                        \
 		   ./model/fv_update_phys.F90                     \
@@ -65,7 +73,7 @@ SRCS_F90 = \
 		   ./driver/fvGFS/fv_nggps_diag.F90               \
 		   ./driver/fvGFS/atmosphere.F90
 
-SRCS_c   = 
+SRCS_c   =
 
 DEPEND_FILES = $(SRCS_f) $(SRCS_f90) $(SRCS_F) $(SRCS_F90)
 
@@ -88,6 +96,7 @@ $(LIBRARY): $(OBJS)
 ./model/nh_utils.o : ./model/nh_utils.F90
 	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(FAST) -c $< -o $@
 
+# For PROD/TRANSITION, this is overwritten below
 ./model/fv_mapz.o : ./model/fv_mapz.F90
 	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(FAST) -c $< -o $@
 
@@ -98,11 +107,25 @@ $(LIBRARY): $(OBJS)
 ./driver/fvGFS/atmosphere.o : ./driver/fvGFS/atmosphere.F90
 	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS) $(OTHER_FFLAGS) $(ESMF_INC) -c $< -o $@
 
+# For CCPP acceptance: reduce optimization for certain files to
+# obtain bit-for-bit identical results in PROD mode on Theia/Intel 15
+ifneq (,$(findstring TRANSITION,$(CPPDEFS)))
+FFLAGS_LOPT=$(subst CORE-AVX2,CORE-AVX-I,\
+              $(subst no-prec-div,prec-div,\
+                $(subst no-prec-sqrt,prec-sqrt,$(FFLAGS))))
+./model/dyn_core.o : ./model/dyn_core.F90
+	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS_LOPT) $(OTHER_FFLAGS) -c $< -o $@
+./model/fv_mapz.o : ./model/fv_mapz.F90
+	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS_LOPT) $(OTHER_FFLAGS) $(FAST) -c $< -o $@
+./model/fv_cmp.o : ./model/fv_cmp.F90
+	$(FC) $(CPPDEFS) $(FPPFLAGS) $(FFLAGS_LOPT) $(OTHER_FFLAGS) -c $< -o $@
+endif # (,$(findstring TRANSITION,$(CPPDEFS)))
+
 .PHONY: clean
 clean:
 	@echo "Cleaning fv3core ... "
 	@echo
-	$(RM) -f $(LIBRARY) *__genmod.f90 */*.o */*/*.o  *.mod *.lst *.i depend
+	$(RM) -f $(LIBRARY) *__genmod.f90 */*.o */*/*.o *.mod *.i90 *.lst *.i depend
 
 MKDEPENDS = ../mkDepends.pl
 include ../conf/make.rules

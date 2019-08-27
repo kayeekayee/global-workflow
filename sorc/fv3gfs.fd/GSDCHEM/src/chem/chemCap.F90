@@ -42,10 +42,14 @@ module CHM
       "inst_surface_roughness               "  &
     /)
   ! -- export fields
-  integer, parameter :: exportFieldCount = 1
+  integer, parameter :: exportFieldCount = 5
   character(len=*), dimension(exportFieldCount), parameter :: &
     exportFieldNames = (/ &
-      "inst_tracer_mass_frac                "  &
+      "inst_tracer_mass_frac                ", &
+      "inst_tracer_up_surface_flx           ", &
+      "inst_tracer_down_surface_flx         ", &
+      "inst_tracer_clmn_mass_dens           ", &
+      "inst_tracer_anth_biom_flx            "  &
     /)
 
   ! -- verbosity
@@ -98,17 +102,6 @@ module CHM
       return  ! bail out
     call NUOPC_CompSpecialize(model, specLabel=label_Advance, &
       specRoutine=ModelAdvance, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_MethodRemove(model, label=label_CheckImport, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call NUOPC_CompSpecialize(model, specLabel=label_CheckImport, &
-      specRoutine=CheckImport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -433,7 +426,7 @@ module CHM
     end if
 
     ! -- initialize model I/O
-    call chem_io_init(rc=rc)
+    call chem_io_init(verbose=btest(verbosity,0), rc=rc)
     if (chem_rc_check(rc)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="Failed to initialize I/O model subsystem", &
@@ -496,11 +489,11 @@ module CHM
       return  ! bail out
     end if
 
-    ! -- allocate memory for internal workspace
+    ! -- allocate memory for background fields
     call chem_backgd_init(rc=rc)
     if (chem_rc_check(rc)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
-        msg="Failed to initialize I/O model subsystem", &
+        msg="Failed to initialize I/O model storage", &
         line=__LINE__, &
         file=__FILE__, &
         rcToReturn=rc)
@@ -508,28 +501,15 @@ module CHM
     end if
 
     ! -- read-in emission and background fields
-    call chem_backgd_read(rc=rc)
+    call chem_backgd_read(verbose=btest(verbosity,0), rc=rc)
     if (chem_rc_check(rc)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
-        msg="Failed to initialize I/O model subsystem", &
+        msg="Failed to read background/emission values", &
         line=__LINE__, &
         file=__FILE__, &
         rcToReturn=rc)
       return  ! bail out
     end if
-
-#if 0
-    ! -- diagnostics: write out emission and background fields
-    call chem_backgd_write(rc=rc)
-    if (chem_rc_check(rc)) then
-      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
-        msg="Failed to initialize I/O model subsystem", &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
-      return  ! bail out
-    end if
-#endif
 
     ! -- connect import fields to model
     ! -- this can be done only once since remote fields are accessed by reference
@@ -546,6 +526,17 @@ module CHM
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! -- allocate memory for internal workspace
+    call chem_buffer_init(rc=rc)
+    if (chem_rc_check(rc)) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
+        msg="Failed to initialize I/O model buffers", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return  ! bail out
+    end if
 
     ! -- initialize internal component (GOCART)
     call chem_comp_init(rc=rc)
@@ -624,7 +615,7 @@ module CHM
       return  ! bail out
     
     call ESMF_TimePrint(currTime + timeStep, &
-      preString="--------------------------------> to: ", rc=rc)
+      preString="---------------------> to: ", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -660,7 +651,7 @@ module CHM
       return  ! bail out
 
     ! write output if it is time
-    call chem_output_write(rc)
+    call chem_output_write(rc=rc)
     if (chem_rc_check(rc)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="Failed to write chemistry output", &
@@ -671,60 +662,6 @@ module CHM
     end if
 
   end subroutine ModelAdvance
-
-  !-----------------------------------------------------------------------------
-
-  subroutine CheckImport(model, rc)
-    type(ESMF_GridComp)   :: model
-    integer, intent(out)  :: rc
-    
-    ! Enforce a time dependency on the imported fields to be a coupling
-    ! timeStep ahead of the current time. This means that the chemistry
-    ! component is assumed to run sequentially after the ATM during the
-    ! same timestep. An incorrect run sequence will be flagged here as an
-    ! incompatibility.
-    
-    ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_Time)         :: time
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
-
-    rc = ESMF_SUCCESS
-    
-    ! query the Component for its clock and importState
-    call NUOPC_ModelGet(model, modelClock=clock, importState=importState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! get the current time out of the clock
-    call ESMF_ClockGet(clock, stopTime=time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    
-    ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_IsAtTime(importState, time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    if (.not.allCurrent) then
-      !TODO: introduce and use INCOMPATIBILITY return codes!!!!
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not at the "// &
-        "expected time", &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-  end subroutine
 
   !-----------------------------------------------------------------------------
 

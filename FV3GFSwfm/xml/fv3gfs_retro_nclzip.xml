@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY FV3GFS_HOME "/scratch4/BMC/rtfim/rtruns/FV3-Chem">
+  <!ENTITY PSLOT  "rt_fv3gfs_chem">
+  <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
+  <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY AC_MODEL_NAME "FV3GFS_CHEM">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "FV3GFS_CHEM">
+  <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
+  <!ENTITY RES "0p50">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  %theia;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="8">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
+  </log>
+
+  <cycledef>201908140000 201908150000 24:00:00</cycledef>
+
+  &nclzipretro_task;  
+<!--    
+-->
+</workflow>

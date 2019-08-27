@@ -11,7 +11,8 @@
     <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
     <envar><name>hh</name><value><cyclestr>@H</cyclestr></value></envar>
     <dependency>
-      <or>
+        <metataskdep metatask="remap_ncl"/>
+<!--
         <and>
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/fim/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
           <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a2/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
@@ -31,10 +32,6 @@
           <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/130/aodtot_sfc_f162.png</cyclestr></datadep>
           <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/201/aodtot_sfc_f162.png</cyclestr></datadep>
         </and>
-        <and>
-          <timedep><cyclestr offset="01:12:30:00">@Y@m@d@H@M00</cyclestr></timedep>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/fim/aodtot_sfc_f000.png</cyclestr></datadep>
-        </and>
-      </or>
+-->
     </dependency>
   </task>

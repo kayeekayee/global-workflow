@@ -1,3 +1,4 @@
+
 !***********************************************************************
 !*                   GNU Lesser General Public License                 
 !*
@@ -116,6 +117,9 @@ module fv_update_phys_mod
 #endif
   use fv_arrays_mod,      only: fv_grid_type, fv_nest_type, fv_grid_bounds_type
   use fv_grid_utils_mod,  only: cubed_to_latlon
+#ifdef MULTI_GASES
+  use multi_gases_mod,    only: virq, virqd, vicpqd, vicvqd, num_gas
+#endif
 
   implicit none
 
@@ -137,8 +141,8 @@ module fv_update_phys_mod
     real, intent(in)   :: dt, ptop
     integer, intent(in):: is,  ie,  js,  je, ng
     integer, intent(in):: isd, ied, jsd, jed
-    integer, intent(in):: nq            ! tracers modified by physics 
-                                        ! ncnst is the total nmber of tracers
+    integer, intent(in):: nq            ! tracers modified by physics
+                                        ! ncnst is the total number of tracers
     logical, intent(in):: moist_phys
     logical, intent(in):: hydrostatic
     logical, intent(in):: nudge
@@ -206,6 +210,10 @@ module fv_update_phys_mod
     real  ps_dt(is:ie,js:je)
     real  cvm(is:ie), qc(is:ie)
     real  phalf(npz+1), pfull(npz)
+
+#ifdef MULTI_GASES
+    integer :: nn, nm
+#endif
 
     type(group_halo_update_type), save :: i_pack(2)
     integer  i, j, k, m, n, nwat
@@ -283,11 +291,19 @@ module fv_update_phys_mod
 
     call get_eta_level(npz, 1.0E5, pfull, phalf, ak, bk)
 
+#ifdef MULTI_GASES
+        nm = max(           nwat,num_gas)
+        nn = max(flagstruct%nwat,num_gas)
+#endif
+
 !$OMP parallel do default(none) &
 !$OMP             shared(is,ie,js,je,npz,flagstruct,pfull,q_dt,sphum,q,qdiag,  &
 !$OMP                    nq,w_diff,dt,nwat,liq_wat,rainwat,ice_wat,snowwat,    &
 !$OMP                    graupel,delp,cld_amt,hydrostatic,pt,t_dt,delz,adj_vmr,&
 !$OMP                    gama_dt,cv_air,ua,u_dt,va,v_dt,isd,ied,jsd,jed,       &
+#ifdef MULTI_GASES
+!$OMP                    nn, nm,                                               &
+#endif
 !$OMP                    conv_vmr_mmr)                                         &
 !$OMP             private(cvm, qc, qstar, ps_dt, p_fac)
     do k=1, npz
@@ -351,12 +367,22 @@ module fv_update_phys_mod
 !--------------------------------------------------------
         do j=js,je
           do i=is,ie
+#ifdef MULTI_GASES
+            ps_dt(i,j)  = 1. + dt*sum(q_dt(i,j,k,1:nm))
+#else
             ps_dt(i,j)  = 1. + dt*sum(q_dt(i,j,k,1:nwat))
+#endif
             delp(i,j,k) = delp(i,j,k) * ps_dt(i,j)
             if (flagstruct%adj_mass_vmr) then
+#ifdef MULTI_GASES
+               adj_vmr(i,j,k) =                          &
+                    (ps_dt(i,j) - sum(q(i,j,k,1:nn))) /  &
+                    (1.d0       - sum(q(i,j,k,1:nn)))
+#else
                adj_vmr(i,j,k) =                          &
                     (ps_dt(i,j) - sum(q(i,j,k,1:flagstruct%nwat))) /  &
                     (1.d0       - sum(q(i,j,k,1:flagstruct%nwat)))
+#endif
             end if
           enddo
         enddo
@@ -386,7 +412,6 @@ module fv_update_phys_mod
             call moist_cp(is,ie,isd,ied,jsd,jed, npz, j, k, nwat, sphum, liq_wat, rainwat,    &
                           ice_wat, snowwat, graupel, q, qc, cvm, pt(is:ie,j,k) )
             do i=is,ie
-!!!            pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt
                pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt*con_cp/cvm(i)
             enddo
          enddo
@@ -398,7 +423,6 @@ module fv_update_phys_mod
                               ice_wat, snowwat, graupel, q, qc, cvm, pt(is:ie,j,k) )
                 do i=is,ie
                    delz(i,j,k) = delz(i,j,k) / pt(i,j,k)
-!!!                pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt
                    pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt*con_cp/cvm(i)
                    delz(i,j,k) = delz(i,j,k) * pt(i,j,k)
                 enddo
@@ -416,7 +440,6 @@ module fv_update_phys_mod
                   call moist_cv(is,ie,isd,ied,jsd,jed, npz, j, k, nwat, sphum, liq_wat, rainwat,    &
                                 ice_wat, snowwat, graupel, q, qc, cvm, pt(is:ie,j,k))
                   do i=is,ie
-!!!                  pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt*con_cp/cv_air
                      pt(i,j,k) = pt(i,j,k) + t_dt(i,j,k)*dt*con_cp/cvm(i)
                   enddo
                enddo
@@ -433,7 +456,7 @@ module fv_update_phys_mod
       enddo
 #endif
 
-   enddo ! k-loop
+    enddo ! k-loop
 
 ! [delp, (ua, va), pt, q] updated. Perform nudging if requested
 !------- nudging of atmospheric variables toward specified data --------
@@ -550,6 +573,9 @@ module fv_update_phys_mod
   endif
 
 !$OMP parallel do default(none) shared(is,ie,js,je,npz,pe,delp,peln,pk,ps,u_srf,v_srf, &
+#ifdef MULTI_GASES
+!$OMP                                  q,                                              &
+#endif
 !$OMP                                  ua,va,pkz,hydrostatic)
    do j=js,je
       do k=2,npz+1                                                                             
@@ -570,6 +596,9 @@ module fv_update_phys_mod
          do k=1,npz
             do i=is,ie
                pkz(i,j,k) = (pk(i,j,k+1)-pk(i,j,k))/(kappa*(peln(i,k+1,j)-peln(i,k,j)))
+#ifdef MULTI_GASES
+               pkz(i,j,k) = exp( virqd(q(i,j,k,:))/vicpqd(q(i,j,k,:)) * log( pkz(i,j,k) ) )
+#endif
             enddo
          enddo
       endif
@@ -603,6 +632,66 @@ module fv_update_phys_mod
     endif
 
     call timing_off('COMM_TOTAL')
+!
+! for regional grid need to set values for u_dt and v_dt at the edges.
+! Note from Lucas:The physics only operates on the compute domain.
+! One snag is that in fv_update_phys.F90 u_dt and v_dt from the physics need to be interpolated to the D-grids,
+! which requires BCs for u_dt and v_dt. For the nested grid I can simply get the BCs from the coarse grid, but
+! in your case I would recommend just setting the boundary conditions to 0 or to constant values (ie the value
+! of the cell closest to the boundary).
+    if (gridstruct%regional) then
+     if (is == 1) then
+      do k=1,npz
+       do j = js,je
+        u_dt(is-1,j,k) = u_dt(is,j,k)
+        v_dt(is-1,j,k) = v_dt(is,j,k)
+       enddo
+      enddo
+     endif
+     if (ie == npx) then
+      do k=1,npz
+       do j = js,je
+        u_dt(ie+1,j,k) = u_dt(ie,j,k)
+        v_dt(ie+1,j,k) = v_dt(ie,j,k)
+       enddo
+      enddo
+     endif
+     if (js == 1) then
+      do k=1,npz
+       do i = is,ie
+        u_dt(i,js-1,k) = u_dt(i,js,k)
+        v_dt(i,js-1,k) = v_dt(i,js,k)
+       enddo
+      enddo
+     endif
+     if (je == npy) then
+      do k=1,npz
+       do i = is,ie
+        u_dt(i,je+1,k) = u_dt(i,je,k)
+        v_dt(i,je+1,k) = v_dt(i,je,k)
+       enddo
+      enddo
+     endif
+!
+! corners
+!
+     do k=1,npz
+      if (is == 1 .and. js == 1) then
+       u_dt(is-1,js-1,k) = u_dt(is,js,k)
+       v_dt(is-1,js-1,k) = v_dt(is,js,k)
+      elseif (is == 1 .and. je == npy) then
+       u_dt(is-1,je+1,k) = u_dt(is,je,k)
+       v_dt(is-1,je+1,k) = v_dt(is,je,k)
+      elseif (ie == npx .and. js == 1) then
+       u_dt(ie+1,js-1,k) = u_dt(ie,je,k)
+       v_dt(ie+1,js-1,k) = v_dt(ie,je,k)
+      elseif (ie == npx .and. je == npy) then
+       u_dt(ie+1,je+1,k) = u_dt(ie,je,k)
+       v_dt(ie+1,je+1,k) = v_dt(ie,je,k)
+      endif
+     enddo
+    endif !regional
+!
     call update_dwinds_phys(is, ie, js, je, isd, ied, jsd, jed, dt, u_dt, v_dt, u, v, gridstruct, npx, npy, npz, domain)
  endif
                                                     call timing_off(' Update_dwinds')
@@ -810,7 +899,7 @@ module fv_update_phys_mod
         enddo
 
 ! --- E_W edges (for v-wind):
-        if ( is==1 .and. .not. gridstruct%nested ) then
+        if ( is==1 .and. .not. (gridstruct%nested .or. gridstruct%regional)) then
           i = 1
           do j=js,je
             if ( j>jm2 ) then
@@ -829,7 +918,7 @@ module fv_update_phys_mod
              ve(i,j,3) = vt3(j)
           enddo
         endif
-        if ( (ie+1)==npx .and. .not. gridstruct%nested ) then
+        if ( (ie+1)==npx .and. .not. (gridstruct%nested .or. gridstruct%regional)) then
           i = npx
           do j=js,je
             if ( j>jm2 ) then
@@ -849,7 +938,7 @@ module fv_update_phys_mod
           enddo
         endif
 ! N-S edges (for u-wind):
-        if ( js==1  .and. .not. gridstruct%nested) then
+        if ( js==1  .and. .not. (gridstruct%nested .or. gridstruct%regional)) then
           j = 1
           do i=is,ie
             if ( i>im2 ) then
@@ -868,7 +957,7 @@ module fv_update_phys_mod
              ue(i,j,3) = ut3(i)
           enddo
         endif
-        if ( (je+1)==npy  .and. .not. gridstruct%nested) then
+        if ( (je+1)==npy  .and. .not. (gridstruct%nested .or. gridstruct%regional)) then
           j = npy
           do i=is,ie
             if ( i>im2 ) then

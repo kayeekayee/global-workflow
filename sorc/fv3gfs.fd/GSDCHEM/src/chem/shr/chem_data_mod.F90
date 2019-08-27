@@ -8,40 +8,28 @@ module chem_data_mod
   type chem_data_type
     ! -- input
     real(CHEM_KIND_R4), dimension(:),     allocatable :: p_gocart          ! GOCART pressure levels
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: clayfrac          ! clay fraction (AFWA dust scheme)
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: clayfrac          ! clay fraction (AFWA & FENGSHA dust scheme)
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: dm0               ! dms reference emissions
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: emiss_ab          ! emissions for all available species
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: emiss_abu         ! emissions for all available species
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_ash_dt      ! ash emissions
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_ash_height  ! ash emissions
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_ash_mass    ! ash emissions
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_dt      ! ash emissions
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_height  ! ash emissions
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_mass    ! ash emissions
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_dt       ! ash emissions
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_height   ! ash emissions
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: emiss_tr_mass     ! ash emissions
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero1              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero2              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero3              ! dust erosion factor
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ssm               ! PJZ Sediment Supply Map (FENGSHA)
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: h2o2_backgd       ! H2O2 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: no3_backgd        ! NO3 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: oh_backgd         ! OH background for GOCART
-    real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: plumestuff        ! fire info
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: sandfrac          ! sand fraction (AFWA dust scheme)
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: plumefrp          ! fire info - GBBEPx
+    real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: plumestuff        ! fire info - MODIS
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: sandfrac          ! sand fraction (AFWA & FENGSHA dust scheme)
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: th_pvsrf
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: rcav_save !lzhang
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: rnav_save !lzhang
-    real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: ebu_save !lzhang
     ! -- output
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: emi_d1
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: emi_d2
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: emi_d3
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: emi_d4
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: emi_d5
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intaer
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intbc
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intoc
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intsulf
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intdust
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: intsea
     real(CHEM_KIND_R4), dimension(:,:),     allocatable :: aod2d
     real(CHEM_KIND_R4), dimension(:,:,:),   allocatable :: pm10
     real(CHEM_KIND_R4), dimension(:,:,:),   allocatable :: pm25
@@ -55,6 +43,10 @@ module chem_data_mod
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: asymp
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: tr3d
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: trdp
+    ! -- internal buffers
+    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: rainl
+    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: rainc
+    real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: eburn
   end type chem_data_type
 
   private
@@ -130,6 +122,10 @@ contains
       deallocate(data % ero3, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
+    if (allocated(data % ssm)) then
+      deallocate(data % ssm, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
     if (allocated(data % h2o2_backgd)) then
       deallocate(data % h2o2_backgd, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
@@ -142,6 +138,10 @@ contains
       deallocate(data % oh_backgd, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
+    if (allocated(data % plumefrp)) then
+      deallocate(data % plumefrp, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
     if (allocated(data % plumestuff)) then
       deallocate(data % plumestuff, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
@@ -152,62 +152,6 @@ contains
     end if
     if (allocated(data % th_pvsrf)) then
       deallocate(data % th_pvsrf, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % rcav_save)) then
-      deallocate(data % rcav_save, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if !lzhang
-    if (allocated(data % rnav_save)) then
-      deallocate(data % rnav_save, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if !lzhang
-    if (allocated(data % ebu_save)) then
-      deallocate(data % ebu_save, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if !lzhang
-    if (allocated(data % emi_d1)) then
-      deallocate(data % emi_d1, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % emi_d2)) then
-      deallocate(data % emi_d2, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % emi_d3)) then
-      deallocate(data % emi_d3, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % emi_d4)) then
-      deallocate(data % emi_d4, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % emi_d5)) then
-      deallocate(data % emi_d5, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intaer)) then
-      deallocate(data % intaer, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intbc)) then
-      deallocate(data % intbc, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intoc)) then
-      deallocate(data % intoc, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intsulf)) then
-      deallocate(data % intsulf, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intdust)) then
-      deallocate(data % intdust, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % intsea)) then
-      deallocate(data % intsea, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
     if (allocated(data % aod2d)) then
@@ -260,6 +204,18 @@ contains
     end if
     if (allocated(data % trdp)) then
       deallocate(data % trdp, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
+    if (allocated(data % rainl)) then
+      deallocate(data % rainl, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
+    if (allocated(data % rainc)) then
+      deallocate(data % rainc, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
+    if (allocated(data % eburn)) then
+      deallocate(data % eburn, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
 

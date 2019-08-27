@@ -554,6 +554,7 @@ module module_MEDIATOR
     call fld_list_add(fldsToAtm,"liquid_water_content_of_soil_layer_4", "will provide")
     call fld_list_add(fldsToAtm,"mean_ice_volume"         , "will provide")
     call fld_list_add(fldsToAtm,"mean_snow_volume"        , "will provide")
+    call fld_list_add(fldsToAtm,"sea_ice_surface_temperature"        , "will provide")
 !    call fld_list_add(fldsFrHyd,"volume_fraction_of_total_water_in_soil", "will provide")
 !    call fld_list_add(fldsFrHyd,"surface_snow_thickness"                , "will provide")
 !    call fld_list_add(fldsFrHyd,"liquid_water_content_of_surface_snow"  , "will provide")
@@ -689,6 +690,8 @@ module module_MEDIATOR
     call fld_list_add(fldsFrOcn,"mixed_layer_depth"       , "will provide","copy")
     call fld_list_add(fldsFrOcn,"sea_surface_slope_zonal" , "will provide","copy")
     call fld_list_add(fldsFrOcn,"sea_surface_slope_merid" , "will provide","copy")
+    call fld_list_add(fldsFrOcn,"accum_heat_frazil"       , "will provide","copy")
+    call fld_list_add(fldsFrOcn,"inst_melt_potential "    , "will provide","copy")
 
     ! Fields to ICE
     call fld_list_add(fldsToIce,"dummyfield"               , "cannot provide")
@@ -731,7 +734,7 @@ module module_MEDIATOR
     ! Fields from ICE
 !     call fld_list_add(fldsFrIce,"dummyfield"              , "cannot provide","bilinear")
     call fld_list_add(fldsFrIce,"ice_mask"                , "cannot provide","conservedst")
-    call fld_list_add(fldsFrIce,"sea_ice_temperature"     , "will provide","conservefrac")
+    call fld_list_add(fldsFrIce,"sea_ice_surface_temperature"     , "will provide","conservefrac")
     call fld_list_add(fldsFrIce,"inst_ice_ir_dir_albedo"  , "will provide","conservefrac")
     call fld_list_add(fldsFrIce,"inst_ice_ir_dif_albedo"  , "will provide","conservefrac")
     call fld_list_add(fldsFrIce,"inst_ice_vis_dir_albedo" , "will provide","conservefrac")
@@ -914,6 +917,8 @@ module module_MEDIATOR
     
     call ESMF_AttributeGet(gcomp, name="Verbosity", value=value, defaultValue="max", &
       convention="NUOPC", purpose="Instance", rc=rc)
+     call ESMF_LogWrite(trim(subname)//": Verbosity="//trim(value), ESMF_LOGMSG_INFO, rc=dbrc)
+    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
     dbug_flag = ESMF_UtilString2Int(value, &
@@ -924,7 +929,7 @@ module module_MEDIATOR
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=dbrc)
 
     if (dbug_flag > 5) then
-      call ESMF_LogWrite(trim(subname)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
+     call ESMF_LogWrite(trim(subname)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
     endif
     rc = ESMF_SUCCESS
 
@@ -2067,7 +2072,6 @@ module module_MEDIATOR
           write (msgString,*) trim(subname)//"land_mask = ",minval(dataPtr_fieldAtm),maxval(dataPtr_fieldAtm)
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #endif
-
           ! clean up
 
           call ESMF_GridDestroy(gridAtmCoord,rc=rc)
@@ -2547,8 +2551,7 @@ module module_MEDIATOR
         patchmap=is_local%wrap%RH_a2o_patch, &
         fcopymap=is_local%wrap%RH_a2o_fcopy, &
         nearestmap=is_local%wrap%RH_a2o_nearest, &
-!        srcMaskValue=1, &
-        srcMaskValue=0, &
+        srcMaskValue=1, &
         dstMaskValue=0, &
         fldlist1=FldsFrAtm, string='a2o_weights', rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2563,8 +2566,7 @@ module module_MEDIATOR
         patchmap=is_local%wrap%RH_a2i_patch, &
         fcopymap=is_local%wrap%RH_a2i_fcopy, &
         nearestmap=is_local%wrap%RH_a2i_nearest, &
-!        srcMaskValue=1, &
-        srcMaskValue=0, &
+        srcMaskValue=1, &
         dstMaskValue=0, &
         fldlist1=FldsFrAtm, string='a2i_weights', rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2604,8 +2606,7 @@ module module_MEDIATOR
         fcopymap=is_local%wrap%RH_o2a_fcopy, &
         nearestmap=is_local%wrap%RH_o2a_nearest, &
         srcMaskValue=0, &
-!        dstMaskValue=1, &
-        dstMaskValue=0, &
+        dstMaskValue=1, &
         fldlist1=FldsFrOcn, fldlist2=FldsAtmOcn, string='o2a_weights', rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
@@ -2633,8 +2634,7 @@ module module_MEDIATOR
         fcopymap=is_local%wrap%RH_i2a_fcopy, &
         nearestmap=is_local%wrap%RH_i2a_nearest, &
         srcMaskValue=0, &
-!        dstMaskValue=1, &
-        dstMaskValue=0, &
+        dstMaskValue=1, &
         fldlist1=FldsFrIce, string='i2a_weights', rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
@@ -3692,12 +3692,6 @@ module module_MEDIATOR
 
     !--- merges
 
-    call fieldBundle_FieldMerge(is_local%wrap%FBforAtm  ,'surface_temperature' , & 
-                                is_local%wrap%FBOcn_a   ,'sea_surface_temperature',ocnwgt, &
-                                is_local%wrap%FBIce_a   ,'sea_ice_temperature',icewgt, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
-
     call fieldBundle_FieldMerge(is_local%wrap%FBforAtm  ,'mean_sensi_heat_flx' , & 
                                 is_local%wrap%FBAtmOcn_a,'mean_sensi_heat_flx_atm_into_ocn',ocnwgt, &
                                 is_local%wrap%FBIce_a   ,'mean_sensi_heat_flx_atm_into_ice',icewgt, rc=rc)
@@ -3757,21 +3751,15 @@ module module_MEDIATOR
       line=__LINE__, file=__FILE__)) return  ! bail out
 
     if (statewrite_flag) then
+    ! write the fields exported to atm to file
+#ifdef FRONT_FV3
       regridwriteAtmExp_timeslice = regridwriteAtmExp_timeslice + 1
       call ESMFPP_RegridWriteFB(is_local%wrap%FBforAtm, "med_to_atm_export_", regridwriteAtmExp_timeslice, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-    endif
-
-    if (dbug_flag > 1) then
-      call state_diagnose(NState_AtmExp, trim(subname)//' AtmExp_final ', rc=rc)
-    endif
-
-    if (statewrite_flag) then
-      ! write the fields exported to atm to file
-#ifndef FRONT_FV3
+#else
       call NUOPC_Write(NState_AtmExp, &
         fldsToAtm%shortname(1:fldsToAtm%num), &
         "field_med_to_atm_", timeslice=is_local%wrap%fastcntr, &
@@ -3780,7 +3768,11 @@ module module_MEDIATOR
         line=__LINE__, file=__FILE__)) return  ! bail out
 #endif
     endif
-    
+
+    if (dbug_flag > 1) then
+     call state_diagnose(NState_AtmExp, trim(subname)//' AtmExp_final ', rc=rc)
+    endif
+
     !---------------------------------------
     !--- clean up
     !---------------------------------------
@@ -3876,6 +3868,7 @@ module module_MEDIATOR
         ! http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node5.html#SECTION050366000000000000000
         call ESMF_FieldRegridStore(inField, outField, regridMethod=regridMethod, &
              unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+             srcTermProcessing=srcTermProcessing_Value, &
              Routehandle=rh, &
              rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3883,7 +3876,8 @@ module module_MEDIATOR
              file=__FILE__)) &
              return  ! bail out
 
-        call ESMF_FieldRegrid(inField, outField, Routehandle=rh, rc=rc)
+        call ESMF_FieldRegrid(inField, outField, Routehandle=rh, &
+          termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
              line=__LINE__, &
              file=__FILE__)) &
@@ -3951,7 +3945,11 @@ module module_MEDIATOR
     ! validate all data by default
     !---------------------------
 
+#if ESMF_VERSION_MAJOR >= 8
+    call NUOPC_SetTimestamp(NState_AtmExp, clock, rc=rc)
+#else
     call NUOPC_UpdateTimestamp(NState_AtmExp, clock, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
 
@@ -3963,7 +3961,11 @@ module module_MEDIATOR
 
     if (coldstart) then
       if (is_local%wrap%fastcntr == 1) then
+#if ESMF_VERSION_MAJOR >= 8
+        call NUOPC_SetTimestamp(NState_AtmExp, clock_invalidTimeStamp, rc=rc)
+#else
         call NUOPC_UpdateTimestamp(NState_AtmExp, clock_invalidTimeStamp, rc=rc)
+#endif
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
       else
@@ -3980,7 +3982,11 @@ module module_MEDIATOR
           line=__LINE__, file=__FILE__)) return  ! bail out
         do n = 1, fieldCount
           if (trim(fieldNameList(n))=="sea_surface_temperature") then
+#if ESMF_VERSION_MAJOR >= 8
+             call NUOPC_SetTimestamp(fieldList(n), time_invalidTimeStamp, rc=rc)
+#else
              call NUOPCplus_UpdateTimestamp(fieldList(n), time_invalidTimeStamp, rc=rc)
+#endif
              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                line=__LINE__, file=__FILE__)) return  ! bail out
           endif
@@ -7079,14 +7085,15 @@ endif
     character(len=*),parameter :: subname='(module_MEDIATOR:Fieldbundle_Regrid)'
 
     rc = ESMF_SUCCESS
-    if (dbug_flag > 5) then
-      call ESMF_LogWrite(trim(subname)//trim(lstring)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
-    endif
 
     if (present(string)) then
       lstring = trim(string)
     else
       lstring = " "
+    endif
+
+    if (dbug_flag > 5) then
+      call ESMF_LogWrite(trim(subname)//trim(lstring)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
     endif
 
     if (.not.present(rc)) then
@@ -7247,14 +7254,15 @@ endif
     character(len=*),parameter :: subname='(module_MEDIATOR:Fieldbundle_Regrid2)'
 
     rc = ESMF_SUCCESS
-    if (dbug_flag > 5) then
-      call ESMF_LogWrite(trim(subname)//trim(lstring)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
-    endif
 
     if (present(string)) then
       lstring = trim(string)
     else
       lstring = " "
+    endif
+
+    if (dbug_flag > 5) then
+      call ESMF_LogWrite(trim(subname)//trim(lstring)//": called", ESMF_LOGMSG_INFO, rc=dbrc)
     endif
 
     if (.not.present(rc)) then

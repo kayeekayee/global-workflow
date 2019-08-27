@@ -61,14 +61,15 @@ ROTDIR=${ROTDIR:-$pwd}         # rotating archive directory
 ICSDIR=${ICSDIR:-$pwd}         # cold start initial conditions
 DMPDIR=${DMPDIR:-$pwd}         # global dumps for seaice, snow and sst analysis
 EMIDIR=${EMIDIR:-$pwd}         # anthro. emission 
+EMITYPE=${EMITYPE:-1}         # 1:MODIS, 2:GBBEPx 
 # Model resolution specific parameters
 DELTIM=${DELTIM:-225}
 layout_x=${layout_x:-8}
 layout_y=${layout_y:-16}
 LEVS=${LEVS:-65}
 
-# OUTTIME=$(( $FHOUT*3600/ $DELTIM ))         #JKH
-OUTTIME=100000000
+ #OUTTIME=$(( $FHOUT*3600/ $DELTIM ))
+ 
 if [ $imp_physics -eq 99 ]; then NTRACER=0; fi
 if [ $imp_physics -eq 11 ]; then NTRACER=1; fi
 
@@ -553,6 +554,7 @@ atmos_nthreads:          $NTHREADS_FV3
 use_hyper_thread:        ${hyperthread:-".false."}
 ncores_per_node:         $cores_per_node
 restart_interval:        $restart_interval
+output_1st_tstep_rst:    .false.
 
 quilting:                $QUILTING
 write_groups:            ${WRITE_GROUP:-1}
@@ -871,6 +873,9 @@ cat > input.nml <<EOF
   cldchem_onoff=0
   dmsemis_opt=1
   dust_opt=3
+  dust_alpha=0.2
+  dust_gamma=1.3
+  dust_uthres=-1
   emiss_inpt_opt=1
   emiss_opt=5
   gas_bc_opt=1
@@ -879,11 +884,14 @@ cat > input.nml <<EOF
   kemit=1
   phot_opt=1
   photdt=60
-  plumerisefire_frq=30
+  plumerisefire_frq=60
+  PLUMERISE_flag=$EMITYPE
   seas_opt=2
+  seas_emis_scheme=-1
+  seas_emis_scale=0.2,0.2,0.2,0.2,0.2
   vertmix_onoff=1
   gfdlmp_onoff=$NTRACER
-  archive_step = $OUTTIME
+  archive_step =-1
   chem_hist_outname = "chem_out_"
   emi_inname  = "${EMIDIR}${CASE}/$SMONTH"
   fireemi_inname  = "../prep"

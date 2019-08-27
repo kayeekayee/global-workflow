@@ -1,3 +1,4 @@
+
 !***********************************************************************
 !*                   GNU Lesser General Public License                 
 !*
@@ -130,10 +131,17 @@ module dyn_core_mod
                                 fv_grid_bounds_type, R_GRID
 
   use boundary_mod,         only: extrapolation_BC,  nested_grid_BC_apply_intT
+  use fv_regional_mod,      only: regional_boundary_update
+  use fv_regional_mod,      only: current_time_in_seconds
 
 #ifdef SW_DYNAMICS
   use test_cases_mod,      only: test_case, case9_forcing1, case9_forcing2
 #endif
+#ifdef MULTI_GASES
+    use multi_gases_mod,  only:  virqd, vicvqd
+#endif
+  use fv_regional_mod,     only: dump_field, exch_uv, H_STAGGER, U_STAGGER, V_STAGGER
+  use fv_regional_mod,     only: a_step, p_step, k_step, n_step
 
 implicit none
 private
@@ -151,6 +159,7 @@ public :: dyn_core, del2_cubed, init_ijk_mem
   real, allocatable ::  rf(:)
   integer:: k_rf = 0
   logical:: RFF_initialized = .false.
+  logical:: first_call = .true.
   integer :: kmax=1
 
 contains
@@ -159,7 +168,11 @@ contains
 !     dyn_core :: FV Lagrangian dynamics driver
 !-----------------------------------------------------------------------
  
- subroutine dyn_core(npx, npy, npz, ng, sphum, nq, bdt, n_split, zvir, cp, akap, cappa, grav, hydrostatic,  &
+ subroutine dyn_core(npx, npy, npz, ng, sphum, nq, bdt, n_split, zvir, cp, akap, cappa,  &
+#ifdef MULTI_GASES
+                     kapad,  &
+#endif
+                     grav, hydrostatic,  &
                      u,  v,  w, delz, pt, q, delp, pe, pk, phis, ws, omga, ptop, pfull, ua, va, & 
                      uc, vc, mfx, mfy, cx, cy, pkz, peln, q_con, ak, bk, &
                      ks, gridstruct, flagstruct, neststruct, idiag, bd, domain, &
@@ -185,7 +198,10 @@ contains
     real, intent(inout) :: w(   bd%isd:,bd%jsd:,1:)  !< vertical vel. (m/s)
     real, intent(inout) ::  delz(bd%isd:,bd%jsd:,1:)  !< delta-height (m, negative)
     real, intent(inout) :: cappa(bd%isd:,bd%jsd:,1:) !< moist kappa
-    real, intent(inout) :: pt(  bd%isd:bd%ied  ,bd%jsd:bd%jed  ,npz)  !< temperature (K)
+#ifdef MULTI_GASES
+    real, intent(inout) :: kapad(bd%isd:bd%ied,bd%jsd:bd%jed,1:npz) !< multi_gases kappa
+#endif
+    real, intent(inout) :: pt(  bd%isd:bd%ied  ,bd%jsd:bd%jed  ,npz)  !< potential temperature (K)
     real, intent(inout) :: delp(bd%isd:bd%ied  ,bd%jsd:bd%jed  ,npz)  !< pressure thickness (pascal)
     real, intent(inout) :: q(   bd%isd:bd%ied  ,bd%jsd:bd%jed  ,npz, nq)  ! 
     real, intent(in), optional:: time_total  !< total time (seconds) since start
@@ -262,6 +278,8 @@ contains
     real    :: dt, dt2, rdt
     real    :: d2_divg
     real    :: k1k, rdg, dtmp, delt
+    real    :: recip_k_split_n_split
+    real    :: reg_bc_update_time
     logical :: last_step, remap_step
     logical used
     real :: split_timestep_bc
@@ -291,6 +309,7 @@ contains
     beta = flagstruct%beta
     rdg = -rdgas / grav
     cv_air = cp_air - rdgas
+    recip_k_split_n_split=1./real(flagstruct%k_split*n_split)
 
 ! Indexes:
     iep1 = ie + 1
@@ -314,6 +333,7 @@ contains
        enddo
     endif
 
+!
       if ( init_step ) then  ! Start of the big dynamic time stepping
 
            allocate(    gz(isd:ied, jsd:jed ,npz+1) )
@@ -379,11 +399,10 @@ contains
          endif
     endif
 
-
-
 !-----------------------------------------------------
   do it=1,n_split
 !-----------------------------------------------------
+     n_step = it
 #ifdef ROT3
      call start_group_halo_update(i_pack(8), u, v, domain, gridtype=DGRID_NE)
 #endif
@@ -421,7 +440,7 @@ contains
                              call timing_off('COMM_TOTAL')
 
       if ( it==1 ) then
-         if (gridstruct%nested) then
+         if (gridstruct%nested .or. gridstruct%regional) then
 !$OMP parallel do default(none) shared(isd,ied,jsd,jed,npz,gz,zs,delz)
          do j=jsd,jed
             do i=isd,ied
@@ -452,7 +471,6 @@ contains
       endif
 
      endif
-
 
 #ifdef SW_DYNAMICS
      if (test_case>1) then
@@ -526,8 +544,29 @@ contains
               neststruct%pt_BC, bctype=neststruct%nestbctype )
 #endif
       endif
+
+      if (flagstruct%regional) then
+        reg_bc_update_time=current_time_in_seconds+(0.5+(it-1))*dt
+        call regional_boundary_update(delpc, 'delp', &
+                                      isd, ied, jsd, jed, npz, &
+                                      is,  ie,  js,  je,       &
+                                      isd, ied, jsd, jed,      &
+                                      reg_bc_update_time )
+#ifndef SW_DYNAMICS
+        call regional_boundary_update(ptc, 'pt', &
+                                      isd, ied, jsd, jed, npz, &
+                                      is,  ie,  js,  je,       &
+                                      isd, ied, jsd, jed,      &
+                                      reg_bc_update_time )
+#endif
+      endif
+
       if ( hydrostatic ) then
-           call geopk(ptop, pe, peln, delpc, pkc, gz, phis, ptc, q_con, pkz, npz, akap, .true., &
+           call geopk(ptop, pe, peln, delpc, pkc, gz, phis, ptc,  &
+#ifdef MULTI_GASES
+                      kapad, &
+#endif
+                      q_con, pkz, npz, akap, .true., &
                       gridstruct%nested, .false., npx, npy, flagstruct%a2b_ord, bd)
       else
 #ifndef SW_DYNAMICS
@@ -565,7 +604,11 @@ contains
 
                                                call timing_on('Riem_Solver')
            call Riem_Solver_C( ms, dt2,   is,  ie,   js,   je,   npz,   ng,   &
-                               akap, cappa,  cp,  ptop, phis, omga, ptc,  &
+                               akap, cappa, cp,  &
+#ifdef MULTI_GASES
+                               kapad, &
+#endif
+                               ptop, phis, omga, ptc,  &
                                q_con,  delpc, gz,  pkc, ws3, flagstruct%p_fac, &
                                 flagstruct%a_imp, flagstruct%scale_z )
                                                call timing_off('Riem_Solver')
@@ -574,12 +617,26 @@ contains
                  call nested_grid_BC_apply_intT(delz, &
                       0, 0, npx, npy, npz, bd, split_timestep_BC+0.5, real(n_split*flagstruct%k_split), &
                 neststruct%delz_BC, bctype=neststruct%nestbctype )
+           endif
 
+           if (flagstruct%regional) then
+             reg_bc_update_time=current_time_in_seconds+(0.5+(it-1))*dt
+             call regional_boundary_update(delz, 'delz', &
+                                           isd, ied, jsd, jed, ubound(delz,3), &
+                                           is,  ie,  js,  je,       &
+                                           isd, ied, jsd, jed,      &
+                                           reg_bc_update_time )
+           endif
 
+           if (gridstruct%nested .or. flagstruct%regional) then
               !Compute gz/pkc
               !NOTE: nominally only need to compute quantities one out in the halo for p_grad_c
               !(instead of entire halo)
-           call nest_halo_nh(ptop, grav, akap, cp, delpc, delz, ptc, phis, &
+
+             call nest_halo_nh(ptop, grav, akap, cp, delpc, delz, ptc, phis, &
+#ifdef MULTI_GASES
+                q, &
+#endif
 #ifdef USE_COND
                 q_con, &
 #ifdef MOIST_CAPPA
@@ -587,10 +644,8 @@ contains
 #endif
 #endif
                 pkc, gz, pk3, &
-                npx, npy, npz, gridstruct%nested, .false., .false., .false., bd)
-
+                npx, npy, npz, gridstruct%nested, .false., .false., .false., bd, flagstruct%regional)
            endif
-
 #endif SW_DYNAMICS
 
       endif   ! end hydro check
@@ -638,7 +693,32 @@ contains
 
       end if
 
-    if ( gridstruct%nested .and. flagstruct%inline_q ) then
+      if (flagstruct%regional) then
+
+        call exch_uv(domain, bd, npz, vc, uc)
+        
+        reg_bc_update_time=current_time_in_seconds+(0.5+(it-1))*dt
+        call regional_boundary_update(vc, 'vc', &
+                                      isd, ied, jsd, jed+1, npz, &
+                                      is,  ie,  js,  je,       &
+                                      isd, ied, jsd, jed,      &
+                                      reg_bc_update_time )
+        call regional_boundary_update(uc, 'uc', &
+                                      isd, ied+1, jsd, jed, npz, &
+                                      is,  ie,  js,  je,       &
+                                      isd, ied, jsd, jed,      &
+                                      reg_bc_update_time )
+!!! Currently divgd is always 0.0 in the regional domain boundary area.
+        reg_bc_update_time=current_time_in_seconds+(it-1)*dt
+        call regional_boundary_update(divgd, 'divgd', &
+                                      isd, ied+1, jsd, jed+1, npz, &
+                                      is,  ie,  js,  je,       &
+                                      isd, ied, jsd, jed,      &
+                                      reg_bc_update_time )
+      endif
+
+    if ( flagstruct%inline_q ) then
+      if ( gridstruct%nested ) then
             do iq=1,nq
                   call nested_grid_BC_apply_intT(q(isd:ied,jsd:jed,:,iq), &
                        0, 0, npx, npy, npz, bd, split_timestep_BC+1, real(n_split*flagstruct%k_split), &
@@ -646,12 +726,28 @@ contains
             end do
       endif
 
+      if (flagstruct%regional) then
+        reg_bc_update_time=current_time_in_seconds+(it-1)*dt
+        do iq=1,nq
+          call regional_boundary_update(q(:,:,:,iq), 'q', &
+                                        isd, ied, jsd, jed, npz, &
+                                        is,  ie,  js,  je,       &
+                                        isd, ied, jsd, jed,      &
+                                        reg_bc_update_time )
+        enddo
+      endif
+
+    endif
+
+    if (flagstruct%regional) call exch_uv(domain, bd, npz, vc, uc)
+    if (first_call .and. is_master() .and. last_step) write(6,*) 'Sponge layer divergence damping coefficent:'
+
                                                      call timing_on('d_sw')
 !$OMP parallel do default(none) shared(npz,flagstruct,nord_v,pfull,damp_vt,hydrostatic,last_step, &
 !$OMP                                  is,ie,js,je,isd,ied,jsd,jed,omga,delp,gridstruct,npx,npy,  &
 !$OMP                                  ng,zh,vt,ptc,pt,u,v,w,uc,vc,ua,va,divgd,mfx,mfy,cx,cy,     &
 !$OMP                                  crx,cry,xfx,yfx,q_con,zvir,sphum,nq,q,dt,bd,rdt,iep1,jep1, &
-!$OMP                                  heat_source,diss_est)                                      &
+!$OMP                                  heat_source,diss_est,ptop,first_call)                                      &
 !$OMP                          private(nord_k, nord_w, nord_t, damp_w, damp_t, d2_divg,   &
 !$OMP                          d_con_k,kgb, hord_m, hord_v, hord_t, hord_p, wk, heat_s,diss_e, z_rat)
     do k=1,npz
@@ -688,6 +784,10 @@ contains
        else
 ! Sponge layers with del-2 damping on divergence, vorticity, w, z, and air mass (delp).
 ! no special damping of potential temperature in sponge layers
+! enhanced del-2 divergence damping has same vertical structure as Rayleigh
+! damping if d2_bg_k2<=0.
+          if (flagstruct%d2_bg_k2 > 0) then ! old version, only applied at top two or three levels
+
               if ( k==1 ) then
 ! Divergence damping:
                    nord_k=0; d2_divg = max(0.01, flagstruct%d2_bg, flagstruct%d2_bg_k1)
@@ -695,7 +795,7 @@ contains
                    nord_w=0; damp_w = d2_divg
                    if ( flagstruct%do_vort_damp ) then
 ! damping on delp and vorticity:
-                        nord_v(k)=0; 
+                        nord_v(k)=0;
 #ifndef HIWPP
                         damp_vt(k) = 0.5*d2_divg
 #endif
@@ -716,6 +816,21 @@ contains
                    nord_w=0;  damp_w = d2_divg
                    d_con_k = 0.
               endif
+          else ! new version, uses d2_bg_k1 and sponge layer vertical structure
+              if ( pfull(k) < flagstruct%rf_cutoff ) then
+                   nord_k=0; nord_w=0
+                   d2_divg = max(flagstruct%d2_bg, flagstruct%d2_bg_k1*   &
+                             sin(0.5*pi*log(flagstruct%rf_cutoff/pfull(k))/log(flagstruct%rf_cutoff/ptop))**2)
+                   if (first_call .and. is_master() .and. last_step) write(6,*) k, 0.01*pfull(k), d2_divg
+                   damp_w = d2_divg
+                   if ( flagstruct%do_vort_damp ) then
+! damping on delp and vorticity
+                      nord_v(k)=0
+                      damp_vt(k) = 0.5*d2_divg
+                   endif
+              endif
+          endif
+
        endif
 
        if( hydrostatic .and. (.not.flagstruct%use_old_omega) .and. last_step ) then
@@ -740,6 +855,7 @@ contains
             enddo
          enddo
        endif
+
        call d_sw(vt(isd,jsd,k), delp(isd,jsd,k), ptc(isd,jsd,k),  pt(isd,jsd,k),      &
                   u(isd,jsd,k),    v(isd,jsd,k),   w(isd:,jsd:,k),  uc(isd,jsd,k),      &
                   vc(isd,jsd,k),   ua(isd,jsd,k),  va(isd,jsd,k), divgd(isd,jsd,k),   &
@@ -783,6 +899,10 @@ contains
        endif
     enddo           ! end openMP k-loop
 
+    if (flagstruct%regional) then
+       call exch_uv(domain, bd, npz, vc, uc)
+       call exch_uv(domain, bd, npz, u,  v )
+    endif
                                                      call timing_off('d_sw')
 
     if( flagstruct%fill_dp ) call mix_dp(hydrostatic, w, delp, pt, npz, ak, bk, .false., flagstruct%fv_debug, bd)
@@ -849,14 +969,45 @@ contains
 #endif
 
     end if
+
+    if (flagstruct%regional) then
+      reg_bc_update_time=current_time_in_seconds+bdt+(it-1)*dt
+      call regional_boundary_update(delp, 'delp', &
+                                    isd, ied, jsd, jed, npz, &
+                                    is,  ie,  js,  je,       &
+                                    isd, ied, jsd, jed,      &
+                                    reg_bc_update_time )
+#ifndef SW_DYNAMICS
+      call regional_boundary_update(pt, 'pt', &
+                                    isd, ied, jsd, jed, npz, &
+                                    is,  ie,  js,  je,       &
+                                    isd, ied, jsd, jed,      &
+                                    reg_bc_update_time )
+
+#ifdef USE_COND
+      call regional_boundary_update(q_con, 'q_con', &
+                                    isd, ied, jsd, jed, npz, &
+                                    is,  ie,  js,  je,       &
+                                    isd, ied, jsd, jed,      &
+                                    reg_bc_update_time )
+#endif
+
+#endif
+    endif
+
      if ( hydrostatic ) then
-          call geopk(ptop, pe, peln, delp, pkc, gz, phis, pt, q_con, pkz, npz, akap, .false., &
+          call geopk(ptop, pe, peln, delp, pkc, gz, phis, pt,  &
+#ifdef MULTI_GASES
+                     kapad,   &
+#endif
+                     q_con, pkz, npz, akap, .false., &
                      gridstruct%nested, .true., npx, npy, flagstruct%a2b_ord, bd)
        else
 #ifndef SW_DYNAMICS
                                             call timing_on('UPDATE_DZ')
         call update_dz_d(nord_v, damp_vt, flagstruct%hord_tm, is, ie, js, je, npz, ng, npx, npy, gridstruct%area,  &
-                         gridstruct%rarea, dp_ref, zs, zh, crx, cry, xfx, yfx, delz, ws, rdt, gridstruct, bd, flagstruct%lim_fac)
+                         gridstruct%rarea, dp_ref, zs, zh, crx, cry, xfx, yfx, delz, ws, rdt, gridstruct, bd, flagstruct%lim_fac, &
+                         flagstruct%regional)
                                             call timing_off('UPDATE_DZ')
     if ( flagstruct%fv_debug ) then
          if ( .not. flagstruct%hydrostatic )    &
@@ -867,19 +1018,20 @@ contains
 !           call prt_maxmin('WS', ws, is, ie, js, je, 0, 1, 1., master)
             used=send_data(idiag%id_ws, ws, fv_time)
         endif
-
-
-
-                             
-
                                                          call timing_on('Riem_Solver')
+
         call Riem_Solver3(flagstruct%m_split, dt,  is,  ie,   js,   je, npz, ng,     &
                          isd, ied, jsd, jed, &
-                         akap, cappa, cp,  ptop, zs, q_con, w, delz, pt, delp, zh,   &
+                         akap, cappa, cp,  &
+#ifdef MULTI_GASES
+                         kapad, &
+#endif
+                         ptop, zs, q_con, w, delz, pt, delp, zh,   &
                          pe, pkc, pk3, pk, peln, ws, &
                          flagstruct%scale_z, flagstruct%p_fac, flagstruct%a_imp, &
                          flagstruct%use_logp, remap_step, beta<-0.1)
                                                          call timing_off('Riem_Solver')
+
                                        call timing_on('COMM_TOTAL')
         if ( gridstruct%square_domain ) then
           call start_group_halo_update(i_pack(4), zh ,  domain)
@@ -901,18 +1053,33 @@ contains
           call nested_grid_BC_apply_intT(delz, &
                0, 0, npx, npy, npz, bd, split_timestep_BC+1., real(n_split*flagstruct%k_split), &
                neststruct%delz_BC, bctype=neststruct%nestbctype  )
-          
+       endif
+
+       if (flagstruct%regional) then
+         reg_bc_update_time=current_time_in_seconds+it*dt
+         call regional_boundary_update(delz, 'delz', &
+                                       isd, ied, jsd, jed, ubound(delz,3), &
+                                       is,  ie,  js,  je,       &
+                                       isd, ied, jsd, jed,      &
+                                       reg_bc_update_time )
+       endif
+
+       if (gridstruct%nested .or. flagstruct%regional) then
           !Compute gz/pkc/pk3; note that now pkc should be nonhydro pert'n pressure
+
           call nest_halo_nh(ptop, grav, akap, cp, delp, delz, pt, phis, &
+#ifdef MULTI_GASES
+               q, &
+#endif
 #ifdef USE_COND
                q_con, &
 #ifdef MOIST_CAPPA
                cappa, &
 #endif
 #endif
-               pkc, gz, pk3, npx, npy, npz, gridstruct%nested, .true., .true., .true., bd)
+               pkc, gz, pk3, npx, npy, npz, gridstruct%nested, .true., .true., .true., bd, flagstruct%regional)
+        endif
 
-       endif
         call timing_on('COMM_TOTAL')
         call complete_group_halo_update(i_pack(4), domain)
         call timing_off('COMM_TOTAL')
@@ -1007,7 +1174,11 @@ contains
 #ifdef MOIST_CAPPA
                     pkz(i,j,k) = exp(cappa(i,j,k)/(1.-cappa(i,j,k))*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
 #else
+#ifdef MULTI_GASES
+                    pkz(i,j,k) = exp( k1k*virqd(q(i,j,k,:))/vicvqd(q(i,j,k,:))*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
+#else
                     pkz(i,j,k) = exp( k1k*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
+#endif
 #endif
                  enddo
               enddo
@@ -1024,7 +1195,7 @@ contains
 !-------------------------------------------------------------------------------------------------------
 
                                                      call timing_on('COMM_TOTAL')
-    if( it==n_split .and. gridstruct%grid_type<4 .and. .not. gridstruct%nested) then
+    if( it==n_split .and. gridstruct%grid_type<4 .and. .not. (gridstruct%nested .or. gridstruct%regional)) then
 ! Prevent accumulation of rounding errors at overlapped domain edges:
        call mpp_get_boundary(u, v, domain, ebuffery=ebuffer,  &
                              nbufferx=nbuffer, gridtype=DGRID_NE )
@@ -1121,8 +1292,36 @@ contains
 
       end if
 
+      if (flagstruct%regional) then
+
+#ifndef SW_DYNAMICS
+         if (.not. hydrostatic) then
+           reg_bc_update_time=current_time_in_seconds+it*dt
+           call regional_boundary_update(w, 'w', &
+                                         isd, ied, jsd, jed, ubound(w,3), &
+                                         is,  ie,  js,  je,       &
+                                         isd, ied, jsd, jed,      &
+                                         reg_bc_update_time )
+         endif
+#endif SW_DYNAMICS
+
+         call regional_boundary_update(u, 'u', &
+                                       isd, ied, jsd, jed+1, npz, &
+                                       is,  ie,  js,  je,       &
+                                       isd, ied, jsd, jed,      &
+                                       reg_bc_update_time )
+         call regional_boundary_update(v, 'v', &
+                                       isd, ied+1, jsd, jed, npz, &
+                                       is,  ie,  js,  je,       &
+                                       isd, ied, jsd, jed,      &
+                                       reg_bc_update_time )
+      
+         call exch_uv(domain, bd, npz, u,  v )      
+      endif
+
 !-----------------------------------------------------
   enddo   ! time split loop
+  first_call=.false.
 !-----------------------------------------------------
     if ( nq > 0 .and. .not. flagstruct%inline_q ) then
        call timing_on('COMM_TOTAL')
@@ -1141,10 +1340,10 @@ contains
        nf_ke = min(3, flagstruct%nord+1)
        call del2_cubed(heat_source, cnst_0p20*gridstruct%da_min, gridstruct, domain, npx, npy, npz, nf_ke, bd)
 
-! Note: pt here is cp*(Virtual_Temperature/pkz)
+! Note: pt here is cp_air*(Virtual_Temperature/pkz), cp_air is constant
     if ( hydrostatic ) then
 !
-! del(Cp*T) = - del(KE)
+! del(Cp_air*Tm) = - del(KE)
 !
 !$OMP parallel do default(none) shared(flagstruct,is,ie,js,je,n_con,pt,heat_source,delp,pkz,bdt) &
 !$OMP                          private(dtmp)
@@ -1176,9 +1375,13 @@ contains
 #ifdef MOIST_CAPPA
                 pkz(i,j,k) = exp( cappa(i,j,k)/(1.-cappa(i,j,k))*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
 #else
+#ifdef MULTI_GASES
+                pkz(i,j,k) = exp( k1k*virqd(q(i,j,k,:))/vicvqd(q(i,j,k,:))*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
+#else
                 pkz(i,j,k) = exp( k1k*log(rdg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)) )
 #endif
-                     dtmp = heat_source(i,j,k) / (cv_air*delp(i,j,k))
+#endif
+                dtmp = heat_source(i,j,k) / (cv_air*delp(i,j,k))
                 pt(i,j,k) = pt(i,j,k) + sign(min(delt, abs(dtmp)),dtmp) / pkz(i,j,k)
              enddo
           enddo
@@ -2036,13 +2239,20 @@ do 1000 j=jfirst,jlast
  end subroutine  mix_dp
 
 !>@brief The subroutine 'geopk' calculates geopotential and pressure to the kappa.
- subroutine geopk(ptop, pe, peln, delp, pk, gz, hs, pt, q_con, pkz, km, akap, CG, nested, computehalo, npx, npy, a2b_ord, bd)
+ subroutine geopk(ptop, pe, peln, delp, pk, gz, hs, pt,    &
+#ifdef MULTI_GASES
+                  kapad,  &
+#endif
+                  q_con, pkz, km, akap, CG, nested, computehalo, npx, npy, a2b_ord, bd)
 
    integer, intent(IN) :: km, npx, npy, a2b_ord
    real   , intent(IN) :: akap, ptop
    type(fv_grid_bounds_type), intent(IN) :: bd
    real   , intent(IN) :: hs(bd%isd:bd%ied,bd%jsd:bd%jed)
    real, intent(IN), dimension(bd%isd:bd%ied,bd%jsd:bd%jed,km):: pt, delp
+#ifdef MULTI_GASES
+   real, intent(IN) :: kapad(bd%isd:bd%ied,bd%jsd:bd%jed,km)
+#endif
    real, intent(IN), dimension(bd%isd:,bd%jsd:,1:):: q_con
    logical, intent(IN) :: CG, nested, computehalo
    ! !OUTPUT PARAMETERS
@@ -2057,6 +2267,12 @@ do 1000 j=jfirst,jlast
    real pkg(bd%isd:bd%ied,km+1)
    real p1d(bd%isd:bd%ied)
    real logp(bd%isd:bd%ied)
+#ifdef MULTI_GASES
+   real pkx (bd%isd:bd%ied,km)
+   real pkgx(bd%isd:bd%ied,km)
+   real akapx
+   integer n
+#endif
    integer i, j, k
    integer ifirst, ilast
    integer jfirst, jlast
@@ -2088,9 +2304,15 @@ do 1000 j=jfirst,jlast
       if (je == npy-1) jlast  = jed
    end if
 
+#ifdef MULTI_GASES
+!$OMP parallel do default(none) shared(jfirst,jlast,ifirst,ilast,pk,km,gz,hs,ptop,ptk,kapad, &
+!$OMP             js,je,is,ie,peln,peln1,pe,delp,akap,pt,CG,pkz,q_con) &
+!$OMP                          private(peg, pkx, pkgx, akapx, pkg, p1d, logp)
+#else
 !$OMP parallel do default(none) shared(jfirst,jlast,ifirst,ilast,pk,km,gz,hs,ptop,ptk, &
 !$OMP                                  js,je,is,ie,peln,peln1,pe,delp,akap,pt,CG,pkz,q_con) &
 !$OMP                          private(peg, pkg, p1d, logp)
+#endif
    do 2000 j=jfirst,jlast
 
       do i=ifirst, ilast
@@ -2139,8 +2361,22 @@ do 1000 j=jfirst,jlast
                enddo
             endif
          endif
-
       enddo
+
+#ifdef MULTI_GASES
+      do k=1,km
+         do i=ifirst, ilast
+            akapx = (kapad(i,j,k)-akap)/akap
+#ifdef USE_COND
+            pkgx(i,k) = (pkg(i,k+1)-pkg(i,k))/(akap*(log(peg(i,k+1))-log(peg(i,k))))
+            pkgx(i,k) = exp( akapx*log(pkgx(i,k)) )
+#else
+            pkx(i,k) = (pk(i,j,k+1)-pk(i,j,k))/(akap*(peln(i,k+1,j)-peln(i,k,j)))
+            pkx (i,k) = exp( akapx*log(pkx(i,k)) )
+#endif
+         enddo
+      enddo
+#endif
 
       ! Bottom up
       do k=km,1,-1
@@ -2149,9 +2385,17 @@ do 1000 j=jfirst,jlast
             gz(i,j,k) = gz(i,j,k+1) + pt(i,j,k)*(pk(i,j,k+1)-pk(i,j,k))
 #else
 #ifdef USE_COND
+#ifdef MULTI_GASES
+            gz(i,j,k) = gz(i,j,k+1) + cp_air*pkgx(i,k)*pt(i,j,k)*(pkg(i,k+1)-pkg(i,k))
+#else
             gz(i,j,k) = gz(i,j,k+1) + cp_air*pt(i,j,k)*(pkg(i,k+1)-pkg(i,k))
+#endif
+#else
+#ifdef MULTI_GASES
+            gz(i,j,k) = gz(i,j,k+1) + cp_air*pkx(i,k)*pt(i,j,k)*(pk(i,j,k+1)-pk(i,j,k))
 #else
             gz(i,j,k) = gz(i,j,k+1) + cp_air*pt(i,j,k)*(pk(i,j,k+1)-pk(i,j,k))
+#endif
 #endif
 #endif
          enddo
@@ -2161,6 +2405,10 @@ do 1000 j=jfirst,jlast
          do k=1,km
             do i=is,ie
                pkz(i,j,k) = (pk(i,j,k+1)-pk(i,j,k))/(akap*(peln(i,k+1,j)-peln(i,k,j)))
+#ifdef MULTI_GASES
+               akapx = kapad(i,j,k) / akap
+               pkz(i,j,k) = exp ( akapx * log( pkz(i,j,k) ) )
+#endif
             enddo
          enddo
       endif
@@ -2246,7 +2494,7 @@ do 1000 j=jfirst,jlast
                q(1,npy,k) =  q(1,je,k)
             endif
 
-            if(nt>0) call copy_corners(q(isd,jsd,k), npx, npy, 1, gridstruct%nested, bd, &
+            if(nt>0 .and. (.not. gridstruct%regional)) call copy_corners(q(isd,jsd,k), npx, npy, 1, gridstruct%nested, bd, &
                  gridstruct%sw_corner, gridstruct%se_corner, gridstruct%nw_corner, gridstruct%ne_corner )
             do j=js-nt,je+nt
                do i=is-nt,ie+1+nt
@@ -2258,7 +2506,7 @@ do 1000 j=jfirst,jlast
                enddo
             enddo
 
-            if(nt>0) call copy_corners(q(isd,jsd,k), npx, npy, 2, gridstruct%nested, bd, &
+            if(nt>0 .and. (.not. gridstruct%regional)) call copy_corners(q(isd,jsd,k), npx, npy, 2, gridstruct%nested, bd, &
                  gridstruct%sw_corner, gridstruct%se_corner, gridstruct%nw_corner, gridstruct%ne_corner)
             do j=js-nt,je+1+nt
                do i=is-nt,ie+nt

@@ -20,24 +20,25 @@ module load mvapich2/2.1a
 module load netcdf/4.4.0
 
 ##
-## use pre-compiled EMSF library for above compiler / MPI combination
+## NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
 ##
-setenv ESMF_DIR              /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a
-setenv ESMF_INC              /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/include
-setenv ESMF_BIN              /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/bin/binO/Linux.pgi.64.mvapich2.default
-setenv ESMF_LIB              /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/lib/libO/Linux.pgi.64.mvapich2.default
-setenv ESMF_MOD              /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/mod/modO/Linux.pgi.64.mvapich2.default
-setenv ESMFMKFILE            /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/lib/libO/Linux.pgi.64.mvapich2.default/esmf.mk
-prepend-path PATH            /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/bin/binO/Linux.pgi.64.mvapich2.default
-prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-7.1.0r/pgi-17.7/mvapich2-2.1a/lib/libO/Linux.pgi.64.mvapich2.default
+set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-pgi-20181105
+setenv NCEPLIBS_DIR ${NCEPLIBS_DIR}
+setenv NEMSIO_INC   ${NCEPLIBS_DIR}/include
+setenv NEMSIO_LIB   ${NCEPLIBS_DIR}/lib/libnemsio_d.a
+setenv BACIO_LIB4   ${NCEPLIBS_DIR}/lib/libbacio_4.a
+setenv SP_LIBd      ${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
+setenv W3EMC_LIBd   ${NCEPLIBS_DIR}/lib/libw3emc_d.a
+setenv W3NCO_LIBd   ${NCEPLIBS_DIR}/lib/libw3nco_d.a
 
 ##
-## NCEP libraries (download and build manually for the time being; https://github.com/climbfuji/NCEPlibs)
+## use pre-compiled EMSF library for above compiler / MPI combination
 ##
-set NCEPLIBS_DIR /scratch4/home/Dom.Heinzeller/NEMSfv3gfs_vlab_portability/NCEPlibs-pgi-20180420
-setenv NEMSIO_INC  ${NCEPLIBS_DIR}/include
-setenv NEMSIO_LIB  ${NCEPLIBS_DIR}/lib/libnemsio_d.a
-setenv BACIO_LIB4  ${NCEPLIBS_DIR}/lib/libbacio_4.a
-setenv SP_LIBd     ${NCEPLIBS_DIR}/lib/libsp_v2.0.2_d.a
-setenv W3EMC_LIBd  ${NCEPLIBS_DIR}/lib/libw3emc_d.a
-setenv W3NCO_LIBd  ${NCEPLIBS_DIR}/lib/libw3nco_d.a
+setenv ESMF_DIR              /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a
+setenv ESMF_INC              /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/include
+setenv ESMF_BIN              /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/bin
+setenv ESMF_LIB              /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/lib
+setenv ESMF_MOD              /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/mod
+setenv ESMFMKFILE            /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/lib/esmf.mk
+prepend-path PATH            /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/bin
+prepend-path LD_LIBRARY_PATH /scratch4/BMC/gmtb/esmf-8.0.0_bs21/pgi-17.7/mvapich2-2.1a/lib

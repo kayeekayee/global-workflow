@@ -6,8 +6,11 @@ module gocart_prep_mod
   use chem_config_mod, only : CHEM_OPT_GOCART,       &
                               CHEM_OPT_GOCART_RACM,  &
                               CHEM_OPT_RACM_SOA_VBS, &
-                              CHEM_OPT_MAX
+                              CHEM_OPT_MAX,          &
+                              FIRE_OPT_GBBEPx,       &
+                              FIRE_OPT_MODIS
   use chem_const_mod,  only : airmw, epsilc, rgasuniv, mwdry
+  use plume_data_mod
 
   implicit none
 
@@ -31,7 +34,8 @@ contains
                        t8w,p8w,exch_h,pbl,hfx,snowh,xlat,xlong,convfac,z_at_w,zmid,dz8w,vvel,&
                        rho_phy,smois,num_soil_layers,num_chem,num_moist,             &
                        emiss_abu,ebu_in,emiss_ab,num_ebu_in,num_emis_ant,            &
-                       num_emis_vol,kemit,call_gocart,plumestuff,                    &
+                       num_emis_vol,kemit,call_gocart,plumerise_flag,                &
+                       plumefrp,plumestuff,plumedist,                                &
                        mean_fct_agtf,mean_fct_agef,mean_fct_agsv,                    &
                        mean_fct_aggr,firesize_agtf,firesize_agef,                    &
                        firesize_agsv,firesize_aggr,                                  &
@@ -47,10 +51,12 @@ contains
     LOGICAL,      INTENT(IN) :: readrestart
     INTEGER,      INTENT(IN) :: chem_opt,chem_in_opt
     INTEGER,      INTENT(IN) :: ktau,nvl,nvlp1,ntra,ntrb,nvl_gocart
-    INTEGER,      INTENT(IN) :: num_ebu_in,num_soil_layers,num_chem,num_moist,julday,     &
-                                   num_emis_vol,num_emis_ant,ids,ide, jds,jde, kds,kde,      &
-                                   kemit,ims,ime, jms,jme, kms,kme,                          &
-                                   its,ite, jts,jte, kts,kte
+    INTEGER,      INTENT(IN) :: num_ebu_in,num_soil_layers,num_chem,num_moist, &
+                                num_emis_vol,num_emis_ant,kemit,plumerise_flag
+    INTEGER,      INTENT(IN) :: julday
+    INTEGER,      INTENT(IN) :: ids,ide, jds,jde, kds,kde, &
+                                ims,ime, jms,jme, kms,kme, &
+                                its,ite, jts,jte, kts,kte
     LOGICAL,      INTENT(IN) :: call_gocart
     REAL(CHEM_KIND_R4), INTENT(IN) :: g,rd,p1000,cp,dtstep,gmt
 
@@ -100,7 +106,7 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: backg_oh
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: backg_h2o2
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: backg_no3
-    real(CHEM_KIND_R4), dimension(nvl_gocart+1),     intent(in) :: p_gocart
+    real(CHEM_KIND_R4), dimension(nvl_gocart),       intent(in) :: p_gocart
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: ttday
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: tcosz
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: ero1
@@ -153,7 +159,9 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_emis_ant),   intent(in) :: emiss_ab
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_ebu_in),     intent(in) :: emiss_abu
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_ebu_in),     intent(out) :: ebu_in
+    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(in) :: plumefrp
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 8), intent(in) :: plumestuff
+    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_frp_plume), intent(out) :: plumedist
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(out) :: mean_fct_agtf
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(out) :: mean_fct_agef
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(out) :: mean_fct_agsv
@@ -192,16 +200,52 @@ contains
     real(CHEM_KIND_R4), parameter :: percen_mass_umbrel = 0.75
     real(CHEM_KIND_R4), parameter :: base_umbrel        = 0.25    ! fraction
     real(CHEM_KIND_R4), parameter :: base_umbrel2       = 1.0     ! evenly distribution
+    real(CHEM_KIND_R4), parameter :: frac_so2_ant       = 0.5_CHEM_KIND_R4     ! antropogenic so2 fraction
+    real(CHEM_KIND_R4), parameter :: frp2plume          = 1.e+06_CHEM_KIND_R4  ! FRP-to-plume conversion factor
+    real(CHEM_KIND_R4), parameter :: frpc               = 1.e+09_CHEM_KIND_R4  ! FRP conversion factor
+
     ! .. Intrinsic Functions ..
     INTRINSIC max, min, float
 
     ! -- begin
-    print *,'chem_prep: begin...'
     if (present(rc)) rc = CHEM_RC_SUCCESS
 
-    real_time=float(ktau)*dtstep/60.
+    ! -- initialize fire emissions
+    plumedist     = 0._CHEM_KIND_R4
+    mean_fct_agtf = 0._CHEM_KIND_R4
+    mean_fct_agef = 0._CHEM_KIND_R4
+    mean_fct_agsv = 0._CHEM_KIND_R4
+    mean_fct_aggr = 0._CHEM_KIND_R4
+    firesize_agtf = 0._CHEM_KIND_R4
+    firesize_agef = 0._CHEM_KIND_R4
+    firesize_agsv = 0._CHEM_KIND_R4
+    firesize_aggr = 0._CHEM_KIND_R4
 
-    so2_mass = 0.
+    ! -- initialize local arrays
+    so2_mass       = 0._CHEM_KIND_R4
+    vert_mass_dist = 0._CHEM_KIND_R4
+
+    ! -- sanity check for volcanic emissions
+    if (num_emis_vol > 0) then
+      select case (chem_opt)
+        case (316)
+          jmax = 10
+        case (317, 502)
+          jmax = 4
+        case (CHEM_OPT_GOCART)
+          jmax = 4
+        case default
+          jmax = num_emis_vol
+      end select
+      if (num_emis_vol /= jmax) then
+        call chem_rc_set(CHEM_RC_FAILURE, &
+          msg="Inconsistent volcanic ash settings", &
+          file=__FILE__, line=__LINE__, rc=rc)
+        return
+      end if
+    end if
+
+    real_time=float(ktau)*dtstep/60.
 
     if (ktau <= 1) then
       emis_ant = 0.
@@ -224,8 +268,7 @@ contains
         kp = k - kts + 1
         do i=its,ite
           ip = i - its + 1
-          dz8w(i,k,j)=(ph3d(ip,jp,kp+1)-ph3d(ip,jp,kp))/g
-          if (dz8w(i,k,j) < 0.) dz8w(i,k,j)=-dz8w(i,k,j)
+          dz8w(i,k,j)=abs(ph3d(ip,jp,kp+1)-ph3d(ip,jp,kp))/g
           z_at_w(i,k+1,j)=z_at_w(i,k,j)+dz8w(i,k,j)
         enddo
       enddo
@@ -298,7 +341,7 @@ contains
           emis_ant(i,k,j,p_e_bc)=emiss_ab(i,j,p_e_bc)
           emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc)
           emis_ant(i,k,j,p_e_sulf)=emiss_ab(i,j,p_e_sulf)
-          emis_ant(i,k,j,p_e_so2)=emiss_ab(i,j,p_e_so2)
+          emis_ant(i,k,j,p_e_so2)=frac_so2_ant * emiss_ab(i,j,p_e_so2)
           emis_ant(i,k,j,p_e_dms)= 0. !emiss_ab(j,p_e_dms)
           emis_ant(i,k,j,p_e_pm_25)=emiss_ab(i,j,p_e_pm_25)
           emis_ant(i,k,j,p_e_pm_10)=emiss_ab(i,j,p_e_pm_10)
@@ -346,21 +389,37 @@ contains
             ebu_in(i,j,p_ebu_in_ora2)=emiss_abu(i,j,p_e_ora2)
             ebu_in(i,j,p_ebu_in_nh3)=emiss_abu(i,j,p_e_nh3)
           endif
-          ebu_in(i,j,p_ebu_in_oc)=emiss_abu(i,j,p_e_oc)
-          ebu_in(i,j,p_ebu_in_bc)=emiss_abu(i,j,p_e_bc)
-          ebu_in(i,j,p_ebu_in_pm25)=emiss_abu(i,j,p_e_pm_25)
-          ebu_in(i,j,p_ebu_in_pm10)=emiss_abu(i,j,p_e_pm_10)
-          ebu_in(i,j,p_ebu_in_so2)=emiss_abu(i,j,p_e_so2)
-          ebu_in(i,j,p_ebu_in_dms)= 0.
 
-          mean_fct_agtf(i,j)=plumestuff(i,j,1)
-          mean_fct_agef(i,j)=plumestuff(i,j,2)
-          mean_fct_agsv(i,j)=plumestuff(i,j,3)
-          mean_fct_aggr(i,j)=plumestuff(i,j,4)
-          firesize_agtf(i,j)=plumestuff(i,j,5)
-          firesize_agef(i,j)=plumestuff(i,j,6)
-          firesize_agsv(i,j)=plumestuff(i,j,7)
-          firesize_aggr(i,j)=plumestuff(i,j,8)
+          ebu_in(i,j,p_ebu_in_pm10)=emiss_abu(i,j,p_e_pm_10)
+          ebu_in(i,j,p_ebu_in_dms)= 0._CHEM_KIND_R4
+
+          select case (plumerise_flag)
+            case (FIRE_OPT_MODIS)
+              ebu_in(i,j,p_ebu_in_oc)   = emiss_abu(i,j,p_e_oc)
+              ebu_in(i,j,p_ebu_in_bc)   = emiss_abu(i,j,p_e_bc)
+              ebu_in(i,j,p_ebu_in_pm25) = emiss_abu(i,j,p_e_pm_25)
+              ebu_in(i,j,p_ebu_in_so2)  = emiss_abu(i,j,p_e_so2)
+              mean_fct_agtf(i,j)=plumestuff(i,j,1)
+              mean_fct_agef(i,j)=plumestuff(i,j,2)
+              mean_fct_agsv(i,j)=plumestuff(i,j,3)
+              mean_fct_aggr(i,j)=plumestuff(i,j,4)
+              firesize_agtf(i,j)=plumestuff(i,j,5)
+              firesize_agef(i,j)=plumestuff(i,j,6)
+              firesize_agsv(i,j)=plumestuff(i,j,7)
+              firesize_aggr(i,j)=plumestuff(i,j,8)
+            case (FIRE_OPT_GBBEPx)
+              ebu_in(i,j,p_ebu_in_oc)   = frpc * emiss_abu(i,j,p_e_oc)
+              ebu_in(i,j,p_ebu_in_bc)   = frpc * emiss_abu(i,j,p_e_bc)
+              ebu_in(i,j,p_ebu_in_pm25) = frpc * emiss_abu(i,j,p_e_pm_25)
+              ebu_in(i,j,p_ebu_in_so2)  = frpc * emiss_abu(i,j,p_e_so2)
+              plumedist(i,j,p_frp_flam_frac) = flaming(catb(ivgtyp(i,j)))
+              plumedist(i,j,p_frp_mean     ) = frp2plume * plumefrp(i,j)
+              plumedist(i,j,p_frp_std      ) = 0.3_CHEM_KIND_R4   * frp2plume * plumefrp(i,j)
+              plumedist(i,j,p_frp_mean_size) = msize(ivgtyp(i,j)) * frp2plume * plumefrp(i,j)
+              plumedist(i,j,p_frp_std_size ) = 0.5_CHEM_KIND_R4 * plumedist(i,j,p_frp_mean_size)
+            case default
+              ! -- no further option available
+          end select
         enddo
       enddo
 
@@ -451,9 +510,6 @@ contains
       enddo
     enddo
 
-    print *,'chem_prep: chem array done'
-    print *,'chem_prep: readrestart  =',readrestart
-
     if (.NOT. readrestart) then
       if (chem_in_opt == 0 ) then
         if(ktau.le.1)then
@@ -477,8 +533,8 @@ contains
                   chem(i,k,j,p_bc2)=0.1e-3
                   chem(i,k,j,p_oc1)=0.1e-3
                   chem(i,k,j,p_oc2)=0.1e-3
-                  chem(i,k,j,p_p25)=1.
-                  chem(i,k,j,p_p10)=1.
+                  chem(i,k,j,p_p25)=0.1e-3 !lzhang
+                  chem(i,k,j,p_p10)=0.1e-3 !lzhang
                 endif !chem_opt >= 300 .and. chem_opt <  500
 
                 if ((chem_opt == CHEM_OPT_GOCART_RACM) .or. (chem_opt == CHEM_OPT_RACM_SOA_VBS)) then  !added o3 background !lzhang
@@ -529,8 +585,6 @@ contains
         
       endif !(chem_in_opt == 1 )
 
-      print *,'chem_prep: chem in done'
-      
 #if 0
       if (ktau<=1.and.chem_opt == CHEM_OPT_RACM_SOA_VBS) then
            call aerosols_soa_vbs_init(chem,convfac,z_at_w,           &
@@ -567,7 +621,7 @@ contains
      !   endif
 
 
-        chem(its:ite,kts:min(kte,kde-1),jts:jte,:)=max(chem(its:ite,kts:min(kte,kde-1),jts:jte,:),epsilc)
+        chem(its:ite,kts:kte,jts:jte,:)=max(chem(its:ite,kts:kte,jts:jte,:),epsilc)
 
        endif !ktau<=1.and.chem_opt=108
 #endif
@@ -590,7 +644,7 @@ if (first_init .and. chem_opt == CHEM_OPT_RACM_SOA_VBS) then
      end if
           call aerosols_soa_vbs_init_aercld_ptrs(                    &
                 num_chem, is_aerosol )
-chem(its:ite,kts:min(kte,kde-1),jts:jte,:)=max(chem(its:ite,kts:min(kte,kde-1),jts:jte,:),epsilc)
+chem(its:ite,kts:kte,jts:jte,:)=max(chem(its:ite,kts:kte,jts:jte,:),epsilc)
 endif
 #endif
 !
@@ -601,7 +655,6 @@ endif
     !
     !if (.NOT. readrestart) then
     if (call_gocart .and. (chem_opt == CHEM_OPT_GOCART))then
-      print *,'chem_prep: call_gocart enter...'
       do j=jts,jte
         do i=its,ite
           do k=kts,kte
@@ -630,11 +683,9 @@ endif
           enddo
         enddo
       enddo
-      print *,'chem_prep: call_gocart exit'
     endif   ! end gocart stuff
     !endif !restart
 
-    print *,'chem_prep: chem + emiss: starting ...'
 !   emis_ant=0.
     nv=1
     k=1
@@ -669,9 +720,7 @@ endif
         file=__FILE__, line=__LINE__, rc=rc)
       return
     endif
-    print *,'chem_prep: chem + emiss: done ...'
 
-    print *,'chem_prep: smois: start'
     do j=jts,jte
       jp = j - jts + 1
       do nv=1,num_soil_layers
@@ -681,7 +730,6 @@ endif
         enddo
       enddo
     enddo
-    print *,'chem_prep: smois: end'
 
     curr_secs=ktau*ifix(dtstep)
     curr_hours=curr_secs/3600
@@ -726,126 +774,131 @@ endif
       end if
     end do
 
-    print *,'chem_prep: stage 2'
 !     endif ! chem_opt = 502
 !
     ! -- real-time application, keeping eruption constant
 !
     if (ktau <= 2) then
       ! -- volcanic emissions
-      emis_vol(:,:,:,:)=0.
-!      if(curr_hours.eq.h1 .or. curr_hours.eq.h2 .or. curr_hours.eq.h3 &
-!         .or. curr_hours.eq.h4 .or. curr_hours.eq.h5 .or. curr_hours.eq.h6 .or. h1.gt.239)then
-!         .or. curr_hours.eq.0)then
-!         if(chem_opt == 316 .or. chem_opt == 317 .or. chem_opt == 502) then
+      if (num_emis_vol > 0) then
 
-      do j=jts,jte
-        do i=its,ite
-          if (emiss_ash_dt(i,j)     <= 0) cycle
-          if (emiss_ash_height(i,j) <= 0) cycle
-          ashz_above_vent=emiss_ash_height(i,j) +z_at_w(i,kts,j)
-          do k=kte-1,kts,-1
-            if (z_at_w(i,k,j) < ashz_above_vent)then
-              k_final=k+1
-              exit
-            endif !inner
-          enddo
-          do k=kte-1,kts,-1
-            if (z_at_w(i,k,j) < (1.-base_umbrel)*ashz_above_vent)then
-              k_initial=k
-              exit
-            endif !inner
-          enddo
-          vert_mass_dist=0.
-!              k_initial=int((k_final+k_initial)*0.5)
-             
-          ! -- parabolic vertical distribution between k_initial and k_final
-          kk4 = k_final-k_initial+2
-          do ko=1,kk4-1
-            kl=ko+k_initial-1
-            vert_mass_dist(kl) = 6.*percen_mass_umbrel* float(ko)/float(kk4)**2 * (1. - float(ko)/float(kk4))
-          enddo
-          if (sum(vert_mass_dist(kts:kte)) /= percen_mass_umbrel) then
-            x1= ( percen_mass_umbrel- sum(vert_mass_dist(kts:kte)) )/float(k_final-k_initial+1)
-            do ko=k_initial,k_final
-              vert_mass_dist(ko) = vert_mass_dist(ko)+ x1 !- values between 0 and 1.
+        emis_vol = 0._CHEM_KIND_R4
+  !      if(curr_hours.eq.h1 .or. curr_hours.eq.h2 .or. curr_hours.eq.h3 &
+  !         .or. curr_hours.eq.h4 .or. curr_hours.eq.h5 .or. curr_hours.eq.h6 .or. h1.gt.239)then
+  !         .or. curr_hours.eq.0)then
+  !         if(chem_opt == 316 .or. chem_opt == 317 .or. chem_opt == 502) then
+
+        do j=jts,jte
+          do i=its,ite
+            if (emiss_ash_dt(i,j)     <= 0) cycle
+            if (emiss_ash_height(i,j) <= 0) cycle
+            ashz_above_vent=emiss_ash_height(i,j) +z_at_w(i,kts,j)
+            do k=kte-1,kts,-1
+              if (z_at_w(i,k,j) < ashz_above_vent)then
+                k_final=k+1
+                exit
+              endif !inner
             enddo
-                   !pause
-          endif !inner
-          !k_final > 0 .and. k_initial >
-    
-          ! -- linear detrainment from vent to base of umbrella
-          do ko=1,k_initial-1
-            vert_mass_dist(ko)=float(ko)/float(k_initial-1)
-          enddo
-          x1=sum(vert_mass_dist(1:k_initial-1))
-    
-          do ko=1,k_initial-1
-            vert_mass_dist(ko)=(1.-percen_mass_umbrel)*vert_mass_dist(ko)/x1
-          enddo
-          if (chem_opt == 316 ) then 
-            do ko=1,k_final
-              emis_vol(i,ko,j,p_e_vash1)=.02*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash2)=.04*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash3)=.11*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash4)=.09*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash5)=.09*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash6)=.13*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash7)=.16*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash8)=.16*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash9)=.1*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash10)=.1*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+            do k=kte-1,kts,-1
+              if (z_at_w(i,k,j) < (1.-base_umbrel)*ashz_above_vent)then
+                k_initial=k
+                exit
+              endif !inner
             enddo
+            vert_mass_dist=0.
+  !              k_initial=int((k_final+k_initial)*0.5)
+
+            ! -- parabolic vertical distribution between k_initial and k_final
+            kk4 = k_final-k_initial+2
+            do ko=1,kk4-1
+              kl=ko+k_initial-1
+              vert_mass_dist(kl) = 6.*percen_mass_umbrel* float(ko)/float(kk4)**2 * (1. - float(ko)/float(kk4))
+            enddo
+            if (sum(vert_mass_dist(kts:kte)) /= percen_mass_umbrel) then
+              x1= ( percen_mass_umbrel- sum(vert_mass_dist(kts:kte)) )/float(k_final-k_initial+1)
+              do ko=k_initial,k_final
+                vert_mass_dist(ko) = vert_mass_dist(ko)+ x1 !- values between 0 and 1.
+              enddo
+                     !pause
+            endif !inner
+            !k_final > 0 .and. k_initial >
+
+            ! -- linear detrainment from vent to base of umbrella
+            do ko=1,k_initial-1
+              vert_mass_dist(ko)=float(ko)/float(k_initial-1)
+            enddo
+            x1=sum(vert_mass_dist(1:k_initial-1))
+
+            do ko=1,k_initial-1
+              vert_mass_dist(ko)=(1.-percen_mass_umbrel)*vert_mass_dist(ko)/x1
+            enddo
+
+            select case (chem_opt)
+#if 0
+              case (316)
+                do ko=1,k_final
+                  emis_vol(i,ko,j,p_e_vash1)=.02*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash2)=.04*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash3)=.11*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash4)=.09*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash5)=.09*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash6)=.13*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash7)=.16*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash8)=.16*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash9)=.1*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash10)=.1*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                enddo
+                do ko=k_final+1,kte
+                  emis_vol(i,ko,j,p_e_vash1)=0.
+                  emis_vol(i,ko,j,p_e_vash2)=0.
+                  emis_vol(i,ko,j,p_e_vash3)=0.
+                  emis_vol(i,ko,j,p_e_vash4)=0.
+                  emis_vol(i,ko,j,p_e_vash5)=0.
+                  emis_vol(i,ko,j,p_e_vash6)=0.
+                  emis_vol(i,ko,j,p_e_vash7)=0.
+                  emis_vol(i,ko,j,p_e_vash8)=0.
+                  emis_vol(i,ko,j,p_e_vash9)=0.
+                  emis_vol(i,ko,j,p_e_vash10)=0.
+                enddo
+              case (317, 502)
+                ! -- reduced vocanic ash transport
+                do ko=1,k_final
+                  emis_vol(i,ko,j,p_e_vash1)=.11*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash2)=.08*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash3)=.05*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash4)=.035*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                enddo
+#endif
+              case (CHEM_OPT_GOCART)
+                ! -- if applied to gocart we only need finest ash bins, we use the coarse one for so2
+                do ko=1,k_final
+                  emis_vol(i,ko,j,p_e_vash1)=vert_mass_dist(ko)*so2_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash2)=.08*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash3)=.05*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                  emis_vol(i,ko,j,p_e_vash4)=.035*vert_mass_dist(ko)*emiss_ash_mass(i,j)
+                enddo
+              case default
+                ! -- no default action
+            end select
+
             do ko=k_final+1,kte
               emis_vol(i,ko,j,p_e_vash1)=0.
               emis_vol(i,ko,j,p_e_vash2)=0.
               emis_vol(i,ko,j,p_e_vash3)=0.
               emis_vol(i,ko,j,p_e_vash4)=0.
-              emis_vol(i,ko,j,p_e_vash5)=0.
-              emis_vol(i,ko,j,p_e_vash6)=0.
-              emis_vol(i,ko,j,p_e_vash7)=0.
-              emis_vol(i,ko,j,p_e_vash8)=0.
-              emis_vol(i,ko,j,p_e_vash9)=0.
-              emis_vol(i,ko,j,p_e_vash10)=0.
             enddo
-          elseif (chem_opt == 317 .or. chem_opt == 502) then
 
-            ! -- reduced vocanic ash transport
-            do ko=1,k_final
-              emis_vol(i,ko,j,p_e_vash1)=.11*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash2)=.08*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash3)=.05*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash4)=.035*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-            enddo
-          elseif (chem_opt == CHEM_OPT_GOCART) then
-
-            ! -- if applied to gocart we only need finest ash bins, we use the coarse one for so2
-            do ko=1,k_final
-              emis_vol(i,ko,j,p_e_vash1)=vert_mass_dist(ko)*so2_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash2)=.08*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash3)=.05*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-              emis_vol(i,ko,j,p_e_vash4)=.035*vert_mass_dist(ko)*emiss_ash_mass(i,j)
-            enddo
-          endif !chem_opt==316 or 317,300,502
- 
-          do ko=k_final+1,kte
-            emis_vol(i,ko,j,p_e_vash1)=0.
-            emis_vol(i,ko,j,p_e_vash2)=0.
-            emis_vol(i,ko,j,p_e_vash3)=0.
-            emis_vol(i,ko,j,p_e_vash4)=0.
           enddo
         enddo
-      enddo
+      end if
 !      endif ! chem_opt == 316 .or. chem_opt == 317 .or. chem_opt == 502
     endif ! curr_mins 
-    print *,'chem_prep: stage 3'
 
     ! next is done to scale background oh and no3 in dependence on average zenith angle and day/night for no3
     ! this is done since background values are only available as average/month. It will not be necessary if other
     ! chemistry packages are used that provide oh,no3,h2o2
 
     !if(ktau.le.1 .or.readrestart)then
-    print *,'-- chem_opt = ',chem_opt
     if ((chem_opt == CHEM_OPT_RACM_SOA_VBS) .or. (chem_opt >= CHEM_OPT_GOCART .and. chem_opt < CHEM_OPT_MAX)) then
       !ndystep=86400/ifix(dtstepc)
       ndystep=86400/ifix(dtstep)
@@ -871,69 +924,85 @@ endif
     endif !chem_opt >= 300 .and. chem_opt <  500
          !endif ! ktau
 
-    print *,'chem_prep: stage 4'
-#if 0
-    if (chem_opt == 316) then
-      do j = jts, jte
-        do k = kts, kte-2
-          do i = its, ite
-            if (emiss_ash_dt(i,j) <= 0.) cycle
-            factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
-            chem(i,k,j,p_vash_1)=chem(i,k,j,p_vash_1)+emis_vol(i,k,j,p_e_vash1)*factor2
-            chem(i,k,j,p_vash_2)=chem(i,k,j,p_vash_2)+emis_vol(i,k,j,p_e_vash2)*factor2
-            chem(i,k,j,p_vash_3)=chem(i,k,j,p_vash_3)+emis_vol(i,k,j,p_e_vash3)*factor2
-            chem(i,k,j,p_vash_4)=chem(i,k,j,p_vash_4)+emis_vol(i,k,j,p_e_vash4)*factor2
-            chem(i,k,j,p_vash_5)=chem(i,k,j,p_vash_5)+emis_vol(i,k,j,p_e_vash5)*factor2
-            chem(i,k,j,p_vash_6)=chem(i,k,j,p_vash_6)+emis_vol(i,k,j,p_e_vash6)*factor2
-            chem(i,k,j,p_vash_7)=chem(i,k,j,p_vash_7)+emis_vol(i,k,j,p_e_vash7)*factor2
-            chem(i,k,j,p_vash_8)=chem(i,k,j,p_vash_8)+emis_vol(i,k,j,p_e_vash8)*factor2
-            chem(i,k,j,p_vash_9)=chem(i,k,j,p_vash_9)+emis_vol(i,k,j,p_e_vash9)*factor2
-            chem(i,k,j,p_vash_10)=chem(i,k,j,p_vash_10)+emis_vol(i,k,j,p_e_vash10)*factor2
-          enddo
-        enddo
-      enddo
-    endif
+    ! -- add volcanic emissions
+    if (num_emis_vol > 0) then
 
-    if ((chem_opt == 317) .or. (chem_opt == 502))  then
-      do j=jts,jte
-        do k=kts,kte-2
-          do i=its,ite
-            if (emiss_ash_dt(i,j) <= 0.) cycle
-            factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
-            chem(i,k,j,p_vash_1)=chem(i,k,j,p_vash_1)+emis_vol(i,k,j,p_e_vash1)*factor2
-            chem(i,k,j,p_vash_2)=chem(i,k,j,p_vash_2)+emis_vol(i,k,j,p_e_vash2)*factor2
-            chem(i,k,j,p_vash_3)=chem(i,k,j,p_vash_3)+emis_vol(i,k,j,p_e_vash3)*factor2
-            chem(i,k,j,p_vash_4)=chem(i,k,j,p_vash_4)+emis_vol(i,k,j,p_e_vash4)*factor2
+      select case (chem_opt)
+#if 0
+        case (316)
+          if (num_emis_vol /= 10) then
+            call chem_rc_set(CHEM_RC_FAILURE, msg="num_emis_vol must be 10", &
+              file=__FILE__, line=__LINE__, rc=rc)
+            return
+          end if
+          do j = jts, jte
+            do k = kts, kte 
+              do i = its, ite
+                if (emiss_ash_dt(i,j) <= 0.) cycle
+                factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
+                chem(i,k,j,p_vash_1)=chem(i,k,j,p_vash_1)+emis_vol(i,k,j,p_e_vash1)*factor2
+                chem(i,k,j,p_vash_2)=chem(i,k,j,p_vash_2)+emis_vol(i,k,j,p_e_vash2)*factor2
+                chem(i,k,j,p_vash_3)=chem(i,k,j,p_vash_3)+emis_vol(i,k,j,p_e_vash3)*factor2
+                chem(i,k,j,p_vash_4)=chem(i,k,j,p_vash_4)+emis_vol(i,k,j,p_e_vash4)*factor2
+                chem(i,k,j,p_vash_5)=chem(i,k,j,p_vash_5)+emis_vol(i,k,j,p_e_vash5)*factor2
+                chem(i,k,j,p_vash_6)=chem(i,k,j,p_vash_6)+emis_vol(i,k,j,p_e_vash6)*factor2
+                chem(i,k,j,p_vash_7)=chem(i,k,j,p_vash_7)+emis_vol(i,k,j,p_e_vash7)*factor2
+                chem(i,k,j,p_vash_8)=chem(i,k,j,p_vash_8)+emis_vol(i,k,j,p_e_vash8)*factor2
+                chem(i,k,j,p_vash_9)=chem(i,k,j,p_vash_9)+emis_vol(i,k,j,p_e_vash9)*factor2
+                chem(i,k,j,p_vash_10)=chem(i,k,j,p_vash_10)+emis_vol(i,k,j,p_e_vash10)*factor2
+              enddo
+            enddo
           enddo
-        enddo
-      enddo
-    endif
+        case (317, 502)
+          if (num_emis_vol /= 4) then
+            call chem_rc_set(CHEM_RC_FAILURE, msg="num_emis_vol must be 4", &
+              file=__FILE__, line=__LINE__, rc=rc)
+            return
+          end if
+          do j=jts,jte
+            do k=kts,kte 
+              do i=its,ite
+                if (emiss_ash_dt(i,j) <= 0.) cycle
+                factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
+                chem(i,k,j,p_vash_1)=chem(i,k,j,p_vash_1)+emis_vol(i,k,j,p_e_vash1)*factor2
+                chem(i,k,j,p_vash_2)=chem(i,k,j,p_vash_2)+emis_vol(i,k,j,p_e_vash2)*factor2
+                chem(i,k,j,p_vash_3)=chem(i,k,j,p_vash_3)+emis_vol(i,k,j,p_e_vash3)*factor2
+                chem(i,k,j,p_vash_4)=chem(i,k,j,p_vash_4)+emis_vol(i,k,j,p_e_vash4)*factor2
+              enddo
+            enddo
+          enddo
 #endif
-
-    if(chem_opt == CHEM_OPT_GOCART)  then
-      ! -- for gocart only lump ash into p25 and p10
-      do j=jts,jte
-        do k=kts,kte-2
-          do i=its,ite
-            if (emiss_ash_dt(i,j) <= 0.) cycle
-            factor=4.828e-4*dtstep*rri(i,k,j)/(60.*dz8w(i,k,j))
-            factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
-            chem(i,k,j,p_p25)=chem(i,k,j,p_p25)                          &
-                             +emis_vol(i,k,j,p_e_vash4)*factor2   
-            chem(i,k,j,p_so2)=chem(i,k,j,p_so2)                          &
-                             +emis_vol(i,k,j,p_e_vash1)*factor   
-            chem(i,k,j,p_p10)=chem(i,k,j,p_p10)                          &
-!                         +.5* emis_vol(i,k,j,p_e_vash4)*factor2      &  
-                             +1.* emis_vol(i,k,j,p_e_vash3)*factor2      &  
-                             +.5* emis_vol(i,k,j,p_e_vash2)*factor2
+        case (CHEM_OPT_GOCART)
+          ! -- for gocart only lump ash into p25 and p10
+          if (num_emis_vol /= 4) then
+            call chem_rc_set(CHEM_RC_FAILURE, msg="num_emis_vol must be 4", &
+              file=__FILE__, line=__LINE__, rc=rc)
+            return
+          end if
+          do j=jts,jte
+            !do k=kts,kte-2
+            do k=kts,kte
+              do i=its,ite
+                if (emiss_ash_dt(i,j) <= 0.) cycle
+                factor=4.828e-4*dtstep*rri(i,k,j)/(60.*dz8w(i,k,j))
+                factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
+                chem(i,k,j,p_p25)=chem(i,k,j,p_p25)                          &
+                                 +emis_vol(i,k,j,p_e_vash4)*factor2
+                chem(i,k,j,p_so2)=chem(i,k,j,p_so2)                          &
+                                 +emis_vol(i,k,j,p_e_vash1)*factor
+                chem(i,k,j,p_p10)=chem(i,k,j,p_p10)                          &
+  !                              +.5* emis_vol(i,k,j,p_e_vash4)*factor2      &
+                                 +1.* emis_vol(i,k,j,p_e_vash3)*factor2      &
+                                 +.5* emis_vol(i,k,j,p_e_vash2)*factor2
+              enddo
+            enddo
           enddo
-        enddo
-      enddo
-    endif
-!
-#if 0
-    print *,'chem_prep: stage 5'
+        case default
+          ! -- volcanic emissions not included by default
+      end select
+    end if
 
+#if 0
     ! -- option 501 was only used for cesium ensemble - Japan 2010
     if (chem_opt == 501) then
       ! -- explosive tr emissions
@@ -984,7 +1053,7 @@ endif
               emis_ant(i,ko,j,p_e_tr2)=1./float(k_final)*emiss_tr_mass(j)
             enddo
             if (emiss_tr_dt(j) <= 0.) cycle
-            do k=kts,kte-2
+            do k=kts,kte 
               factor2=dtstep*rri(i,k,j)/dz8w(i,k,j)
               chem(i,k,j,p_tr2)=chem(i,k,j,p_tr2)+emis_ant(i,k,j,p_e_tr2)*factor2
               if(real_time > 360.) chem(i,k,j,p_tr1)=chem(i,k,j,p_tr1)+emis_ant(i,k,j,p_e_tr2)*factor2
@@ -993,7 +1062,6 @@ endif
         enddo       
       endif       
 #endif
-      print *,'chem_prep: stage end'
 
   end subroutine gocart_prep
 

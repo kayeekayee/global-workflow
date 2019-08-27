@@ -30,7 +30,7 @@ module GFS_diagnostics
     integer :: id
     integer :: axes
     logical :: time_avg
-    logical :: full_time_avg                       !no bucket
+    character(len=64)    :: time_avg_kind
     character(len=64)    :: mod_name
     character(len=64)    :: name
     character(len=128)   :: desc
@@ -68,7 +68,7 @@ module GFS_diagnostics
 !     ExtDiag%id                   [integer ]   switch to turn on/off variable output         !
 !     ExtDiag%axes                 [integer ]   dimensionality of variable (2 or 3)           !
 !     ExtDiag%time_avg             [logical ]   bucketed accumulation time average            !
-!     ExtDiag%full_time_avg        [logical ]   accumulation time average (no bucket)         !
+!     ExtDiag%time_avg_kind        [char*64 ]   time average period                           !
 !     ExtDiag%mod_name             [char*64 ]   classification of the variable                !
 !     ExtDiag%name                 [char*64 ]   output name for variable                      !
 !     ExtDiag%desc                 [char*128]   long description of field                     !
@@ -98,7 +98,7 @@ module GFS_diagnostics
     type(GFS_init_type),          intent(in)    :: Init_parm
 
 !--- local variables
-    integer :: idx, num, nb, nblks, NFXR
+    integer :: idt, idx, num, nb, nblks, NFXR
     character(len=2) :: xtra
     real(kind=kind_phys), parameter :: cn_one = 1._kind_phys
     real(kind=kind_phys), parameter :: cn_100 = 100._kind_phys
@@ -112,7 +112,7 @@ module GFS_diagnostics
     ExtDiag(:)%axes = -99
     ExtDiag(:)%cnvfac = cn_one
     ExtDiag(:)%time_avg = .FALSE.
-    ExtDiag(:)%full_time_avg = .FALSE.
+    ExtDiag(:)%time_avg_kind = ''
     ExtDiag(:)%mask = ''
     ExtDiag(:)%name = ''
     ExtDiag(:)%intpl_method = 'nearest_stod'
@@ -194,6 +194,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -220,6 +221,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -245,6 +247,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -258,6 +261,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -271,6 +275,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -284,6 +289,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -297,6 +303,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -310,6 +317,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -323,6 +331,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_lw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -336,6 +345,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -349,6 +359,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_lw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -362,6 +373,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -375,6 +387,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -388,6 +401,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_lw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -403,6 +417,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -418,6 +433,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_sw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -432,6 +448,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_lw'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -447,6 +464,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_100
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%fluxr(:,17)
@@ -460,6 +478,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_100
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%fluxr(:,18)
@@ -513,6 +532,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_100
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%fluxr(:,5)
@@ -525,6 +545,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -539,6 +560,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -553,6 +575,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -568,6 +591,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_100
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%fluxr(:,6)
@@ -580,6 +604,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -594,6 +619,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -608,6 +634,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -623,6 +650,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_100
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%fluxr(:,7)
@@ -635,6 +663,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -649,6 +678,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -663,6 +693,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'rad_swlw_min'
     ExtDiag(idx)%mask = "cldmask_ratio"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -861,6 +892,7 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%time_avg = .TRUE.
+    ExtDiag(idx)%cnvfac = cn_100
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%snowca(:)
@@ -968,7 +1000,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_th
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%full_time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'full'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -997,11 +1029,11 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_one
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%mask = "land_ice_only"
+!    ExtDiag(idx)%mask = "land_ice_only"
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2  => IntDiag(nb)%gflux(:)
-      ExtDiag(idx)%data(nb)%var21 => Sfcprop(nb)%slmsk(:)
+!      ExtDiag(idx)%data(nb)%var21 => Sfcprop(nb)%slmsk(:)
     enddo
 
     idx = idx + 1
@@ -1046,6 +1078,7 @@ module GFS_diagnostics
     ExtDiag(idx)%desc = 'total water runoff'
     ExtDiag(idx)%unit = 'kg/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%cnvfac = cn_th
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%runoff(:)
@@ -1123,7 +1156,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_th
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%full_time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'full'
     ExtDiag(idx)%intpl_method = 'bilinear'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -1214,6 +1247,88 @@ module GFS_diagnostics
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%wind10mmax(:)
     enddo
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'u10max'
+    ExtDiag(idx)%desc = 'hourly maximum (magnitude) u-wind'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'vector_bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%u10max(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'v10max'
+    ExtDiag(idx)%desc = 'hourly maximum (magnitude) v-wind'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'vector_bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%v10max(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'spd10max'
+    ExtDiag(idx)%desc = 'hourly maximum wind speed'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%spd10max(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 't02max'
+    ExtDiag(idx)%desc = 'max hourly 2m Temperature'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%t02max(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 't02min'
+    ExtDiag(idx)%desc = 'min hourly 2m Temperature'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%t02min(:)
+    enddo
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'rh02max'
+    ExtDiag(idx)%desc = 'max hourly 2m RH'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%rh02max(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'rh02min'
+    ExtDiag(idx)%desc = 'min hourly 2m RH'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    ExtDiag(idx)%intpl_method = 'bilinear'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%rh02min(:)
+    enddo
 
     idx = idx + 1
     ExtDiag(idx)%axes = 2
@@ -1278,7 +1393,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_th
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%full_time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'full'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%totice(:)
@@ -1305,7 +1420,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_th
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%full_time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'full'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%totsnw(:)
@@ -1332,7 +1447,7 @@ module GFS_diagnostics
     ExtDiag(idx)%mod_name = 'gfs_phys'
     ExtDiag(idx)%cnvfac = cn_th
     ExtDiag(idx)%time_avg = .TRUE.
-    ExtDiag(idx)%full_time_avg = .TRUE.
+    ExtDiag(idx)%time_avg_kind = 'full'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%totgrp(:)
@@ -1608,7 +1723,7 @@ module GFS_diagnostics
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'gfluxi'
     ExtDiag(idx)%desc = 'instantaneous surface ground heat flux'
-    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%unit = 'W/m**2'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -1655,9 +1770,19 @@ module GFS_diagnostics
     ExtDiag(idx)%unit = 'XXX'
     ExtDiag(idx)%mod_name = 'gfs_phys'
     allocate (ExtDiag(idx)%data(nblks))
-    do nb = 1,nblks
-      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%wet1(:)
-    enddo
+#ifdef CCPP
+    if (Model%lsm==Model%lsm_ruc) then
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%wetness(:)
+      enddo
+    else
+#endif
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%wet1(:)
+      enddo
+#ifdef CCPP
+    endif
+#endif
 
     idx = idx + 1
     ExtDiag(idx)%axes = 2
@@ -1785,6 +1910,27 @@ module GFS_diagnostics
     enddo
 
     idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'refdmax'
+    ExtDiag(idx)%desc = 'max hourly 1-km agl reflectivity'
+    ExtDiag(idx)%unit = 'dBZ'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%refdmax(:)
+    enddo
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'refdmax263k'
+    ExtDiag(idx)%desc = 'max hourly -10C reflectivity'
+    ExtDiag(idx)%unit = 'dBZ'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%refdmax263k(:)
+    enddo
+
+    idx = idx + 1
     ExtDiag(idx)%axes = 3
     ExtDiag(idx)%name = 'sppt_wts'
     ExtDiag(idx)%desc = 'perturbation velocity'
@@ -1805,18 +1951,456 @@ module GFS_diagnostics
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%shum_wts(:,:)
     enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_out'
+    ExtDiag(idx)%desc = 'Cellular Automata'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_out(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_deep'
+    ExtDiag(idx)%desc = 'CA deep conv'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_deep(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_turb'
+    ExtDiag(idx)%desc = 'CA turbulence'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_turb(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_shal'
+    ExtDiag(idx)%desc = 'CA shallow conv'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_shal(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_rad'
+    ExtDiag(idx)%desc = 'CA radiation'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_rad(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'ca_micro'
+    ExtDiag(idx)%desc = 'CA microphys'
+    ExtDiag(idx)%unit = '%'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ca_micro(:)
+    enddo
+
+  if (Model%ldiag_ugwp) THEN
+!
+! VAY-2018: Momentum and Temp-re tendencies
+! du3dt_pbl dv3dt_pbl  dT3dt_pbl
+!
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'zmtb'
+    ExtDiag(idx)%desc = 'height of dividing streamline'
+    ExtDiag(idx)%unit = 'm'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%zmtb(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'zogw'
+    ExtDiag(idx)%desc = 'height of OGW-launch'
+    ExtDiag(idx)%unit = 'm'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%zogw(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'zlwb'
+    ExtDiag(idx)%desc = 'height of LWB-level'
+    ExtDiag(idx)%unit = 'm'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%zlwb(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'tau_ogw'
+    ExtDiag(idx)%desc = ' OGW vertical MF at launch level'
+    ExtDiag(idx)%unit = 'N/m2'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%tau_ogw(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'tau_mtb'
+    ExtDiag(idx)%desc = ' ORO-MTB integrated flux from surface'
+    ExtDiag(idx)%unit = 'N/m2'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%tau_mtb(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'tau_tofd'
+    ExtDiag(idx)%desc = ' ORO-TOFD integrated flux from surface'
+    ExtDiag(idx)%unit = 'N/m2'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%tau_tofd(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 2
+    ExtDiag(idx)%name = 'tau_ngw'
+    ExtDiag(idx)%desc = ' NGW momentum flux at launch level '
+    ExtDiag(idx)%unit = 'N/m2'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%tau_ngw(:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_pbl_ugwp'
+    ExtDiag(idx)%desc = 'U-tendency due to PBL physics'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt_pbl(:,:)
+    enddo
+!    
+! dv3dt_pbl     
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dv3dt_pbl_ugwp'
+    ExtDiag(idx)%desc = 'V-tendency due to PBL physics'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dv3dt_pbl(:,:)
+    enddo
+!    
+! dt3dt_pbl     
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_pbl_ugwp'
+    ExtDiag(idx)%desc = 'T-tendency due to PBL physics'
+    ExtDiag(idx)%unit = 'K/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt_pbl(:,:)
+    enddo
+!
+! uav_ugwp 
+! 
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'uav_ugwp'
+    ExtDiag(idx)%desc = 'U-daily mean for UGWP'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%uav_ugwp(:,:)
+    enddo
+!
+! tav_ugwp 
+! 
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'tav_ugwp'
+    ExtDiag(idx)%desc = 'T-daily mean for UGWP'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%tav_ugwp(:,:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_ogw'
+    ExtDiag(idx)%desc = 'axz_oro averaged E-W OROGW-tendency'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt_ogw(:,:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_ngw'
+    ExtDiag(idx)%desc = 'axz_oro averaged E-W GWALL-tendency'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt_ngw(:,:)
+    enddo
+!
+!    
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_mtb'
+    ExtDiag(idx)%desc = 'axz_oro averaged E-W MTB-tendency'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt_mtb(:,:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_tms'
+    ExtDiag(idx)%desc = 'axz_oro averaged E-W TMS-tendency'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt_tms(:,:)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dudt_tot'
+    ExtDiag(idx)%desc = ' dudt_tot averaged E-W dycore-tendency'
+    ExtDiag(idx)%unit = 'm/s/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dudt_tot(:,:)
+    enddo
+
+     idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dtdt_tot'
+    ExtDiag(idx)%desc = ' dtdt_tot averaged Temp dycore-tendency'
+    ExtDiag(idx)%unit = 'Ks'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dtdt_tot(:,:)
+    enddo
+   ENDIF
+
+
+
 !    if(mpp_pe()==mpp_root_pe())print *,'in gfdl_diag_register,af shum_wts,idx=',idx
 
 !--- three-dimensional variables that need to be handled special when writing 
-!rab    do num = 1,6
-!rab      write (xtra,'(I1)') num 
-!rab      idx = idx + 1
-!rab      ExtDiag(idx)%axes = 3
-!rab      ExtDiag(idx)%name = 'dt3dt_'//trim(xtra)
-!rab      ExtDiag(idx)%desc = 'temperature change due to physics '//trim(xtra)//''
-!rab      ExtDiag(idx)%unit = 'XXX'
-!rab      ExtDiag(idx)%mod_name = 'gfs_phys'
-!rab    enddo
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_lw'
+    ExtDiag(idx)%desc = 'temperature change due to long wave radiation'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,1)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_sw'
+    ExtDiag(idx)%desc = 'temperature change due to short wave radiation'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,2)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_pbl'
+    ExtDiag(idx)%desc = 'temperature change due to pbl'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,3)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_deepcnv'
+    ExtDiag(idx)%desc = 'temperature change due to deep convection'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,4)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_shlwcnv'
+    ExtDiag(idx)%desc = 'temperature change due to shallow convection'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,5)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_microphy'
+    ExtDiag(idx)%desc = 'temperature change due to micro-physics'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,6)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dt3dt_orogwd'
+    ExtDiag(idx)%desc = 'temperature change due to orographic gravity wave drag'
+    ExtDiag(idx)%unit = 'K'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dt3dt(:,:,7)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_pbl'
+    ExtDiag(idx)%desc = 'u momentum change due to PBL'
+    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt(:,:,1)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dv3dt_pbl'
+    ExtDiag(idx)%desc = 'v momentum change due to PBL'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dv3dt(:,:,1)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_orogwd'
+    ExtDiag(idx)%desc = 'u momentum change due to orographic gravity wave drag'
+    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt(:,:,2)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dv3dt_orogwd'
+    ExtDiag(idx)%desc = 'v momentum change due to orographic gravity wave drag'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dv3dt(:,:,2)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_deepcnv'
+    ExtDiag(idx)%desc = 'u momentum change due to deep convection'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt(:,:,3)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dv3dt_deepcnv'
+    ExtDiag(idx)%desc = 'v momentum change due to deep convection'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dv3dt(:,:,3)
+    enddo
+
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'du3dt_cnvgwd'
+    ExtDiag(idx)%desc = 'u momentum change due to convective gravity wave drag'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%du3dt(:,:,4)
+    enddo
+
+    idx = idx + 1
+    ExtDiag(idx)%axes = 3
+    ExtDiag(idx)%name = 'dv3dt_cnvgwd'
+    ExtDiag(idx)%desc = 'v momentum change due to convective gravity wave drag'
+    ExtDiag(idx)%unit = 'm/s'
+    ExtDiag(idx)%mod_name = 'gfs_phys'
+    allocate (ExtDiag(idx)%data(nblks))
+    do nb = 1,nblks
+      ExtDiag(idx)%data(nb)%var3 => IntDiag(nb)%dv3dt(:,:,4)
+    enddo
+
+
 !rab
 !rab    do num = 1,5+Mdl_parms%pl_coeff
 !rab      write (xtra,'(I1)') num 
@@ -1824,26 +2408,6 @@ module GFS_diagnostics
 !rab      ExtDiag(idx)%axes = 3
 !rab      ExtDiag(idx)%name = 'dq3dt_'//trim(xtra)
 !rab      ExtDiag(idx)%desc = 'moisture change due to physics '//trim(xtra)//''
-!rab      ExtDiag(idx)%unit = 'XXX'
-!rab      ExtDiag(idx)%mod_name = 'gfs_phys'
-!rab    enddo
-!rab
-!rab    do num = 1,4
-!rab      write (xtra,'(I1)') num 
-!rab      idx = idx + 1
-!rab      ExtDiag(idx)%axes = 3
-!rab      ExtDiag(idx)%name = 'du3dt_'//trim(xtra)
-!rab      ExtDiag(idx)%desc = 'u momentum change due to physics '//trim(xtra)//''
-!rab      ExtDiag(idx)%unit = 'XXX'
-!rab      ExtDiag(idx)%mod_name = 'gfs_phys'
-!rab    enddo
-!rab
-!rab    do num = 1,4
-!rab      write (xtra,'(I1)') num 
-!rab      idx = idx + 1
-!rab      ExtDiag(idx)%axes = 3
-!rab      ExtDiag(idx)%name = 'dv3dt_'//trim(xtra)
-!rab      ExtDiag(idx)%desc = 'v momentum change due to physics '//trim(xtra)//''
 !rab      ExtDiag(idx)%unit = 'XXX'
 !rab      ExtDiag(idx)%mod_name = 'gfs_phys'
 !rab    enddo
@@ -1861,7 +2425,7 @@ module GFS_diagnostics
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'alnsf'
     ExtDiag(idx)%desc = 'mean nir albedo with strong cosz dependency'
-    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -1872,7 +2436,7 @@ module GFS_diagnostics
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'alnwf'
     ExtDiag(idx)%desc = 'mean nir albedo with weak cosz dependency'
-    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -1883,7 +2447,7 @@ module GFS_diagnostics
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'alvsf'
     ExtDiag(idx)%desc = 'mean vis albedo with strong cosz dependency'
-    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -1894,7 +2458,7 @@ module GFS_diagnostics
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'alvwf'
     ExtDiag(idx)%desc = 'mean vis albedo with weak cosz dependency'
-    ExtDiag(idx)%unit = 'XXX'
+    ExtDiag(idx)%unit = '%'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
@@ -2014,7 +2578,7 @@ module GFS_diagnostics
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'snoalb'
-    ExtDiag(idx)%desc = 'maximum snow albedo in fraction (salbd?? in gfs data)'
+    ExtDiag(idx)%desc = 'maximum snow albedo in fraction'
     ExtDiag(idx)%unit = 'XXX'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
@@ -2055,6 +2619,32 @@ module GFS_diagnostics
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%snowd(:)
     enddo
+
+#ifdef CCPP
+    if (Model%lsm == Model%lsm_ruc) then
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'snowfall_acc'
+      ExtDiag(idx)%desc = 'total accumulated frozen precipitation'
+      ExtDiag(idx)%unit = 'kg m-2'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%snowfallac(:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'swe_snowfall_acc'
+      ExtDiag(idx)%desc = 'accumulated water equivalent of frozen precipitation'
+      ExtDiag(idx)%unit = 'kg m-2'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%acsnow(:)
+      enddo
+    endif
+#endif
 
     idx = idx + 1
     ExtDiag(idx)%axes = 2
@@ -2216,8 +2806,47 @@ module GFS_diagnostics
       ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%vfrac(:)
     enddo
 
+#ifdef CCPP
+  if (Model%lsm == Model%lsm_ruc) then
+    do num = 1,Model%lsoil_lsm
+      write (xtra,'(i1)') num
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'slc_'//trim(xtra)
+      ExtDiag(idx)%desc = 'liquid soil moisture ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+      ExtDiag(idx)%unit = 'm**3/m**3'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%sh2o(:,num)
+      enddo
+    enddo
+  else
+    do num = 1,Model%lsoil_lsm
+      write (xtra,'(i1)') num
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'slc_'//trim(xtra)
+! DH* Can't use correct unit/description because of the way
+! bit for bit tests are conducted (using cmp -> test fails)
+#if 0
+      ExtDiag(idx)%desc = 'liquid soil moisture ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+      ExtDiag(idx)%unit = 'm**3/m**3'
+#else
+      ExtDiag(idx)%desc = 'liquid soil mositure at layer-'//trim(xtra)
+      ExtDiag(idx)%unit = 'xxx'
+#endif
+! *DH
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%slc(:,num)
+      enddo
+    enddo
+  endif
+#else
     do num = 1,4
-      write (xtra,'(i1)') num 
+      write (xtra,'(i1)') num
       idx = idx + 1
       ExtDiag(idx)%axes = 2
       ExtDiag(idx)%name = 'slc_'//trim(xtra)
@@ -2229,7 +2858,39 @@ module GFS_diagnostics
         ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%slc(:,num)
       enddo
     enddo
+#endif
 
+#ifdef CCPP
+  if (Model%lsm == Model%lsm_ruc) then
+    do num = 1,Model%lsoil_lsm
+      write (xtra,'(i1)') num
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'soilw'//trim(xtra)
+      ExtDiag(idx)%desc = 'volumetric soil moisture ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+      ExtDiag(idx)%unit = 'fraction'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%smois(:,num)
+      enddo
+    enddo
+  else
+    do num = 1,Model%lsoil_lsm
+      write (xtra,'(i1)') num
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'soilw'//trim(xtra)
+      ExtDiag(idx)%desc = 'volumetric soil moisture ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+      ExtDiag(idx)%unit = 'fraction'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%smc(:,num)
+      enddo
+    enddo
+  endif
+#else
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'soilw1'
@@ -2273,11 +2934,43 @@ module GFS_diagnostics
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%smc(:,4)
     enddo
+#endif
 
+#ifdef CCPP
+    if (Model%lsm == Model%lsm_ruc) then
+      do num = 1,Model%lsoil_lsm
+        write (xtra,'(i1)') num
+        idx = idx + 1
+        ExtDiag(idx)%axes = 2
+        ExtDiag(idx)%name = 'soilt'//trim(xtra)
+        ExtDiag(idx)%desc = 'soil temperature ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+        ExtDiag(idx)%unit = 'K'
+        ExtDiag(idx)%mod_name = 'gfs_sfc'
+        allocate (ExtDiag(idx)%data(nblks))
+        do nb = 1,nblks
+          ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%tslb(:,num)
+        enddo
+      enddo
+    else
+      do num = 1,Model%lsoil_lsm
+        write (xtra,'(i1)') num
+        idx = idx + 1
+        ExtDiag(idx)%axes = 2
+        ExtDiag(idx)%name = 'soilt'//trim(xtra)
+        ExtDiag(idx)%desc = 'soil temperature ' // trim(soil_layer_depth(Model%lsm, Model%lsm_ruc, Model%lsm_noah, num))
+        ExtDiag(idx)%unit = 'K'
+        ExtDiag(idx)%mod_name = 'gfs_sfc'
+        allocate (ExtDiag(idx)%data(nblks))
+        do nb = 1,nblks
+          ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%stc(:,num)
+        enddo
+      enddo
+    endif
+#else
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'soilt1'
-    ExtDiag(idx)%desc = 'soil temperature 0-10cm' 
+    ExtDiag(idx)%desc = 'soil temperature 0-10cm'
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
@@ -2288,7 +2981,7 @@ module GFS_diagnostics
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'soilt2'
-    ExtDiag(idx)%desc = 'soil temperature 10-40cm' 
+    ExtDiag(idx)%desc = 'soil temperature 10-40cm'
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
@@ -2299,7 +2992,7 @@ module GFS_diagnostics
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'soilt3'
-    ExtDiag(idx)%desc = 'soil temperature 40-100cm' 
+    ExtDiag(idx)%desc = 'soil temperature 40-100cm'
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
@@ -2310,13 +3003,14 @@ module GFS_diagnostics
     idx = idx + 1
     ExtDiag(idx)%axes = 2
     ExtDiag(idx)%name = 'soilt4'
-    ExtDiag(idx)%desc = 'soil temperature 100-200cm' 
+    ExtDiag(idx)%desc = 'soil temperature 100-200cm'
     ExtDiag(idx)%unit = 'K'
     ExtDiag(idx)%mod_name = 'gfs_sfc'
     allocate (ExtDiag(idx)%data(nblks))
     do nb = 1,nblks
       ExtDiag(idx)%data(nb)%var2 => sfcprop(nb)%stc(:,4)
     enddo
+#endif
 
 !--------------------------nsst variables
   if (model%nstf_name(1) > 0) then
@@ -2521,7 +3215,366 @@ module GFS_diagnostics
     enddo
 !--------------------------nsst variables
   endif
+
+!--------------------------aerosols
+#ifdef CCPP
+    if (Model%ntwa>0) then
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'nwfa'
+      ExtDiag(idx)%desc = 'number concentration of water-friendly aerosols'
+      ExtDiag(idx)%unit = 'kg-1'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Statein(nb)%qgrs(:,:,Model%ntwa)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'nwfa2d'
+      ExtDiag(idx)%desc = 'water-friendly surface aerosol source'
+      ExtDiag(idx)%unit = 'kg-1 s-1'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Coupling(nb)%nwfa2d
+      enddo
+    endif
+
+    if (Model%ntia>0) then
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'nifa'
+      ExtDiag(idx)%desc = 'number concentration of ice-friendly aerosols'
+      ExtDiag(idx)%unit = 'kg-1'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Statein(nb)%qgrs(:,:,Model%ntia)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'nifa2d'
+      ExtDiag(idx)%desc = 'ice-friendly surface aerosol source'
+      ExtDiag(idx)%unit = 'kg-1 s-1'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Coupling(nb)%nifa2d
+      enddo
+    endif
+
+    !! Cloud effective radii from Microphysics
+    !if (Model%imp_physics == Model%imp_physics_thompson .or. Model%imp_physics == Model%imp_physics_wsm6) then
+    !  idx = idx + 1
+    !  ExtDiag(idx)%axes = 3
+    !  ExtDiag(idx)%name = 'cleffr'
+    !  ExtDiag(idx)%desc = 'effective radius of cloud liquid water particle'
+    !  ExtDiag(idx)%unit = 'um'
+    !  ExtDiag(idx)%mod_name = 'gfs_phys'
+    !  allocate (ExtDiag(idx)%data(nblks))
+    !  do nb = 1,nblks
+    !    ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%phy_f3d(:,:,Model%nleffr)
+    !  enddo
+    !  idx = idx + 1
+    !  ExtDiag(idx)%axes = 3
+    !  ExtDiag(idx)%name = 'cieffr'
+    !  ExtDiag(idx)%desc = 'effective radius of stratiform cloud ice particle in um'
+    !  ExtDiag(idx)%unit = 'um'
+    !  ExtDiag(idx)%mod_name = 'gfs_phys'
+    !  allocate (ExtDiag(idx)%data(nblks))
+    !  do nb = 1,nblks
+    !    ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%phy_f3d(:,:,Model%nieffr)
+    !  enddo
+    !  idx = idx + 1
+    !  ExtDiag(idx)%axes = 3
+    !  ExtDiag(idx)%name = 'cseffr'
+    !  ExtDiag(idx)%desc = 'effective radius of stratiform cloud snow particle in um'
+    !  ExtDiag(idx)%unit = 'um'
+    !  ExtDiag(idx)%mod_name = 'gfs_phys'
+    !  allocate (ExtDiag(idx)%data(nblks))
+    !  do nb = 1,nblks
+    !    ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%phy_f3d(:,:,Model%nseffr)
+    !  enddo
+    !endif
+
+    !MYNN
+    if (Model%do_mynnedmf) then
+
+      !idx = idx + 1
+      !ExtDiag(idx)%axes = 2
+      !ExtDiag(idx)%name = 'ktop_shallow'
+      !ExtDiag(idx)%desc = 'k-level of plume top'
+      !ExtDiag(idx)%unit = 'n/a'
+      !ExtDiag(idx)%mod_name = 'gfs_sfc'
+      !allocate (ExtDiag(idx)%data(nblks))
+      !do nb = 1,nblks
+      !  ExtDiag(idx)%data(nb)%var2 => real(IntDiag(nb)%ktop_shallow(:),kind=kind_phys)
+      !enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'maxmf'
+      ExtDiag(idx)%desc = 'maximum mass-flux in column'
+      ExtDiag(idx)%unit = 'm s-1'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%maxmf(:)
+      enddo
+
+      !idx = idx + 1
+      !ExtDiag(idx)%axes = 2
+      !ExtDiag(idx)%name = 'nupdraft'
+      !ExtDiag(idx)%desc = 'number of plumes in grid column'
+      !ExtDiag(idx)%unit = 'n/a'
+      !ExtDiag(idx)%mod_name = 'gfs_sfc'
+      !allocate (ExtDiag(idx)%data(nblks))
+      !do nb = 1,nblks
+      !  ExtDiag(idx)%data(nb)%var2 => real(IntDiag(nb)%nupdraft(:),kind=kind_phys)
+      !enddo
+    endif
+
+    if (Model%do_mynnsfclay) then
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'zol'
+      ExtDiag(idx)%desc = 'monin obukhov surface stability parameter'
+      ExtDiag(idx)%unit = 'n/a'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%zol(:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'flhc'
+      ExtDiag(idx)%desc = 'surface exchange coefficient for heat'
+      ExtDiag(idx)%unit = 'W m-2 K-1'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%flhc(:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%name = 'flqc'
+      ExtDiag(idx)%desc = 'surface exchange coefficient for moisture'
+      ExtDiag(idx)%unit = 'kg m-2 s-1'
+      ExtDiag(idx)%mod_name = 'gfs_sfc'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => Sfcprop(nb)%flqc(:)
+      enddo
+    endif
+
+    if (Model%do_mynnedmf) then
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'CLDFRA_BL'
+      ExtDiag(idx)%desc = 'subgrid cloud fraction'
+      ExtDiag(idx)%unit = 'frac'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%CLDFRA_BL(:,:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'QC_BL'
+      ExtDiag(idx)%desc = 'subgrid cloud mixing ratio'
+      ExtDiag(idx)%unit = 'frac'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%QC_BL(:,:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'EL_PBL'
+      ExtDiag(idx)%desc = 'turbulent mixing length'
+      ExtDiag(idx)%unit = 'm'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%el_pbl(:,:)
+      enddo
+
+      idx = idx + 1
+      ExtDiag(idx)%axes = 3
+      ExtDiag(idx)%name = 'QKE'
+      ExtDiag(idx)%desc = '2 X TKE (from mynn)'
+      ExtDiag(idx)%unit = 'm2 s-2'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var3 => Tbd(nb)%QKE(:,:)
+      enddo
+    endif
+#endif
+
 !  print *,'in gfdl_diag_register,af all extdiag, idx=',idx
+
+! -- chemistry diagnostic variables
+  if (Model%cplchm) then
+
+    if (Model%ntchm > 0) then
+
+      if (associated(IntDiag(1)%duem)) then
+        do num = 1, size(IntDiag(1)%duem, dim=2)
+          idx = idx + 1
+          ExtDiag(idx)%axes = 2
+          write(ExtDiag(idx)%name,'("duem",i3.3)') num
+          write(ExtDiag(idx)%desc,'("Dust Emission Bin ",i0)') num
+          ExtDiag(idx)%unit = 'kg/m2/s'
+          ExtDiag(idx)%mod_name = 'gfs_phys'
+          allocate (ExtDiag(idx)%data(nblks))
+          do nb = 1,nblks
+            ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%duem(:,num)
+          enddo
+        enddo
+      endif
+
+      if (associated(IntDiag(1)%ssem)) then
+        do num = 1, size(IntDiag(1)%ssem, dim=2)
+          idx = idx + 1
+          ExtDiag(idx)%axes = 2
+          write(ExtDiag(idx)%name,'("ssem",i3.3)') num
+          write(ExtDiag(idx)%desc,'("Seasalt Emission Bin ",i0)') num
+          ExtDiag(idx)%unit = 'kg/m2/s'
+          ExtDiag(idx)%mod_name = 'gfs_phys'
+          allocate (ExtDiag(idx)%data(nblks))
+          do nb = 1,nblks
+            ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%ssem(:,num)
+          enddo
+        enddo
+      endif
+
+      if (associated(Model%ntdiag)) then
+        idt = 0
+        do num = Model%ntchs, Model%ntchm + Model%ntchs - 1
+          if (Model%ntdiag(num-Model%ntchs+1)) then
+            idt = idt + 1
+            idx = idx + 1
+            ExtDiag(idx)%axes = 2
+            ExtDiag(idx)%name = trim(Model%tracer_names(num)) // 'sd'
+            ExtDiag(idx)%desc = trim(Model%tracer_names(num)) // ' Sedimentation'
+            ExtDiag(idx)%unit = 'kg/m2/s'
+            ExtDiag(idx)%mod_name = 'gfs_phys'
+            allocate (ExtDiag(idx)%data(nblks))
+            do nb = 1,nblks
+              ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%sedim(:,idt)
+            enddo
+
+            idx = idx + 1
+            ExtDiag(idx)%axes = 2
+            ExtDiag(idx)%name = trim(Model%tracer_names(num)) // 'dp'
+            ExtDiag(idx)%desc = trim(Model%tracer_names(num)) // ' Dry Deposition'
+            ExtDiag(idx)%unit = 'kg/m2/s'
+            ExtDiag(idx)%mod_name = 'gfs_phys'
+            allocate (ExtDiag(idx)%data(nblks))
+            do nb = 1,nblks
+              ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%drydep(:,idt)
+            enddo
+
+            idx = idx + 1
+            ExtDiag(idx)%axes = 2
+            ExtDiag(idx)%name = trim(Model%tracer_names(num)) // 'wtl'
+            ExtDiag(idx)%desc = trim(Model%tracer_names(num)) // ' Large-Scale Wet Deposition'
+            ExtDiag(idx)%unit = 'kg/m2/s'
+            ExtDiag(idx)%mod_name = 'gfs_phys'
+            allocate (ExtDiag(idx)%data(nblks))
+            do nb = 1,nblks
+              ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%wetdpl(:,idt)
+            enddo
+
+            idx = idx + 1
+            ExtDiag(idx)%axes = 2
+            ExtDiag(idx)%name = trim(Model%tracer_names(num)) // 'wtc'
+            ExtDiag(idx)%desc = trim(Model%tracer_names(num)) // ' Convective-Scale Wet Deposition'
+            ExtDiag(idx)%unit = 'kg/m2/s'
+            ExtDiag(idx)%mod_name = 'gfs_phys'
+            allocate (ExtDiag(idx)%data(nblks))
+            do nb = 1,nblks
+              ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%wetdpc(:,idt)
+            enddo
+          endif
+        enddo
+      endif
+
+    endif
+
+    num = size(IntDiag(1)%abem, dim=2)
+    do num = 1, size(IntDiag(1)%abem, dim=2)
+      idx = idx + 1
+      select case (mod(num,3))
+        case (0)
+          ExtDiag(idx)%name = 'bcem'
+          ExtDiag(idx)%desc = 'Black Carbon'
+        case (1)
+          ExtDiag(idx)%name = 'ocem'
+          ExtDiag(idx)%desc = 'Organic Carbon'
+        case (2)
+          ExtDiag(idx)%name = 'so2em'
+          ExtDiag(idx)%desc = 'SO2'
+      end select
+
+      if (num > 3) then
+        ExtDiag(idx)%name = trim(ExtDiag(idx)%name) // 'bb'
+        ExtDiag(idx)%desc = trim(ExtDiag(idx)%desc) // ' Biomass Burning Emissions'
+      else
+        ExtDiag(idx)%name = trim(ExtDiag(idx)%name) // 'an'
+        ExtDiag(idx)%desc = trim(ExtDiag(idx)%desc) // ' Anthropogenic Emissions'
+      end if
+
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%unit = 'ug/m2/s'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%abem(:,num)
+      enddo
+    end do
+
+    do num = 1, size(IntDiag(1)%aecm, dim=2)
+      idx = idx + 1
+      select case (num)
+        case(1)
+          ExtDiag(idx)%name = 'aecmass'
+          ExtDiag(idx)%desc = 'Aerosol Column Mass Density (PM2.5)'
+        case(2)
+          ExtDiag(idx)%name = 'bccmass'
+          ExtDiag(idx)%desc = 'Black Carbon Column Mass Density'
+        case(3)
+          ExtDiag(idx)%name = 'occmass'
+          ExtDiag(idx)%desc = 'Organic Carbon Column Mass Density'
+        case(4)
+          ExtDiag(idx)%name = 'sucmass'
+          ExtDiag(idx)%desc = 'Sulfate Column Mass Density'
+        case(5)
+          ExtDiag(idx)%name = 'ducmass'
+          ExtDiag(idx)%desc = 'Dust Column Mass Density'
+        case(6)
+          ExtDiag(idx)%name = 'sscmass'
+          ExtDiag(idx)%desc = 'Seasalt Column Mass Density'
+      end select
+
+      ExtDiag(idx)%axes = 2
+      ExtDiag(idx)%unit = 'g/m2'
+      ExtDiag(idx)%mod_name = 'gfs_phys'
+      allocate (ExtDiag(idx)%data(nblks))
+      do nb = 1,nblks
+        ExtDiag(idx)%data(nb)%var2 => IntDiag(nb)%aecm(:,num)
+      enddo
+    end do
+
+  endif
 
 !--- prognostic variable tendencies (t, u, v, sph, clwmr, o3)
 !rab    idx = idx + 1
@@ -2567,6 +3620,59 @@ module GFS_diagnostics
 !rab    ExtDiag(idx)%mod_name = 'gfs_phys'
 
   end subroutine GFS_externaldiag_populate
+
+#ifdef CCPP
+  function soil_layer_depth(lsm, lsm_ruc, lsm_noah, layer) result(layer_depth)
+     character(len=30)   :: layer_depth
+     integer, intent(in) :: lsm, lsm_ruc, lsm_noah, layer
+     !
+     continue
+     !
+     if (lsm==lsm_ruc) then
+        select case (layer)
+           case (1)
+              layer_depth = 'at 0 cm depth'
+           case (2)
+              layer_depth = 'at 5 cm depth'
+           case (3)
+              layer_depth = 'at 20 cm depth'
+           case (4)
+              layer_depth = 'at 40 cm depth'
+           case (5)
+              layer_depth = 'at 60 cm depth'
+           case (6)
+              layer_depth = 'at 100 cm depth'
+           case (7)
+              layer_depth = 'at 160 cm depth'
+           case (8)
+              layer_depth = 'at 220 cm depth'
+           case (9)
+              layer_depth = 'at 300 cm depth'
+           case default
+              write (layer_depth,'(a,i0)') 'invalid layer ', layer
+        end select
+     else if (lsm==lsm_noah) then
+        select case (layer)
+           case (1)
+              layer_depth = '0-10cm'
+           case (2)
+              layer_depth = '10-40cm'
+           case (3)
+              layer_depth = '40-100cm'
+           case (4)
+              layer_depth = '100-200cm'
+           case default
+              write (layer_depth,'(a,i0)') 'invalid layer ', layer
+        end select
+     else
+        write (layer_depth,'(a,i0)') 'unknown layer ', layer
+     end if
+     !
+     return
+     !
+  end function soil_layer_depth
+#endif
+
 !-------------------------------------------------------------------------      
 
 end module GFS_diagnostics

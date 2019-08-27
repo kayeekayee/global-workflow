@@ -3,7 +3,6 @@ module chem_species_mod
   implicit none
 
   type chem_species_type
-    sequence
     ! -- atmospheric tracers
     integer :: p_atm_shum    = 0
     integer :: p_atm_cldq    = 0
@@ -162,6 +161,7 @@ module chem_species_mod
     integer :: p_eseas2      = 0
     integer :: p_eseas3      = 0
     integer :: p_eseas4      = 0
+    integer :: p_eseas5      = 0
     integer :: p_ete         = 0
     integer :: p_eth         = 0
     integer :: p_extcof106   = 0
@@ -232,6 +232,7 @@ module chem_species_mod
     integer :: p_seas_2      = 0
     integer :: p_seas_3      = 0
     integer :: p_seas_4      = 0
+    integer :: p_seas_5      = 0
     integer :: p_sesq        = 0
     integer :: p_so2         = 0
     integer :: p_so4ai       = 0

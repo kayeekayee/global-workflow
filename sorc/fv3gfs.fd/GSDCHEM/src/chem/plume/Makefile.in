@@ -79,15 +79,15 @@ POST_UNINSTALL = :
 subdir = src/chem/plume
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ar-lib.m4 \
+	$(top_srcdir)/m4/ax_compiler_vendor.m4 \
+	$(top_srcdir)/m4/fc_features.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
@@ -95,7 +95,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libplume_a_AR = $(AR) $(ARFLAGS)
 libplume_a_LIBADD =
-am_libplume_a_OBJECTS = libplume_a-plume_rise_mod.$(OBJEXT) \
+am_libplume_a_OBJECTS = libplume_a-plume_data_mod.$(OBJEXT) \
+	libplume_a-plume_rise_mod.$(OBJEXT) \
 	libplume_a-plume_zero_mod.$(OBJEXT) \
 	libplume_a-plume_scalar_mod.$(OBJEXT)
 libplume_a_OBJECTS = $(am_libplume_a_OBJECTS)
@@ -111,7 +112,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+DEFAULT_INCLUDES = -I.@am__isrc@
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -159,6 +160,7 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -166,7 +168,6 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CUT = @CUT@
 CYGPATH_W = @CYGPATH_W@
@@ -175,12 +176,13 @@ DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
-EGREP = @EGREP@
 ESMFMKFILE = @ESMFMKFILE@
 EXEEXT = @EXEEXT@
 FC = @FC@
 FCFLAGS = @FCFLAGS@
-FCLIBS = @FCLIBS@
+FCFLAGS_F90 = @FCFLAGS_F90@
+FC_MODEXT = @FC_MODEXT@
+FC_MODINC = @FC_MODINC@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -191,6 +193,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -212,8 +215,10 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_FC = @ac_ct_FC@
+ac_empty = @ac_empty@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -252,14 +257,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libplume.a
-libplume_a_SOURCES = plume_rise_mod.F90 plume_zero_mod.F90 plume_scalar_mod.F90
+libplume_a_SOURCES = plume_data_mod.F90 plume_rise_mod.F90 plume_zero_mod.F90 plume_scalar_mod.F90
 libplume_a_FCFLAGS = -I ../shr/
 libplume_a_DEPENDENCIES = ../shr/libshr.a
 all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .F90 .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -284,9 +289,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
@@ -309,6 +314,12 @@ distclean-compile:
 
 .F90.obj:
 	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+libplume_a-plume_data_mod.o: plume_data_mod.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplume_a_FCFLAGS) $(FCFLAGS) -c -o libplume_a-plume_data_mod.o `test -f 'plume_data_mod.F90' || echo '$(srcdir)/'`plume_data_mod.F90
+
+libplume_a-plume_data_mod.obj: plume_data_mod.F90
+	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplume_a_FCFLAGS) $(FCFLAGS) -c -o libplume_a-plume_data_mod.obj `if test -f 'plume_data_mod.F90'; then $(CYGPATH_W) 'plume_data_mod.F90'; else $(CYGPATH_W) '$(srcdir)/plume_data_mod.F90'; fi`
 
 libplume_a-plume_rise_mod.o: plume_rise_mod.F90
 	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplume_a_FCFLAGS) $(FCFLAGS) -c -o libplume_a-plume_rise_mod.o `test -f 'plume_rise_mod.F90' || echo '$(srcdir)/'`plume_rise_mod.F90
@@ -528,11 +539,16 @@ uninstall-am:
 	tags tags-am uninstall uninstall-am
 
 
-clean-local:
-	-rm -f *.mod
+.PHONY: clean-modules
 
-libplume_a-plume_rise_mod.$(OBJEXT)   : libplume_a-plume_zero_mod.$(OBJEXT) libplume_a-plume_scalar_mod.$(OBJEXT)
-libplume_a-plume_scalar_mod.$(OBJEXT) : libplume_a-plume_zero_mod.$(OBJEXT)
+clean-modules:
+	-test -z "$(FC_MODEXT)" || rm -f *.$(FC_MODEXT)
+
+clean-local: clean-modules
+
+libplume_a-plume_rise_mod.$(OBJEXT)   : libplume_a-plume_data_mod.$(OBJEXT) \
+	libplume_a-plume_zero_mod.$(OBJEXT) libplume_a-plume_scalar_mod.$(OBJEXT)
+libplume_a-plume_scalar_mod.$(OBJEXT) : libplume_a-plume_data_mod.$(OBJEXT) libplume_a-plume_zero_mod.$(OBJEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

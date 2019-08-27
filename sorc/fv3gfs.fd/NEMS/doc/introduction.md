@@ -125,35 +125,48 @@ Quick Build and Run
 
 ### 6.1.1   Download
 
-Use the following SVN command to download a specific revision of a NEMS application from its development trunk:
+Use the following git command to download the top of the master of a NEMS application
     
-    svn co -r <REV> 
-    https://svnemc.ncep.noaa.gov/projects/nems/apps/
-    <Application>/trunk <Application>
+    git clone gerrit:EMC_appname
 
-In this command, `<REV>` stands for a revision number, for example, `73964`. In some places on this site, the prefix `DREV` is used to indicate that the revision is on a development trunk. The prefix R indicates that a revision is on an application trunk. These prefixes should not be included in the command, just the revision number.
+To get a specific branch or hash, `<REV>`, 
 
-Where `<Application>` appears, it can have one of the following values:
-* HYCOM-Ice
-* Regional
-* Regional-Nest
-* UGCS-Weather
-* UGCS-Subseasonal
-* UGCS-Seasonal
-* WAM
-* WAM-IPE
+    git clone gerrit:EMC_appname -b <REV> 
 
-The `SVN` command will download all of the necessary pieces including constituent components from different repositories.  It is possible to access the very latest working revision of the code by omitting the `"-r REV"` part from the `SVN` command when downloading by revision number. This may be convenient during development, however, it is not recommended for validation work where it is critical to keep track of the precise revision information.
+In this command, `<REV>` can be a branch name (ie. `master`), a tag
+name (`tags/version-1.2.3`) or the hash of a specific version
+(`ecea67a941675b30f036995a5d6d16cd9df5b185`)  
+
+For some older revisions of apps, the code only exists in Subversion.:
+
+    svn co -r <REV> https://svnemc.ncep.noaa.gov/projects/nems/apps/<APPname>/trunk
+
+In some places on this site, the prefix `DREV` is used to indicate
+that the revision is on a development trunk. The prefix R indicates
+that a revision is on an application trunk. These prefixes should not
+be included in the command, just the revision number.
+
+The `git` or `svn` commands will download all of the necessary pieces
+including constituent components from different repositories.  It is
+possible to access the very latest working revision of the code by
+omitting the `"-r REV"` part from the `SVN` command when downloading
+by revision number. This may be convenient during development,
+however, it is not recommended for validation work where it is
+critical to keep track of the precise revision information.
 
 There are a few ways to find out more about specific revisions and the features that they contain. The links under the Milestone Revisions header on the left navigation bar describe revisions that are documented and tested for particular [application milestones](https://docs.google.com/spreadsheets/d/1RS-fTBYnfSIWrJYfalD2lAI-bUOGM0frNPEMIO_ND28/edit#gid=0). The development tasks completed for each revision are included in the [task prioritization spreadsheet](https://docs.google.com/spreadsheets/d/1C0k9AfH9DZHmJCW_bSdK2TzfFB9qLjyE8416nqqXjTM/edit#gid=0).
 
 ### 6.1.2   Build
 
-Change into the `<Application>` directory created by the SVN command during download. Then execute the `NEMS AppBuilder` by typing:
+Change into the `<Application>` directory created by the git or svn command during download. Then build the app using:
 
-    ./NEMS/NEMSAppBuilder
+    cd NEMS
+    make app=<name>
 
-A terminal based dialog script will guide you through the build process. The end result of the build process is a NEMS executable `(./NEMS/exe/NEMS.x)` that is configured to run the application.
+where `<name>` refers to a `<name>.appBuilder` file at the application
+level directory. The end result of the build process is a NEMS
+executable `(./NEMS/exe/NEMS.x)` that is configured to run the
+application.
 
 ### 6.1.3   Run
 

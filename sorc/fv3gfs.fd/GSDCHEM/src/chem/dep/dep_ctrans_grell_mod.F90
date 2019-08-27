@@ -1,26 +1,22 @@
 module dep_ctrans_grell_mod
 
-
-use chem_tracers_mod
-use chem_const_mod, only : epsilc
-!use dep_cu_g3_mod,only : cup_env,cup_env_clev,cup_MAXIMI,cup_kbcon,cup_minimi, &
-!                         cup_up_he,cup_ktop,cup_up_nms,cup_dd_nms,cup_dd_he,&
-!                         cup_dd_moisture_3d,cup_up_moisture,cup_dd_edt
-use chem_config_mod, only : CHEM_OPT_GOCART,       &
-                              CHEM_OPT_MAX
+  use chem_const_mod,  only : epsilc
+  use chem_tracers_mod
 
   IMPLICIT NONE
+
   private
   public :: grelldrvct
+
 CONTAINS
 
 !-------------------------------------------------------------
-   SUBROUTINE grelldrvct(DT,itimestep,                       &
-              rho_phy,RAINCV,chem,trfall,              &
+   SUBROUTINE grelldrvct(DT,itimestep,                          &
+              rho_phy,RAINCV,chem,trfall,                       &
               U,V,t_phy,moist,dz8w,p_phy,p8w,                   &
               pbl,XLV,CP,G,r_v,z,cu_co_ten,                     &
               numgas,chem_opt,                                  &
-              num_chem,num_moist,tile,                               &
+              num_chem,num_moist,tile,                          &
               ids,ide, jds,jde, kds,kde,                        &
               ims,ime, jms,jme, kms,kme,                        &
               its,ite, jts,jte, kts,kte                         )
@@ -29,7 +25,7 @@ CONTAINS
 !-------------------------------------------------------------
    INTEGER,      INTENT(IN   ) ::                               &
                                   numgas,chem_opt,              &
-              num_chem,num_moist, tile,                              &
+                                  num_chem,num_moist, tile,     &
                                   ids,ide, jds,jde, kds,kde,    & 
                                   ims,ime, jms,jme, kms,kme,    & 
                                   its,ite, jts,jte, kts,kte
@@ -40,26 +36,26 @@ CONTAINS
    REAL,         INTENT(IN   ) :: XLV, R_v
    REAL,         INTENT(IN   ) :: CP,G
 
-   REAL,  DIMENSION( ims:ime , kms:kme , jms:jme,num_moist )         ,    &
-          INTENT(IN   ) ::                              moist 
+   REAL,  DIMENSION( ims:ime , kms:kme , jms:jme,num_moist ),   &
+          INTENT(IN   ) ::                            moist
    REAL,  DIMENSION( ims:ime , kms:kme , jms:jme )         ,    &
           INTENT(IN   ) ::                                      &
                                                           U,    &
                                                           V,    &
                                                       t_phy,    &
-                                                      z,        &
+                                                          z,    &
                                                       p_phy,    &
-                                                      p8w,    &
+                                                        p8w,    &
                                                        dz8w,    &
                                                     rho_phy
 !
 ! on output for control only, purely diagnostic
-  REAL,  DIMENSION( ims:ime , jms:jme )                   ,    &
+  REAL,  DIMENSION( ims:ime , jms:jme )                    ,    &
           INTENT(INOUT) ::                                      &
-                                                    pbl
+                                                        pbl
    REAL,  DIMENSION( ims:ime , kms:kme , jms:jme )         ,    &
           INTENT(INOUT   ) ::                                   &
-                                                    cu_co_ten
+                                                  cu_co_ten
 
 
 !
@@ -67,13 +63,13 @@ CONTAINS
 !
    REAL, DIMENSION( ims:ime , kms:kme , jms:jme, num_chem ),    &
          INTENT(INOUT) ::                                       &
-                                   chem
+                                                       chem
    REAL, DIMENSION( ims:ime ,           jms:jme, num_chem ),    &
          INTENT(INOUT) ::                                       &
-                                   trfall
+                                                     trfall
 
    REAL, DIMENSION( ims:ime , jms:jme ),                        &
-         INTENT(IN) ::                 RAINCV
+         INTENT(IN) ::                               RAINCV
 
 ! LOCAL VARS
      real,    dimension (its:ite,kts:kte) ::                    &
@@ -88,40 +84,30 @@ CONTAINS
 !
      real,    dimension (its:ite,kts:kte) ::                    &
         T,TN,q,qo,PO,P,US,VS,hstary
-     real,    dimension (its:ite,kts:kte,num_chem) ::                    &
+     real,    dimension (its:ite,kts:kte,num_chem) ::           &
            tracer,tracert
-     real,    dimension (its:ite,num_chem) ::                    &
+     real,    dimension (its:ite,num_chem) ::                   &
            trdep
      real, dimension (its:ite)            ::                    &
         xmb,Z1,PSUR,AAEQ
-     integer, dimension (its:ite)            ::                    &
+     integer, dimension (its:ite)            ::                 &
         kpbli,ktop,csum,ipr
-!  TYPE(grid_config_rec_type),  INTENT(IN   )    :: config_flags
 
    INTEGER :: nv,i,j,k,ICLDCK,jpr,npr
-   REAL    :: tcrit,dp,dq
+   REAL    :: tcrit,dp,dq,trmax
    INTEGER :: itf,jtf,ktf,iopt
-!  epsilc=1.e-30
-!  return
-!  jpr=40
-!  if(itimestep.lt.34.or.itimestep.gt.36)jpr=0
-!  jpr=60
+
    jpr=0
    npr=10
    tcrit=258.
    iopt=1
-   !itf=MIN(ite,ide)
-   !ktf=MIN(kte,kde)
-   !jtf=MIN(jte,jde)
    itf=ite !lzhang
    ktf=kte !lzhang
    jtf=jte !lzhang
 !                                                                      
 !
-!    write(6,*)'in ctrans'
      trfall(:,:,:)=0.
      DO 100 J = jts,jtf  
-     if(j.eq.jpr)print *,'dt = ',dt
      DO I=ITS,ITF
          xmb(i)=0.
          csum(i)=0
@@ -168,9 +154,6 @@ CONTAINS
      DO I=ITS,ITF
          cu_co_ten(i,k,j)=0.
 !        hstary(i,k)=hstar4(nv)*exp(dhr(nv)*(1./t(i,k)-1./298.))
-!        if(i.eq.ipr.and.j.eq.jpr)then
-!         print *,k,pret(i),tracer(i,k,npr),p(i,k),z(i,k,j)
-!        endif
      ENDDO
      ENDDO
 !    ENDDO
@@ -210,50 +193,45 @@ CONTAINS
        endif
        enddo
 #endif
-            do nv=1,num_chem
-            DO I=its,itf
-              if(pret(i).le.0.)then
-                 DO K=kts,ktf
-                   tracert(i,k,nv)=0.
-                 ENDDO
-              endif
-             enddo
-             enddo
-      CALL neg_check_ct(pret,ktop,epsilc,dt,tracer,tracert,iopt,num_chem,   &
-                        its,ite,kts,kte,itf,ktf,jpr,jpr,npr,j)
-
-
+       do nv=1,num_chem
+         DO I=its,itf
+           if(pret(i).le.0.)then
+             DO K=kts,ktf
+               tracert(i,k,nv)=0.
+             ENDDO
+           endif
+         enddo
+       enddo
+!     CALL neg_check_ct(pret,ktop,epsilc,dt,tracer,tracert,iopt,num_chem,   &
+!                       its,ite,kts,kte,itf,ktf,jpr,jpr,npr,j)
 !lzhang diag trdep:
-
-           do i=its,itf
-             trdep(i,1)=pret(i)
-             trdep(i,2)=maxval(tracert(i,:,16))
-           enddo
-
+!      do i=its,itf
+!        trdep(i,1)=pret(i)
+!        trdep(i,2)=maxval(tracert(i,:,p_seas_2))
+!      enddo
 
        do nv=1,num_chem
-            DO I=its,itf
-              if(pret(i).gt.0.)then
-                 trfall(i,j,nv)=trdep(i,nv) !lzhang
-                 DO K=kts,ktop(i)
-                   
-                   chem(i,k,j,nv)=max(epsilc,chem(i,k,j,nv)+tracert(i,k,nv)*dt)
-                   if(nv.eq.npr)then
-                        cu_co_ten(i,k,j)=tracert(i,k,npr)*dt
-!                        if(i.eq.ipr.and.j.eq.jpr)print *,k,chem(i,k,j,nv),cu_co_ten(i,k,j)
-                   endif
-                 ENDDO
-              else
-                 DO K=kts,ktf-1
-                   tracert(i,k,nv)=0.
-                   if(nv.eq.npr)cu_co_ten(i,k,j)=0.
-                 enddo
-              endif
-            ENDDO
-       ENDDO
+         do I=its,itf
+           if(pret(i).gt.0.)then
+             trfall(i,j,nv)=trdep(i,nv) !lzhang
+             trmax = maxval(chem(i,kts:ktf,j,nv))
+             do k=kts,ktop(i)
+               chem(i,k,j,nv)=min(trmax,chem(i,k,j,nv)+tracert(i,k,nv)*dt)
+               chem(i,k,j,nv)=max(epsilc,chem(i,k,j,nv))
+               if(nv.eq.npr)then
+                 cu_co_ten(i,k,j)=tracert(i,k,npr)*dt
+               endif
+             enddo
+           else
+             do K=kts,ktf-1
+               tracert(i,k,nv)=0.
+               if(nv.eq.npr)cu_co_ten(i,k,j)=0.
+             enddo
+           endif
+         enddo
+       enddo
 
-
- 100    continue
+ 100   continue
 
    END SUBROUTINE GRELLDRVCT
 
@@ -448,7 +426,6 @@ CONTAINS
       use_excess=0
       ztexec(:)=0.
       zqexec(:)=0.
-      cap_max_increment(i)=25.
 !srf- end
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -461,6 +438,7 @@ CONTAINS
         xmb(i)=0.
         ierr(i)=0
         cap_max(i)=cap_maxs
+        cap_max_increment(i) = 20.
         ierrc(i)=" "
       enddo
 !
@@ -869,8 +847,7 @@ CONTAINS
           jmin(i)=jmin(i)-1
           if(zd(i,jmin(i)) .lt.1.e-8)then
              ierr(i)=876
-           !  exit
-             cycle  !lzhang
+             cycle
           endif
         endif
         
@@ -999,17 +976,19 @@ CONTAINS
 
                     alpha = 0.
    if(chem_opt >= 300 .and. chem_opt < 500)then
+# if 0
     if(nv.gt. numgas .or. nv.eq.p_sulf) then
-    alpha = .5    ! scavenging factor
-      ! if(nv.le. numgas .and. nv.ne.p_sulf)cycle
+     alpha = .5    ! scavenging factor
        !if(nv.eq.p_bc1 .or. nv.eq.p_oc1 .or. nv.eq.p_dms) alpha=0.
-       if(nv.eq.p_bc1 .or. nv.eq.p_oc1) alpha=0.2 !lzhang
+       if(nv.eq.p_bc1 .or. nv.eq.p_oc1) alpha=0.4 !lzhang
        if(nv.eq.p_dms) alpha=0.
        if(nv.eq.p_sulf .or. nv.eq.p_seas_1 .or. nv.eq.p_seas_2 .or. &
-          nv.eq.p_seas_3 .or. nv.eq.p_seas_4)alpha=1.
+          nv.eq.p_seas_3 .or. nv.eq.p_seas_4 .or. nv.eq.p_seas_5)alpha=1.
        !if(nv.eq.p_bc2 .or. nv.eq.p_oc2)alpha=0.8
        if(nv.eq.p_bc2 .or. nv.eq.p_oc2)alpha=0.5  !lzhang
      endif
+# endif
+    alpha = 1. 
    endif
 
 !    if(chem_opt == 301 .or. chem_opt==108 ) then
@@ -1155,7 +1134,8 @@ CONTAINS
             G_rain=  0.5*(chem_pw (i,1,nv)+chem_pw (i,2,nv))*g/dp
             E_dn  =  0.5*(chem_pwd(i,1,nv)+chem_pwd(i,2,nv))*g/dp
             dellac(i,1,nv)=(edt(i)*zd(i,2)*chem_down(i,2,nv)   &
-                     -edt(i)*zd(i,2)*chem_cup(i,2,nv))*g/dp &
+                     -edt(i)*zd(i,2)*chem_cup(i,2,nv)&
+                     -zu(i,2)*(chem_up(i,2,nv)-chem_cup(i,2,nv)) )*g/dp &
                          - g_rain + E_dn
             do k=kts+1,ktop(i)
                dp=100.*(p_cup(i,k)-p_cup(i,k+1))
@@ -1459,8 +1439,7 @@ CONTAINS
          qcd(i,ki)=(qcd(i,ki+1)*zd(i,ki+1)                          &
                   -.5*dd_massdetr(i,ki)*qcd(i,ki+1)+ &
                   dd_massentr(i,ki)*q(i,ki))   /            &
-                  !(zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki))
-                  max(epsilc,(zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki)))
+                  max(epsilc,zd(i,ki+1)-.5*dd_massdetr(i,ki)+dd_massentr(i,ki))
 !        write(0,*)'qcd in dd_moi = ',qcd(i,ki)
 
 !

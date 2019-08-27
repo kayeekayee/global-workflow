@@ -95,6 +95,28 @@ def check_output(cmd):
 # ----------------------------------------------------------------------
 
 def scan_nems(nems_dir):
+    if os.path.exists(os.path.join(nems_dir,'.git')):
+        return git_scan_nems(nems_dir)
+    elif os.path.exists(os.path.join(nems_dir,'.svn')):
+        return svn_scan_nems(nems_dir)
+    else:
+        error('%s: could not determine if this is a git or subversion repo'%(nems_dir,))
+        return None, None
+
+# ----------------------------------------------------------------------
+
+def scan_app(app_dir):
+    if os.path.exists(os.path.join(app_dir,'.git')):
+        return git_scan_app(app_dir)
+    elif os.path.exists(os.path.join(app_dir,'.svn')):
+        return svn_scan_app(app_dir)
+    else:
+        error('%s: could not determine if this is a git or subversion repo'%(app_dir,))
+        return None, None, None
+
+# ----------------------------------------------------------------------
+
+def svn_scan_nems(nems_dir):
     nems_rev=None
     nems_loc=None
 
@@ -122,7 +144,34 @@ def scan_nems(nems_dir):
 
 # ----------------------------------------------------------------------
 
-def scan_app(app_dir):
+def git_scan_nems(nems_dir):
+    nems_rev=None
+    nems_loc=None
+
+    info=check_output('set -e ; cd '+nems_dir+' ; git branch')
+    for line in info.splitlines():
+        r=re.match('^\s*\*\s*(\S+)',line.strip())
+        nems_loc = ( r and r.group(1) ) or None
+        if nems_loc: break
+    
+    info=check_output('set -e ; cd '+nems_dir+' ; git rev-parse HEAD')
+    for line in info.splitlines():
+        nems_rev = line.strip()[:10] or None
+        if nems_rev: break
+
+    if not nems_rev:
+        error('%s: could not get git hash of HEAD\n'%(nems_dir,))
+        nems_rev='unknown'
+
+    if not nems_loc:
+        error('%s: could not get git branch\n'%(nems_dir,))
+        nems_loc='nems'
+
+    return nems_rev, nems_loc
+
+# ----------------------------------------------------------------------
+
+def svn_scan_app(app_dir):
     app_rev=None
     app_name=None
     app_loc=None
@@ -151,6 +200,44 @@ def scan_app(app_dir):
         error('%s: could not get svn location '
               'relative to app directory\n'%(app_dir,))
         app_rev='app'
+
+    return app_rev, app_name, app_loc
+
+# ----------------------------------------------------------------------
+
+def git_scan_app(app_dir):
+    app_rev=None
+    app_name=None
+    app_loc=None
+
+    info=check_output('set -e ; cd '+app_dir+' ; git remote show -n origin')
+    for line in info.splitlines():
+        r=re.match('^.*URL:\s*(\S+)',line.strip())
+        app_name = ( r and r.group(1) ) or None
+        if app_loc: break
+
+    info=check_output('set -e ; cd '+app_dir+' ; git branch')
+    for line in info.splitlines():
+        r=re.match('^\s*\*\s*(\S+)',line.strip())
+        app_loc = ( r and r.group(1) ) or None
+        if app_loc: break
+    
+    info=check_output('set -e ; cd '+app_dir+' ; git rev-parse HEAD')
+    for line in info.splitlines():
+        app_rev = line.strip()[:10] or None
+        if app_rev: break
+
+    if not app_rev:
+        error('%s: could not get git hash of HEAD\n'%(app_dir,))
+        app_rev='unknown'
+
+    if not app_loc:
+        error('%s: could not get git branch\n'%(app_dir,))
+        app_loc='app'
+
+    if not app_name:
+        error('%s: could not get git URL\n'%(app_dir,))
+        app_loc='app'
 
     return app_rev, app_name, app_loc
 

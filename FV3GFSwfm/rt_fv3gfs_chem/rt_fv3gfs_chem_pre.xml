@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+	<!--
+	PROGRAM
+		Main workflow manager for Forecast only Global Forecast System
+
+	AUTHOR:
+		Rahul Mahajan
+		rahul.mahajan@noaa.gov
+
+	NOTES:
+		This workflow was automatically generated at 2019-03-14 00:19:39.376145
+	-->
+
+	<!-- Experiment parameters such as name, cycle, resolution -->
+	<!ENTITY PSLOT    "rt_fv3gfs_chem">
+	<!ENTITY CDUMP    "gfs">
+	<!ENTITY CASE     "C384">
+
+	<!-- Experiment parameters such as starting, ending dates -->
+	<!ENTITY SDATE    "201908100000">
+	<!ENTITY EDATE    "202907020000">
+	<!ENTITY INTERVAL "24:00:00">
+
+	<!-- Run Envrionment -->
+	<!ENTITY RUN_ENVIR "emc">
+
+	<!-- Experiment related directories -->
+	<!ENTITY EXPDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
+	<!ENTITY ROTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+	<!ENTITY ICSDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS">
+        <!ENTITY PUBDIR "/scratch3/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY RETRODIR "/scratch4/BMC/fim/GFS_RETRO_NEMSIO/">
+        <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
+        <!ENTITY GDASDIR "/scratch4/BMC/public/data/grids/gdas/bufr">
+        <!ENTITY GDASDIR "/scratch3/BMC/fim/jhender/scratch/gdas_atmanl">
+        <!ENTITY RUNDIR "/scratch4/BMC/rtfim/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY OUTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+	<!ENTITY PREDIR "/scratch4/BMC/public/data/grids/sdsu/emissions">
+         
+	<!-- Directories for driving the workflow -->
+	<!ENTITY HOMEgfs  "/scratch4/BMC/rtfim/rtruns/FV3-Chem/">
+	<!ENTITY JOBS_DIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/jobs/rocoto">
+
+	<!-- Machine related entities -->
+	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
+	<!ENTITY ACCOUNT    "gsd-fv3">
+	<!ENTITY QUEUE      "batch">
+	<!ENTITY QUEUE_DEBUG "debug">
+	<!ENTITY QUEUE_ARCH "service">
+	<!ENTITY SCHEDULER  "slurm">
+
+	<!-- Toggle HPSS archiving -->
+	<!ENTITY ARCHIVE_TO_HPSS "YES">
+
+	<!-- ROCOTO parameters that control workflow -->
+	<!ENTITY CYCLETHROTTLE "6">
+	<!ENTITY TASKTHROTTLE  "20">
+	<!ENTITY MAXTRIES      "3">
+
+	<!-- BEGIN: Resource requirements for the workflow -->
+        
+<!--      	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE;"> -->
+        <!ENTITY QUEUE_CHECKGDAS_GFS     "&QUEUE_ARCH;">
+        <!ENTITY WALLTIME_CHECKGDAS_GFS  "00:10:00">
+        <!ENTITY RESOURCES_CHECKGDAS_GFS "<nodes>1:ppn=1</nodes>">
+        <!ENTITY MEMORY_CHECKGDAS_GFS    "">
+        <!ENTITY NATIVE_CHECKGDAS_GFS    "--export=NONE">
+
+      	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE_ARCH;">
+	<!ENTITY WALLTIME_GETIC_GFS  "00:30:00">
+	<!ENTITY RESOURCES_GETIC_GFS "<nodes>1:ppn=1</nodes>">
+	<!ENTITY MEMORY_GETIC_GFS    "">
+	<!ENTITY NATIVE_GETIC_GFS    "--export=NONE">
+
+	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE;">
+	<!ENTITY WALLTIME_FV3IC_GFS  "00:30:00">
+	<!ENTITY RESOURCES_FV3IC_GFS "<nodes>1:ppn=24</nodes>">
+	<!ENTITY MEMORY_FV3IC_GFS    "">
+	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
+
+        <!ENTITY QUEUE_REGRID     "&QUEUE;">
+        <!ENTITY WALLTIME_REGRID  "00:30:00">
+        <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
+        <!ENTITY MEMORY_REGRID    "">
+        <!ENTITY NATIVE_REGRID    "--export=NONE">
+
+	<!-- END: Resource requirements for the workflow -->
+
+]>
+
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+
+	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_pre.log</cyclestr></log>
+
+	<!-- Define the cycles -->
+	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+<task name="checkgdas" cycledefs="gfs" maxtries="&MAXTRIES;">
+        <command>&JOBS_DIR;/checkgdas.sh</command>
+
+        <jobname><cyclestr>&PSLOT;_checkgdas_@H</cyclestr></jobname>
+        <account>&ACCOUNT;</account>
+        <partition>&QUEUE_CHECKGDAS_GFS;</partition>
+        &RESOURCES_CHECKGDAS_GFS;
+        <walltime>&WALLTIME_CHECKGDAS_GFS;</walltime>
+        <native>&NATIVE_CHECKGDAS_GFS;</native>
+
+        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/checkgdas.log</cyclestr></join>
+
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
+        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+        <envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
+        <envar><name>PUBDIR</name><value>&PUBDIR;</value></envar>
+        <envar><name>RETRODIR</name><value>&RETRODIR;</value></envar>
+        <envar><name>GDASDIR</name><value>&GDASDIR;</value></envar>
+        <envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+        <dependency>
+	  <or>
+		<timedep><cyclestr offset="23:50:00">@Y@m@d@H@M00</cyclestr></timedep>
+		<datadep><cyclestr>&GDASDIR;/@y@j0000.gdas.t00z.atmanl.nemsio</cyclestr></datadep>
+	  </or>
+	</dependency>
+</task>
+
+<task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
+	<command>&JOBS_DIR;/getic.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfsgetic_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<partition>&QUEUE_GETIC_GFS;</partition>
+	&RESOURCES_GETIC_GFS;
+	<walltime>&WALLTIME_GETIC_GFS;</walltime>
+	<native>&NATIVE_GETIC_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsgetic.log</cyclestr></join>
+
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
+	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>  
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+	<envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
+	<envar><name>PUBDIR</name><value>&PUBDIR;</value></envar>
+	<envar><name>RETRODIR</name><value>&RETRODIR;</value></envar>
+	<envar><name>GDASDIR</name><value>&GDASDIR;</value></envar>
+	<envar><name>GFSDIR</name><value>&GFSDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+
+	<dependency>
+           <and>
+             <or>
+               <and>
+                 <datadep><cyclestr>&PUBDIR;/@y@j@H00.gfs.t@Hz.atmanl.nemsio</cyclestr></datadep>
+                 <datadep><cyclestr>&PUBDIR;/@y@j@H00.gfs.t@Hz.sfcanl.nemsio</cyclestr></datadep>
+               </and>
+               <and>
+                 <datadep><cyclestr>&RETRODIR;/@y@j@H00.gfs.t@Hz.atmanl.nemsio</cyclestr></datadep>
+                 <datadep><cyclestr>&RETRODIR;/@y@j@H00.gfs.t@Hz.sfcanl.nemsio</cyclestr></datadep>
+               </and>
+             </or>
+             <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas_available</cyclestr></datadep>
+           </and>
+	</dependency>
+</task>
+
+<task name="gfsfv3ic" cycledefs="gfs" maxtries="&MAXTRIES;">
+
+	<command>&JOBS_DIR;/fv3ic.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfsfv3ic_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_FV3IC_GFS;</queue>
+	&RESOURCES_FV3IC_GFS;
+	<walltime>&WALLTIME_FV3IC_GFS;</walltime>
+	<native>&NATIVE_FV3IC_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfv3ic.log</cyclestr></join>
+
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
+	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+
+	<dependency>
+		<and>
+			<or>
+				<and>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gfs.t@Hz.atmanl.nemsio</cyclestr></datadep>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gfs.t@Hz.sfcanl.nemsio</cyclestr></datadep>
+				</and>
+				<and>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+				</and>
+			</or>
+			<not>
+				<and>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
+					<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
+				</and>
+			</not>
+		</and>
+	</dependency>
+
+</task>
+
+<task name="regrid" cycledefs="gfs" maxtries="&MAXTRIES;">
+
+        <command>&JOBS_DIR;/regrid.sh</command>
+
+        <jobname><cyclestr>&PSLOT;_regrid_@H</cyclestr></jobname>
+        <account>&ACCOUNT;</account>
+        <queue>&QUEUE_REGRID;</queue>
+        &RESOURCES_REGRID;
+        <walltime>&WALLTIME_REGRID;</walltime>
+        <native>&NATIVE_REGRID;</native>
+        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
+
+        <envar><name>SLURM_SET</name><value>YES</value></envar>
+        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>OUTDIR</name><value>&OUTDIR;</value></envar>
+        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+        <envar><name>SYEAR</name><value><cyclestr>@Y</cyclestr></value></envar>
+        <envar><name>SMONTH</name><value><cyclestr>@m</cyclestr></value></envar>
+        <envar><name>SDAY</name><value><cyclestr>@d</cyclestr></value></envar>
+        <envar><name>SHOUR</name><value><cyclestr>@H</cyclestr></value></envar>
+        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+
+        <dependency>
+           <and>
+               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nemsio</cyclestr></datadep>
+               <datadep><cyclestr offset="-24:00:00">&OUTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf000.nemsio</cyclestr></datadep>
+           </and>  
+        </dependency>
+</task>
+
+</workflow>

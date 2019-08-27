@@ -68,6 +68,9 @@
 #ifdef FRONT_FV3
       use FRONT_FV3,        only: FV3_SS   => SetServices
 #endif
+#ifdef FRONT_DATM
+      use FRONT_DATM,       only: DATM_SS  => SetServices
+#endif
   ! - Handle build time OCN options:
 #ifdef FRONT_SOCN
       use FRONT_SOCN,       only: SOCN_SS   => SetServices
@@ -915,6 +918,29 @@
           file=__FILE__)) &
           return  ! bail out
       endif
+      ! following two added for export from MOM6
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "accum_heat_frazil")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="accum_heat_frazil", &
+          canonicalUnits="W m-2", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "inst_melt_potential")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="inst_melt_potential", &
+          canonicalUnits="W m-2", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
       if (.not. NUOPC_FieldDictionaryHasEntry( &
         "u_surf")) then
         call NUOPC_FieldDictionaryAddEntry( &
@@ -1699,6 +1725,17 @@
           return  ! bail out
       endif
       if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "sea_ice_surface_temperature")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="sea_ice_surface_temperature", &
+          canonicalUnits="K", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
         "sea_ice_temperature")) then
         call NUOPC_FieldDictionaryAddEntry( &
           standardName="sea_ice_temperature", &
@@ -1787,7 +1824,44 @@
           file=__FILE__)) &
           return  ! bail out
       endif
-      
+     
+      !Mass flux of liquid runoff
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "Foxx_rofl")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="Foxx_rofl", &
+          canonicalUnits="kg m-2 s-1", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+      !Mass flux of frozen runoff
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "Foxx_rofi")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="Foxx_rofi", &
+          canonicalUnits="kg m-2 s-1", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+      !Ocean surface boundary layer depth
+      if (.not. NUOPC_FieldDictionaryHasEntry( &
+        "So_bldepth")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="So_bldepth", &
+          canonicalUnits="m", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+ 
       ! Synonyms for HYCOM fields
       call NUOPC_FieldDictionarySetSyno( &
         standardNames = (/"surface_downward_eastward_stress",&
@@ -2848,6 +2922,54 @@
       endif
 
       if (.not.NUOPC_FieldDictionaryHasEntry( &
+        "inst_tracer_up_surface_flx")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="inst_tracer_up_surface_flx", &
+          canonicalUnits="kg m-2 s-1", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+
+      if (.not.NUOPC_FieldDictionaryHasEntry( &
+        "inst_tracer_down_surface_flx")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="inst_tracer_down_surface_flx", &
+          canonicalUnits="kg m-2 s-1", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+
+      if (.not.NUOPC_FieldDictionaryHasEntry( &
+        "inst_tracer_clmn_mass_dens")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="inst_tracer_clmn_mass_dens", &
+          canonicalUnits="g m-2", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+
+      if (.not.NUOPC_FieldDictionaryHasEntry( &
+        "inst_tracer_anth_biom_flx")) then
+        call NUOPC_FieldDictionaryAddEntry( &
+          standardName="inst_tracer_anth_biom_flx", &
+          canonicalUnits="ug m-2 s-1", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+
+      if (.not.NUOPC_FieldDictionaryHasEntry( &
         "inst_pbl_height")) then
         call NUOPC_FieldDictionaryAddEntry( &
           standardName="inst_pbl_height", &
@@ -3228,6 +3350,19 @@
               file=__FILE__, rcToReturn=rc)
             return  ! bail out
 #endif
+          elseif (trim(model) == "datm") then
+#ifdef FRONT_DATM
+            call NUOPC_DriverAddComp(driver, trim(prefix), DATM_SS, &
+              petList=petList, comp=comp, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+#else
+            write (msg, *) "Model '", trim(model), "' was requested, "// &
+              "but is not available in the executable!"
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, msg=msg, line=__LINE__, &
+              file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+#endif
           elseif (trim(model) == "socn") then
 #ifdef FRONT_SOCN
             call NUOPC_DriverAddComp(driver, trim(prefix), SOCN_SS, &
@@ -3577,11 +3712,14 @@
           
         enddo
         
+#if ESMF_VERSION_MAJOR < 8
+!TODOgjt: REMOVE THIS BLOCK ONCE SHOWN TO WORK WITHOUT
         ! SetServices for Connectors
         call SetFromConfig(driver, mode="setServicesConnectors", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-          
+#endif
+
         ! clean-up
         deallocate(compLabels)
         
@@ -3595,6 +3733,10 @@
     
     ! local variables
     character(ESMF_MAXSTR)          :: name
+#if ESMF_VERSION_MAJOR >= 8
+    type(ESMF_Config)               :: config
+    type(NUOPC_FreeFormat)          :: runSeqFF
+#endif
 
     rc = ESMF_SUCCESS
 
@@ -3603,11 +3745,27 @@
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
+#if ESMF_VERSION_MAJOR >= 8
+    ! read free format run sequence from config
+    call ESMF_GridCompGet(driver, config=config, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+    runSeqFF = NUOPC_FreeFormatCreate(config, label="runSeq::", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+
+    ! ingest FreeFormat run sequence
+    call NUOPC_DriverIngestRunSequence(driver, runSeqFF, &
+      autoAddConnectors=.true., rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+#else
     ! access runSeq in the config
     call SetFromConfig(driver, mode="setRunSequence", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-
+#endif
+    
     ! Diagnostic output
     if(verbose_diagnostics()) then
        call NUOPC_DriverPrint(driver, orderflag=.true., rc=rc)
@@ -3619,6 +3777,8 @@
     
   !-----------------------------------------------------------------------------
 
+#if ESMF_VERSION_MAJOR < 8
+!TODOgjt: REMOVE THIS BLOCK ONCE SHOWN TO WORK WITHOUT
   subroutine SetFromConfig(driver, mode, rc)
     type(ESMF_GridComp)   :: driver
     character(len=*)      :: mode
@@ -3641,6 +3801,14 @@
     integer                         :: connectorCount, j
     type(ESMF_CplComp)              :: conn
 
+    character(len=ESMF_MAXSTR) :: msgString
+    character(len=10)          :: value
+
+    !can set to 'max' to recover intro/extro CurrGarbInfo for 
+    !all connectors 
+    character(len=10)          :: defaultVerbosity = "0"
+    !character(len=10)          :: defaultVerbosity = "max"
+
     rc = ESMF_SUCCESS
     
     ! query the Component for info
@@ -3661,6 +3829,8 @@
     if (trim(mode)=="setServicesConnectors") then
       allocate(connectorInstance(lineCount))  ! max number of connectors
       connectorCount = 0 ! reset
+    write(msgString,'(a,i6)')'max number of connectors ',lineCount
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     endif
     
     ! reset config to beginning of runSeq:: block
@@ -3712,13 +3882,18 @@
               ! this is a new Connector instance
               connectorCount = j
               connectorInstance(j) = trim(line(1))//trim(line(2))//trim(line(3))
+              write(msgString,'(a,i4,a,i4,4a)')'Connector j = ',j,&
+                                                ' line number ', i,&
+                                                '  ',trim(connectorInstance(j)),&
+                                                ' Verbosity = ',trim(defaultVerbosity)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
               ! SetServices for new Connector instance
               call NUOPC_DriverAddComp(driver, &
                 srcCompLabel=trim(line(1)), dstCompLabel=trim(line(3)), &
                 compSetServicesRoutine=conSS, comp=conn, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail
-              call NUOPC_CompAttributeSet(conn, name="Verbosity", value="max", &
+              call NUOPC_CompAttributeSet(conn, name="Verbosity", value=defaultVerbosity, &
                 rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail
@@ -3792,7 +3967,7 @@
               slot = slotHWM + 1
               slotHWM = slotHWM + 1
               read(tempString(2:len(tempString)), *) seconds
-              print *, "found time step indicator: ", seconds
+              !print *, "found time step indicator: ", seconds
               call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, &
@@ -3876,7 +4051,7 @@
     endif
 
   end subroutine
-
+#endif
   !-----------------------------------------------------------------------------
 
   subroutine Finalize(driver, rc)

@@ -109,11 +109,15 @@ structure under SVN control looks like this:
     
        * \ref building "NEMSAppBuilder"
 
+       * \ref building "GNUmakefile" - main entry point for build system
+
        * \ref running "NEMSCompsetRun"
 
        * exe/ - Built executables are placed here
 
        * src/
+
+          * \ref building "incmake" - build system logic
 
           * ... NEMS code located here ...
 
@@ -140,6 +144,10 @@ For a hypothetical `SomeApp` app,
 
     svn co https://svnemc.ncep.noaa.gov/projects/nems/apps/SomeApp/trunk SomeApp
 
+or:
+
+    git clone gerrit:SomeApp
+
 This checks out everything needed to build the initial revision of the
 `SomeApp` application prototype from source into a directory called
 `SomeApp`. 
@@ -156,8 +164,16 @@ The application directory can be located anywhere under revision
 control. However, most of the NCEP applications are expected to be
 located on the EMC SVN server.  It is very simple to relocate a
 directory that is under SVN control to a different location at any
-time (or to rename it), without losing any history. For this reason we
-have set up a staging area here:
+time (or to rename it), without losing any history. 
+
+Newer applications can be found in VLAB Gerrit; a list is available on
+the NEMS Projects main page:
+
+* https://vlab.ncep.noaa.gov/redmine/projects/nems-projects
+
+in the lower-right corner, labeled "Subprojects."
+
+For older NEMS apps, this staging area contains most applications:
 
 * https://svnemc.ncep.noaa.gov/projects/nems/apps
 
@@ -177,35 +193,16 @@ revision history will be lost.  This setup provides a very structured
 approach for early development work, without committing to anything
 that cannot be changed in the future.
 
-#### 6.2.1.2	Handling External Components
+#### Handling External Components
 
 NEMS includes some external components whose primary development
 repository is outside of EMC. The application level provides the
 necessary control over which version of a specific external component
-is used in the modeling application.
-
-External components can be located anywhere under revision
-control. There is a staging area:
+is used in the modeling application.  Generally, such external
+components have been moved to their own repositories.  For some old
+apps, there is a staging area:
 
  * https://svnemc.ncep.noaa.gov/projects/nems/external_components
 
-where external components may first be placed before a final location
-is identified (in some cases back at the parent organization). We
-recommend creating the canonical trunk, tags, branches directory
-triplet under each application for consistency.  E.g., at this point
-the future XYZ component has this location and directory structure:
-
- * /projects/nems/external_components/XYZ
-   * branches
-   * tags
-   * trunk
-
-At any point in the future the XYZ directory can be renamed and/or
-moved to a different location on the SVN server. None of the revision
-history will be lost.  This setup provides a very structured approach
-for early development work, without committing to anything that cannot
-be changed in the future.
-
-For example, the FV3 component is here:
-
- * /projects/fv3/trunk
+However, those externals should be moved to their own git repository as
+soon as possible.

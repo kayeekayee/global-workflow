@@ -187,6 +187,8 @@ export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="@ICSDIR@"
 export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
+export EMITYPE=2 # 1: MODIS, 2: GBBEPx !lzhang
+
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
 export NET="gfs"
@@ -219,7 +221,7 @@ fi
 # Output frequency of the forecast model (for cycling)
 export FHMIN=0
 export FHMAX=9
-export FHOUT=6  #lzhang
+export FHOUT=6
 
 # GFS cycle info
 export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.

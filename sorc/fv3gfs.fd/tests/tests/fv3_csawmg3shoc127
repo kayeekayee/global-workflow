@@ -49,13 +49,7 @@ export LIST_FILES="atmos_4xdaily.tile1.nc \
                    RESTART/sfc_data.tile3.nc \
                    RESTART/sfc_data.tile4.nc \
                    RESTART/sfc_data.tile5.nc \
-                   RESTART/sfc_data.tile6.nc \
-                   RESTART/phy_data.tile1.nc \
-                   RESTART/phy_data.tile2.nc \
-                   RESTART/phy_data.tile3.nc \
-                   RESTART/phy_data.tile4.nc \
-                   RESTART/phy_data.tile5.nc \
-                   RESTART/phy_data.tile6.nc"
+                   RESTART/sfc_data.tile6.nc"
 
 
 export_fv3
@@ -68,6 +62,8 @@ export SHOUR='00'
 export TASKS=204
 export WRITE_GROUP=1
 export WRTTASK_PER_GROUP=12
+
+export NODES=$(expr $TASKS / $TPN + 1)
 
 export INPES='4'
 export JNPES='8'

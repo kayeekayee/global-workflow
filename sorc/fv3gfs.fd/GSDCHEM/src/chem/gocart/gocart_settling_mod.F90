@@ -1,10 +1,11 @@
 module gocart_settling_mod
 
   use chem_types_mod,   only : CHEM_KIND_R8
-  use chem_tracers_mod, only : p_seas_1, p_seas_2, p_seas_3, p_seas_4, &
+  use chem_tracers_mod, only : p_seas_1, p_seas_2, p_seas_3, p_seas_4, p_seas_5, &
                                p_dust_1, p_dust_2, p_dust_3, p_dust_4, p_dust_5, &
                                p_qv, &
                                config => chem_config
+  use chem_config_mod,  only : DUST_OPT_AFWA, DUST_OPT_GOCART, SEAS_OPT_NONE
 
 
   use dust_data_mod, only : den_dust, reff_dust, dyn_visc
@@ -21,14 +22,8 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
          ids,ide, jds,jde, kds,kde,                                        &
          ims,ime, jms,jme, kms,kme,                                        &
          its,ite, jts,jte, kts,kte                                         )
-! USE module_configure
-! USE module_state_description
-! USE module_initial_chem_namelists
-! USE module_data_gocart_dust
-! USE module_data_gocart_seas
-! USE module_model_constants, ONLY: mwdry
+
   IMPLICIT NONE
-!  TYPE(grid_config_rec_type),  INTENT(IN   )    :: config_flags
 
    INTEGER,      INTENT(IN   ) ::                      &
                                   num_moist,num_chem,                      &
@@ -48,9 +43,9 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 
   REAL, INTENT(IN   ) :: dt,g
   integer :: nv,nmx,i,j,k,kk,lmx,iseas,idust
-  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+0) :: tmp,airden,airmas,p_mid,delz,rh
-  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+0,5) :: dust
-  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+0,4) :: sea_salt
+  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1) :: tmp,airden,airmas,p_mid,delz,rh
+  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1,5) :: dust
+  real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1,5) :: sea_salt
   real, dimension (1:5) :: maxdust,maxseas
 !
 ! bstl is for budgets
@@ -60,7 +55,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 ! real(CHEM_KIND_R8), DIMENSION (4), PARAMETER :: den_seas(4)=(/2200.,2200.,2200.,2290./)
 ! real(CHEM_KIND_R8), DIMENSION (4), PARAMETER :: reff_seas(4)=(/0.30D-6,1.00D-6,3.25D-6,7.50D-6/)
   real(CHEM_KIND_R8), DIMENSION (5) :: bstl_dust
-  real(CHEM_KIND_R8), DIMENSION (4) :: bstl_seas
+  real(CHEM_KIND_R8), DIMENSION (5) :: bstl_seas
   real(CHEM_KIND_R8) conver,converi
   real(CHEM_KIND_R8),parameter::max_default=0.
 !      conver=1.e-9*mwdry
@@ -68,7 +63,6 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
        conver=1.e-9
        converi=1.e9
        lmx=kte-kts+1
-       lmx=kte-kts
 !        write(6,*)'in settle'
        select case (config % chem_opt)
        case (304, 316, 317)
@@ -83,10 +77,10 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 ! initialize met stuff
 !
           kk=0
-          do k=kts,kte-1
+          do k=kts,kte 
           kk=kk+1
-          p_mid(1,1,kk)=.01*p_phy(i,kte-k+kts-1,j)
-          delz(1,1,kk)=dz8w(i,kte-k+kts-1,j)
+          p_mid(1,1,kk)=.01*p_phy(i,kte-k+kts,j) 
+          delz(1,1,kk)=dz8w(i,kte-k+kts,j)  
           airmas(1,1,kk)=-(p8w(i,k+1,j)-p8w(i,k,j))*area(i,j)/g
           airden(1,1,kk)=rho_phy(i,k,j)
           tmp(1,1,kk)=t_phy(i,k,j)
@@ -99,7 +93,8 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 !
 ! dust first
 !
-          if ((config % dust_opt == 1) .or. (config % dust_opt == 3)) then
+          if((config % dust_opt == DUST_OPT_GOCART) .or. &
+             (config % dust_opt == DUST_OPT_AFWA  )) then
           iseas=0
           idust=1
           maxdust(:)=0.
@@ -111,7 +106,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
             enddo
           enddo
           kk=0
-          do k=kts,kte-1
+          do k=kts,kte 
           kk=kk+1
           if(k.eq.kts)then
              dust(1,1,kk,1)=(chem(i,k,j,p_dust_1)-.31*dusthelp(i,j))*conver
@@ -127,7 +122,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
           enddo
           call settling(1, 1, lmx, 5,g,dyn_visc, &
                     dust, tmp, p_mid, delz, airmas, &
-                    den_dust, reff_dust, dt, bstl_dust, rh, idust, iseas)
+                    den_dust, reff_dust, dt, bstl_dust, rh, idust, iseas,airden)
           kk=0
           do k=kts,kte-5
              kk=kk+1
@@ -149,7 +144,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 !
 !
 !
-          if(config % seas_opt == 1 ) then
+          if(config % seas_opt /= SEAS_OPT_NONE) then
           iseas=1
           idust=0
           maxseas(:)=0.
@@ -161,7 +156,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
              enddo
           enddo
           kk=0
-          do k=kts,kte-1
+          do k=kts,kte 
              kk=kk+1
              if(k.eq.kts)then
                 sea_salt(1,1,kk,1)=(chem(i,k,j,p_seas_1)-.75*seashelp(i,j))*conver
@@ -176,7 +171,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
            enddo
              call settling(1, 1, lmx, 4, g,dyn_visc,&
                     sea_salt, tmp, p_mid, delz, airmas, &
-                    den_seas, reff_seas, dt, bstl_seas, rh, idust, iseas)
+                    den_seas, reff_seas, dt, bstl_seas, rh, idust, iseas,airden)
           kk=0
           do k=kts,kte-5
             kk=kk+1
@@ -194,7 +189,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
             chem(i,k,j,p_seas_1)=0.
             chem(i,k,j,p_seas_2)=0.
           enddo
-          endif ! seas_opt == 1
+          endif ! seas_opt >= 1
 !
 !
 !
@@ -213,10 +208,10 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
           kk=0
           bstl_dust(:)=0.
           bstl_seas(:)=0.
-          do k=kts,kte-1
+          do k=kts,kte 
           kk=kk+1
-          p_mid(1,1,kk)=.01*p_phy(i,kte-k+kts-1,j)
-          delz(1,1,kk)=dz8w(i,kte-k+kts-1,j)
+          p_mid(1,1,kk)=.01*p_phy(i,kte-k+kts,j) 
+          delz(1,1,kk)=dz8w(i,kte-k+kts,j) 
           airmas(1,1,kk)=-(p8w(i,k+1,j)-p8w(i,k,j))*area(i,j)/g
           airden(1,1,kk)=rho_phy(i,k,j)
           tmp(1,1,kk)=t_phy(i,k,j)
@@ -229,7 +224,8 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 !
 ! max dust in column
 !
-          if((config % dust_opt == 1) .or. (config % dust_opt == 3)) then
+          if((config % dust_opt == DUST_OPT_GOCART) .or. &
+             (config % dust_opt == DUST_OPT_AFWA  )) then
           iseas=0
           idust=1
           maxdust(:)=0.
@@ -241,7 +237,7 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
              enddo
           enddo
           kk=0
-          do k=kts,kte-1
+          do k=kts,kte 
             kk=kk+1
             dust(1,1,kk,1)=chem(i,k,j,p_dust_1)*conver
             dust(1,1,kk,2)=chem(i,k,j,p_dust_2)*conver
@@ -253,20 +249,15 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 
           call settling(1, 1, lmx, 5,g,dyn_visc, &
                     dust, tmp, p_mid, delz, airmas, &
-                    den_dust, reff_dust, dt, bstl_dust, rh, idust, iseas)
+                    den_dust, reff_dust, dt, bstl_dust, rh, idust, iseas,airden)
           kk=0
           do k=kts,kte-4
           kk=kk+1
-          chem(i,k,j,p_dust_1)=dust(1,1,kk,1)*converi
-          chem(i,k,j,p_dust_2)=dust(1,1,kk,2)*converi
-          chem(i,k,j,p_dust_3)=dust(1,1,kk,3)*converi
-          chem(i,k,j,p_dust_4)=dust(1,1,kk,4)*converi
-          chem(i,k,j,p_dust_5)=dust(1,1,kk,5)*converi
-          chem(i,k,j,p_dust_1)=min(maxdust(1),chem(i,k,j,p_dust_1))
-          chem(i,k,j,p_dust_2)=min(maxdust(2),chem(i,k,j,p_dust_2))
-          chem(i,k,j,p_dust_3)=min(maxdust(3),chem(i,k,j,p_dust_3))
-          chem(i,k,j,p_dust_4)=min(maxdust(4),chem(i,k,j,p_dust_4))
-          chem(i,k,j,p_dust_5)=min(maxdust(5),chem(i,k,j,p_dust_5))
+          chem(i,k,j,p_dust_1)=min(maxdust(1),dust(1,1,kk,1)*converi)
+          chem(i,k,j,p_dust_2)=min(maxdust(2),dust(1,1,kk,2)*converi)
+          chem(i,k,j,p_dust_3)=min(maxdust(3),dust(1,1,kk,3)*converi)
+          chem(i,k,j,p_dust_4)=min(maxdust(4),dust(1,1,kk,4)*converi)
+          chem(i,k,j,p_dust_5)=min(maxdust(5),dust(1,1,kk,5)*converi)
           enddo
           do k=kte-3,kte
             chem(i,k,j,p_dust_1)=1.e-16
@@ -279,49 +270,48 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 !
 !
 !
-          if(config % seas_opt == 1 ) then
+          if(config % seas_opt /= SEAS_OPT_NONE) then
           iseas=1
           idust=0
           kk=0
-          do k=kts,kte-1
+          do k=kts,kte 
           kk=kk+1
              sea_salt(1,1,kk,1)=chem(i,k,j,p_seas_1)*conver
              sea_salt(1,1,kk,2)=chem(i,k,j,p_seas_2)*conver
              sea_salt(1,1,kk,3)=chem(i,k,j,p_seas_3)*conver
              sea_salt(1,1,kk,4)=chem(i,k,j,p_seas_4)*conver
+             sea_salt(1,1,kk,5)=chem(i,k,j,p_seas_5)*conver
           enddo
 !
 ! max seasalt in column
 !
           maxseas(:)=0.
           kk=0
-          do nv = p_seas_1,p_seas_4
+          do nv = p_seas_1,p_seas_5
              kk=kk+1
              do k=kts,kte
                  if(chem(i,k,j,nv).gt.maxseas(kk)) maxseas(kk)=chem(i,k,j,nv)
              enddo
           enddo
 !         write(0,*)i,j,bstl_dust(3),bstl_dust(4),chem(i,1,j,p_dust_4)
-             call settling(1, 1, lmx, 4, g,dyn_visc,&
+             call settling(1, 1, lmx, 5, g,dyn_visc,&
                     sea_salt, tmp, p_mid, delz, airmas, &
-                    den_seas, reff_seas, dt, bstl_seas, rh, idust, iseas)
+                    den_seas, reff_seas, dt, bstl_seas, rh, idust, iseas,airden)
           kk=0
           do k=kts,kte-4
           kk=kk+1
-            chem(i,k,j,p_seas_1)=sea_salt(1,1,kk,1)*converi
-            chem(i,k,j,p_seas_2)=sea_salt(1,1,kk,2)*converi
-            chem(i,k,j,p_seas_3)=sea_salt(1,1,kk,3)*converi
-            chem(i,k,j,p_seas_4)=sea_salt(1,1,kk,4)*converi
-            chem(i,k,j,p_seas_1)=min(maxseas(1),chem(i,k,j,p_seas_1))
-            chem(i,k,j,p_seas_2)=min(maxseas(2),chem(i,k,j,p_seas_2))
-            chem(i,k,j,p_seas_3)=min(maxseas(3),chem(i,k,j,p_seas_3))
-            chem(i,k,j,p_seas_4)=min(maxseas(4),chem(i,k,j,p_seas_4))
+            chem(i,k,j,p_seas_1)=min(maxseas(1),sea_salt(1,1,kk,1)*converi)
+            chem(i,k,j,p_seas_2)=min(maxseas(2),sea_salt(1,1,kk,2)*converi)
+            chem(i,k,j,p_seas_3)=min(maxseas(3),sea_salt(1,1,kk,3)*converi)
+            chem(i,k,j,p_seas_4)=min(maxseas(4),sea_salt(1,1,kk,4)*converi)
+            chem(i,k,j,p_seas_5)=min(maxseas(5),sea_salt(1,1,kk,5)*converi)
           enddo
           do k=kte-3,kte
             chem(i,k,j,p_seas_1)=0.
             chem(i,k,j,p_seas_2)=0.
             chem(i,k,j,p_seas_3)=0.
             chem(i,k,j,p_seas_4)=0.
+            chem(i,k,j,p_seas_5)=0.
           enddo
           endif   ! end seasopt==1
 !
@@ -339,7 +329,7 @@ END SUBROUTINE gocart_settling_driver
 
           subroutine settling(imx,jmx, lmx, nmx,g0,dyn_visc, &
                     tc, tmp, p_mid, delz, airmas, &
-                    den, reff, dt, bstl, rh, idust, iseas)
+                    den, reff, dt, bstl, rh, idust, iseas,airden)
 ! ****************************************************************************
 ! *                                                                          *
 ! *  Calculate the loss by settling, using an implicit method                *
@@ -360,15 +350,18 @@ END SUBROUTINE gocart_settling_driver
   REAL, INTENT(IN) :: dt,g0,dyn_visc
   REAL(CHEM_KIND_R8),    INTENT(IN) :: tmp(imx,jmx,lmx), delz(imx,jmx,lmx),  &
                          airmas(imx,jmx,lmx), rh(imx,jmx,lmx), &
-                         den(nmx), reff(nmx), p_mid(imx,jmx,lmx)
+                         den(nmx), reff(nmx),p_mid(imx,jmx,lmx),&
+                         airden(imx,jmx,lmx)
   REAL(CHEM_KIND_R8), INTENT(INOUT) :: tc(imx,jmx,lmx,nmx)
   REAL(CHEM_KIND_R8), INTENT(OUT)   :: bstl(imx,jmx,nmx)
 
   REAL(CHEM_KIND_R8)    :: tc1(imx,jmx,lmx,nmx), dt_settl(nmx), rcm(nmx), rho(nmx)
   INTEGER :: ndt_settl(nmx)
   REAL(CHEM_KIND_R8)    :: dzmin, vsettl, dtmax, pres, rhb, rwet(nmx), ratio_r(nmx)
-  REAL(CHEM_KIND_R8)    :: c_stokes, free_path, c_cun, viscosity, vd_cor, growth_fac
+  REAL(CHEM_KIND_R8)    :: c_stokes, free_path, c_cun, viscosity,  growth_fac
+  REAL(CHEM_KIND_R8)    :: vd_cor(lmx),vd_wk1 
   INTEGER :: k, n, i, j, l, l2
+  REAL(CHEM_KIND_R8)    :: transfer_to_below_level,temp_tc
   ! for sea-salt:
   REAL(CHEM_KIND_R8), PARAMETER :: c1=0.7674, c2=3.079, c3=2.573E-11, c4=-1.424 
 
@@ -437,7 +430,8 @@ END SUBROUTINE gocart_settling_driver
         DO n = 1,ndt_settl(k)
 
            ! Solve each vertical layer successively (layer l)
-      
+        transfer_to_below_level=0
+ 
            DO l = lmx,1,-1
               l2 = lmx - l + 1
 
@@ -475,18 +469,26 @@ END SUBROUTINE gocart_settling_driver
                     rho_priv(k) = ratio_r(k)*den(k) + (1.0 - ratio_r(k))*1000.0
                  END IF
 
-                 vd_cor = 2.0/9.0*g0*rho_priv(k)*rwet_priv(k)**2/viscosity
+                 vd_cor(l) = 2.0/9.0*g0*rho_priv(k)*rwet_priv(k)**2/viscosity
 
                  ! Update mixing ratio
-                 ! Order of delz is top->sfc
-                 IF (l == lmx) THEN
-                    tc(i,j,l,k) = tc(i,j,l,k) / &
-                         (1.0 + dt_settl(k)*vd_cor/delz(i,j,l2))
-                 ELSE
-                    tc(i,j,l,k) = 1.0/(1.0+dt_settl(k)*vd_cor/delz(i,j,l2))&
-                         *(tc(i,j,l,k) + dt_settl(k)*vd_cor /delz(i,j,l2-1) &
-                         * tc(i,j,l+1,k))
-                 END IF
+                 !! Order of delz is top->sfc
+                 !IF (l == lmx) THEN
+                 !   tc(i,j,l,k) = tc(i,j,l,k) / &
+                 !        (1.0 + dt_settl(k)*vd_cor/delz(i,j,l2))
+                 !ELSE
+                 !   tc(i,j,l,k) = 1.0/(1.0+dt_settl(k)*vd_cor/delz(i,j,l2))&
+                 !        *(tc(i,j,l,k) + dt_settl(k)*vd_cor /delz(i,j,l2-1) &
+                 !        * tc(i,j,l+1,k))
+                 !END IF
+            ! Update mixing ratio; order of delz: top->sfc
+            temp_tc=tc(i,j,l,k)      !temp_tc - for temporal storage [ug/kg]            
+            vd_wk1 = dt_settl(k)*vd_cor(l)/delz(i,j,l2)   !fraction to leave level
+
+            tc(i,j,l,k)   =  tc(i,j,l,k)*(1.- vd_wk1)+transfer_to_below_level ! [ug/kg]
+            if (l.gt.1) transfer_to_below_level =(temp_tc*vd_wk1)*((delz(i,j,l2) &
+                   *airden(i,j,l))/(delz(i,j,l2+1)*airden(i,j,l-1)))          ! [ug/kg]
+
               END DO   !i
 !           END DO   !j
         END DO  !l

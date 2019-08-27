@@ -1620,7 +1620,7 @@
                     gridstruct%area_64, dx, dy, dxa, dya, dxc, dyc, &
                     gridstruct%sin_sg, phis, &
                     flagstruct%stretch_fac, gridstruct%nested, &
-                    npx_global, domain, flagstruct%grid_number, bd)
+                    npx_global, domain, flagstruct%grid_number, bd,  flagstruct%regional)
        call mpp_update_domains( phis, domain )
 
        if ( hybrid_z ) then
@@ -6293,7 +6293,12 @@ end subroutine terminator_tracers
                do i=is,ie
                   pm(i) = delp(i,j,k)/(peln(i,k+1,j)-peln(i,k,j))
                enddo
+#ifdef MULTI_GASES
+               call qsmith((ie-is+1)*(je-js+1), npz,  &
+                            ie-is+1, 1, pt(is:ie,j,k), pm, q(is:ie,j,k,1), qs)
+#else
                call qsmith(ie-is+1, 1, 1, pt(is:ie,j,k), pm, q(is:ie,j,k,1), qs)
+#endif
                do i=is,ie
                   q(i,j,k,1) = max(2.E-6, 0.8*pm(i)/ps(i,j)*qs(i) )
                enddo
@@ -6707,7 +6712,12 @@ end subroutine terminator_tracers
                do i=is,ie
                   pm(i) = delp(i,j,k)/(peln(i,k+1,j)-peln(i,k,j))
                enddo
+#ifdef MULTI_GASES
+               call qsmith((ie-is+1)*(je-js+1), npz,  &
+                            ie-is+1, 1, pt(is:ie,j,k), pm, q(is:ie,j,k,1), qs)
+#else
                call qsmith(ie-is+1, 1, 1, pt(is:ie,j,k), pm, q(is:ie,j,k,1), qs)
+#endif
                do i=is,ie
                   if ( pm(i) > 100.E2 ) then
                        q(i,j,k,1) = 0.9*qs(i)

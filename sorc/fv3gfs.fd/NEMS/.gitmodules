@@ -1,0 +1,3 @@
+[submodule "tests/produtil/NCEPLIBS-pyprodutil"]
+	path = tests/produtil/NCEPLIBS-pyprodutil
+	url = gerrit:NCEPLIBS-pyprodutil

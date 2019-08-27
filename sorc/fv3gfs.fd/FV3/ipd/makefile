@@ -17,12 +17,12 @@ endif
 
 LIBRARY  = libipd.a
 
-FFLAGS   += -I../fms -I../fms/include -I../gfsphysics -I../namphysics
+FFLAGS   += -I$(FMS_DIR) -I../gfsphysics -I../namphysics
 
-CPPDEFS = -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM -DINTERNAL_FILE_NML
+CPPDEFS += -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM -DINTERNAL_FILE_NML
 
 SRCS_F90 = \
-	   ./IPD_driver.F90						     \
+	   ./IPD_driver.F90 \
 	   ./IPD_typedefs.F90
 
 SRCS_c   =
@@ -42,25 +42,11 @@ all default: depend $(LIBRARY)
 $(LIBRARY): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $?
 
-# this is the place to override default (implicit) compilation rules
-# and create specific (explicit) rules
-
-ifneq (,$(findstring axSSE4.2,AVX,CORE-AVX2,$(FFLAGS)))
-./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -axSSE4.2,AVX,CORE-AVX-I -c $< -o $@
-else
-./physics/radiation_aerosols.o : ./physics/radiation_aerosols.f
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -xCORE-AVX-I -c $< -o $@
-endif
-
-./GFS_layer/GFS_diagnostics.o : ./GFS_layer/GFS_diagnostics.F90
-	$(FC) $(FFLAGS) $(OTHER_FFLAGS) -O0 -c $< -o $@
-
 .PHONY: clean
 clean:
 	@echo "Cleaning ipd  ... "
 	@echo
-	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.lst *.i depend
+	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.i90 *.lst *.i depend
 
 MKDEPENDS = ../mkDepends.pl
 include ../conf/make.rules

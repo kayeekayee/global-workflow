@@ -13,5 +13,7 @@ guides, howtos and system descriptions.
   + @subpage mediator
   + @subpage sw_mediator
   + @subpage cap-page
+  + @subpage multiapp_test
+  + @subpage code-manager-notes
 
 */

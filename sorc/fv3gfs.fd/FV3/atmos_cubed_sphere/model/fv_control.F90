@@ -1,3 +1,4 @@
+
 !***********************************************************************
 !*                   GNU Lesser General Public License                 
 !*
@@ -151,6 +152,13 @@ module fv_control_mod
    use mpp_mod,             only: mpp_send, mpp_sync, mpp_transmit, mpp_set_current_pelist, mpp_declare_pelist, mpp_root_pe, mpp_recv, mpp_sync_self, mpp_broadcast, read_input_nml
    use fv_diagnostics_mod,  only: fv_diag_init_gn
 
+#ifdef MULTI_GASES
+   use constants_mod,       only: rvgas, cp_air
+   use multi_gases_mod,     only: multi_gases_init, &
+                                  rilist => ri,     &
+                                  cpilist => cpi
+#endif
+
    implicit none
    private
 
@@ -221,6 +229,9 @@ module fv_control_mod
    real    , pointer :: p_fac
    real    , pointer :: a_imp
    integer , pointer :: n_split 
+
+   real    , pointer :: fac_n_spl
+   real    , pointer :: fhouri
                              ! Default 
    integer , pointer :: m_split 
    integer , pointer :: k_split 
@@ -318,6 +329,8 @@ module fv_control_mod
   real(kind=R_GRID), pointer :: deglat
 
   logical, pointer :: nested, twowaynest
+  logical, pointer :: regional
+  integer, pointer :: bc_update_interval 
   integer, pointer :: parent_tile, refinement, nestbctype, nestupdate, nsponge, ioffset, joffset
   real, pointer :: s_weight, update_blend
 
@@ -373,7 +386,6 @@ module fv_control_mod
    integer :: ic, jc
 
    gid = mpp_pe()
-
    call init_nesting(Atm, grids_on_this_pe, p_split)
 
    !This call is needed to set up the pointers for fv_current_grid, even for a single-grid run
@@ -432,9 +444,10 @@ module fv_control_mod
             endif
 
             !!CLEANUP: Convenience pointers
-            Atm(n)%gridstruct%nested    => Atm(n)%neststruct%nested
-            Atm(n)%gridstruct%grid_type => Atm(n)%flagstruct%grid_type
+            Atm(n)%gridstruct%nested      => Atm(n)%neststruct%nested
+            Atm(n)%gridstruct%grid_type   => Atm(n)%flagstruct%grid_type
             Atm(n)%flagstruct%grid_number => Atm(n)%grid_number
+            Atm(n)%gridstruct%regional  => Atm(n)%flagstruct%regional
 
             call init_grid(Atm(n), grid_name, grid_file, npx, npy, npz, ndims, ntiles, ng)
 
@@ -656,9 +669,12 @@ module fv_control_mod
                          nested, twowaynest, parent_grid_num, parent_tile, nudge_qv, &
                          refinement, nestbctype, nestupdate, nsponge, s_weight, &
                          ioffset, joffset, check_negative, nudge_ic, halo_update_type, gfs_phil, agrid_vel_rst,     &
-                         do_uni_zfull, adj_mass_vmr
+                         do_uni_zfull, adj_mass_vmr, fac_n_spl, fhouri, regional, bc_update_interval
 
    namelist /test_case_nml/test_case, bubble_do, alpha, nsolitons, soliton_Umax, soliton_size
+#ifdef MULTI_GASES
+   namelist /multi_gases_nml/ rilist,cpilist
+#endif
 
 
    pe_counter = mpp_root_pe()
@@ -703,6 +719,20 @@ module fv_control_mod
    ! Read FVCORE namelist 
       read (input_nml_file,fv_core_nml,iostat=ios)
       ierr = check_nml_error(ios,'fv_core_nml')
+#ifdef MULTI_GASES
+      if( is_master() ) print *,' enter multi_gases: ncnst = ',ncnst
+      allocate (rilist(0:ncnst))
+      allocate (cpilist(0:ncnst))
+      rilist     =    0.0
+      cpilist    =    0.0
+      rilist(0)  = rdgas
+      rilist(1)  = rvgas
+      cpilist(0) = cp_air
+      cpilist(1) = 4*cp_air
+   ! Read multi_gases namelist
+      read (input_nml_file,multi_gases_nml,iostat=ios)
+      ierr = check_nml_error(ios,'multi_gases_nml')
+#endif
    ! Read Test_Case namelist
       read (input_nml_file,test_case_nml,iostat=ios)
       ierr = check_nml_error(ios,'test_case_nml')
@@ -723,6 +753,21 @@ module fv_control_mod
       read (f_unit,fv_core_nml,iostat=ios)
       ierr = check_nml_error(ios,'fv_core_nml')
 
+#ifdef MULTI_GASES
+      if( is_master() ) print *,' enter multi_gases: ncnst = ',ncnst
+      allocate (rilist(0:ncnst))
+      allocate (cpilist(0:ncnst))
+      rilist     =    0.0
+      cpilist    =    0.0
+      rilist(0)  = rdgas
+      rilist(1)  = rvgas
+      cpilist(0) = cp_air
+      cpilist(1) = 4*cp_air
+   ! Read multi_gases namelist
+      rewind (f_unit)
+      read (f_unit,multi_gases_nml,iostat=ios)
+      ierr = check_nml_error(ios,'multi_gases_nml')
+#endif
    ! Read Test_Case namelist
       rewind (f_unit)
       read (f_unit,test_case_nml,iostat=ios)
@@ -731,6 +776,10 @@ module fv_control_mod
 #endif         
       write(unit, nml=fv_core_nml)
       write(unit, nml=test_case_nml)
+#ifdef MULTI_GASES
+      write(unit, nml=multi_gases_nml)
+      call multi_gases_init(ncnst,nwat)
+#endif
 
       if (len_trim(grid_file) /= 0) Atm(n)%flagstruct%grid_file = grid_file
       if (len_trim(grid_name) /= 0) Atm(n)%flagstruct%grid_name = grid_name
@@ -744,17 +793,17 @@ module fv_control_mod
          nf_omega = 0
       endif
 
-      if (.not. nested) Atm(n)%neststruct%npx_global = npx
+      if (.not. (nested .or. regional)) Atm(n)%neststruct%npx_global = npx
 
       ! Define n_split if not in namelist
-      if (ntiles==6) then
+      if (ntiles == 6) then
          dimx = 4.0*(npx-1)
          if ( hydrostatic ) then
             if ( npx >= 120 ) ns0 = 6
          else
             if ( npx <= 45 ) then
                ns0 = 6
-            elseif ( npx <=90 ) then
+            elseif ( npx <= 90 ) then
                ns0 = 7
             else
                ns0 = 8
@@ -896,7 +945,7 @@ module fv_control_mod
  198  format(A,i2.2,A,i4.4,'x',i4.4,'x',i1.1,'-',f9.3)
  199  format(A,i3.3)
 
-      if (.not. nested) alpha = alpha*pi
+      if (.not. (nested .or. regional)) alpha = alpha*pi
 
 
       allocate(Atm(n)%neststruct%child_grids(size(Atm)))
@@ -996,7 +1045,6 @@ module fv_control_mod
    enddo
 
   end subroutine run_setup
-
   subroutine init_nesting(Atm, grids_on_this_pe, p_split)
     
     type(fv_atmos_type), intent(inout), allocatable :: Atm(:)
@@ -1182,10 +1230,14 @@ module fv_control_mod
      stretch_fac                   => Atm%flagstruct%stretch_fac
      target_lat                    => Atm%flagstruct%target_lat
      target_lon                    => Atm%flagstruct%target_lon
+     regional                      => Atm%flagstruct%regional
+     bc_update_interval            => Atm%flagstruct%bc_update_interval 
      reset_eta                     => Atm%flagstruct%reset_eta
      p_fac                         => Atm%flagstruct%p_fac
      a_imp                         => Atm%flagstruct%a_imp
      n_split                       => Atm%flagstruct%n_split
+     fac_n_spl                     => Atm%flagstruct%fac_n_spl
+     fhouri                        => Atm%flagstruct%fhouri
      m_split                       => Atm%flagstruct%m_split
      k_split                       => Atm%flagstruct%k_split
      use_logp                      => Atm%flagstruct%use_logp

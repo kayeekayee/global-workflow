@@ -17,7 +17,7 @@ endif
 
 LIBRARY  = libnamphys.a
 
-FFLAGS   += -I../fms -I../fms/include -I../cpl $(ESMF_INC)
+FFLAGS   += -I$(FMS_DIR) -I../cpl $(ESMF_INC)
 
 CPPDEFS = -DNEW_TAUCTMAX -DSMALL_PE -DNEMS_GSM -DINTERNAL_FILE_NML
 
@@ -55,7 +55,8 @@ SRCS_F   = ./physics/machine.F
 
 SRCS_f90 = \
            ./physics/funcphys.f90                                                    \
-           ./physics/physcons.f90
+           ./physics/physcons.f90                                                    \
+           ./physics/noahmp_tables.f90
 
 SRCS_F90 = \
            ./physics/module_BL_GFSPBL.F90                                            \
@@ -134,7 +135,7 @@ $(LIBRARY): $(OBJS)
 clean:
 	@echo "Cleaning namphysics  ... "
 	@echo
-	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.lst *.i depend
+	$(RM) -f $(LIBRARY) *__genmod.f90 *.o */*.o *.mod *.i90 *.lst *.i depend
 
 MKDEPENDS = ../mkDepends.pl
 include ../conf/make.rules

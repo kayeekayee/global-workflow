@@ -18,7 +18,7 @@ contains
   subroutine gocart_dust_afwa_driver(ktau,dt,alt,t_phy,moist,u_phy,        &
          v_phy,chem,rho_phy,dz8w,smois,u10,v10,p8w,erod,                   &
          ivgtyp,isltyp,vegfra,xland,xlat,xlong,gsw,area,g,emis_dust,       &
-         srce_dust,dustin,ust,znt,clay,sand,alpha,gamma,                    &
+         srce_dust,dustin,ust,znt,clay,sand,                               &
          num_emis_dust,num_moist,num_chem,num_soil_layers,                 &
          ids,ide, jds,jde, kds,kde,                                        &
          ims,ime, jms,jme, kms,kme,                                        &
@@ -38,18 +38,16 @@ contains
          INTENT(IN ) ::                              moist
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),                 &
          INTENT(INOUT ) ::                           chem
-   REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL,           &
+   REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),                    &
          INTENT(INOUT ) ::                                                 &
          emis_dust
-   REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL,&
+   REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),                    &
          INTENT(INOUT ) ::                                                 &
          srce_dust
    REAL, DIMENSION( ims:ime, num_soil_layers, jms:jme ) ,     &
          INTENT(INOUT) ::                            smois
    REAL, DIMENSION( ims:ime , jms:jme, ndcls )             ,               &
          INTENT(IN   ) ::                            erod
-!  REAL,  DIMENSION( ims:ime , jms:jme, 5 )                   ,               &
-!         INTENT(INout   ) ::    dustin
    REAL, DIMENSION( ims:ime , jms:jme )                    ,               &
          INTENT(IN   ) ::                                                  &
                                                      u10,                  &
@@ -79,12 +77,10 @@ contains
   REAL(CHEM_KIND_R8), DIMENSION (1,1) :: gravsm
   REAL(CHEM_KIND_R8), DIMENSION (1,1) :: drylimit
   real(CHEM_KIND_R8), DIMENSION (5)   :: tc,bems
-!  real*8, dimension (1,1) :: w10m
   real(CHEM_KIND_R8), dimension (1,1) :: airden,airmas,ustar
   real(CHEM_KIND_R8), dimension (1) :: dxy
   real(CHEM_KIND_R8), dimension (3) :: massfrac
   real(CHEM_KIND_R8) :: conver,converi
-  real, INTENT(IN   ) :: alpha, gamma
 
   conver=1.e-9
   converi=1.e9
@@ -109,21 +105,11 @@ contains
 
 ! Total concentration at lowest model level. This is still hardcoded for 5 bins.
 
-!    if(config_flags%chem_opt == 2 .or. config_flags%chem_opt == 11 ) then
-!       tc(:)=1.e-16*conver
-!    else
-        tc(1)=chem(i,kts,j,p_dust_1)*conver
-        tc(2)=chem(i,kts,j,p_dust_2)*conver
-        tc(3)=chem(i,kts,j,p_dust_3)*conver
-        tc(4)=chem(i,kts,j,p_dust_4)*conver
-        tc(5)=chem(i,kts,j,p_dust_5)*conver
-!    endif
-
-!     tc(1)=chem(i,kts,j,p_dust_1)*conver
-!     tc(2)=chem(i,kts,j,p_dust_2)*conver
-!     tc(3)=chem(i,kts,j,p_dust_3)*conver
-!     tc(4)=chem(i,kts,j,p_dust_4)*conver
-!     tc(5)=chem(i,kts,j,p_dust_5)*conver
+      tc(1)=chem(i,kts,j,p_dust_1)*conver
+      tc(2)=chem(i,kts,j,p_dust_2)*conver
+      tc(3)=chem(i,kts,j,p_dust_3)*conver
+      tc(4)=chem(i,kts,j,p_dust_4)*conver
+      tc(5)=chem(i,kts,j,p_dust_5)*conver
 
 ! Air mass and density at lowest model level.
 
@@ -166,38 +152,19 @@ contains
 
 ! Calculate gravimetric soil moisture and drylimit.
 
-!      gravsm(1,1)=100*smois(i,1,j)/((1.-maxsmc(isltyp(i,j)))*(2.65*(1-clay(i,j))+2.50*clay(i,j)))
       gravsm(1,1)=100.*smois(i,1,j)/((1.-maxsmc(isltyp(i,j)))*(2.65*(1.-clay(i,j))+2.50*clay(i,j)))
       drylimit(1,1)=14.0*clay(i,j)*clay(i,j)+17.0*clay(i,j)
-!     write(0,*) "gravsm(",i,",",j,")=",gravsm(1,1)," drylimit=",drylimit(1)
  
 ! Call dust emission routine.
-! print *, "i,j=",i,j 
-! print *, "ustar before call=",ustar(1,1)
       call source_dust(imx, jmx, lmx, nmx, smx, dt, tc, ustar, massfrac, &
                        erodtot, ilwi, dxy, gravsm, airden, airmas, &
-                       bems, g, drylimit, alpha, gamma)
+                       bems, g, drylimit, dust_alpha, dust_gamma)
 
-!     write(0,*)tc(1)
-!     write(0,*)tc(2)
-!     write(0,*)tc(3)
-!     write(0,*)tc(4)
-!     write(0,*)tc(5)
-!    if(config_flags%chem_opt == 2 .or. config_flags%chem_opt == 11 ) then
-!     dustin(i,j,1:5)=tc(1:5)*converi
-!    else
      chem(i,kts,j,p_dust_1)=tc(1)*converi
      chem(i,kts,j,p_dust_2)=tc(2)*converi
      chem(i,kts,j,p_dust_3)=tc(3)*converi
      chem(i,kts,j,p_dust_4)=tc(4)*converi
      chem(i,kts,j,p_dust_5)=tc(5)*converi
-!    endif
-
-!     chem(i,kts,j,p_dust_1)=tc(1)*converi
-!     chem(i,kts,j,p_dust_2)=tc(2)*converi
-!     chem(i,kts,j,p_dust_3)=tc(3)*converi
-!     chem(i,kts,j,p_dust_4)=tc(4)*converi
-!     chem(i,kts,j,p_dust_5)=tc(5)*converi
 
 ! For output diagnostics
 
@@ -412,7 +379,6 @@ end subroutine gocart_dust_afwa_driver
        if (beta .gt. betamax) then
          beta=betamax
        endif
-      ! emit=emit+salt*erod(i,j)*alpha*beta    ! (kg m^-2 s^-1)
        emit=emit+salt*(erod(i,j)**gamma)*alpha*beta    ! (kg m^-2 s^-1)
      END DO
    END DO
@@ -442,7 +408,6 @@ end subroutine gocart_dust_afwa_driver
  END DO 
  DO n=1,nmx
    distr_dust(n)=dvol(n)/dvol_tot
-   !print *,"distr_dust(",n,")=",distr_dust(n)
  END DO
 
 ! Now distribute total vertical emission into dust bins and update concentration.
@@ -456,8 +421,7 @@ end subroutine gocart_dust_afwa_driver
 
       ! Update dust mixing ratio at first model level.
         tc(i,j,1,n) = tc(i,j,1,n) + dsrc / airmas(i,j,1) ! (kg/kg)
-     !   bems(i,j,n) = dsrc  ! diagnostic
-        bems(i,j,n) = 1000.*dsrc/(dxy(j)*dt1) ! diagnostic (g/m2/s)
+        bems(i,j,n) = dsrc/(dxy(j)*dt1) ! diagnostic (kg/m2/s)
      END DO
    END DO
  END DO

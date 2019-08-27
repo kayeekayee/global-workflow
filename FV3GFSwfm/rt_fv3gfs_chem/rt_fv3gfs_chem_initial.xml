@@ -31,6 +31,7 @@
 	<!ENTITY ROTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
 	<!ENTITY ICSDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS">
         <!ENTITY PUBDIR "/scratch3/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY RETRODIR "/scratch4/BMC/fim/GFS_RETRO_NEMSIO">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
         <!ENTITY GDASDIR "/scratch4/BMC/public/data/grids/gdas/bufr">
         <!ENTITY RUNDIR "/scratch4/BMC/rtfim/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">

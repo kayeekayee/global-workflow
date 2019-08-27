@@ -24,7 +24,7 @@ echo DATE:     $yyyymmdd $hh
 #    /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem/gfs.20180501/00
 echo "Archiving ${yyyymmdd}${hh} to mss"
 cd $srcDir/gfs.${yyyymmdd}/${hh}
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}.tar gfs*"
+cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}.tar *nemsio*"
 $cmd
 status=$?
 if [ $status != 0 ] ; then
