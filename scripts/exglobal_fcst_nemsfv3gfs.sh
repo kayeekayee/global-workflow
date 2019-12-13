@@ -130,7 +130,7 @@ fi
 if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
 mkdata=NO
 if [ ! -d $DATA ]; then
-   mkdata=YES
+#   mkdata=YES !lzhang
    mkdir -p $DATA
 fi
 # Stage the FV3 initial conditions to ROTDIR  
@@ -141,14 +141,16 @@ cd $COMOUT || exit 99
 [[ ! -d $INPUT ]] && $NLN $OUTDIR .
 #----------------------------------------------------
 cd $DATA || exit 8
-mkdir -p $DATA/INPUT
-if [ $CDUMP = "gfs" -a $restart_interval -gt 0 ]; then
-    RSTDIR_TMP=${RSTDIR:-$ROTDIR}/${CDUMP}.${PDY}/${cyc}/RERUN_RESTART
-    if [ ! -d $RSTDIR_TMP ]; then mkdir -p $RSTDIR_TMP ; fi
-    $NLN $RSTDIR_TMP RESTART
-else
-    mkdir -p $DATA/RESTART
-fi
+
+mkdir -p $DATA/RESTART $DATA/INPUT
+#lzhang we do not need so much restart file in the output
+#if [ $CDUMP = "gfs" -a $restart_interval -gt 0 ]; then
+#    RSTDIR_TMP=${RSTDIR:-$ROTDIR}/${CDUMP}.${PDY}/${cyc}/RERUN_RESTART
+#    if [ ! -d $RSTDIR_TMP ]; then mkdir -p $RSTDIR_TMP ; fi
+#    $NLN $RSTDIR_TMP RESTART
+#else
+#    mkdir -p $DATA/RESTART
+#fi
 
 #-------------------------------------------------------
 # determine if restart IC exists to continue from a previous forecast
@@ -190,7 +192,8 @@ if [ ! -d $memdir ]; then mkdir -p $memdir; fi
 GDATE=$($NDATE -$assim_freq $CDATE)
 gPDY=$(echo $GDATE | cut -c1-8)
 gcyc=$(echo $GDATE | cut -c9-10)
-gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar
+#gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar #lzhang
+gmemdir=$ROTDIR/${prefix}.$gPDY/$gcyc/$memchar
 
 #-------------------------------------------------------
 # initial conditions
@@ -1085,10 +1088,6 @@ if [ $SEND = "YES" ]; then
   # Only save restarts at single time in RESTART directory
   # Either at restart_interval or at end of the forecast
   if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then
-  # Copy gdas and enkf memebr restart files
-  if [ $CDUMP = "gdas" -a $restart_interval -gt 0 ]; then
-    cd $DATA/RESTART
-    mkdir -p $memdir/RESTART
 
     # Add time-stamp to restart files at FHMAX
     RDATE=$($NDATE +$FHMAX $CDATE)
@@ -1099,6 +1098,9 @@ if [ $SEND = "YES" ]; then
       $NCP ${rPDY}.${rcyc}0000.$file $memdir/RESTART/${rPDY}.${rcyc}0000.$file #lzhang
     done
 
+    RSTDIR_TMP=${RSTDIR:-$ROTDIR}/${CDUMP}.${PDY}/${cyc}/RERUN_RESTART #lzhang
+    #if [ ! -d $RSTDIR_TMP ]; then mkdir -p $RSTDIR_TMP ; fi #lzhang
+    $NLN $memdir/RESTART  $RSTDIR_TMP
 
   else
 
