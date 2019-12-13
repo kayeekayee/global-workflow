@@ -3,7 +3,7 @@
                                from 0.065, 0.15, 0.25, 0.30, 0.35, 0.38, 0.35, 0.30, 0.30, 0.45, 0.50, 0.45, 9999.0
 
 10/01/19
-  updated to ms088 tag of EMC_FV3GFS-GSDCHEM repository
+  updated to ms088 tag of EMC_FV3GFS-GSDCHEM repository, f676a1c
        d4937c8aeb927f0ff33fc59845da386502350d16 FMS (warsaw_201803-11-gd4937c8)
        3be1dc49968a712fefa5da27f626e4b7a3cc7e57 FV3 (NEMSfv3gfs_preCCPP_20190506-12-g3be1dc4)
        afc05510f05d108169d4e3966773ad7ae095c939 GSDCHEM (fv3gfs-gsdchem_v0.8.8)
@@ -11,8 +11,11 @@
        063732f85f6e3d54238ba750f6aeb7574ca4f85e ccpp/framework (ccpp_transition_to_vlab_master_20190705)
        243abfc6c9470f8b24f8545795198a231dea35d5 ccpp/physics (ccpp_transition_to_vlab_master_20190705)
 
+  to run on hera, need to check out master of EMC_FV3GFS-GSDCHEM repository, 1c2bd25
+       e05bf2a554544093f02bf177658ad432cbafbaa8 NEMS (e05bf2a)
+
 08/01/19
-  updated to ms087 tag of EMC_FV3GFS-GSDCHEM repository
+  updated to ms087 tag of EMC_FV3GFS-GSDCHEM repository, e2a771d
        d4937c8aeb927f0ff33fc59845da386502350d16 FMS (warsaw_201803-11-gd4937c8)
        64fc1f1a95a6bb980ac6baa33cbf359872345c76 FV3 (NEMSfv3gfs_preCCPP_20190506-7-g64fc1f1)
        a3eeaf0d2f32be6c7d081fe03e0313224db4128e GSDCHEM (fv3gfs-gsdchem_v0.8.7)
