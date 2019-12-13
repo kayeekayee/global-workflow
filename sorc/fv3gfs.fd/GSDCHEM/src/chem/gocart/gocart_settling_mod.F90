@@ -5,7 +5,7 @@ module gocart_settling_mod
                                p_dust_1, p_dust_2, p_dust_3, p_dust_4, p_dust_5, &
                                p_qv, &
                                config => chem_config
-  use chem_config_mod,  only : DUST_OPT_AFWA, DUST_OPT_GOCART, SEAS_OPT_NONE
+  use chem_config_mod,  only : DUST_OPT_AFWA, DUST_OPT_FENGSHA, DUST_OPT_GOCART, SEAS_OPT_NONE
 
 
   use dust_data_mod, only : den_dust, reff_dust, dyn_visc
@@ -15,34 +15,37 @@ module gocart_settling_mod
 
 CONTAINS
 
-SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
-         chem,rho_phy,dz8w,p8w,p_phy,         &
-         dusthelp,seashelp,area,g, &
-         num_moist,num_chem,                  &
-         ids,ide, jds,jde, kds,kde,                                        &
-         ims,ime, jms,jme, kms,kme,                                        &
-         its,ite, jts,jte, kts,kte                                         )
+
+SUBROUTINE gocart_settling_driver(dt,t_phy,moist,                     &
+                                  chem,rho_phy,dz8w,p8w,p_phy,sedim,  &
+                                  dusthelp,seashelp,area,g,           &
+                                  num_moist,num_chem,                 &
+                                  ids,ide, jds,jde, kds,kde,          &
+                                  ims,ime, jms,jme, kms,kme,          &
+                                  its,ite, jts,jte, kts,kte           )
 
   IMPLICIT NONE
 
-   INTEGER,      INTENT(IN   ) ::                      &
+  INTEGER,      INTENT(IN   ) ::                      &
                                   num_moist,num_chem,                      &
                                   ids,ide, jds,jde, kds,kde,               &
                                   ims,ime, jms,jme, kms,kme,               &
                                   its,ite, jts,jte, kts,kte
-    REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
+  REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
          INTENT(IN ) ::                                   moist
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),                 &
+  REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),                 &
          INTENT(INOUT ) ::                                   chem
-   REAL, DIMENSION( ims:ime, jms:jme ),                 &
+  REAL, DIMENSION( ims:ime, jms:jme ),                 &
          INTENT(IN ) :: dusthelp,seashelp
-   REAL,  DIMENSION( ims:ime , kms:kme , jms:jme ),                        &
+  REAL, DIMENSION( ims:ime , kms:kme , jms:jme ),                        &
           INTENT(IN   ) ::  t_phy,p_phy,dz8w,p8w,rho_phy
-   REAL,  DIMENSION( ims:ime ,  jms:jme ),                        &
+  REAL, DIMENSION( ims:ime ,  jms:jme ),                        &
           INTENT(IN   ) ::  area
-
   REAL, INTENT(IN   ) :: dt,g
-  integer :: nv,nmx,i,j,k,kk,lmx,iseas,idust
+
+  REAL, DIMENSION( ims:ime, jms:jme, num_chem ), INTENT(OUT  ) :: sedim
+
+  integer :: nv,i,j,k,kk,lmx,iseas,idust
   real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1) :: tmp,airden,airmas,p_mid,delz,rh
   real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1,5) :: dust
   real(CHEM_KIND_R8), DIMENSION (1,1,kte-kts+1,5) :: sea_salt
@@ -58,12 +61,13 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
   real(CHEM_KIND_R8), DIMENSION (5) :: bstl_seas
   real(CHEM_KIND_R8) conver,converi
   real(CHEM_KIND_R8),parameter::max_default=0.
+
+  sedim = 0.
 !      conver=1.e-9*mwdry
 !      converi=1.e9/mwdry
        conver=1.e-9
        converi=1.e9
        lmx=kte-kts+1
-!        write(6,*)'in settle'
        select case (config % chem_opt)
        case (304, 316, 317)
 !
@@ -94,7 +98,8 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
 ! dust first
 !
           if((config % dust_opt == DUST_OPT_GOCART) .or. &
-             (config % dust_opt == DUST_OPT_AFWA  )) then
+               (config % dust_opt == DUST_OPT_AFWA) .or. &
+               (config % dust_opt == DUST_OPT_FENGSHA)) then
           iseas=0
           idust=1
           maxdust(:)=0.
@@ -220,12 +225,16 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
                (3.80*exp(17.27*(t_phy(i,k,j)-273.)/ &
                (t_phy(i,k,j)-36.))/(.01*p_phy(i,k,j))))
           rh(1,1,kk)=max(1.0D-1,rh(1,1,kk))
+          do nv = 1, num_chem
+            sedim(i,j,nv) = sedim(i,j,nv) + chem(i,k,j,nv)*p8w(i,k,j)/g
+          enddo
           enddo
 !
 ! max dust in column
 !
           if((config % dust_opt == DUST_OPT_GOCART) .or. &
-             (config % dust_opt == DUST_OPT_AFWA  )) then
+               (config % dust_opt == DUST_OPT_AFWA  ) .or. &
+               (config % dust_opt == DUST_OPT_FENGSHA)) then
           iseas=0
           idust=1
           maxdust(:)=0.
@@ -293,7 +302,6 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
                  if(chem(i,k,j,nv).gt.maxseas(kk)) maxseas(kk)=chem(i,k,j,nv)
              enddo
           enddo
-!         write(0,*)i,j,bstl_dust(3),bstl_dust(4),chem(i,1,j,p_dust_4)
              call settling(1, 1, lmx, 5, g,dyn_visc,&
                     sea_salt, tmp, p_mid, delz, airmas, &
                     den_seas, reff_seas, dt, bstl_seas, rh, idust, iseas,airden)
@@ -314,6 +322,13 @@ SUBROUTINE gocart_settling_driver(dt,t_phy,moist,  &
             chem(i,k,j,p_seas_5)=0.
           enddo
           endif   ! end seasopt==1
+
+          do nv = 1, num_chem
+            do k = kts,kte
+              sedim(i,j,nv) = sedim(i,j,nv) - chem(i,k,j,nv)*p8w(i,k,j)/g
+            enddo
+            sedim(i,j,nv) = sedim(i,j,nv) / dt
+          enddo
 !
 !
 !
@@ -357,7 +372,7 @@ END SUBROUTINE gocart_settling_driver
 
   REAL(CHEM_KIND_R8)    :: tc1(imx,jmx,lmx,nmx), dt_settl(nmx), rcm(nmx), rho(nmx)
   INTEGER :: ndt_settl(nmx)
-  REAL(CHEM_KIND_R8)    :: dzmin, vsettl, dtmax, pres, rhb, rwet(nmx), ratio_r(nmx)
+  REAL(CHEM_KIND_R8)    :: dzmin, vsettl, dtmax, rhb, rwet(nmx), ratio_r(nmx)
   REAL(CHEM_KIND_R8)    :: c_stokes, free_path, c_cun, viscosity,  growth_fac
   REAL(CHEM_KIND_R8)    :: vd_cor(lmx),vd_wk1 
   INTEGER :: k, n, i, j, l, l2
@@ -369,6 +384,8 @@ END SUBROUTINE gocart_settling_driver
   REAL(CHEM_KIND_R8) :: rwet_priv(nmx), rho_priv(nmx)
 
   ! executable statements
+
+  bstl = 0._CHEM_KIND_R8
 
 ! IF (type) /= 'dust' .AND. TRIM(aero_type) /= 'sea_salt') RETURN
   if(idust.ne.1.and.iseas.ne.1)return
@@ -502,7 +519,7 @@ END SUBROUTINE gocart_settling_driver
   DO n = 1,nmx
      DO i = 1,imx
         DO j = 1,jmx
-           bstl(i,j,n) = 0.0
+           bstl(i,j,n) = 0._CHEM_KIND_R8
            DO l = 1,lmx
               IF (tc(i,j,l,n) < 0.0) tc(i,j,l,n) = 1.0D-32
               bstl(i,j,n) = bstl(i,j,n) + &

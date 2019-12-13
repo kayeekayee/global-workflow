@@ -80,7 +80,7 @@ export NODES=$(expr $TASKS / $TPN + 1)
 
 RUN_SCRIPT=rt_fv3gsdchem.sh
 
-RTPWD=${DISKNM}/FV3GFS-GSDCHEM/trunk-20190708
+RTPWD=${DISKNM}/FV3GFS-GSDCHEM/trunk-20190901
 
 export DIAG_TABLE=chm_diag_table_gfdlmp
 export FIELD_TABLE=chm_field_table_gfdlmp
@@ -98,7 +98,6 @@ export DT_ATMOS=300
 export FHMAX=06
 export WRITE_GROUP=1
 export WRTTASK_PER_GROUP=24
-#export FDIAG='0,1,2,3,4,5,6,7,8,9,10,11,12'
 export FDIAG='0,1,2,3,4,5,6'
 export IMO=1536
 export JMO=768

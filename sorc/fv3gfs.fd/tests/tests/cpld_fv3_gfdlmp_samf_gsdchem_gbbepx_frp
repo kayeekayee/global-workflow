@@ -4,9 +4,9 @@
 #
 ###############################################################################
 
-export TEST_DESCR="FV3-GSDCHEM with GFDL microphysics and GBBEPx surface emission data"
+export TEST_DESCR="FV3-GSDCHEM with GFDL microphysics, SAMF tracer transport, and GBBEPx emission data + FRP"
 
-export CNTL_DIR=cpld_fv3_gfdlmp_gsdchem_gbbepx_sfc
+export CNTL_DIR=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 
 export LIST_FILES="atmos_4xdaily.tile1.nc \
                    atmos_4xdaily.tile2.nc \
@@ -466,7 +466,8 @@ export chm_model='gsdchem'
 export chm_petlist_bounds="-1 -1"
 export coupling_interval_sec="${DT_ATMOS}" # fv3 time step
 # - chemistry namelist ---
-export FIRE_FRQ=0
+export CTRA_OPT=0
+export TRANS_TRAC='.true.'
 export PLUME_FLAG=2
 export FIRE_DATA=${GBBEPx_source}
 # test walltime

@@ -106,7 +106,7 @@ contains
       call gocart_advance(config % readrestart, config % chem_opt,&
         config % chem_in_opt, config % chem_conv_tr,config % biomass_burn_opt, &
         config % seas_opt, config % dust_opt, config % dmsemis_opt, &
-        config % aer_ra_feedback, &
+        config % wetdep_ls_opt,  config % aer_ra_feedback, &
         config % call_chemistry, config % call_radiation, &
         config % plumerise_flag, config % plumerisefire_frq, &
         config % kemit, &
@@ -123,15 +123,15 @@ contains
         data % emiss_tr_dt, &
         data % emiss_tr_height, &
         data % emiss_tr_mass,   &
-        data % ero1, &
-        data % ero2, &
-        data % ero3, &
-        data % ssm,  &
+        data % ero1,  &
+        data % ero2,  &
+        data % ero3,  &
+        data % rdrag, &
+        data % ssm,   &
         data % h2o2_backgd, &
         data % no3_backgd, &
         data % oh_backgd, &
-        data % plumefrp, &
-        data % plumestuff, &
+        data % plume, &
         data % sandfrac, &
         data % th_pvsrf, &
         ! -- imported atmospheric fields
@@ -149,6 +149,7 @@ contains
         stateIn % vtype2d, &
         stateIn % vfrac2d, &
         stateIn % zorl2d, &
+        stateIn % dqdt, &
         stateIn % exch, &
         stateIn % ph3d, &
         stateIn % phl3d, &
@@ -185,8 +186,8 @@ contains
         ! -- array size
         nl, ni, &
         config % ntra, config % ntrb, config % nvl_gocart, config % nbands, &
-        config % numgas, config % num_ebu, &
-        config % num_ebu_in, config % num_soil_layers, config % num_chem, config % num_moist, &
+        config % numgas, config % num_ebu, config % num_ebu_in, config % num_plume_data, &
+        config % num_soil_layers, config % num_chem, config % num_moist, &
         config % num_emis_vol, config % num_emis_ant, &
         config % num_emis_dust, config % num_emis_seas, &
         config % num_asym_par, config % num_bscat_coef, &

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([gsdchem], [0.8.7], [raffaele.montuoro@noaa.gov])
+AC_INIT([gsdchem], [0.8.8], [raffaele.montuoro@noaa.gov])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -119,9 +119,9 @@ AS_IF([test "x$enable_debug" = xyes],[
                            [perf_opts="${perf_opts} -fno-unsafe-math-optimizations"],[])],
       [ibm],       [perf_opts="-O2"],
       [intel],     [dnl
-                    perf_opts="-O3"
+                    perf_opts="-O2"
                     AS_IF([test "x$enable_safe_fp" != xno],
-                          [perf_opts="${perf_opts} -fp-model precise"],[])],
+                          [perf_opts="${perf_opts} -fp-model source -ftz -align array64byte -xCORE-AVX2 -qno-opt-dynamic-align"],[])],
       [portland],  [dnl
                     perf_opts="-O2"
                     AS_IF([test "x$enable_safe_fp" != xno],

@@ -32,13 +32,3 @@ cp    @[RTPWD]/${inputdir}/*configure .
 emissdir=emi_C$(( NPX - 1 ))
 inputdir=GSDCHEM_input_data/${emissdir}
 cp -r @[RTPWD]/${inputdir} ./INPUT/
-
-if [ -n "${CHEM_EXTRA}" ]; then
-  srcdir=@[RTPWD]/${inputdir}/${CHEM_EXTRA}/${SMONTH}
-  if [ -d "${srcdir}" ]; then
-    dstdir=INPUT/${emissdir}/${SMONTH}
-    for (( tile=1 ; tile<7 ; tile++ )) ; do
-      cp ${srcdir}/tile${tile}/* ${dstdir}/tile${tile}
-    done
-  fi
-fi

@@ -167,7 +167,8 @@ elif [[ $MACHINE_ID = theia.* ]]; then
 #  ACCNR=fv3-cpu
   PARTITION=
   dprefix=/scratch4/NCEPDEV
-  DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
+# DISKNM=$dprefix/nems/noscrub/emc.nemspara/RT
+  DISKNM=/scratch3/NCEPDEV/stmp1/Raffaele.Montuoro/ucc/baseline/emc.nemspara/RT
   STMP=$dprefix/stmp4
   PTMP=$dprefix/stmp3
 

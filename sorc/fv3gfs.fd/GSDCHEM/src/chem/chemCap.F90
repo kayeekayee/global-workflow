@@ -12,7 +12,7 @@ module CHM
   implicit none
 
   ! -- import fields
-  integer, parameter :: importFieldCount = 25
+  integer, parameter :: importFieldCount = 26
   character(len=*), dimension(importFieldCount), parameter :: &
     importFieldNames = (/ &
       "inst_pres_interface                  ", &
@@ -29,6 +29,7 @@ module CHM
       "surface_cell_area                    ", &
       "inst_convective_rainfall_amount      ", &
       "inst_exchange_coefficient_heat_levels", &
+      "inst_spec_humid_conv_tendency_levels ", &
       "inst_friction_velocity               ", &
       "inst_rainfall_amount                 ", &
       "inst_soil_moisture_content           ", &
@@ -176,7 +177,6 @@ module CHM
     if (importFieldCount > 0) then
       call NUOPC_Advertise(importState, importFieldNames, &
         TransferOfferGeomObject="cannot provide", &
-        TransferOfferField="cannot provide", &
         SharePolicyField="share", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -189,7 +189,6 @@ module CHM
     if (exportFieldCount > 0) then
       call NUOPC_Advertise(exportState, exportFieldNames, &
         TransferOfferGeomObject="cannot provide", &
-        TransferOfferField="cannot provide", &
         SharePolicyField="share", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -479,7 +478,8 @@ module CHM
         rcToReturn=rc)
       return  ! bail out
     end if
-    call chem_model_clock_set(yy=yy, mm=mm, dd=dd, h=h, m=m, dts=dts, tz=0, rc=rc)
+    call chem_model_clock_set(yy=yy, mm=mm, dd=dd, h=h, m=m, &
+      dts=real(dts,kind=CHEM_KIND_R8), tz=0, rc=rc)
     if (chem_rc_check(rc)) then
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="Failed to initialize model clock", &

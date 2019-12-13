@@ -449,7 +449,7 @@ export NODES=$(expr $TASKS / $TPN + 1)
 
 RUN_SCRIPT=rt_fv3gsdchem.sh
 
-RTPWD=${DISKNM}/FV3GFS-GSDCHEM/trunk-20190708
+RTPWD=${DISKNM}/FV3GFS-GSDCHEM/trunk-20190901
 
 export DIAG_TABLE=chm_diag_table_gfdlmp
 export FIELD_TABLE=chm_field_table_gfdlmp
@@ -467,7 +467,7 @@ export chm_petlist_bounds="-1 -1"
 export coupling_interval_sec="${DT_ATMOS}" # fv3 time step
 # - chemistry namelist ---
 export DUST_OPT=5
-export CHEM_EXTRA=fengsha
+export DUST_DATA=INPUT/emi_C96/fengsha/${SMONTH}
 export PLUME_FLAG=2
 export FIRE_DATA=${GBBEPx_source}
 # test walltime

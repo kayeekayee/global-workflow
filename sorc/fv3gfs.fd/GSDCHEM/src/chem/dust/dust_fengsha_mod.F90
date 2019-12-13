@@ -15,46 +15,38 @@ module dust_fengsha_mod
 
 contains
 
-  subroutine gocart_dust_fengsha_driver(ktau,dt,alt,t_phy,moist,u_phy,   &
-       v_phy,chem,rho_phy,dz8w,smois,u10,v10,p8w,erod,ssm,               &
-       ivgtyp,isltyp,vegfra,snowh,xland,xlat,xlong,gsw,area,g,emis_dust, &
-       srce_dust,dustin,ust,znt,clay,sand,                               &
+  subroutine gocart_dust_fengsha_driver(dt, &
+       chem,rho_phy,smois,p8w,ssm,               &
+       isltyp,vegfra,snowh,xland,area,g,emis_dust, &
+       ust,znt,clay,sand,rdrag,                         &
        num_emis_dust,num_moist,num_chem,num_soil_layers,                 &
        ids,ide, jds,jde, kds,kde,                                        &
        ims,ime, jms,jme, kms,kme,                                        &
        its,ite, jts,jte, kts,kte)
     IMPLICIT NONE
 
-    INTEGER,      INTENT(IN   ) :: ktau,                     &
+    INTEGER,      INTENT(IN   ) ::                           &
          ids,ide, jds,jde, kds,kde,                          &
          ims,ime, jms,jme, kms,kme,                          &
          its,ite, jts,jte, kts,kte,                          &
          num_emis_dust,num_moist,num_chem,num_soil_layers
-    INTEGER,DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: ivgtyp, isltyp
-    REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ), INTENT(IN) :: moist
+    INTEGER,DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: isltyp
     REAL, DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ), INTENT(INOUT) :: chem
     REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL, INTENT(INOUT) :: emis_dust
-    REAL, DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL, INTENT(INOUT) :: srce_dust
-    REAL, DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(INOUT) :: smois
-    REAL, DIMENSION( ims:ime , jms:jme, ndcls ), INTENT(IN) ::  erod
+    REAL, DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(IN) :: smois
     REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: ssm
-    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: u10,        &
-                                                        v10,        &
-                                                        gsw,        &
-                                                        vegfra,     &
+    REAL, DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: vegfra,     &
                                                         snowh,      &
                                                         xland,      &
-                                                        xlat,       &
-                                                        xlong,area, &
+                                                        area,       &
                                                         ust,        &
                                                         znt,        &
                                                         clay,       &
-                                                        sand,dustin
+                                                        sand,       &
+                                                        rdrag
     REAL, DIMENSION( ims:ime , kms:kme , jms:jme ), INTENT(IN   ) ::   &
-         alt,                  &
-         t_phy,                &
-         dz8w,p8w,             &
-         u_phy,v_phy,rho_phy
+         p8w,             &
+         rho_phy
     REAL, INTENT(IN) :: dt,g
 
     ! Local variables
@@ -69,6 +61,7 @@ contains
     real(CHEM_KIND_R8), dimension (1) :: dxy
     real(CHEM_KIND_R8), dimension (3) :: massfrac
     real(CHEM_KIND_R8) :: conver,converi
+    real(CHEM_KIND_R8) :: R
 
     ! threshold values
     conver=1.e-9
@@ -128,7 +121,7 @@ contains
              ! factor in the literature, which reduces lofting for rough areas.
              ! Forthcoming...
 
-             IF (znt(i,j) .gt. 0.11) then
+             IF (znt(i,j) .gt. 0.2) then
                 ilwi(1,1)=0
              endif
 
@@ -156,14 +149,29 @@ contains
              ! Calculate gravimetric soil moisture and drylimit.
              gravsm(1,1)=100.*smois(i,1,j)/((1.-maxsmc(isltyp(i,j)))*(2.65*(1.-clay(i,j))+2.50*clay(i,j)))
              drylimit(1,1)=14.0*clay(i,j)*clay(i,j)+17.0*clay(i,j)
-             !     write(0,*) "gravsm(",i,",",j,")=",gravsm(1,1)," drylimit=",drylimit(1)
+
+             ! get drag partition
+             ! FENGSHA uses the drag partition correction of MacKinnon et al 2004
+             !     doi:10.1016/j.geomorph.2004.03.009
+             if (dust_calcdrag .ne. 1) then
+                call fengsha_drag(znt(i,j),R)
+             else
+                ! use the precalculated version derived from ASCAT; Prigent et al. (2012,2015)
+                ! doi:10.1109/TGRS.2014.2338913 & doi:10.5194/amt-5-2703-2012
+                ! pick only valid values
+                if (rdrag(i,j) > 0.) then
+                  R = real(rdrag(i,j), kind=CHEM_KIND_R8)
+                else
+                  cycle
+                endif
+             endif
 
              ! Call dust emission routine.
              ! print *, "i,j=",i,j
              ! print *, "ustar before call=",ustar(1,1)
              call source_dust(imx, jmx, lmx, nmx, smx, dt, tc, ustar, massfrac, &
-                  erodtot, ilwi, dxy, gravsm, airden, airmas, &
-                  bems, g, drylimit, dust_alpha, dust_gamma, znt, ssm(i,j), dust_uthres)
+                  erodtot, dxy, gravsm, airden, airmas, &
+                  bems, g, drylimit, dust_alpha, dust_gamma, R, dust_uthres)
 
              !     write(0,*)tc(1)
              !     write(0,*)tc(2)
@@ -202,15 +210,14 @@ contains
 
 
   SUBROUTINE source_dust(imx, jmx, lmx, nmx, smx, dt1, tc, ustar, massfrac, &
-       erod, ilwi, dxy, gravsm, airden, airmas, bems, g0, drylimit, alpha,  &
-       gamma, z0, ssm, uthres)
+       erod, dxy, gravsm, airden, airmas, bems, g0, drylimit, alpha,  &
+       gamma, R, uthres)
 
     ! ****************************************************************************
     ! *  Evaluate the source of each dust particles size bin by soil emission
     ! *
     ! *  Input:
     ! *         EROD      Fraction of erodible grid cell                (-)
-    ! *         ILWI      Land/water flag                               (-)
     ! *         GRAVSM    Gravimetric soil moisture                     (g/g)
     ! *         DRYLIMIT  Upper GRAVSM limit for air-dry soil           (g/g)
     ! *         ALPHA     Constant to fudge the total emission of dust  (1/m)
@@ -224,7 +231,7 @@ contains
     ! *         IMX       Number of I points                            (-)
     ! *         JMX       Number of J points                            (-)
     ! *         LMX       Number of L points                            (-)
-    ! *         SSM       Parajuli and Zender 2017 SSM                  (-)
+    ! *         R         Drag Partition                                (-)
     ! *         UTH       FENGSHA Dry Threshold Velocities              (m/s)
     ! *
     ! *  Data:
@@ -269,7 +276,6 @@ contains
     ! ****************************************************************************
 
     INTEGER, INTENT(IN)   :: nmx,imx,jmx,lmx,smx
-    INTEGER, INTENT(IN)   :: ilwi(imx,jmx)
     REAL(CHEM_KIND_R8), INTENT(IN)    :: erod(imx,jmx)
     REAL(CHEM_KIND_R8), INTENT(IN)    :: ustar(imx,jmx)
     REAL(CHEM_KIND_R8), INTENT(IN)    :: gravsm(imx,jmx)
@@ -284,11 +290,10 @@ contains
     REAL(CHEM_KIND_R8)    :: dvol(nmx), distr_dust(nmx), dlndp(nmx)
     REAL(CHEM_KIND_R8)    :: dsurface(smx), ds_rel(smx)
     REAL(CHEM_KIND_R8)    :: massfrac(3)
-    REAL(CHEM_KIND_R8)    :: u_ts0, u_ts, dsrc, srce, dmass, dvol_tot
+    REAL(CHEM_KIND_R8)    :: u_ts0, u_ts, dsrc, dmass, dvol_tot
     REAL(CHEM_KIND_R8)    :: salt,emit, emit_vol, stotal
-    REAL    :: z0(imx,jmx)
     REAL      :: rhoa, g
-    INTEGER   :: i, j, m, s, n
+    INTEGER   :: i, j, n
 
     !! Sandblasting mass efficiency, aka "fudge factor" (based on Tegen et al,
     !! 2006 and Hemold et al, 2007)
@@ -301,7 +306,7 @@ contains
     REAL, INTENT(IN)  :: alpha
     REAL, PARAMETER :: betamax=5.25E-4
     REAL(CHEM_KIND_R8) :: beta
-    REAL(CHEM_KIND_R8) :: R
+    REAL(CHEM_KIND_R8), INTENT(IN) :: R
     ! Experimental optional exponential tuning constant for erodibility.
     ! 0 < gamma < 1 -> more relative impact by low erodibility regions.
 
@@ -322,7 +327,6 @@ contains
     REAL, PARAMETER :: gsd_dust=3.0     ! geom. std deviation
     REAL, PARAMETER :: lambda=12.0D-6   ! crack propogation length (m)
     REAL, PARAMETER :: cv=12.62D-6      ! normalization constant
-    real, intent(in) :: ssm
     real, dimension(fengsha_maxstypes), intent(in) :: uthres
 
     ! Calculate saltation surface area distribution from sand, silt, and clay
@@ -370,10 +374,6 @@ contains
              ! Fengsha uses threshold velocities based on dale gilletes data
              call fengsha_utst(styp,uthres,u_ts0)
 
-             ! FENGSHA uses the drag partition correction of MacKinnon et al 2004
-             !     doi:10.1016/j.geomorph.2004.03.009
-             call fengsha_drag(z0(i,j),R)
-
              ! Friction velocity threshold correction function based on physical
              ! properties related to moisture tension. Soil moisture greater than
              ! dry limit serves to increase threshold friction velocity (making
@@ -414,7 +414,7 @@ contains
 
              IF (ustar(i,j) .gt. u_ts) then
                 call fengsha_hflux(ustar(i,j),u_ts,beta, salt)
-                salt = cmb * ds_rel(n) * airden(i,j,1) / g0 * salt * (erod(i,j)**gamma) * beta
+                salt = alpha * cmb * ds_rel(n) * airden(i,j,1) / g0 * salt * (erod(i,j)**gamma) * beta
              else
                 salt = 0.
              endif
@@ -534,7 +534,7 @@ contains
   subroutine fengsha_drag(z0,R)
     real, intent(in) :: z0
     real(CHEM_KIND_R8), intent(out) :: R
-    real, parameter :: z0s = 1.0e-04 !Surface roughness for dust [m]
+    real, parameter :: z0s = 1.0e-04 !Surface roughness for ideal bare surface [m]
     ! ------------------------------------------------------------------------
     ! Function: Calculates the MacKinnon et al. 2004 Drag Partition Correction
     !

@@ -24,18 +24,18 @@ contains
                        ts2d,us2d,rsds,pr3d,prl3d,ph3d,phl3d,emiss_ash_mass,emiss_ash_height,          &
                        emiss_ash_dt,dm0,emiss_tr_mass,emiss_tr_height,               &
                        emiss_tr_dt,snwdph2d,vfrac2d,vtype2d,stype2d,us3d,vs3d,ws3d,           &
-                       slmsk2d,zorl2d,exch,pb2d,hf2d,clayfrac,clayf,sandfrac,sandf,th_pvsrf,&
+                       slmsk2d,zorl2d,dqdt,exch,pb2d,hf2d,clayfrac,clayf,sandfrac,sandf,th_pvsrf,&
                        oh_backgd,h2o2_backgd,no3_backgd,backg_oh,backg_h2o2,backg_no3,p_gocart,            &
                        nvl_gocart, ttday,tcosz,gmt,julday,area,ero1,                 &
-                       ero2,ero3,rcav,raincv_b,deg_lat,deg_lon,nvl,nvlp1,ntra,       &
-                       relhum,rri,t_phy,moist,u_phy,v_phy,p_phy,chem,tsk,ntrb,       &
-                       g,rd,p1000,cp,erod,emis_ant,emis_vol,e_co,dms_0,              &
+                       ero2,ero3,rcav,raincv_b,deg_lat,deg_lon,ntra,       &
+                       relhum,rri,t_phy,moist,u_phy,v_phy,p_phy,chem,tsk,            &
+                       g,rd,erod,emis_ant,emis_vol,e_co,dms_0,              &
                        u10,v10,ivgtyp,isltyp,gsw,vegfra,rmol,ust,znt,xland,dxy,      &
-                       t8w,p8w,exch_h,pbl,hfx,snowh,xlat,xlong,convfac,z_at_w,zmid,dz8w,vvel,&
+                       t8w,p8w,dqdti,exch_h,pbl,hfx,snowh,xlat,xlong,convfac,z_at_w,zmid,dz8w,vvel,&
                        rho_phy,smois,num_soil_layers,num_chem,num_moist,             &
-                       emiss_abu,ebu_in,emiss_ab,num_ebu_in,num_emis_ant,            &
+                       emiss_abu,ebu_in,emiss_ab,num_ebu_in,num_plume_data,num_emis_ant, &
                        num_emis_vol,kemit,call_gocart,plumerise_flag,                &
-                       plumefrp,plumestuff,plumedist,                                &
+                       plume,plumedist,                                &
                        mean_fct_agtf,mean_fct_agef,mean_fct_agsv,                    &
                        mean_fct_aggr,firesize_agtf,firesize_agef,                    &
                        firesize_agsv,firesize_aggr,                                  &
@@ -50,44 +50,46 @@ contains
 
     LOGICAL,      INTENT(IN) :: readrestart
     INTEGER,      INTENT(IN) :: chem_opt,chem_in_opt
-    INTEGER,      INTENT(IN) :: ktau,nvl,nvlp1,ntra,ntrb,nvl_gocart
-    INTEGER,      INTENT(IN) :: num_ebu_in,num_soil_layers,num_chem,num_moist, &
-                                num_emis_vol,num_emis_ant,kemit,plumerise_flag
+    INTEGER,      INTENT(IN) :: ktau,ntra,nvl_gocart
+    INTEGER,      INTENT(IN) :: num_ebu_in,num_plume_data,num_soil_layers,    &
+                                num_chem,num_moist,num_emis_vol,num_emis_ant, &
+                                kemit,plumerise_flag
     INTEGER,      INTENT(IN) :: julday
     INTEGER,      INTENT(IN) :: ids,ide, jds,jde, kds,kde, &
                                 ims,ime, jms,jme, kms,kme, &
                                 its,ite, jts,jte, kts,kte
     LOGICAL,      INTENT(IN) :: call_gocart
-    REAL(CHEM_KIND_R4), INTENT(IN) :: g,rd,p1000,cp,dtstep,gmt
+    REAL(CHEM_KIND_R4), INTENT(IN) :: g,rd,dtstep,gmt
 
     ! -- input pointers: indexing must always start from 1
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: area
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: hf2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: pb2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: rsds
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: slmsk2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: snwdph2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: stype2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: ts2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: us2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: vtype2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: vfrac2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: zorl2d
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: deg_lat
-    real(CHEM_KIND_R8), dimension(:, :), intent(in) :: deg_lon
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: area
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: hf2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: pb2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: rsds
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: slmsk2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: snwdph2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: stype2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: ts2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: us2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: vtype2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: vfrac2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: zorl2d
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: deg_lat
+    real(CHEM_KIND_F8), dimension(:, :), intent(in) :: deg_lon
 
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: exch
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: ph3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: phl3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: pr3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: prl3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: sm3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: tk3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: us3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: vs3d
-    real(CHEM_KIND_R8), dimension(:, :, :), intent(in) :: ws3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: dqdt
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: exch
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: ph3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: phl3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: pr3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: prl3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: sm3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: tk3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: us3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: vs3d
+    real(CHEM_KIND_F8), dimension(:, :, :), intent(in) :: ws3d
 
-    real(CHEM_KIND_R8), dimension(:, :, :, :), intent(in)  :: tr3d
+    real(CHEM_KIND_F8), dimension(:, :, :, :), intent(in)  :: tr3d
 
     ! -- I/O arrays
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(inout) :: emiss_ash_mass
@@ -141,6 +143,7 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: dxy
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: t8w
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: p8w
+    real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: dqdti
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: exch_h
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: pbl
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: hfx
@@ -159,8 +162,7 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_emis_ant),   intent(in) :: emiss_ab
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_ebu_in),     intent(in) :: emiss_abu
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_ebu_in),     intent(out) :: ebu_in
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(in) :: plumefrp
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 8), intent(in) :: plumestuff
+    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_plume_data), intent(in) :: plume
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, num_frp_plume), intent(out) :: plumedist
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(out) :: mean_fct_agtf
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),    intent(out) :: mean_fct_agef
@@ -176,8 +178,8 @@ contains
 
     ! -- local variables
     integer i,ip,j,jp,k,kp,kk,kkp,nv,jmax,jmaxi,l,ll,n,ndystep,ixhour
-    real(CHEM_KIND_R4) ::  maxv,factor,factor2,pu,pl,aln,pwant,rlat
-    real(CHEM_KIND_R4) ::  thv,xhour,xmin,gmtp,xlonn,xtime,real_time
+    real(CHEM_KIND_R4) ::  factor,factor2,pu,pl,aln,pwant,rlat
+    real(CHEM_KIND_R4) ::  xhour,xmin,gmtp,xlonn,xtime,real_time
     real(CHEM_KIND_R4), DIMENSION (1,1) :: sza,cosszax
     real(CHEM_KIND_R4), DIMENSION (ims:ime,jms:jme) :: so2_mass
 
@@ -185,7 +187,7 @@ contains
     integer :: ko,k_final,k_initial,kl,kk4,curr_hours,curr_secs
     real(CHEM_KIND_R4) :: x1,ashz_above_vent
     real(CHEM_KIND_R4), DIMENSION (kms:kme) :: vert_mass_dist
-    real(CHEM_KIND_R4) :: eh,h1,h2,h3,h4,h5,h6,maxth
+    real(CHEM_KIND_R4) :: eh,maxth
 #if 0
     logical, save :: first_init = .true.
 #endif
@@ -209,6 +211,55 @@ contains
 
     ! -- begin
     if (present(rc)) rc = CHEM_RC_SUCCESS
+
+    ! -- initialize output arrays
+    backg_oh      = 0._CHEM_KIND_R4
+    backg_h2o2    = 0._CHEM_KIND_R4
+    backg_no3     = 0._CHEM_KIND_R4
+    ttday         = 0._CHEM_KIND_R4
+    tcosz         = 0._CHEM_KIND_R4
+    raincv_b      = 0._CHEM_KIND_R4
+    relhum        = 0._CHEM_KIND_R4
+    rri           = 0._CHEM_KIND_R4
+    t_phy         = 0._CHEM_KIND_R4
+    moist         = 0._CHEM_KIND_R4
+    u_phy         = 0._CHEM_KIND_R4
+    v_phy         = 0._CHEM_KIND_R4
+    p_phy         = 0._CHEM_KIND_R4
+    chem          = 0._CHEM_KIND_R4
+    tsk           = 0._CHEM_KIND_R4
+    e_co          = 0._CHEM_KIND_R4
+    dms_0         = 0._CHEM_KIND_R4
+    u10           = 0._CHEM_KIND_R4
+    v10           = 0._CHEM_KIND_R4
+    ivgtyp        = 0
+    isltyp        = 0
+    gsw           = 0._CHEM_KIND_R4
+    vegfra        = 0._CHEM_KIND_R4
+    rmol          = 0._CHEM_KIND_R4
+    ust           = 0._CHEM_KIND_R4
+    znt           = 0._CHEM_KIND_R4
+    xland         = 0._CHEM_KIND_R4
+    dxy           = 0._CHEM_KIND_R4
+    t8w           = 0._CHEM_KIND_R4
+    p8w           = 0._CHEM_KIND_R4
+    dqdti         = 0._CHEM_KIND_R4
+    exch_h        = 0._CHEM_KIND_R4
+    pbl           = 0._CHEM_KIND_R4
+    hfx           = 0._CHEM_KIND_R4
+    snowh         = 0._CHEM_KIND_R4
+    clayf         = 0._CHEM_KIND_R4
+    sandf         = 0._CHEM_KIND_R4
+    xlat          = 0._CHEM_KIND_R4
+    xlong         = 0._CHEM_KIND_R4
+    convfac       = 0._CHEM_KIND_R4
+    z_at_w        = 0._CHEM_KIND_R4
+    zmid          = 0._CHEM_KIND_R4
+    dz8w          = 0._CHEM_KIND_R4
+    vvel          = 0._CHEM_KIND_R4
+    rho_phy       = 0._CHEM_KIND_R4
+    smois         = 0._CHEM_KIND_R4
+    ebu_in        = 0._CHEM_KIND_R4
 
     ! -- initialize fire emissions
     plumedist     = 0._CHEM_KIND_R4
@@ -333,13 +384,12 @@ contains
     factor=0.
     jmax=0
     jmaxi=0
-    k=1
+    k=kts
     if ((p_bc2 > 1) .or. (chem_opt == CHEM_OPT_RACM_SOA_VBS)) then  ! "regular" chem options
       do j=jts,jte
         do i=its,ite
-          k=1
           emis_ant(i,k,j,p_e_bc)=emiss_ab(i,j,p_e_bc)
-          emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc)
+          emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc) + emiss_ab(i,j,p_e_pm_25)
           emis_ant(i,k,j,p_e_sulf)=emiss_ab(i,j,p_e_sulf)
           emis_ant(i,k,j,p_e_so2)=frac_so2_ant * emiss_ab(i,j,p_e_so2)
           emis_ant(i,k,j,p_e_dms)= 0. !emiss_ab(j,p_e_dms)
@@ -399,23 +449,23 @@ contains
               ebu_in(i,j,p_ebu_in_bc)   = emiss_abu(i,j,p_e_bc)
               ebu_in(i,j,p_ebu_in_pm25) = emiss_abu(i,j,p_e_pm_25)
               ebu_in(i,j,p_ebu_in_so2)  = emiss_abu(i,j,p_e_so2)
-              mean_fct_agtf(i,j)=plumestuff(i,j,1)
-              mean_fct_agef(i,j)=plumestuff(i,j,2)
-              mean_fct_agsv(i,j)=plumestuff(i,j,3)
-              mean_fct_aggr(i,j)=plumestuff(i,j,4)
-              firesize_agtf(i,j)=plumestuff(i,j,5)
-              firesize_agef(i,j)=plumestuff(i,j,6)
-              firesize_agsv(i,j)=plumestuff(i,j,7)
-              firesize_aggr(i,j)=plumestuff(i,j,8)
+              mean_fct_agtf(i,j)=plume(i,j,1)
+              mean_fct_agef(i,j)=plume(i,j,2)
+              mean_fct_agsv(i,j)=plume(i,j,3)
+              mean_fct_aggr(i,j)=plume(i,j,4)
+              firesize_agtf(i,j)=plume(i,j,5)
+              firesize_agef(i,j)=plume(i,j,6)
+              firesize_agsv(i,j)=plume(i,j,7)
+              firesize_aggr(i,j)=plume(i,j,8)
             case (FIRE_OPT_GBBEPx)
-              ebu_in(i,j,p_ebu_in_oc)   = frpc * emiss_abu(i,j,p_e_oc)
+              ebu_in(i,j,p_ebu_in_oc)   = frpc * (emiss_abu(i,j,p_e_pm_25) - emiss_abu(i,j,p_e_bc))
               ebu_in(i,j,p_ebu_in_bc)   = frpc * emiss_abu(i,j,p_e_bc)
-              ebu_in(i,j,p_ebu_in_pm25) = frpc * emiss_abu(i,j,p_e_pm_25)
+              ebu_in(i,j,p_ebu_in_pm25) = frpc * (emiss_abu(i,j,p_e_pm_25) - emiss_abu(i,j,p_e_bc) - emiss_abu(i,j,p_e_oc))
               ebu_in(i,j,p_ebu_in_so2)  = frpc * emiss_abu(i,j,p_e_so2)
               plumedist(i,j,p_frp_flam_frac) = flaming(catb(ivgtyp(i,j)))
-              plumedist(i,j,p_frp_mean     ) = frp2plume * plumefrp(i,j)
-              plumedist(i,j,p_frp_std      ) = 0.3_CHEM_KIND_R4   * frp2plume * plumefrp(i,j)
-              plumedist(i,j,p_frp_mean_size) = msize(ivgtyp(i,j)) * frp2plume * plumefrp(i,j)
+              plumedist(i,j,p_frp_mean     ) = frp2plume * plume(i,j,1)
+              plumedist(i,j,p_frp_std      ) = 0.3_CHEM_KIND_R4   * frp2plume * plume(i,j,1)
+              plumedist(i,j,p_frp_mean_size) = msize(ivgtyp(i,j)) * frp2plume * plume(i,j,1)
               plumedist(i,j,p_frp_std_size ) = 0.5_CHEM_KIND_R4 * plumedist(i,j,p_frp_mean_size)
             case default
               ! -- no further option available
@@ -428,7 +478,6 @@ contains
       ! -- tracer run
       do j=jts,jte
         do i=its,ite
-          k=kts
           emis_ant(i,k,j,p_e_tr1)=emiss_ab(i,j,p_e_tr1)
           emis_ant(i,k,j,p_e_tr2)=emiss_ab(i,j,p_e_tr2)
         enddo
@@ -454,7 +503,7 @@ contains
           t_phy(i,k,j)=tk3d(ip,jp,kkp)
           p_phy(i,k,j)=prl3d(ip,jp,kkp)
           u_phy(i,k,j)=us3d(ip,jp,kkp)
-          exch_h(i,k,j)=exch(ip,jp,kkp)
+          dqdti(i,k,j)=dqdt(ip,jp,kkp)
           v_phy(i,k,j)=vs3d(ip,jp,kkp)
           rho_phy(i,k,j)=p_phy(i,k,j)/(RD*T_phy(i,k,j)*(1.+.608*tr3d(ip,jp,kkp,p_atm_shum)))
           rri(i,k,j)=1./rho_phy(i,k,j)
@@ -476,6 +525,18 @@ contains
             (3.80*exp(17.27*(t_phy(i,k,j)-273.)/ &
             (t_phy(i,k,j)-36.))/(.01*p_phy(i,k,j))))
           relhum(i,k,j)=max(0.1,relhum(i,k,j))
+        enddo
+      enddo
+    enddo
+
+    ! -- the imported atmospheric heat diffusivity is only available up to kte-1
+    do j=jts,jte
+      jp = j - jts + 1
+      do k=kts,kte-1
+        kkp = k - kts + 1
+        do i=its,ite
+          ip = i - its + 1
+          exch_h(i,k,j)=exch(ip,jp,kkp)
         enddo
       enddo
     enddo
@@ -542,12 +603,13 @@ contains
                   kkp = kk - kts + 1
                   ! -- add initial constant into O3,CH4 and CO ect.
                   chem(i,k,j,p_o3)=epsilc
-                  maxth=min(400.,th_pvsrf(i,j))
-                  if (tr3d(ip,jp,kkp,p_atm_ptem) > maxth) then
-                    chem(i,k,j,p_o3)=(airmw/48.)*tr3d(ip,jp,kkp,p_atm_o3mr)*1e6 !convert kg/kg to ppm
-                  else
-                    chem(i,k,j,p_o3)=0.03 !ppm
-                  endif
+                  ! -- this section needs to be revisited before enabling the corresponding chem_opt options
+                  ! maxth=min(400.,th_pvsrf(i,j))
+                  ! if (tr3d(ip,jp,kkp,p_atm_ptem) > maxth) then
+                  !   chem(i,k,j,p_o3)=(airmw/48.)*tr3d(ip,jp,kkp,p_atm_o3mr)*1e6 !convert kg/kg to ppm
+                  ! else
+                  !   chem(i,k,j,p_o3)=0.03 !ppm
+                  ! endif
                   chem(i,k,j,p_ch4)=1.85 !ppm
                   chem(i,k,j,p_co)=0.06 !ppm
                   chem(i,k,j,p_co2)=380.
@@ -574,10 +636,11 @@ contains
               kkp = kk - kts + 1
               do i=its,ite
                 ip = i - its + 1
-                maxth=min(400.,th_pvsrf(i,j))
-                if (tr3d(ip,jp,kkp,p_atm_ptem) >= maxth) then
-                  chem(i,k,j,p_o3)=(airmw/48.)*tr3d(ip,jp,kkp,p_atm_o3mr)*1e6 !convert kg/kg to ppm
-                endif !380K
+                ! -- this section needs to be revisited before enabling the corresponding chem_opt options
+                ! maxth=min(400.,th_pvsrf(i,j))
+                ! if (tr3d(ip,jp,kkp,p_atm_ptem) >= maxth) then
+                !   chem(i,k,j,p_o3)=(airmw/48.)*tr3d(ip,jp,kkp,p_atm_o3mr)*1e6 !convert kg/kg to ppm
+                ! endif !380K
               enddo
             enddo
           enddo
@@ -688,7 +751,7 @@ endif
 
 !   emis_ant=0.
     nv=1
-    k=1
+    k=kts
     factor2=0.
     factor=0.
     if (p_bc2 > 1)then
@@ -980,7 +1043,6 @@ endif
             return
           end if
           do j=jts,jte
-            !do k=kts,kte-2
             do k=kts,kte
               do i=its,ite
                 if (emiss_ash_dt(i,j) <= 0.) cycle
@@ -1073,8 +1135,7 @@ endif
     integer, intent(in):: year, month, day, hour
     integer, intent(in):: minute, sec
 ! Local:
-      integer n, m, ds, nday
-      real tsec
+      integer m, ds, nday
       integer days(12)
       data days /31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/
 

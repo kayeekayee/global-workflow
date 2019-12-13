@@ -125,6 +125,25 @@ contains
         data % ero3 = 0._CHEM_KIND_R4
       end if
 
+      ! -- additional dust quantities for AFWA
+      if (.not.allocated(data % clayfrac)) then
+        allocate(data % clayfrac(ids:ide,jds:jde), stat=localrc)
+        if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+        data % clayfrac = 0._CHEM_KIND_R4
+      end if
+      if (.not.allocated(data % sandfrac)) then
+        allocate(data % sandfrac(ids:ide,jds:jde), stat=localrc)
+        if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+        data % sandfrac = 0._CHEM_KIND_R4
+      end if
+
+      ! -- drag partition map (FENGSHA)
+      if (.not.allocated(data % rdrag)) then
+        allocate(data % rdrag(ids:ide,jds:jde), stat=localrc)
+        if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+        data % rdrag = 0._CHEM_KIND_R4
+      end if
+
       ! -- PJZ sediment supply map
       if (.not.allocated(data % ssm)) then
         allocate(data % ssm(ids:ide,jds:jde), stat=localrc)
@@ -196,44 +215,16 @@ contains
         data % th_pvsrf = 0._CHEM_KIND_R4
       end if
 
-      ! -- additional dust quantities for AFWA
-      select case (config % dust_opt)
-        case (DUST_OPT_AFWA, DUST_OPT_FENGSHA)
-          if (.not.allocated(data % clayfrac)) then
-            allocate(data % clayfrac(ids:ide,jds:jde), stat=localrc)
-            if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-            data % clayfrac = 0._CHEM_KIND_R4
-          end if
-          if (.not.allocated(data % sandfrac)) then
-            allocate(data % sandfrac(ids:ide,jds:jde), stat=localrc)
-            if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-            data % sandfrac = 0._CHEM_KIND_R4
-          end if
-      end select
-
       ! -- emission from burning biomass
-      if (config % biomass_burn_opt == BURN_OPT_ENABLE) then
-        if (.not.allocated(data % emiss_abu)) then
-          allocate(data % emiss_abu(ids:ide,jds:jde,config % num_ebu_in), stat=localrc)
-          if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-          data % emiss_abu = 0._CHEM_KIND_R4
-        end if
-        select case (config % plumerise_flag)
-          case (FIRE_OPT_MODIS)
-            if (.not.allocated(data % plumestuff)) then
-              allocate(data % plumestuff(ids:ide,jds:jde,config % num_plumestuff), stat=localrc)
-              if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-              data % plumestuff = 0._CHEM_KIND_R4
-            end if
-          case (FIRE_OPT_GBBEPx)
-            if (.not.allocated(data % plumefrp)) then
-              allocate(data % plumefrp(ids:ide,jds:jde), stat=localrc)
-              if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-              data % plumefrp = 0._CHEM_KIND_R4
-            end if
-          case default
-            ! -- no additional options
-        end select
+      if (.not.allocated(data % emiss_abu)) then
+        allocate(data % emiss_abu(ids:ide,jds:jde,config % num_ebu_in), stat=localrc)
+        if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+        data % emiss_abu = 0._CHEM_KIND_R4
+      end if
+      if (.not.allocated(data % plume)) then
+        allocate(data % plume(ids:ide,jds:jde,config % num_plume_data), stat=localrc)
+        if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+        data % plume = 0._CHEM_KIND_R4
       end if
 
     end do
@@ -350,11 +341,11 @@ contains
         
         select case (config % dust_opt)
           case (DUST_OPT_AFWA, DUST_OPT_FENGSHA)
-            call chem_io_read('clay.dat', data % clayfrac, path=trim(config % emi_inname), de=de, rc=localrc)
+            call chem_io_read('clay.dat', data % clayfrac, path=trim(config % dust_inname), de=de, rc=localrc)
             if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
             if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," clayfrac - min/max = "2g16.6)') &
               localpe, de, tile, minval(data % clayfrac), maxval(data % clayfrac)
-            call chem_io_read('sand.dat', data % sandfrac, path=trim(config % emi_inname), de=de, rc=localrc)
+            call chem_io_read('sand.dat', data % sandfrac, path=trim(config % dust_inname), de=de, rc=localrc)
             if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
             if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," sandfrac - min/max = "2g16.6)') &
               localpe, de, tile, minval(data % sandfrac), maxval(data % sandfrac)
@@ -362,10 +353,17 @@ contains
 
         if (config % dust_opt == DUST_OPT_FENGSHA) then
           ! -- PJZ sediment supply map
-          call chem_io_read('ssm.dat', data % ssm, path=trim(config % emi_inname), de=de, rc=localrc)
+          call chem_io_read('ssm.dat', data % ssm, path=trim(config % dust_inname), de=de, rc=localrc)
           if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
           if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," ssm - min/max = "2g16.6)') &
             localpe, de, tile, minval(data % ssm), maxval(data % ssm)
+          if (config % dust_calcdrag == 1) then
+            ! -- drag partition map
+            call chem_io_read('rdrag.dat', data % rdrag, path=trim(config % dust_inname), de=de, rc=localrc)
+            if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
+            if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," rdrag - min/max = "2g16.6)') &
+              localpe, de, tile, minval(data % rdrag), maxval(data % rdrag)
+          end if
         end if
 
         if ((config % chem_opt == CHEM_OPT_GOCART_RACM) .or. &
@@ -546,17 +544,17 @@ contains
             if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," ebu_pm_10 - min/max = "2g16.6)') &
               localpe, de, tile, minval(data % emiss_abu(:,:,config % species % p_e_pm_10)), &
               maxval(data % emiss_abu(:,:,config % species % p_e_pm_10))
-            call chem_io_read('plumestuff.dat', data % plumestuff, recrange=(/ 1, config % num_plumestuff /), &
+            call chem_io_read('plumestuff.dat', data % plume, recrange=(/ 1, config % num_plume_data /), &
               path=trim(config % fireemi_inname), de=de, rc=localrc)
             if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
-            if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," plumestuff - min/max = "2g16.6)') &
-              localpe, de, tile, minval(data % plumestuff), maxval(data % plumestuff)
+            if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," plume - min/max = "2g16.6)') &
+              localpe, de, tile, minval(data % plume), maxval(data % plume)
           case (FIRE_OPT_GBBEPx)
-            call chem_io_read('plumefrp.dat', data % plumefrp, &
+            call chem_io_read('plumefrp.dat', data % plume, &
               path=trim(config % fireemi_inname), de=de, rc=localrc)
             if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
-            if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," plumefrp - min/max = "2g16.6)') &
-              localpe, de, tile, minval(data % plumefrp), maxval(data % plumefrp)
+            if (isVerbose) write(6,'("chem_backgd_read: PET:",i4," DE:",i2," tile=",i2," plume - min/max = "2g16.6)') &
+              localpe, de, tile, minval(data % plume), maxval(data % plume)
           case default
             ! -- no further options available
         end select
@@ -878,6 +876,13 @@ contains
           if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
           if (isVerbose) write(6,'("chem_backgd_write: PET:",i4," DE:",i2," tile=",i2," ssm - min/max = "2g16.6)') &
             localpe, de, tile, minval(data % ssm), maxval(data % ssm)
+          if (config % dust_calcdrag == 1) then
+            ! -- drag partition map
+            call chem_io_write('rdrag.dat', data % rdrag, path=trim(config % emi_outname), de=de, rc=localrc)
+            if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
+            if (isVerbose) write(6,'("chem_backgd_write: PET:",i4," DE:",i2," tile=",i2," rdrag - min/max = "2g16.6)') &
+              localpe, de, tile, minval(data % rdrag), maxval(data % rdrag)
+          end if
         end if
 
         if ((config % chem_opt == CHEM_OPT_GOCART_RACM) .or. &
@@ -1306,7 +1311,6 @@ contains
     ! -- local variables
     integer :: localrc
     integer :: de, deCount
-    integer :: ids, ide, jds, jde
     integer :: n, p
     integer :: advanceCount
     type(chem_config_type),  pointer :: config   => null()

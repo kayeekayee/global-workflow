@@ -5,9 +5,6 @@
 	path = GSDCHEM
 	url = gerrit:GSDCHEM
 	branch = pre087
-[submodule "NEMS"]
-	path = NEMS
-	url = gerrit:NEMS
 [submodule "ccpp/framework"]
 	path = ccpp/framework
 	url = https://github.com/NCAR/ccpp-framework
@@ -18,3 +15,6 @@
 	path = FMS
 	url = https://github.com/NOAA-EMC/FMS
 	branch = GFS-FMS
+[submodule "NEMS"]
+	path = NEMS
+	url = https://github.com/NOAA-EMC/NEMS.git

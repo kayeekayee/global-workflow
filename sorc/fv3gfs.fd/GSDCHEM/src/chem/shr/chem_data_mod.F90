@@ -21,12 +21,12 @@ module chem_data_mod
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero1              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero2              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero3              ! dust erosion factor
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: rdrag             ! Drag Partition Map (FENGSHA)
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ssm               ! PJZ Sediment Supply Map (FENGSHA)
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: h2o2_backgd       ! H2O2 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: no3_backgd        ! NO3 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: oh_backgd         ! OH background for GOCART
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: plumefrp          ! fire info - GBBEPx
-    real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: plumestuff        ! fire info - MODIS
+    real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: plume             ! fire info - MODIS & GBBEPx
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: sandfrac          ! sand fraction (AFWA & FENGSHA dust scheme)
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: th_pvsrf
     ! -- output
@@ -122,6 +122,10 @@ contains
       deallocate(data % ero3, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
+    if (allocated(data % rdrag)) then
+      deallocate(data % rdrag, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
     if (allocated(data % ssm)) then
       deallocate(data % ssm, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
@@ -138,12 +142,8 @@ contains
       deallocate(data % oh_backgd, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
-    if (allocated(data % plumefrp)) then
-      deallocate(data % plumefrp, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % plumestuff)) then
-      deallocate(data % plumestuff, stat=localrc)
+    if (allocated(data % plume)) then
+      deallocate(data % plume, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
     if (allocated(data % sandfrac)) then

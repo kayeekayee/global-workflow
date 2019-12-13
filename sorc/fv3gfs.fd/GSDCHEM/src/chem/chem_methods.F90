@@ -4,7 +4,7 @@ module chem_methods
   use NUOPC
   use chem_rc_mod
   use chem_comm_mod
-  use chem_types_mod, only : CHEM_MAXSTR
+  use chem_types_mod, only : CHEM_MAXSTR, CHEM_KIND_R8
   use chem_model_mod
   use chem_io_mod
   use chem_iodata_mod
@@ -341,6 +341,12 @@ contains
               return  ! bail
           case ("inst_exchange_coefficient_heat_levels")
             call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateIn % exch, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail
+          case ("inst_spec_humid_conv_tendency_levels")
+            call ESMF_FieldGet(field, localDe=localDe, farrayPtr=stateIn % dqdt, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=__FILE__)) &
