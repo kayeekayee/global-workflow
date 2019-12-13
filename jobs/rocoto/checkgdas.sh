@@ -48,6 +48,7 @@ echo "CDATE = $CDATE"
 echo "CDUMP = $CDUMP"
 echo "ICSDIR = $ICSDIR"
 echo "PUBDIR = $PUBDIR"
+echo "RETROGDAS = $RETROGDAS"
 echo "GDASDIR = $GDASDIR"
 echo "ROTDIR = $ROTDIR"
 echo "PSLOT = $PSLOT"
@@ -65,7 +66,12 @@ gdasfile=$GDASDIR/${yyddd}${hh}00.gdas.t${hh}z.atmanl.nemsio
 ls  $gdasfile  #ESRL
 status=$?
 if [[ $status -ne 0 ]]; then
-  echo "missing $gdasfile on /public; check on mass store..."
+  echo "missing $gdasfile on /public; check in $RETROGDAS..."
+  ls  $gdasfile  #ESRL
+  status=$?
+elif [[ $status -ne 0 ]]; then
+
+  echo "missing $gdasfile in $RETROGDAS; check on mass store..."
 
   # /5year/NCEPDEV/emc-global/emc.glopara/WCOSS_C/Q1FY19/prfv3rt1/gdas.2018041100/gdas.tar 
   #      ./gdas.20180411/00/gdas.t00z.atmanl.nemsio

@@ -79,8 +79,7 @@ cd $tiledir
     eval $NLN ${CASE}-T-${emiss_date}0000-SO2-bb.bin ebu_so2.dat
     fi
     if [ $EMITYPE -eq 2 ]; then
-    DIRGB=/scratch3/BMC/fim/lzhang/GBBEPx
-    PUBEMI=/scratch4/BMC/public/data/grids/sdsu/emissions
+    DIRGB=/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx
     emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
     print "emiss_date: $emiss_date1"
     mkdir -p $DIRGB/$emiss_date1

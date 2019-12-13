@@ -14,5 +14,5 @@ echo "BEGIN: config.regrid"
 # Set job and DATAROOT
 export job=${CDUMP}_regrid_${cyc}
 export DATA="$RUNDIR/$CDATE/$CDUMP"
-export INPUTDIR="/scratch3/BMC/fim/lzhang/EMC_FV3/ICs"
-echo "END: config.grid"
+export INPUTDIR="/scratch1/BMC/gfs-fv3-dev/lzhang/EMC_FV3/ICs"
+echo "END: config.regrid"

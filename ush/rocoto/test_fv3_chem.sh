@@ -1,9 +1,9 @@
 USER=Kate.Zhang
-COMROT=/scratch4/BMC/fim/NCEPDEV/global/noscrub/$USER/fv3gfs/comrot ## default COMROT directory
-EXPDIR=/scratch4/BMC/fim/NCEPDEV/global/save/$USER/fv3gfs/expdir    ## default EXPDIR directory
-PTMP=/scratch4/BMC/fim/NCEPDEV/stmp4/$USER                          ## default PTMP directory
-STMP=/scratch4/BMC/fim/NCEPDEV/stmp3/$USER                          ## default STMP directory
-GITDIR=/scratch4/BMC/fim/lzhang/EMC_FV3/new/FV3_ESRL
+COMROT=/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/$USER/fv3gfs/comrot ## default COMROT directory
+EXPDIR=/scratch2/BMC/gsd-fv3-dev/NCEPDEV/global/$USER/fv3gfs/expdir    ## default EXPDIR directory
+PTMP=/scratch2/BMC/gsd-fv3-dev/NCEPDEV/stmp4/$USER                          ## default PTMP directory
+STMP=/scratch2/BMC/gsd-fv3-dev/NCEPDEV/stmp3/$USER                          ## default STMP directory
+GITDIR=/scratch1/BMC/gsd-fv3-dev/lzhang/EMC_FV3/FV3_ESRL
 #ICSDIR=/scratch4/BMC/fim/NCEPDEV/global/noscrub/$USER/fv3gfs/comrot/FV3ICS/
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 

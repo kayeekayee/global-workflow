@@ -16,6 +16,7 @@
 # 2017-03-24  Fanglin Yang   Updated to use NEMS FV3GFS with IPD4
 # 2017-05-24  Rahul Mahajan  Updated for cycling with NEMS FV3GFS
 # 2017-09-13  Fanglin Yang   Updated for using GFDL MP and Write Component
+# 2019-03-21  Fanglin Yang   Add restart capability for running gfs fcst from a break point.
 #
 # $Id$
 #
@@ -49,6 +50,9 @@ NSOUT=${NSOUT:-"-1"}
 FDIAG=$FHOUT
 if [ $FHMAX_HF -gt 0 -a $FHOUT_HF -gt 0 ]; then FDIAG=$FHOUT_HF; fi
 
+PDY=$(echo $CDATE | cut -c1-8)
+cyc=$(echo $CDATE | cut -c9-10)
+
 # Directories.
 pwd=$(pwd)
 NWPROD=${NWPROD:-${NWROOT:-$pwd}}
@@ -68,7 +72,7 @@ layout_x=${layout_x:-8}
 layout_y=${layout_y:-16}
 LEVS=${LEVS:-65}
 
- #OUTTIME=$(( $FHOUT*3600/ $DELTIM ))
+ OUTTIME=$(( $FHOUT*3600/ $DELTIM ))
  
 if [ $imp_physics -eq 99 ]; then NTRACER=0; fi
 if [ $imp_physics -eq 11 ]; then NTRACER=1; fi
@@ -124,7 +128,11 @@ fi
 
 #-------------------------------------------------------
 if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
-
+mkdata=NO
+if [ ! -d $DATA ]; then
+   mkdata=YES
+   mkdir -p $DATA
+fi
 # Stage the FV3 initial conditions to ROTDIR  
 export OUTDIR="$ICSDIR/$CDATE/$CDUMP/$CASE/INPUT" #lzhang
 COMOUT="$ROTDIR/$CDUMP.$PDY/$cyc"
@@ -132,9 +140,38 @@ COMOUT="$ROTDIR/$CDUMP.$PDY/$cyc"
 cd $COMOUT || exit 99
 [[ ! -d $INPUT ]] && $NLN $OUTDIR .
 #----------------------------------------------------
-if [ ! -d $DATA ]; then mkdir -p $DATA ;fi
-mkdir -p $DATA/RESTART $DATA/INPUT
 cd $DATA || exit 8
+mkdir -p $DATA/INPUT
+if [ $CDUMP = "gfs" -a $restart_interval -gt 0 ]; then
+    RSTDIR_TMP=${RSTDIR:-$ROTDIR}/${CDUMP}.${PDY}/${cyc}/RERUN_RESTART
+    if [ ! -d $RSTDIR_TMP ]; then mkdir -p $RSTDIR_TMP ; fi
+    $NLN $RSTDIR_TMP RESTART
+else
+    mkdir -p $DATA/RESTART
+fi
+
+#-------------------------------------------------------
+# determine if restart IC exists to continue from a previous forecast
+RERUN="NO"
+filecount=$(find $RSTDIR_TMP -type f | wc -l) 
+if [ $CDUMP = "gfs" -a $restart_interval -gt 0 -a $FHMAX -gt $restart_interval -a $filecount -gt 10 ]; then
+    SDATE=$($NDATE +$FHMAX $CDATE)
+    EDATE=$($NDATE +$restart_interval $CDATE)
+    while [ $SDATE -gt $EDATE ]; do
+        PDYS=$(echo $SDATE | cut -c1-8)
+        cycs=$(echo $SDATE | cut -c9-10)
+        flag1=$RSTDIR_TMP/${PDYS}.${cycs}0000.coupler.res
+        flag2=$RSTDIR_TMP/coupler.res
+        if [ -s $flag1 ]; then
+            mv $flag1 ${flag1}.old
+            if [ -s $flag2 ]; then mv $flag2 ${flag2}.old ;fi
+            RERUN="YES"
+            CDATE_RST=$($NDATE -$restart_interval $SDATE)
+            break
+        fi 
+        SDATE=$($NDATE -$restart_interval $SDATE)
+    done
+fi
 
 #-------------------------------------------------------
 # member directory
@@ -147,16 +184,13 @@ else
   rprefix=enkf$rCDUMP
   memchar=mem$(printf %03i $MEMBER)
 fi
-PDY=$(echo $CDATE | cut -c1-8)
-cyc=$(echo $CDATE | cut -c9-10)
 memdir=$ROTDIR/${prefix}.$PDY/$cyc/$memchar
 if [ ! -d $memdir ]; then mkdir -p $memdir; fi
 
 GDATE=$($NDATE -$assim_freq $CDATE)
 gPDY=$(echo $GDATE | cut -c1-8)
 gcyc=$(echo $GDATE | cut -c9-10)
-#gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar #lzhang
-gmemdir=$ROTDIR/${prefix}.$gPDY/$gcyc/$memchar
+gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/$memchar
 
 #-------------------------------------------------------
 # initial conditions
@@ -169,8 +203,14 @@ if [ -f $gmemdir/RESTART/${PDY}.${cyc}0000.coupler.res ]; then
   export warm_start=".true."
 fi
 
-if [ $warm_start = ".true." ]; then
-  CHEMIN=1 #lzhang
+#-------------------------------------------------------
+if [ $warm_start = ".true." -o $RERUN = "YES" ]; then
+   CHEMIN=1 #lzhang
+#-------------------------------------------------------
+#.............................
+  if [ $RERUN = "NO" ]; then
+#.............................
+
   # Link all (except sfc_data) restart files from $gmemdir
   for file in $gmemdir/RESTART/${PDY}.${cyc}0000.*.nc; do
     file2=$(echo $(basename $file))
@@ -227,6 +267,19 @@ if [ $warm_start = ".true." ]; then
     fi
   done
 #lzhang
+#.............................
+  else  ##RERUN                         
+
+    PDYT=$(echo $CDATE_RST | cut -c1-8)
+    cyct=$(echo $CDATE_RST | cut -c9-10)
+    for file in $RSTDIR_TMP/${PDYT}.${cyct}0000.*; do
+      file2=$(echo $(basename $file))
+      file2=$(echo $file2 | cut -d. -f3-)
+      $NLN $file $DATA/INPUT/$file2
+    done
+
+  fi
+#.............................
 else ## cold start                            
   CHEMIN=0 #lzhang
 
@@ -238,7 +291,10 @@ else ## cold start
     fi
   done
 
+#-------------------------------------------------------
 fi 
+#-------------------------------------------------------
+
 
 nfiles=$(ls -1 $DATA/INPUT/* | wc -l)
 if [ $nfiles -le 0 ]; then
@@ -741,7 +797,7 @@ cat > input.nml <<EOF
   dspheat      = ${dspheat:-".true."}
   hybedmf      = ${hybedmf:-".true."}
   random_clds  = ${random_clds:-".true."}
-  trans_trac   = ${trans_trac:-".false."}
+  trans_trac   = ${trans_trac:-".true."}
   cnvcld       = ${cnvcld:-".true."}
   imfshalcnv   = ${imfshalcnv:-"2"}
   imfdeepcnv   = ${imfdeepcnv:-"2"}
@@ -758,6 +814,7 @@ cat > input.nml <<EOF
   prautco      = ${prautco:-"0.00015,0.00015"}
   lgfdlmprad   = ${lgfdlmprad:-".false."}
   effr_in      = ${effr_in:-".false."}
+  fscav_aero   = "sulf:0.2", "bc1:0.2","bc2:0.2","oc1:0.2","oc2:0.2",
   $gfs_physics_nml
 /
 
@@ -866,16 +923,17 @@ cat > input.nml <<EOF
   aerchem_onoff=1
   bio_emiss_opt=0
   biomass_burn_opt=1
-  chem_conv_tr=2
+  chem_conv_tr=0
   chem_in_opt=$CHEMIN
   chem_opt=300
   chemdt=3
   cldchem_onoff=0
   dmsemis_opt=1
-  dust_opt=3
-  dust_alpha=0.2
-  dust_gamma=1.3
-  dust_uthres=-1
+  dust_opt=5
+  dust_alpha = 2.0
+  dust_gamma = 1.8
+  dust_uthres = 0.0668, 0.16, 0.26, 0.30, 0.30, 0.37, 0.35, 0.30, 0.30,0.45,0.50,0.42,9.999
+  dust_calcdrag=1
   emiss_inpt_opt=1
   emiss_opt=5
   gas_bc_opt=1
@@ -888,12 +946,13 @@ cat > input.nml <<EOF
   PLUMERISE_flag=$EMITYPE
   seas_opt=2
   seas_emis_scheme=-1
-  seas_emis_scale=0.2,0.2,0.2,0.2,0.2
+  seas_emis_scale=1.,1.,1.,1.,1.
   vertmix_onoff=1
   gfdlmp_onoff=$NTRACER
   archive_step =-1
   chem_hist_outname = "chem_out_"
   emi_inname  = "${EMIDIR}${CASE}/$SMONTH"
+  dust_inname = "${EMIDIR}${CASE}/fengsha/$SMONTH"
   fireemi_inname  = "../prep"
   emi_outname = "./"
   $chem_nml
@@ -995,13 +1054,16 @@ if [ $QUILTING = ".true." -a $OUTPUT_GRID = "gaussian_grid" ]; then
   done
 else
   for n in $(seq 1 $ntiles); do
-    eval $NLN nggps2d.tile${n}.nc       $memdir/nggps2d.tile${n}.nc
-    eval $NLN nggps3d.tile${n}.nc       $memdir/nggps3d.tile${n}.nc
-    eval $NLN grid_spec.tile${n}.nc     $memdir/grid_spec.tile${n}.nc
-    eval $NLN atmos_static.tile${n}.nc  $memdir/atmos_static.tile${n}.nc
-    eval $NLN atmos_4xdaily.tile${n}.nc $memdir/atmos_4xdaily.tile${n}.nc
+    eval $NLN $memdir/nggps2d.tile${n}.nc       nggps2d.tile${n}.nc       
+    eval $NLN $memdir/nggps3d.tile${n}.nc       nggps3d.tile${n}.nc       
+    eval $NLN $memdir/grid_spec.tile${n}.nc     grid_spec.tile${n}.nc     
+    eval $NLN $memdir/atmos_static.tile${n}.nc  atmos_static.tile${n}.nc  
+    eval $NLN $memdir/atmos_4xdaily.tile${n}.nc atmos_4xdaily.tile${n}.nc 
   done
 fi
+
+# Copy namelist file
+$NCP input.nml $memdir
 
 #------------------------------------------------------------------
 # run the executable
@@ -1023,6 +1085,10 @@ if [ $SEND = "YES" ]; then
   # Only save restarts at single time in RESTART directory
   # Either at restart_interval or at end of the forecast
   if [ $restart_interval -eq 0 -o $restart_interval -eq $FHMAX ]; then
+  # Copy gdas and enkf memebr restart files
+  if [ $CDUMP = "gdas" -a $restart_interval -gt 0 ]; then
+    cd $DATA/RESTART
+    mkdir -p $memdir/RESTART
 
     # Add time-stamp to restart files at FHMAX
     RDATE=$($NDATE +$FHMAX $CDATE)
@@ -1032,6 +1098,7 @@ if [ $SEND = "YES" ]; then
       $NMV $file ${rPDY}.${rcyc}0000.$file
       $NCP ${rPDY}.${rcyc}0000.$file $memdir/RESTART/${rPDY}.${rcyc}0000.$file #lzhang
     done
+
 
   else
 
@@ -1049,7 +1116,7 @@ fi
 
 #------------------------------------------------------------------
 # Clean up before leaving
-if [ $KEEPDATA = "NO" ]; then rm -rf $DATA; fi
+if [ $mkdata = "YES" ]; then rm -rf $DATA; fi
 
 #------------------------------------------------------------------
 set +x

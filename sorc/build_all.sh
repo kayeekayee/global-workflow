@@ -27,6 +27,12 @@ if [ ! -d "../exec" ]; then
 fi
 
 #------------------------------------
+# GET MACHINE
+#------------------------------------
+target=""
+source ./machine-setup.sh > /dev/null 2>&1
+
+#------------------------------------
 # INCLUDE PARTIAL BUILD 
 #------------------------------------
 
@@ -66,28 +72,23 @@ echo " .... Building ncep_post .... "
 }
 
 #------------------------------------
+# build ufs_utils
+#------------------------------------
+$Build_ufs_utils && {
+echo " .... Building ufs_utils .... "
+./build_ufs_utils.sh > $logs_dir/build_ufs_utils.log 2>&1
+}
+
+#------------------------------------
 # build gfs_wafs 
 #------------------------------------
-#$Build_gfs_wafs  && {
-#echo " .... Building gfs_wafs  .... "
-#./build_gfs_wafs.sh > $logs_dir/build_gfs_wafs .log 2>&1
-#}
-
-#------------------------------------
-# build NEMS util
-#------------------------------------
-$Build_nems_util && {
-echo " .... Building NEMS util .... "
-./build_nems_util.sh > $logs_dir/build_NEMS.log 2>&1
-}
-
-#------------------------------------
-# build chgres
-#------------------------------------
-$Build_chgres && {
-echo " .... Building chgres .... "
-./build_chgres.sh > $logs_dir/build_chgres.log 2>&1
-}
+# Only build on WCOSS
+if [ $target = wcoss -o $target = wcoss_cray -o $target = wcoss_dell_p3 ]; then
+ $Build_gfs_wafs  && {
+ echo " .... Building gfs_wafs  .... "
+ ./build_gfs_wafs.sh > $logs_dir/build_gfs_wafs .log 2>&1
+ }
+fi
 
 #------------------------------------
 # build sfcanl_nsttfchg 
@@ -95,22 +96,6 @@ echo " .... Building chgres .... "
 $Build_sfcanl_nsttfchg && {
 echo " .... Building gaussian_sfcanl and nst_tf_chg .... "
 ./build_sfcanl_nsttfchg.sh > $logs_dir/build_sfcanl_nsttfchg.log 2>&1
-}
-
-#------------------------------------
-# build orog
-#------------------------------------
-$Build_orog && {
-echo " .... Building orog .... "
-./build_orog.sh > $logs_dir/build_orog.log 2>&1
-}
-
-#------------------------------------
-# build cycle 
-#------------------------------------
-$Build_cycle && {
-echo " .... Building cycle .... "
-./build_cycle.sh > $logs_dir/build_cycle.log 2>&1
 }
 
 #------------------------------------
@@ -170,22 +155,6 @@ echo " .... Building gfs_bufrsnd .... "
 }
 
 #------------------------------------
-# build emcsfc
-#------------------------------------
-$Build_emcsfc && {
-echo " .... Building emcsfc .... "
-./build_emcsfc.sh > $logs_dir/build_emcsfc.log 2>&1
-}
-
-#------------------------------------
-# build fre-nctools
-#------------------------------------
-$Build_nctools && {
-echo " .... Building fre-nctools .... "
-./build_fre-nctools.sh > $logs_dir/build_fre-nctools.log 2>&1
-}
-
-#------------------------------------
 # build fv3nc2nemsio
 #------------------------------------
 $Build_fv3nc2nemsio && {
@@ -204,10 +173,13 @@ echo " .... Building regrid_nemsio .... "
 #------------------------------------
 # build gfs_util       
 #------------------------------------
-$Build_gfs_util && {
-echo " .... Building gfs_util .... "
-./build_gfs_util.sh > $logs_dir/build_gfs_util.log 2>&1
-}
+# Only build on WCOSS
+if [ $target = wcoss -o $target = wcoss_cray -o $target = wcoss_dell_p3 ]; then
+ $Build_gfs_util && {
+ echo " .... Building gfs_util .... "
+ ./build_gfs_util.sh > $logs_dir/build_gfs_util.log 2>&1
+ }
+fi
 
 #------------------------------------
 # build prod_util

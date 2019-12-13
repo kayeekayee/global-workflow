@@ -13,21 +13,21 @@ status=$?
 
 
 if [ $FHRGRP -eq 0 ]; then
-    fhrlst="anl"   
-#    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/${CDUMP}.t${cyc}z.atm          
+    fhrlst="anl"
+    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/${CDUMP}.t${cyc}z.atm
 else
     fhrlst=$(echo $FHRLST | sed -e 's/_/ /g; s/f/ /g; s/,/ /g')
-#    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/${CDUMP}.t${cyc}z.logf
+    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/${CDUMP}.t${cyc}z.logf
 fi
 
 
 #---------------------------------------------------------------
 for fhr in $fhrlst; do
 
-#    if [ ! -f $restart_file${fhr}.nemsio ]; then
-#        echo "Nothing to process for FHR = $fhr, cycle"
-#        continue
-#    fi
+    if [ ! -f $restart_file${fhr}.nemsio ]; then
+        echo "Nothing to process for FHR = $fhr, cycle"
+        continue
+    fi
 
     export post_times=$fhr
     $HOMEgfs/jobs/JGLOBAL_NCEPPOST
