@@ -175,6 +175,15 @@ export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/NCEPLIBS.15X
 export WRFPATH=$NCEPLIBS/wrf.shared.new/v1.1.1/src
 export myFC=mpiifort
 
+##---------------------------------------------------------------------------
+elif [[ -d /dev ]] ; then
+    if [[ -d /opt/intel ]]; then
+        target=linux.intel
+        GFS_LIBS_DIR=/opt source ../modulefiles/setup.linux.intel
+    else
+        target=linux.gnu
+        GFS_LIBS_DIR=/opt source ../modulefiles/setup.linux.gnu
+    fi
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
 fi

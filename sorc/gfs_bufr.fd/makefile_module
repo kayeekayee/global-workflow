@@ -30,20 +30,25 @@ OBJS    = physcons.o funcphys.o meteorg.o bfrhdr.o newsig1.o terp3.o\
           machine.o gslp.o modstuff1.o read_nemsio.o read_netcdf_p.o
 
 CMD     = ../../exec/gfs_bufr
+ifeq ($(target),linux.gnu)
+FFR     = -ffree-form
+else
+FFR     = -free
+endif
 
 $(CMD):	$(SRCM) $(OBJS)
 	$(FC) $(FFLAGS) $(SRCM) $(OBJS) $(LIBS) -o $(CMD)
 		  
 machine.o:	machine.f
-	$(FC) $(FFLAGS) -free -c machine.f
+	$(FC) $(FFLAGS) $(FFR) -c machine.f
 physcons.o:	physcons.f machine.o
-	$(FC) $(FFLAGS) -free -c physcons.f
+	$(FC) $(FFLAGS) $(FFR) -c physcons.f
 funcphys.o:	funcphys.f physcons.o
-	$(FC) $(FFLAGS) -free -c funcphys.f
+	$(FC) $(FFLAGS) $(FFR) -c funcphys.f
 gslp.o:	gslp.f
-	$(FC) $(FFLAGS) -free -c gslp.f
+	$(FC) $(FFLAGS) $(FFR) -c gslp.f
 modstuff1.o:	modstuff1.f
-	$(FC) $(INC) $(FFLAGS) -free -c modstuff1.f
+	$(FC) $(INC) $(FFLAGS) $(FFR) -c modstuff1.f
 meteorg.o:	meteorg.f physcons.o funcphys.o
 	$(FC) $(INC) $(FFLAGS) -c meteorg.f 
 read_netcdf_p.o:	read_netcdf_p.f 
@@ -67,7 +72,7 @@ rsearch.o:	rsearch.f
 svp.o:	svp.f
 	$(FC) $(FFLAGS) -c svp.f
 calpreciptype.o:	calpreciptype.f physcons.o funcphys.o
-	$(FC) $(FFLAGS) -FR -c calpreciptype.f
+	$(FC) $(FFLAGS) $(FFR) -c calpreciptype.f
 lcl.o:	lcl.f
 	$(FC) $(FFLAGS) -c lcl.f
 mstadb.o:	mstadb.f

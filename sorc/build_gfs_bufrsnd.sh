@@ -33,7 +33,7 @@ do
   echo "Compiling ${comp}"
   cd $cwd/${comp}.fd
   make -f makefile_module clean
-  make -f makefile_module 
+  target=$target make -f makefile_module 
 done
 
 echo "Build complete"

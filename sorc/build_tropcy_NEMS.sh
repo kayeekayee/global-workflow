@@ -30,7 +30,11 @@ else
 fi
 
 source ../modulefiles/modulefile.storm_reloc_v6.0.0.$target
+if [ $target = "linux.gnu" ]; then
+export FC=mpif90
+else
 export FC=mpiifort
+fi
 
 export INC="${G2_INCd} -I${NEMSIO_INC}"
 export LIBS="${W3EMC_LIBd} ${W3NCO_LIBd} ${BACIO_LIB4} ${G2_LIBd} ${PNG_LIB} ${JASPER_LIB} ${Z_LIB}"
@@ -46,6 +50,16 @@ export LIBS_SYN_QCT="${W3NCO_LIB8}"
 echo $LIBS_REL
 echo NEXT
 
+callmake() {
+   if [ $target = "linux.gnu" ]; then
+     make -f makefile.linux.gnu
+   elif [ $target = "linux.intel" ]; then
+     make -f makefile.linux.intel
+   else
+     make -f makefile
+   fi 
+}
+
 #cd relocate_mv_nvortex.fd
 #   make clean
 #   make -f makefile_$targetx
@@ -54,35 +68,35 @@ echo NEXT
 #   cd ../
 cd vint.fd
    make clean
-   make -f makefile
+   callmake
    make install
    cd ../
 cd tave.fd
    make clean
-   make -f makefile
+   callmake
    make install
    cd ../
 cd syndat_qctropcy.fd
    make clean
-   make -f makefile
+   callmake
    make install
    make clean
    cd ../
 cd syndat_maksynrc.fd
    make clean
-   make -f makefile
+   callmake
    make install
    make clean
    cd ../
 cd syndat_getjtbul.fd
    make clean
-   make -f makefile
+   callmake
    make install
    make clean
    cd ../
 cd supvit.fd
    make clean
-   make -f makefile
+   callmake
    make install
    make clean
    cd ../

@@ -19,4 +19,10 @@ fi
 module list
 
 cd ${cwd}/gaussian_sfcanl.fd
+if [ "$target" = "linux.gnu" ]; then
+./makefile.linux.gnu.sh
+elif [ "$target" = "linux.intel" ]; then
+./makefile.linux.intel.sh
+else
 ./makefile.sh
+fi
