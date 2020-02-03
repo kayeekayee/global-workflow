@@ -28,6 +28,9 @@ export AMSREBF=${AMSREBF:-/dev/null}
 export SSMITBF=${SSMITBF:-/dev/null}
 export AMSR2BF=${AMSR2BF:-/dev/null}
 
+# Set directory and structure for COMIN_OBS
+export COMIN_OBS="$DMPDIR/${CDUMP}${DUMP_SUFFIX}.${PDY}/${cyc}"
+
 # Set CONVINFO and SATINFO for retrospective parallels
 if [ $REALTIME = "NO" ]; then
 
@@ -46,6 +49,15 @@ if [ $REALTIME = "NO" ]; then
 	export CONVINFO=$FIXgsi/fv3_historical/global_convinfo.txt.2014041400
     else
 	echo "WARNING: No CONVINFO for $CDATE"
+    fi
+
+#   Set OZINFO
+    if [[ "$CDATE" -ge "2018110700" ]]; then
+        export OZINFO=$FIXgsi/fv3_historical/global_ozinfo.txt.2018110700
+    elif [[ "$CDATE" -ge "2015110500" ]]; then
+        export OZINFO=$FIXgsi/fv3_historical/global_ozinfo.txt.2015110500
+    else
+        echo "WARNING: No OZINFO for $CDATE"
     fi
 
 #   Set SATINFO

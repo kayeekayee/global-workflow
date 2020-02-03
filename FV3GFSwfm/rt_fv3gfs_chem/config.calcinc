@@ -18,4 +18,4 @@ export NTHREADS_CALCINC=1
 export ncmd=1
 export DO_CALC_INCREMENT="YES"
 
-echo "END: config.grid"
+echo "END: config.calcinc"

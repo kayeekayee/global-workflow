@@ -1,6 +1,17 @@
+01/21/20
+  changed naming convention for GBBEPx data so files have date in middle of filename
+
+01/12/20
+  switched from SDSU emission data to NCEP's data 
+
 11/16/19
   changed dust_uthres settings to   0.065, 0.18, 0.27, 0.30, 0.35, 0.38, 0.35, 0.41, 0.41, 0.45, 0.50, 0.45, 9999.0
                                from 0.065, 0.15, 0.25, 0.30, 0.35, 0.38, 0.35, 0.30, 0.30, 0.45, 0.50, 0.45, 9999.0
+
+10/21/19
+  modified dust variables
+    - dust_alpha=2.0
+      dust_gamma=1.8
 
 10/01/19
   updated to ms088 tag of EMC_FV3GFS-GSDCHEM repository, f676a1c
@@ -13,6 +24,13 @@
 
   to run on hera, need to check out master of EMC_FV3GFS-GSDCHEM repository, 1c2bd25
        e05bf2a554544093f02bf177658ad432cbafbaa8 NEMS (e05bf2a)
+
+  updated to ms088 tag and 01oct2019 port2hera branch of global workflow (84477da)
+     00Z
+     C384
+     6-hourly out to 168h
+     1.0, 0.5 and 0.25 grib2 files 
+     started with 09/28/00 00Z run as jhender; moved to rtfim 10/02/00 00Z
 
 08/01/19
   updated to ms087 tag of EMC_FV3GFS-GSDCHEM repository, e2a771d

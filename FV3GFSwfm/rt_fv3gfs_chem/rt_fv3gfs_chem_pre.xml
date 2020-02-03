@@ -10,7 +10,7 @@
 		rahul.mahajan@noaa.gov
 
 	NOTES:
-		This workflow was automatically generated at 2019-03-14 00:19:39.376145
+		This workflow was automatically generated at 2019-10-04 23:10:43.398162
 	-->
 
 	<!-- Experiment parameters such as name, cycle, resolution -->
@@ -19,34 +19,37 @@
 	<!ENTITY CASE     "C384">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201908100000">
-	<!ENTITY EDATE    "202907020000">
+	<!ENTITY SDATE    "201910030000">
+	<!ENTITY EDATE    "202909200000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
 
 	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
-	<!ENTITY ROTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
-	<!ENTITY ICSDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3ICS">
-        <!ENTITY PUBDIR "/scratch3/BMC/public/data/grids/gfs/nemsio">
-        <!ENTITY RETRODIR "/scratch4/BMC/fim/GFS_RETRO_NEMSIO/">
+	<!ENTITY EXPDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
+	<!ENTITY ROTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
+        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/sdsu/emissions">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
+        <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
+        <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
-        <!ENTITY GDASDIR "/scratch4/BMC/public/data/grids/gdas/bufr">
-        <!ENTITY GDASDIR "/scratch3/BMC/fim/jhender/scratch/gdas_atmanl">
-        <!ENTITY RUNDIR "/scratch4/BMC/rtfim/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
-        <!ENTITY OUTDIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
-	<!ENTITY PREDIR "/scratch4/BMC/public/data/grids/sdsu/emissions">
+        <!ENTITY GDASDIR "/scratch2/BMC/public/data/grids/gdas/bufr">
+        <!ENTITY RETROGDAS  "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/scratch/gdas_atmanl">
+        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY OUTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem/">
          
 	<!-- Directories for driving the workflow -->
-	<!ENTITY HOMEgfs  "/scratch4/BMC/rtfim/rtruns/FV3-Chem/">
-	<!ENTITY JOBS_DIR "/scratch4/BMC/rtfim/rtruns/FV3-Chem/jobs/rocoto">
+	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
+	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/jobs/rocoto">
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
 	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY QUEUE      "batch">
+	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY SCHEDULER  "slurm">
@@ -57,7 +60,7 @@
 	<!-- ROCOTO parameters that control workflow -->
 	<!ENTITY CYCLETHROTTLE "6">
 	<!ENTITY TASKTHROTTLE  "20">
-	<!ENTITY MAXTRIES      "3">
+	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
         
@@ -108,7 +111,6 @@
 
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/checkgdas.log</cyclestr></join>
 
-        <envar><name>SLURM_SET</name><value>YES</value></envar>
         <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
         <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
         <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -139,7 +141,6 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsgetic.log</cyclestr></join>
 
-        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>  
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
@@ -167,6 +168,16 @@
              <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas_available</cyclestr></datadep>
            </and>
 	</dependency>
+<!--
+	    <or>
+		<taskdep task="gfsgetic"/> 
+		<and>
+			<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nemsio</cyclestr></datadep>
+			<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/siganl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+			<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/sfcanl.&CDUMP;.@Y@m@d@H</cyclestr></datadep>
+		</and>
+	    </or>
+-->
 </task>
 
 <task name="gfsfv3ic" cycledefs="gfs" maxtries="&MAXTRIES;">
@@ -182,15 +193,14 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfv3ic.log</cyclestr></join>
 
-        <envar><name>SLURM_SET</name><value>YES</value></envar>
 	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 
 	<dependency>
 		<and>
@@ -227,7 +237,6 @@
         <native>&NATIVE_REGRID;</native>
         <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
 
-        <envar><name>SLURM_SET</name><value>YES</value></envar>
         <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
         <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
         <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>

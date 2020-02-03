@@ -32,13 +32,7 @@ export SCRgfs=$HOMEgfs/scripts
 # GLOBAL static environment parameters
 
 export NWPROD="/gpfs/dell1/nco/ops/nwprod"
-if [ -d /gpfs/tp1 ]; then
-    export SITE="MARS"
-    export DMPDIR="/gpfs/tp1/emc/globaldump"
-elif [ -d /gpfs/gp1 ]; then
-    export SITE="VENUS"
-    export DMPDIR="/gpfs/gp1/emc/globaldump"
-fi
+export DMPDIR="/gpfs/dell3/emc/global/dump"
 export RTMFIX=$CRTM_FIX
 
 
@@ -159,6 +153,10 @@ export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 export FHOUT_GFS=3
 export FHMAX_HF_GFS=120
 export FHOUT_HF_GFS=1
+
+# frequency for saving restart files. set to 6,12,24,48 etc 
+export restart_interval_gfs=12
+
 
 # I/O QUILTING, true--use Write Component; false--use GFDL FMS
 # if quilting=true, choose OUTPUT_GRID as cubed_sphere_grid in netcdf or gaussian_grid
