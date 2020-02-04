@@ -20,7 +20,6 @@ module chem_config_mod
   integer, parameter :: DUST_OPT_GOCART  = 1
   integer, parameter :: DUST_OPT_AFWA    = 3
   integer, parameter :: DUST_OPT_FENGSHA = 5
-  integer, parameter :: dust_tune_uthres = 13
   ! -- sea salt scheme
   integer, parameter :: SEAS_OPT_NONE   = 0
   integer, parameter :: SEAS_OPT_GOCART = 1
@@ -53,6 +52,8 @@ module chem_config_mod
     character(len=CHEM_MAXSTR) :: fireemi_inname     = ''
     character(len=CHEM_MAXSTR) :: emi_outname        = ''
     character(len=CHEM_MAXSTR) :: fireemi_outname    = ''
+    character(len=CHEM_MAXSTR) :: restart_inname     = ''
+    character(len=CHEM_MAXSTR) :: restart_outname    = ''
     character(len=CHEM_MAXSTR) :: input_chem_inname  = ''
     character(len=CHEM_MAXSTR) :: input_chem_outname = ''
     character(len=CHEM_MAXSTR) :: chem_hist_outname  = 'fim_out_'
@@ -89,11 +90,11 @@ module chem_config_mod
     integer :: aer_ic_opt
     logical :: have_bcs_chem
     integer :: aer_ra_feedback    = 0
+    integer :: aer_ra_frq
     integer :: aer_op_opt
     integer :: conv_tr_aqchem
     integer :: call_biomass       = 1
     integer :: call_chemistry     = 1
-    integer :: call_radiation     = 1
     logical :: readrestart        = .false.
     integer :: archive_step
     real(CHEM_KIND_R4):: ash_mass
@@ -134,7 +135,6 @@ module chem_config_mod
     ! -- tuning parameters
     real(CHEM_KIND_R4) :: dust_alpha
     real(CHEM_KIND_R4) :: dust_gamma
-    real(CHEM_KIND_R4) :: dust_uthres(dust_tune_uthres)
     integer            :: dust_calcdrag
     real(CHEM_KIND_R4) :: seas_emis_scale(seas_tune_bins)
     integer            :: seas_emis_scheme
@@ -190,9 +190,9 @@ contains
     integer, parameter :: unit = 200
 
     integer                :: localrc, i, iostat, is
-    integer                :: buffer(28)
-    real(CHEM_KIND_R4)     :: rbuffer(8+dust_tune_uthres+seas_tune_bins+chem_tune_tracers)
-    character(CHEM_MAXSTR) :: sbuffer(5)
+    integer                :: buffer(29)
+    real(CHEM_KIND_R4)     :: rbuffer(8+seas_tune_bins+chem_tune_tracers)
+    character(CHEM_MAXSTR) :: sbuffer(7)
 
     ! -- variables in input namelist
     character(len=CHEM_MAXSTR) :: dust_inname
@@ -200,6 +200,8 @@ contains
     character(len=CHEM_MAXSTR) :: fireemi_inname
     character(len=CHEM_MAXSTR) :: emi_outname
     character(len=CHEM_MAXSTR) :: fireemi_outname
+    character(len=CHEM_MAXSTR) :: restart_inname
+    character(len=CHEM_MAXSTR) :: restart_outname
     character(len=CHEM_MAXSTR) :: input_chem_inname
     character(len=CHEM_MAXSTR) :: input_chem_outname
     character(len=CHEM_MAXSTR) :: chem_hist_outname
@@ -236,6 +238,7 @@ contains
     integer :: aer_ic_opt
     logical :: have_bcs_chem
     integer :: aer_ra_feedback
+    integer :: aer_ra_frq
     integer :: aer_op_opt
     integer :: conv_tr_aqchem
     integer :: archive_step
@@ -243,7 +246,6 @@ contains
     real(CHEM_KIND_R4) :: ash_height
     real(CHEM_KIND_R4) :: dust_alpha
     real(CHEM_KIND_R4) :: dust_gamma
-    real(CHEM_KIND_R4) :: dust_uthres(dust_tune_uthres)
     integer            :: dust_calcdrag
     real(CHEM_KIND_R4) :: seas_emis_scale(seas_tune_bins)
     integer            :: seas_emis_scheme
@@ -256,6 +258,8 @@ contains
       fireemi_inname,            &
       emi_outname,               &
       fireemi_outname,           &
+      restart_inname,            &
+      restart_outname,           &
       input_chem_inname,         &
       input_chem_outname,        &
       chem_hist_outname,         &
@@ -292,6 +296,7 @@ contains
       aer_ic_opt,                &
       have_bcs_chem,             &
       aer_ra_feedback,           &
+      aer_ra_frq,                &
       aer_op_opt,                &
       conv_tr_aqchem,            &
       archive_step,              &
@@ -299,7 +304,6 @@ contains
       ash_height,                &
       dust_alpha,                &
       dust_gamma,                &
-      dust_uthres,               &
       dust_calcdrag,             &
       seas_emis_scale,           &
       seas_emis_scheme,          &
@@ -320,7 +324,6 @@ contains
     ash_height        = -999._CHEM_KIND_R4
     dust_alpha        = 0._CHEM_KIND_R4
     dust_gamma        = 0._CHEM_KIND_R4
-    dust_uthres       = 0._CHEM_KIND_R4
     dust_calcdrag     = 0
     seas_emis_scale   = 0._CHEM_KIND_R4
     seas_emis_scheme  = 0
@@ -348,6 +351,7 @@ contains
     vertmix_onoff     = 1
     chem_conv_tr      = CTRA_OPT_NONE
     aer_ra_feedback   = 0
+    aer_ra_frq        = 60
     aer_op_opt        = 0
     chem_in_opt       = 0
     archive_step      = 1
@@ -359,6 +363,8 @@ contains
     fireemi_inname     = ""
     emi_outname        = ""
     fireemi_outname    = ""
+    restart_inname     = ""
+    restart_outname    = ""
     input_chem_inname  = ""
     input_chem_outname = ""
     chem_hist_outname  = "chem_out_"
@@ -408,6 +414,7 @@ contains
       vertmix_onoff,     &
       chem_conv_tr,      &
       aer_ra_feedback,   &
+      aer_ra_frq,        &
       chem_in_opt,       &
       archive_step,      &
       seas_emis_scheme,  &
@@ -441,22 +448,18 @@ contains
     config % vertmix_onoff     = buffer( 21 )
     config % chem_conv_tr      = buffer( 22 )
     config % aer_ra_feedback   = buffer( 23 )
-    config % chem_in_opt       = buffer( 24 )
-    config % archive_step      = buffer( 25 )
-    config % seas_emis_scheme  = buffer( 26 )
-    config % dust_calcdrag     = buffer( 27 )
-    config % wetdep_ls_opt     = buffer( 28 )
+    config % aer_ra_frq        = buffer( 24 )
+    config % chem_in_opt       = buffer( 25 )
+    config % archive_step      = buffer( 26 )
+    config % seas_emis_scheme  = buffer( 27 )
+    config % dust_calcdrag     = buffer( 28 )
+    config % wetdep_ls_opt     = buffer( 29 )
 
     ! -- pack real variables in buffer
     rbuffer(1:8) = (/ bioemdt, photdt, chemdt, ash_mass, ash_height, &
                       depo_fact, dust_alpha, dust_gamma /)
 
     is = 8
-    do i = 1, dust_tune_uthres
-      rbuffer(i+is) = dust_uthres(i)
-    end do
-
-    is = is + dust_tune_uthres
     do i = 1, seas_tune_bins
       rbuffer(i+is) = seas_emis_scale(i)
     end do
@@ -480,11 +483,6 @@ contains
     config % dust_gamma = rbuffer(8)
 
     is = 8
-    do i = 1, dust_tune_uthres
-      config % dust_uthres(i) = rbuffer(i+is)
-    end do
-
-    is = is + dust_tune_uthres
     do i = 1, seas_tune_bins
       config % seas_emis_scale(i) = rbuffer(i+is)
     end do
@@ -495,8 +493,9 @@ contains
     end do
 
     ! -- pack strings into buffer
-    sbuffer = (/ chem_hist_outname, dust_inname, &
-                 emi_inname, fireemi_inname, emi_outname /)
+    sbuffer = (/ chem_hist_outname, dust_inname,          &
+                 emi_inname, fireemi_inname, emi_outname, &
+                 restart_inname, restart_outname          /)
     ! -- broadcast string variable
     call chem_comm_bcast(sbuffer, rc=localrc)
     if (chem_rc_check(localrc, file=__FILE__, line=__LINE__, rc=rc)) return
@@ -506,6 +505,8 @@ contains
     config % emi_inname        = sbuffer(3)
     config % fireemi_inname    = sbuffer(4)
     config % emi_outname       = sbuffer(5)
+    config % restart_inname    = sbuffer(6)
+    config % restart_outname   = sbuffer(7)
 
   end subroutine chem_config_read
 

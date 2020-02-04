@@ -1,28 +1,28 @@
 + SECONDS=0
 + [[ 5 != 5 ]]
-+ export PATHRT=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests
-+ PATHRT=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests
-+ export RUNDIR_ROOT=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041
-+ RUNDIR_ROOT=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041
++ export PATHRT=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests
++ PATHRT=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests
++ export RUNDIR_ROOT=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157
++ RUNDIR_ROOT=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157
 + export TEST_NAME=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 + TEST_NAME=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 + export TEST_NR=07
 + TEST_NR=07
 + export COMPILE_NR=1
 + COMPILE_NR=1
-+ cd /scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests
++ cd /scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests
 + [[ -e run_test.env ]]
 + source run_test.env
 ++ export MACHINE_ID=hera.intel
 ++ MACHINE_ID=hera.intel
 ++ export DISKNM=/scratch1/NCEPDEV/nems/emc.nemspara/RT
 ++ DISKNM=/scratch1/NCEPDEV/nems/emc.nemspara/RT
-++ export RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901
-++ RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901
-++ export PATHRT=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests
-++ PATHRT=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests
-++ export PATHTR=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM
-++ PATHTR=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM
+++ export RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121
+++ RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121
+++ export PATHRT=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests
+++ PATHRT=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests
+++ export PATHTR=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM
+++ PATHTR=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM
 ++ export NEW_BASELINE=/scratch1/NCEPDEV/stmp4/Raffaele.Montuoro/FV3_RT/REGRESSION_TEST
 ++ NEW_BASELINE=/scratch1/NCEPDEV/stmp4/Raffaele.Montuoro/FV3_RT/REGRESSION_TEST
 ++ export CREATE_BASELINE=false
@@ -41,8 +41,8 @@
 ++ PARTITION=
 ++ export ROCOTO=false
 ++ ROCOTO=false
-++ export LOG_DIR=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel
-++ LOG_DIR=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel
+++ export LOG_DIR=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel
+++ LOG_DIR=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel
 + source default_vars.sh
 ++ '[' hera.intel = wcoss ']'
 ++ '[' hera.intel = wcoss_cray ']'
@@ -270,7 +270,7 @@
 ++ export NODES=4
 ++ NODES=4
 ++ RUN_SCRIPT=rt_fv3gsdchem.sh
-++ RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901
+++ RTPWD=/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121
 ++ export DIAG_TABLE=chm_diag_table_gfdlmp
 ++ DIAG_TABLE=chm_diag_table_gfdlmp
 ++ export FIELD_TABLE=chm_field_table_gfdlmp
@@ -307,22 +307,22 @@
 ++ WLCLK=30
 + export INPUT_DIR=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 + INPUT_DIR=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
-+ export RUNDIR=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
-+ RUNDIR=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
++ export RUNDIR=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
++ RUNDIR=/scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 + export CNTL_DIR=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 + CNTL_DIR=cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
-++ basename /scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041
-+ JBNME=rt_188041_07
+++ basename /scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157
++ JBNME=rt_369157_07
 + export JBNME
 + export FV3X=fv3_1.exe
 + FV3X=fv3_1.exe
-+ export REGRESSIONTEST_LOG=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel/rt_07_cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp.log
-+ REGRESSIONTEST_LOG=/scratch4/BMC/esmf/Raffaele.Montuoro/dev/nems/dev/milestones/dev/0.8.8/dev/final/hera/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel/rt_07_cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp.log
++ export REGRESSIONTEST_LOG=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel/rt_07_cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp.log
++ REGRESSIONTEST_LOG=/scratch1/NCEPDEV/nems/Raffaele.Montuoro/dev/fv3gfs-gsdchem/dev/fengsha/tmp/repo/rt2/EMC_FV3GFS-GSDCHEM/tests/log_hera.intel/rt_07_cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp.log
 + echo 'Test 07 cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp FV3-GSDCHEM with GFDL microphysics, SAMF tracer transport, and GBBEPx emission data + FRP'
 Test 07 cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp FV3-GSDCHEM with GFDL microphysics, SAMF tracer transport, and GBBEPx emission data + FRP
 + trap 'echo "run_test.sh: Test ${TEST_NAME} killed"; kill $(jobs -p); wait; trap 0; exit' 1 2 3 4 5 6 7 8 10 12 13 15
 + wait
 + ./rt_fv3gsdchem.sh
-+ elapsed=346
-+ echo 'Elapsed time 346 seconds. Test cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp'
-Elapsed time 346 seconds. Test cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
++ elapsed=336
++ echo 'Elapsed time 336 seconds. Test cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp'
+Elapsed time 336 seconds. Test cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp

@@ -4,7 +4,7 @@ set +x
 set -eu
 
 # List of valid/tested machines
-VALID_MACHINES=( wcoss_cray wcoss_dell_p3 gaea.intel jet.intel theia.intel theia.gnu theia.pgi \
+VALID_MACHINES=( wcoss_cray wcoss_dell_p3 gaea.intel jet.intel hera.intel theia.intel theia.gnu theia.pgi \
                  cheyenne.intel cheyenne.intel-impi cheyenne.gnu cheyenne.pgi endeavor.intel \
                  stampede.intel supermuc_phase2.intel macosx.gnu linux.gnu )
 

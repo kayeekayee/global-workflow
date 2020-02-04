@@ -60,12 +60,8 @@ contains
        dust_alpha = afwa_alpha
        dust_gamma = afwa_gamma
      case (DUST_OPT_FENGSHA)
-       dust_alpha = fengsha_alpha
-       dust_gamma = fengsha_gamma
-       if (any(config % dust_uthres > 0._CHEM_KIND_R4)) then
-         n = min(fengsha_maxstypes, size(config % dust_uthres))
-         dust_uthres(1:n) = config % dust_uthres(1:n)
-       end if
+       dust_alpha    = fengsha_alpha
+       dust_gamma    = fengsha_gamma
        dust_calcdrag = config % dust_calcdrag
      case (DUST_OPT_GOCART )
        dust_alpha = gocart_alpha
@@ -96,19 +92,18 @@ contains
 
 
   subroutine gocart_advance(readrestart, chem_opt, chem_in_opt, chem_conv_tr, &
-    biomass_burn_opt, seas_opt, dust_opt, dmsemis_opt, wetdep_ls_opt, aer_ra_feedback, &
-    call_chemistry, call_rad, plumerise_flag, plumerisefire_frq, &
+    biomass_burn_opt, seas_opt, dust_opt, dmsemis_opt, wetdep_ls_opt, call_chemistry, &
+    aer_ra_feedback, aer_ra_frq, plumerise_flag, plumerisefire_frq, &
     kemit, ktau, dts, current_month, tz, julday,      &
     p_gocart, clayfrac, dm0, emiss_ab, emiss_abu,                         &
     emiss_ash_dt, emiss_ash_height, emiss_ash_mass, &
-    emiss_tr_dt, emiss_tr_height, emiss_tr_mass, ero1, ero2, ero3, rdrag, ssm, &
+    emiss_tr_dt, emiss_tr_height, emiss_tr_mass, ero1, ero2, ero3, rdrag, uthr, ssm, &
     h2o2_backgd, no3_backgd, oh_backgd, plume, sandfrac, th_pvsrf,  &
     area, hf2d, pb2d, rc2d, rn2d, rsds, slmsk2d, snwdph2d, stype2d,       &
     ts2d, us2d, vtype2d, vfrac2d, zorl2d, dqdt, exch, ph3d, phl3d, pr3d, prl3d, &
     sm3d, tk3d, us3d, vs3d, ws3d, tr3d_in, tr3d_out, trcm, trab, truf, trdf, trdp, &
-    ext_cof, sscal, asymp, aod2d,&
-    p10, pm25, ebu_oc, oh_bg, h2o2_bg, no3_bg, wet_dep, &
-    rainl, rainc, ebu, &
+    ext_cof, sscal, asymp, &
+    p10, pm25, ebu_oc, oh_bg, h2o2_bg, no3_bg, wet_dep, aod2d, ebu, &
     nvl, nvi, ntra, ntrb, nvl_gocart, nbands, numgas, num_ebu, num_ebu_in, &
     num_plume_data, num_soil_layers, num_chem, num_moist, num_emis_vol, &
     num_emis_ant, num_emis_dust, num_emis_seas, &
@@ -125,9 +120,9 @@ contains
     integer,            intent(in) :: dust_opt
     integer,            intent(in) :: dmsemis_opt
     integer,            intent(in) :: wetdep_ls_opt
-    integer,            intent(in) :: aer_ra_feedback
     integer,            intent(in) :: call_chemistry
-    integer,            intent(in) :: call_rad
+    integer,            intent(in) :: aer_ra_feedback
+    integer,            intent(in) :: aer_ra_frq
     integer,            intent(in) :: plumerise_flag
     integer,            intent(in) :: plumerisefire_frq
     integer,            intent(in) :: kemit
@@ -157,6 +152,7 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: ero2
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: ero3
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: rdrag
+    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: uthr
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: ssm
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: emiss_tr_dt
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(in) :: emiss_tr_height
@@ -213,7 +209,6 @@ contains
     real(CHEM_KIND_F8), dimension(:, :, :, :), intent(out) :: trdf
 
     ! -- output tracers
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(out) :: aod2d
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 1:num_chem), intent(out) :: wet_dep
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 1:nvl), intent(out) :: p10
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 1:nvl), intent(out) :: pm25
@@ -227,8 +222,7 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme, 1:nvl, ntra+ntrb), intent(out) :: trdp
 
     ! -- buffers
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(inout) :: rainl
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme), intent(inout) :: rainc
+    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme),                     intent(inout) :: aod2d
     real(CHEM_KIND_R4), dimension(ims:ime, kms:kme, jms:jme, 1:num_ebu), intent(inout) :: ebu
 
     ! -- local variables
@@ -257,7 +251,6 @@ contains
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: pbl
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: raincv_b
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: precc
-    real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: precl
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: rcav
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: rnav
     real(CHEM_KIND_R4), dimension(ims:ime, jms:jme) :: rmol
@@ -349,7 +342,6 @@ contains
     real(CHEM_KIND_R4), dimension(1:num_chem) :: ppm2ugkg
 
     ! -- local variables
-    logical, save :: firstfire = .true.
     logical :: call_gocart, call_plume, call_radiation, scale_fire_emiss
     logical :: store_arrays
 
@@ -370,7 +362,6 @@ contains
     if (present(rc)) rc = CHEM_RC_SUCCESS
 
     ! -- initialize output arrays
-    aod2d    = 0._CHEM_KIND_R4
     wet_dep  = 0._CHEM_KIND_R4
     p10      = 0._CHEM_KIND_R4
     pm25     = 0._CHEM_KIND_R4
@@ -416,7 +407,6 @@ contains
     pbl           = 0._CHEM_KIND_R4
     raincv_b      = 0._CHEM_KIND_R4
     precc         = 0._CHEM_KIND_R4
-    precl         = 0._CHEM_KIND_R4
     rcav          = 0._CHEM_KIND_R4
     rnav          = 0._CHEM_KIND_R4
     rmol          = 0._CHEM_KIND_R4
@@ -530,46 +520,32 @@ contains
     ! -- set control flags
     call_plume       = (biomass_burn_opt == BURN_OPT_ENABLE) .and. (plumerisefire_frq > 0)
     if (call_plume) &
-       call_plume    = (mod(ktau, max(1, int(60*plumerisefire_frq/dts))) == 0) &
-                        .or. (ktau == 1) .or. firstfire
+       call_plume    = (mod(int(curr_secs), max(1, 60*plumerisefire_frq)) == 0) &
+                        .or. (ktau == 1)
     call_gocart      = (mod(ktau, call_chemistry) == 0) .or. (ktau == 1)
-    call_radiation   = (mod(ktau, call_rad)       == 0) .or. (ktau == 1)
+    call_radiation   = (mod(int(curr_secs), max(1, 60*aer_ra_frq)) == 0) .or. (ktau == 1)
     scale_fire_emiss = .false.
 
     if (present(verbose)) then
       if (verbose) &
        call gocart_diag_output(ktau, plumerise_flag, plumerisefire_frq, &
-         firstfire, call_gocart, call_plume, call_radiation)
+         call_gocart, call_plume, call_radiation, readrestart)
     end if
 
     ! -- compute accumulated large-scale and convective rainfall since last call
     if (ktau > 1) then
       dtstep = call_chemistry * dt
-      ! -- retrieve stored emissions
     else
       dtstep = dt
-      ! -- initialize buffers
-      rainl = 0._CHEM_KIND_R4
-      rainc = 0._CHEM_KIND_R4
-      ebu   = 0._CHEM_KIND_R4
     end if
 
     do j = jts, jte
       jp = j - jts + 1
       do i = its, ite
         ip = i - its + 1
-        ! -- compute incremental large-scale rainfall
-        ! -- NOTE: In NGAC large-scale wet removal scheme we only use non-convective
-        ! -- precipitation, therefore convective precipitation is set to 0.
-        ! -- Please uncamment the following line to also provide convective precipitation.
-        ! precc(i,j) = max(m2mm * rc2d(ip,jp)                , 0._CHEM_KIND_R4)
-        precl(i,j) = max(m2mm * (rn2d(ip,jp) - rc2d(ip,jp)), 0._CHEM_KIND_R4)
-        ! -- compute incremental large-scale and convective rainfall
-        rcav(i,j)  = max(m2mm * rc2d(ip,jp)                 - rainc(i,j), 0._CHEM_KIND_R4)
-        rnav(i,j)  = max(m2mm * (rn2d(ip,jp) - rc2d(ip,jp)) - rainl(i,j), 0._CHEM_KIND_R4)
-        ! -- store to buffers
-        rainc(i,j) = m2mm * rc2d(ip,jp)
-        rainl(i,j) = m2mm * rn2d(ip,jp) - rainc(i,j)
+        ! -- compute incremental convective and large-scale rainfall
+        rcav(i,j)  = max(m2mm * rc2d(ip,jp)                , 0._CHEM_KIND_R4)
+        rnav(i,j)  = max(m2mm * (rn2d(ip,jp) - rc2d(ip,jp)), 0._CHEM_KIND_R4)
       end do
     end do
 
@@ -627,7 +603,7 @@ contains
       case (DUST_OPT_FENGSHA)
        call gocart_dust_fengsha_driver(dt,chem,rho_phy,smois,p8w,ssm,  &
             isltyp,vegfra,snowh,xland,dxy,grvity,emis_dust,ust,znt,    &
-            clayf,sandf,rdrag,                                         &
+            clayf,sandf,rdrag,uthr,                                    &
             num_emis_dust,num_moist,num_chem,num_soil_layers,          &
             ids,ide, jds,jde, kds,kde,                                 &
             ims,ime, jms,jme, kms,kme,                                 &
@@ -651,7 +627,6 @@ contains
       truf(:,:,1:num_emis_dust) = emis_dust(its:ite,1,jts:jte,1:num_emis_dust)
     end if
     if (call_plume) then
-      firstfire = .false.
       call plumerise_driver (ktau,dtstep,num_chem,num_ebu,num_ebu_in, &
         ebu,ebu_in,mean_fct_agtf,mean_fct_agef,mean_fct_agsv,mean_fct_aggr, &
         firesize_agtf,firesize_agef,firesize_agsv,firesize_aggr, &
@@ -799,7 +774,7 @@ contains
        case (WDLS_OPT_NGAC)
          call WetRemovalGOCART(its,ite, jts,jte, kts,kte, 1,1, dt, &
                                num_chem,var_rmv,chem,p_phy,t_phy,  &
-                               rho_phy,dqdti,precc,precl,          &
+                               rho_phy,dqdti,rcav,rnav,            &
                                ims,ime, jms,jme, kms,kme, localrc)
          if (chem_rc_check(localrc, msg="Failure in NGAC wet removal scheme", &
            file=__FILE__, line=__LINE__, rc=rc)) return
@@ -958,26 +933,31 @@ contains
   end subroutine gocart_advance
 
   subroutine gocart_diag_output(ktau, plumerise_flag, plumerisefire_frq, &
-    firstfire, call_gocart, call_plume, call_radiation)
+    call_gocart, call_plume, call_radiation, readrestart)
 
     ! -- arguments
     integer, intent(in) :: ktau
     integer, intent(in) :: plumerise_flag
     integer, intent(in) :: plumerisefire_frq
-    logical, intent(in) :: firstfire
     logical, intent(in) :: call_gocart
     logical, intent(in) :: call_plume
     logical, intent(in) :: call_radiation
+    logical, intent(in) :: readrestart
 
     ! -- local parameters
     character(len=3), dimension(0:1), parameter :: switch = (/"OFF", "ON "/)
 
     ! -- local variables
-    integer :: state
+    integer       :: state
+    logical, save :: firstfire = .true.
 
     ! -- begin
     write(6,'(38("-"))')
-    write(6,'(1x,"Running GSDCHEM @ step: ",i0)') ktau
+    if (readrestart) then
+      write(6,'(1x,"Restarting GSDCHEM @ step: ",i0)') ktau
+    else
+      write(6,'(1x,"Running GSDCHEM @ step: ",i0)') ktau
+    end if
     write(6,'(14("-")," Modules: ",14("-"))')
     state = 0
     if (call_gocart) state = 1
@@ -989,7 +969,10 @@ contains
     if (call_plume) state = 1
     write(6,'(1x,"Fires    ",24x,a)') switch(state)
     if (call_plume) then
-      if (firstfire) write(6,'(1x,"* Initializing...")')
+      if (firstfire) then
+        write(6,'(1x,"* Initializing...")')
+        firstfire = .false.
+      end if
       select case (plumerise_flag)
         case (FIRE_OPT_MODIS)
           if (plumerisefire_frq > 0) write(6,'(1x,"* Using MODIS with plume-rise")')

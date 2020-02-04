@@ -1,6 +1,6 @@
 
-baseline dir = /scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
-working dir  = /scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_188041/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
+baseline dir = /scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
+working dir  = /scratch1/NCEPDEV/stmp2/Raffaele.Montuoro/FV3_RT/rt_369157/cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp
 Checking test 07 cpld_fv3_gfdlmp_samf_gsdchem_gbbepx_frp results ....
  Comparing atmos_4xdaily.tile1.nc .........OK
  Comparing atmos_4xdaily.tile2.nc .........OK

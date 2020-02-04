@@ -200,8 +200,8 @@ platform wcoss_dell_p3 {
     LONG_TEST_QUEUE='&LONGQ;'
     BUILD_QUEUE='&BUILDQ;'
 
-    BASELINE="/gpfs/dell2/emc/modeling/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901"
-    BASELINE_TEMPLATE="/gpfs/dell2/emc/modeling/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901"
+    BASELINE="/gpfs/dell2/emc/modeling/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121"
+    BASELINE_TEMPLATE="/gpfs/dell2/emc/modeling/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121"
 
     default_resources={
         TASKS=156
@@ -295,8 +295,8 @@ platform wcoss.cray {
     BUILD_WALLTIME="1800"
     DEFAULT_TEST_WALLTIME=3600
 
-    BASELINE="/gpfs/hps3/emc/nems/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901"
-    BASELINE_TEMPLATE="/gpfs/hps3/emc/nems/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901"
+    BASELINE="/gpfs/hps3/emc/nems/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121"
+    BASELINE_TEMPLATE="/gpfs/hps3/emc/nems/noscrub/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121"
 
     execution_time_modules=[[[
       module load alps

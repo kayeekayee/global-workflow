@@ -26,7 +26,7 @@ platform hera.intel {   # Moab+Torque Hera.  See below for SLURM.
     # INPUTS is the input directory, which should contain fix and parm
     # files, plus any restarts or other inputs.
 
-    BASELINE="/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20190901"
+    BASELINE="/scratch1/NCEPDEV/nems/emc.nemspara/RT/FV3GFS-GSDCHEM/trunk-20200121"
     BASELINE_TEMPLATE="@[BASELINE]"
     INPUTS="@[BASELINE]"
 

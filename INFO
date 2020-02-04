@@ -1,77 +1,25 @@
+02/01/20
+  update to ms090 tag of EMC_FV3GFS_GSDCHEM  (modified scripts/exglobal_fcst_nemsfv3gfs.sh)
+
 01/21/20
   changed naming convention for GBBEPx data so files have date in middle of filename
 
 01/12/20
   switched from SDSU emission data to NCEP's data 
 
-11/16/19
-  changed dust_uthres settings to   0.065, 0.18, 0.27, 0.30, 0.35, 0.38, 0.35, 0.41, 0.41, 0.45, 0.50, 0.45, 9999.0
-                               from 0.065, 0.15, 0.25, 0.30, 0.35, 0.38, 0.35, 0.30, 0.30, 0.45, 0.50, 0.45, 9999.0
-
 10/21/19
   modified dust variables
     - dust_alpha=2.0
       dust_gamma=1.8
 
+    effective 00Z 10/20/19 run
+   
 10/01/19
-  updated to ms088 tag of EMC_FV3GFS-GSDCHEM repository, f676a1c
-       d4937c8aeb927f0ff33fc59845da386502350d16 FMS (warsaw_201803-11-gd4937c8)
-       3be1dc49968a712fefa5da27f626e4b7a3cc7e57 FV3 (NEMSfv3gfs_preCCPP_20190506-12-g3be1dc4)
-       afc05510f05d108169d4e3966773ad7ae095c939 GSDCHEM (fv3gfs-gsdchem_v0.8.8)
-       87da3d3ae0012797873acc4de1dd58df35036ac3 NEMS (87da3d3)
-       063732f85f6e3d54238ba750f6aeb7574ca4f85e ccpp/framework (ccpp_transition_to_vlab_master_20190705)
-       243abfc6c9470f8b24f8545795198a231dea35d5 ccpp/physics (ccpp_transition_to_vlab_master_20190705)
+  update to ms088 tag of EMC_FV3GFS_GSDCHEM and 01oct2019 port2hera branch of global workflow (84477da)
 
-  to run on hera, need to check out master of EMC_FV3GFS-GSDCHEM repository, 1c2bd25
-       e05bf2a554544093f02bf177658ad432cbafbaa8 NEMS (e05bf2a)
-
-  updated to ms088 tag and 01oct2019 port2hera branch of global workflow (84477da)
-     00Z
-     C384
-     6-hourly out to 168h
-     1.0, 0.5 and 0.25 grib2 files 
-     started with 09/28/00 00Z run as jhender; moved to rtfim 10/02/00 00Z
-
-08/01/19
-  updated to ms087 tag of EMC_FV3GFS-GSDCHEM repository, e2a771d
-       d4937c8aeb927f0ff33fc59845da386502350d16 FMS (warsaw_201803-11-gd4937c8)
-       64fc1f1a95a6bb980ac6baa33cbf359872345c76 FV3 (NEMSfv3gfs_preCCPP_20190506-7-g64fc1f1)
-       a3eeaf0d2f32be6c7d081fe03e0313224db4128e GSDCHEM (fv3gfs-gsdchem_v0.8.7)
-       411306f087c0cf5a5316ca349d0b36a8a57001b2 NEMS (NEMSfv3gfs_preCCPP_20190506-1-g411306f)
-       063732f85f6e3d54238ba750f6aeb7574ca4f85e ccpp/framework (ccpp_transition_to_vlab_master_20190705)
-       243abfc6c9470f8b24f8545795198a231dea35d5 ccpp/physics (ccpp_transition_to_vlab_master_20190705)
-
-07/31/19
-  changed colorscale for AOD images
-
-07/01/19
-  change from MODIS to GBBEPX+PL+PDT
-
-03/16/19
-  updated to ms085 tag of EMC_FV3GFS-GSDCHEM repository
-
-09/06/18
-updated to Li's latest located at /scratch3/BMC/fim/lzhang/EMC_FV3/FV3_ESRL/sorc/
-  fv3gfs.fd points to /scratch4/BMC/fim/lzhang/cv-test/EMC_FV3GFS-GSDCHEM/
-     067e4866d89377002e02e4d4c276be6296b44ed6 FV3 (nemsfv3gfs_beta_v1.0.4-83-g067e486)
-    +9b98268c1f715b12f8af1d6c23cac7ba3b561318 GSDCHEM (heads/newgrell)
-     e3ca17765e3751ef36a5309aa2a3a45258f37cac NEMS (nemsfv3gfs_beta_v1.0.4-207-ge3ca177)
-
-07/24/18
-updated to superstructure based on 24Jun2018 master branch, e758bd, in fv3gfs repository
-updated to Li's latest  
-C384
-GFDL microphysics  (imp_physics=11)
-
-04/26/18
-initial version of realtime FV3-Chem:  /scratch4/BMC/rtfim/rtruns/FV3-Chem
-  superstructure based on 17Mar2018 master branch, a69828b, in fv3gfs repository
-  fv3gfs.fd points to development branch of EMC_FV3GFS-GSDCHEM repository
-      1003fd58ee7def9e55ad69f26c19f06c8be1cd6d FV3 (FV3_prebeta_v1.1-73-g1003fd5)
-      f2943c2ddf9b094b31f8600c19fc0ff113daad08 GSDCHEM (heads/development)
-      d925af99fd0cc688d5bf28a59bff31d7f0982844 NEMS (FV3_prebeta_v1.1-208-gd925af9)
-  run 00Z
-  C96
+  00Z
+  C384
   6-hourly out to 168h
-  0.5 and 0.25 grib2 files 
-  ZhaoCarr microphysics  (imp_physics=99)
+  1.0, 0.5 and 0.25 grib2 files 
+
+  started with 09/28/00 00Z run as jhender; moved to rtfim 10/02/00 00Z

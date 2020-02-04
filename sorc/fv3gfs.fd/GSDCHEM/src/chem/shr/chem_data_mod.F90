@@ -22,7 +22,8 @@ module chem_data_mod
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero2              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ero3              ! dust erosion factor
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: rdrag             ! Drag Partition Map (FENGSHA)
-    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ssm               ! PJZ Sediment Supply Map (FENGSHA)
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: uthr              ! Threshold Friction Velocity (FENGSHA)
+    real(CHEM_KIND_R4), dimension(:,:),   allocatable :: ssm               ! Sediment Supply Map (FENGSHA)
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: h2o2_backgd       ! H2O2 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: no3_backgd        ! NO3 background for GOCART
     real(CHEM_KIND_R4), dimension(:,:,:), allocatable :: oh_backgd         ! OH background for GOCART
@@ -30,7 +31,6 @@ module chem_data_mod
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: sandfrac          ! sand fraction (AFWA & FENGSHA dust scheme)
     real(CHEM_KIND_R4), dimension(:,:),   allocatable :: th_pvsrf
     ! -- output
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: aod2d
     real(CHEM_KIND_R4), dimension(:,:,:),   allocatable :: pm10
     real(CHEM_KIND_R4), dimension(:,:,:),   allocatable :: pm25
     real(CHEM_KIND_R4), dimension(:,:,:),   allocatable :: ebu_oc
@@ -44,8 +44,7 @@ module chem_data_mod
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: tr3d
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: trdp
     ! -- internal buffers
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: rainl
-    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: rainc
+    real(CHEM_KIND_R4), dimension(:,:),     allocatable :: aod2d
     real(CHEM_KIND_R4), dimension(:,:,:,:), allocatable :: eburn
   end type chem_data_type
 
@@ -126,6 +125,10 @@ contains
       deallocate(data % rdrag, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
+    if (allocated(data % uthr)) then
+      deallocate(data % uthr, stat=localrc)
+      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
+    end if
     if (allocated(data % ssm)) then
       deallocate(data % ssm, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
@@ -152,10 +155,6 @@ contains
     end if
     if (allocated(data % th_pvsrf)) then
       deallocate(data % th_pvsrf, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % aod2d)) then
-      deallocate(data % aod2d, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
     if (allocated(data % pm10)) then
@@ -206,12 +205,8 @@ contains
       deallocate(data % trdp, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
-    if (allocated(data % rainl)) then
-      deallocate(data % rainl, stat=localrc)
-      if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
-    end if
-    if (allocated(data % rainc)) then
-      deallocate(data % rainc, stat=localrc)
+    if (allocated(data % aod2d)) then
+      deallocate(data % aod2d, stat=localrc)
       if (chem_rc_test((localrc /= 0), file=__FILE__, line=__LINE__, rc=rc)) return
     end if
     if (allocated(data % eburn)) then
