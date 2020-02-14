@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "/scratch4/BMC/rtfim/rtruns/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "/home/rtfim/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
   <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
   <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->
@@ -18,7 +18,7 @@
   <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
-  %theia;
+  %hera;
   %metatasks;
 ]>
 
@@ -27,7 +27,7 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef>201908140000 201908150000 24:00:00</cycledef>
+  <cycledef>201911020000 201911020000 24:00:00</cycledef>
 
   &nclzipretro_task;  
 <!--    

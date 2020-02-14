@@ -3,7 +3,7 @@
     <account>&PROJECT;</account>
     <memory>4G</memory>
     <cores>1</cores>
-    <walltime>00:25:00</walltime>
+    <walltime>00:35:00</walltime>
     <jobname><cyclestr>ncl_#T#</cyclestr></jobname>
     <join><cyclestr>&FV3GFS_LOG;/ncl/ncl#T#_@Y@m@d@H00.log</cyclestr></join>
     <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value></envar>

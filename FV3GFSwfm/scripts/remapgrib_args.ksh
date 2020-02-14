@@ -14,7 +14,6 @@ fi
 module load wgrib2
 ECHO=/bin/echo
 MKDIR=/bin/mkdir
-WGRIB2=/scratch4/BMC/rtfim/wgrib2_v0.2.0.8/bin/wgrib2
 
 FV3GFS_RUN=$PWD/../../FV3GFSrun
 PSLOT=rt_*
@@ -117,7 +116,7 @@ do
     tgt_gribfile=${tgt_gribfile_dir}/${yyjjjhh}000${fcst}.g2
     ${ECHO} "Processing grids for grid ${grid}"
     eval grid_specs=\${grid_specs_${grid}}
-    ${WGRIB2} ${postDir}/../${src_gribfile} -set_grib_type c3 -new_grid_winds grid \
+    wgrib2 ${postDir}/../${src_gribfile} -set_grib_type c3 -new_grid_winds grid \
       -new_grid_interpolation bilinear \
       -new_grid ${grid_specs} ${tgt_gribfile}
 done

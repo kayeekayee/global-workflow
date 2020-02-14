@@ -4,10 +4,10 @@
 #    236 201 244 130 224 242
 
 # initialize
+module load intel
 module load wgrib2
 ECHO=echo
 MKDIR=mkdir
-WGRIB2=/scratch4/BMC/rtfim/wgrib2_v0.2.0.8/bin/wgrib2
 #GRID_NAMES=201D130D244D236D224D242
 echo entering remapgrib.ksh....
 echo "****************************"
@@ -96,7 +96,7 @@ do
     tgt_gribfile=${tgt_gribfile_dir}/${yyjjjhh}000${fcst}.g2
     ${ECHO} "Processing grids for grid ${grid}"
     eval grid_specs=\${grid_specs_${grid}}
-    ${WGRIB2} ${postDir}/../${src_gribfile} -set_grib_type c3 -new_grid_winds grid \
+    wgrib2 ${postDir}/../${src_gribfile} -set_grib_type c3 -new_grid_winds grid \
       -new_grid_interpolation bilinear \
       -new_grid ${grid_specs} ${tgt_gribfile}
 done

@@ -33,7 +33,7 @@ $cmd
 status=$?
 if [ $status -ne 0 ] ; then
   printf "Error : [%d] when executing htar command: '$cmd'" $status
-  #exit $status
+#  #exit $status
 fi
 
 ## RESTART directory
@@ -42,7 +42,7 @@ $cmd
 status=$?
 if [ $status -ne 0 ] ; then
   printf "Error : [%d] when executing htar command: '$cmd'" $status
-  #exit $status
+#  #exit $status
 fi
 
 ## GRIB2 files
@@ -51,6 +51,6 @@ $cmd
 status=$?
 if [ $status -ne 0 ] ; then
   printf "Error : [%d] when executing htar command: '$cmd'" $status
-  #exit $status
+#  #exit $status
 fi
 

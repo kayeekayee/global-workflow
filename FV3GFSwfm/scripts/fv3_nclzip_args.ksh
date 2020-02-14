@@ -2,7 +2,7 @@
 
 ## this interactive script zips all *png files in ncl/domain directories
 ##
-##    ./fv3_nclzip_args.ksh /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem yyyymmdd  hh GRID_NAMES
+##    ./fv3_nclzip_args.ksh /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem yyyymmdd  hh GRID_NAMES
 ##
 ##   J. Henderson                   03/24/2014
 ##     modified for FV3             11/30/2017
@@ -12,7 +12,7 @@
 
 # check for correct number of parameters
 if [ $# -lt 4 ]; then
-  echo "Usage:  $0 /scratch4/BMC/rtfim/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem yyyymmdd hh fimD201D130D244D236D224D242 "
+  echo "Usage:  $0 /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem yyyymmdd hh fimD201D130D244D236D224D242 "
   exit 1
 fi
 

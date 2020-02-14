@@ -12,26 +12,5 @@
     <envar><name>hh</name><value><cyclestr>@H</cyclestr></value></envar>
     <dependency>
         <metataskdep metatask="remap_ncl"/>
-<!--
-        <and>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/fim/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a2/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a1/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/242/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/224/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/236/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/244/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/130/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/201/aodtot_sfc_f&FCST_LENGTH;.png</cyclestr></datadep>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a2/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="900"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/a1/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/242/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/224/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/236/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/244/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/130/aodtot_sfc_f162.png</cyclestr></datadep>
-          <datadep age="600"><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/ncl/201/aodtot_sfc_f162.png</cyclestr></datadep>
-        </and>
--->
     </dependency>
   </task>
