@@ -1,5 +1,12 @@
 #!/bin/bash
 
+##
+## Library directory
+##
+export GFS_LIBS_DIR=${GFS_LIBS_DIR:-/opt}
+export INSTALL_DIR=${INSTALL_DIR:-/usr/local}
+export COMP=${COMP:-gnu}
+
 #%Module######################################################################
 ##
 
@@ -8,22 +15,30 @@ echo "Setting environment variables for gnu compilers"
 ##
 ## load programming environment: compiler, flags, paths
 ##
+
+if [ "$COMP" = "gnu" ]; then
+
 export CC=$(which mpicc)
 export CXX=$(which mpicxx)
 export F77=$(which mpif77)
 export F90=$(which mpif90)
 export FC=$(which mpif90)
 
+else
+
+export CC=$(which mpiicc)
+export CXX=$(which mpiicpc)
+export F77=$(which mpiifort)
+export F90=$(which mpiifort)
+export FC=$(which mpiifort)
+
+fi
+
 ##
 ## use own NetCDF library
 ##
-export NETCDF=/usr/local
-export HDF5=/usr/local
-
-##
-## Library directory
-##
-: ${GFS_LIBS_DIR:-/opt}
+export NETCDF=${INSTALL_DIR}
+export HDF5=${INSTALL_DIR}
 
 ##
 ## NCEP libraries
@@ -41,9 +56,9 @@ export IP_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/v3.0.1/libip_v3.0.1_d.a
 export W3EMC_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_d.a
 export W3EMC_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_4.a
 export W3EMC_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-w3emc/w3emc/v2.3.0/libw3emc_v2.3.0_8.a
-export W3NCO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_4.a
-export W3NCO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_8.a
-export W3NCO_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_d.a
+export W3NCO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_4.a
+export W3NCO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_8.a
+export W3NCO_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_d.a
 export BUFR_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_4_64.a
 export BUFR_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_8_64.a
 export BUFR_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_d_64.a
@@ -88,14 +103,14 @@ export CURL_INCLUDE_DIR=/usr/include/x86_64-linux-gnu/curl
 ##
 
 export CRTM_VER=2.3.0
-export CRTM_INC=/opt/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/include
-export CRTM_LIB=/opt/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/lib/libcrtm.a
+export CRTM_INC=${GFS_LIBS_DIR}/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/include
+export CRTM_LIB=${GFS_LIBS_DIR}/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/lib/libcrtm.a
 
 ##
 ## ESMF
 ##
 
-export ESMF_VERSION=/usr/local/esmf-8.0.0_bs40
+export ESMF_VERSION=${INSTALL_DIR}/esmf-8.0.0_bs40
 export ESMF_DIR=${ESMF_VERSION}/
 export ESMF_INC=${ESMF_VERSION}/include
 export ESMF_BIN=${ESMF_VERSION}/bin
@@ -111,5 +126,10 @@ export LD_LIBRARY_PATH="${ESMF_VERSION}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export PATH="/opt/NCEPLIBS-prod_util/ush":${PATH}
 export PATH="/opt/rocoto/bin":${PATH}
 export COMDATEROOT='N/A on LINUX'
-ln -sf /bin/bash /usr/bin/sbatch
 
+##
+## Fake some paths
+##
+ln -sf /bin/echo /usr/bin/module
+ln -sf /bin/bash /bin/sh
+ln -sf /bin/bash /usr/bin/sbatch

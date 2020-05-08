@@ -179,10 +179,10 @@ export myFC=mpiifort
 elif [[ -d /dev ]] ; then
     if [[ -d /opt/intel ]]; then
         target=linux.intel
-        GFS_LIBS_DIR=/opt source ../modulefiles/setup.linux.intel
+        COMP=intel source ../modulefiles/setup.linux
     else
         target=linux.gnu
-        GFS_LIBS_DIR=/opt source ../modulefiles/setup.linux.gnu
+        COMP=gnu source ../modulefiles/setup.linux
     fi
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
