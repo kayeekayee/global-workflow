@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY FV3GFS_HOME "/home/rtfim/FV3-Chem">
+  <!ENTITY PSLOT  "rt_fv3gfs_chem">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+
+  %hera;
+  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions/">
+  <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
+]>
+
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="12" cyclelifespan="72:00:00">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_chemplot.log</cyclestr>
+  </log>
+
+  <cycledef>202005100000 202806190000 24:00:00</cycledef>
+
+  <task name="chemplot_000" maxtries="2">
+      <command>&SCRIPTS;/ncl_FV3chem_smoke.ksh</command>
+      <account>&PROJECT;</account>
+      <cores>1</cores>
+      <walltime>00:35:00</walltime>
+      <jobname>FV3chem_smoke_ncl</jobname>
+      <join><cyclestr>&FV3GFS_LOG;/ncl/ncl_FV3chem_smoke_@Y@m@d@H00.log</cyclestr></join>
+
+      <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value> </envar>
+      <envar><name>START_TIME</name><value><cyclestr>@Y@m@d</cyclestr></value> </envar>
+      <envar><name>FCST_TIME</name><value>00</value></envar>
+      <envar><name>DATAROOT</name><value>&PUBEMI;</value></envar>
+      <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
+      <envar><name>MODEL</name><value>FV3-Chem</value></envar>
+
+      <dependency>
+         <and>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+         </and>
+      </dependency>
+
+    </task>
+
+<!--
+    <task name="ncl_zip" maxtries="2">
+
+      <command>&SCRIPTS;/fv3_nclzip.ksh</command>
+      <cores>1</cores>
+      <walltime>00:35:00</walltime>
+      <jobname>nclzip</jobname>
+      <join><cyclestr>&FV3GFS_LOG;/ncl/nclzip_@Y@m@d@H.log</cyclestr></join>
+
+      <envar><name>START_TIME</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+      <envar><name>FCST_TIME</name><value>00</value></envar>
+      <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
+
+      <dependency>
+          <taskdep task="chemplot_000"/>
+      </dependency>
+
+    </task>
+-->
+
+</workflow>

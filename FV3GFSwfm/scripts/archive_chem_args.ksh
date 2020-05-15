@@ -36,7 +36,7 @@ if [ $status -ne 0 ] ; then
 fi
 
 ## RESTART directory
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_restart.tar RESTART"
+cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_restart.tar RESTART/\*0000\.\*"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then
