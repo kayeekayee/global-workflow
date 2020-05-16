@@ -19,12 +19,12 @@ begin
   idate = asciiread("start_time.txt",-1,"string")
 ;  print("idate = "+idate)
 
-;do idate=20200114,20200114
-;  diri = "/scratch3/BMC/fim/lzhang/fv3_grid/"
-;  fi = "C96_grid_spec.tile1.nc"
-
-   diri ="/scratch1/NCEPDEV/global/glopara/fix/fix_fv3/C384/"
-      fi="C384_grid_spec.tile1.nc"
+  fixfv3 = getenv("FIXfv3")
+  case = getenv("CASE")
+  diri= fixfv3+"/"+case+"/"
+;  print("diri = "+diri)
+  fi=case+"_grid_spec.tile1.nc"
+;  print("fi = "+fi)
 
   if (.not. fileexists(diri+fi)) then
      print("")
@@ -39,10 +39,10 @@ begin
      exit
   end if
 ;levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.14,0.16,0.18,0.20,0.30,0.4,0.5,1/)
- levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.15,0.20,0.30,0.4,0.5,1,2,3/) 
-   ff    = addfile(diri+fi, "r")
-   x=ff->grid_lont
-   nx=384
+  levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.15,0.20,0.30,0.4,0.5,1,2,3/) 
+  ff    = addfile(diri+fi, "r")
+  x=ff->grid_lont
+  nx=384
   imax=nx*nx*6
   var=new((/imax/),typeof(x)) 
   lonn=new((/imax/),typeof(x)) 
@@ -52,46 +52,40 @@ begin
   itt=10
   sandall=new((/itd+1,nx,nx/),typeof(x))
   sandall=0.0
-   in=0
+  in=0
   do iy=1,6
-  ;dir = "/scratch3/BMC/fim/lzhang/fv3_grid/"
-  ;fv3 = "C96_grid_spec.tile"+iy+".nc"
-   dir ="/scratch1/NCEPDEV/global/glopara/fix/fix_fv3/C384/"
-   fv3="C384_grid_spec.tile"+iy+".nc"
-  
-  f    = addfile(dir+fv3, "r")
+   dir= fixfv3+"/"+case+"/"
+   fv3=case+"_grid_spec.tile"+iy+".nc"
+   f=addfile(dir+fv3, "r")
 
-
-  dir3="/scratch2/BMC/public/data/grids/sdsu/emissions/"
-  f3="GBBEPx.oc."+idate+".FV3.C384Grid.tile"+iy+".bin"
-  do k=0, itd
-  sand = fbinrecread (dir3+f3, k, (/lev,nx,nx/), "float")
-   sandall(k,:,:)=sand(0,:,:)*1e+9
-  ;print (max(sand(0,:,:)))
- end do
+   dir3=getenv("DATAHOME")
+   f3="GBBEPx.oc."+idate+".FV3.C384Grid.tile"+iy+".bin"
+   do k=0, itd
+     sand = fbinrecread (dir3+f3, k, (/lev,nx,nx/), "float")
+     sandall(k,:,:)=sand(0,:,:)*1e+9
+     ;print (max(sand(0,:,:)))
+   end do
 
 ;  print (idate)
 
-  lon=f->grid_lont
-  lat=f->grid_latt
+   lon=f->grid_lont
+   lat=f->grid_latt
+    
+   do ii=0,nx-1
+    do jj=0,nx-1
+      var(in)=sandall(itd,ii,jj)
+      lonn(in)=lon(ii,jj)
+      latn(in)=lat(ii,jj)
+      in=in+1
+    end do
+   end do
 
-
-
-  do ii=0,nx-1
-  do jj=0,nx-1
-  var(in)=sandall(itd,ii,jj)
-  lonn(in)=lon(ii,jj)
-  latn(in)=lat(ii,jj)
-  in=in+1
   end do
-  end do
-
-end do
   print (idate)
-;print (max(var(:)))
-;   var@_FillValue=1e20
+; print (max(var(:)))
+; var@_FillValue=1e20
 
-;  var@_FillValue = getVarFillValue(var)   ;-- retrieve missing value of var
+; var@_FillValue = getVarFillValue(var)   ;-- retrieve missing value of var
 
   
 
@@ -116,7 +110,7 @@ end do
   ; res@trGridType            ="TriangularMesh"
   ; res@mpProjection         = "Orthographic"
     res@cnLevelSelectionMode = "ExplicitLevels"   ; set explicit contour levels 
-   res@cnLevels         = levels 
+    res@cnLevels         = levels 
    ; res@cnFillDrawOrder       = "PreDraw"         ; make sure fill map on top
 
  

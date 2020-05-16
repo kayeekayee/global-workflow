@@ -1,5 +1,6 @@
   <!ENTITY archive_ics_task    SYSTEM  "FV3GFS_ArchiveICS.xml">
   <!ENTITY sounding_task       SYSTEM  "FV3GFS_Soundings.xml">
+  <!ENTITY chemplot_task       SYSTEM  "FV3GFS_Chemplot.xml">
   <!ENTITY ncldiff_task        SYSTEM  "FV3GFS_NCLdiff.xml">
   <!ENTITY nclzip_task         SYSTEM  "FV3GFS_NCLzip.xml">
   <!ENTITY nclzipretro_task    SYSTEM  "FV3GFS_NCLzip_retro.xml">

@@ -19,6 +19,9 @@
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
   %hera;
+  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
+  <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
+  <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
 ]>
 
@@ -27,7 +30,7 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef>202002070000 202002070000 24:00:00</cycledef>
+  <cycledef>202003270000 202003280000 24:00:00</cycledef>
 
   <metatask name="remap_ncl" throttle="100">
 <!--
@@ -41,6 +44,7 @@
     &remapgrib_task; 
     &ncl_task;
   </metatask>
+  &chemplot_task;
   &nclzip_task;  
 <!--    
   &nclzipretro_task;  

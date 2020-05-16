@@ -19,6 +19,9 @@
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
   %hera;
+  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
+  <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
+  <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
 ]>
 
@@ -35,6 +38,6 @@
     &remapgrib_task; 
     &ncl_task;
   </metatask>
-  &nclzip_task; 
-
+  &chemplot_task;
+  &nclzip_task;  
 </workflow>

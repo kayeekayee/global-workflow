@@ -2,6 +2,10 @@
 #
 # variables sent via xml
 
+echo "entering ncl_FV3chem_smoke.ksh...."
+echo "FIXfv3=$FIXfv3"
+echo "CASE=$CASE"
+
 # initialize
 module load intel
 module load ncl
@@ -11,11 +15,13 @@ module load imagemagick
 # export DATAROOT="/scratch2/BMC/public/data/grids/sdsu/emissions/"  # for testing
 # export START_TIME=20200114  # for testing
 # export FCST_TIME=00  # for testing
-export DATAHOME="${DATAROOT}"  # for testing
+export DATAHOME="${DATAROOT}/"  # for testing
 export TZ="GMT"
 export NCL_HOME="/home/rtrr/HRRR_smoke/bin/NCL/ncl"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
 export MAGICK_THREAD_LIMIT=1
+export FIXfv3=${FIXfv3}
+export CASE=${CASE}
 
 # Set up paths to shell commands
 LS=/bin/ls
@@ -67,16 +73,13 @@ ${ECHO} "   START_TIME = ${START_TIME}"
 ${ECHO} "   FCST_TIME = ${FCST_TIME}"
 
 # Set up the work directory and cd into it
-workdir=${OUTPUT_ROOT}/nclprd/${FCST_TIME}   # for testing
+workdir=${OUTPUT_ROOT}/${START_TIME}/nclprd/${FCST_TIME}   # for testing
 ${RM} -rf ${workdir}
 ${MKDIR} -p ${workdir}
 cd ${workdir}
 pwd
 
 # Link to input file
-# # DATAHOME=${DATAROOT}/${START_TIME}  # for testing
-# ${LN} -s ${DATAHOME}/${START_TIME}.meanFRP.FV3.C384Grid.tile1.bin file.bin
-# ${LN} -s ${DATAHOME}/${START_TIME}.GBBEPx.oc.FV3.C384Grid.tile1.bin ocfile.bin
 ${ECHO} "${START_TIME}" > start_time.txt
 ls -al
 
@@ -84,23 +87,23 @@ ncl_error=0
 
 # Run the NCL scripts for each plot
 
-${ECHO} "Starting plot_GB_C384.ncl at `${DATE}`"
-${NCL} < ${NCL_ROOT}/plot_GB_C384.ncl
+${ECHO} "Starting plot_GB_${CASE}.ncl at `${DATE}`"
+${NCL} < ${NCL_ROOT}/plot_GB_${CASE}.ncl
 error=$?
 if [ ${error} -ne 0 ]; then
-  ${ECHO} "ERROR: plot_GB_C384.ncl crashed!  Exit status=${error}"
+  ${ECHO} "ERROR: plot_GB_${CASE}.ncl crashed!  Exit status=${error}"
   ncl_error=${error}
 fi
-${ECHO} "Finished plot_GB_C384.ncl at `${DATE}`"
+${ECHO} "Finished plot_GB_${CASE}.ncl at `${DATE}`"
 
-${ECHO} "Starting plot_GB_OC_C384.ncl at `${DATE}`"
-${NCL} < ${NCL_ROOT}/plot_GB_OC_C384.ncl
+${ECHO} "Starting plot_GB_OC_${CASE}.ncl at `${DATE}`"
+${NCL} < ${NCL_ROOT}/plot_GB_OC_${CASE}.ncl
 error=$?
 if [ ${error} -ne 0 ]; then
-  ${ECHO} "ERROR: plot_GB_OC_C384.ncl crashed!  Exit status=${error}"
+  ${ECHO} "ERROR: plot_GB_OC_${CASE}.ncl crashed!  Exit status=${error}"
   ncl_error=${error}
 fi
-${ECHO} "Finished plot_GB_OC_C384.ncl at `${DATE}`"
+${ECHO} "Finished plot_GB_OC_${CASE}.ncl at `${DATE}`"
 
 # Copy png files to their proper names
 i=0
