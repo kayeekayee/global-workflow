@@ -6,9 +6,9 @@
 echo "Setting environment variables for gfs_util on Linux with gcc/gfortran"
 
 export GEMINC=/opt/GEMPAK7/gempak/include
-export GEMOLB=/opt/GEMPAK7/os/linux64_gfortran_ubuntu/lib
-export GEMLIB=/opt/GEMPAK7/os/linux64_gfortran_ubuntu/lib
-export OS_INC=/opt/GEMPAK7/os/linux64_gfortran_ubuntu/include
+export GEMOLB=/opt/GEMPAK7/os/linux64_gfortran/lib
+export GEMLIB=/opt/GEMPAK7/os/linux64_gfortran/lib
+export OS_INC=/opt/GEMPAK7/os/linux64_gfortran/include
 
 export GPHCNTR_LIB8=/opt/NCEPLIBS-graphics/v2.0.0/linux/libgphcntr_v2.0.0_8.a
 export GPHFONT_LIB8=/opt/NCEPLIBS-graphics/v2.0.0/linux/libgphfont_v2.0.0_8.a
