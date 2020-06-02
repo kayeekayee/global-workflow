@@ -38,6 +38,7 @@ fi
 ## use own NetCDF library
 ##
 export NETCDF=${INSTALL_DIR}
+export NETCDF_INC=${INSTALL_DIR}/include
 export HDF5=${INSTALL_DIR}
 
 ##
