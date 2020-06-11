@@ -1,0 +1,29 @@
+ARG REPO
+FROM ${REPO}/nceplibs-gnu:latest
+MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
+
+# global-workflow
+COPY ./patch_gfs.sh /opt/patch_gfs.sh
+COPY ./patch_fv3.sh /opt/patch_fv3.sh
+COPY ./scripts/checkout_gfs.sh /opt/checkout_gfs.sh
+COPY ./scripts/build_gfs.sh /opt/build_gfs.sh
+
+# download ncl
+ARG PP=ncl_ncarg-6.6.2-Debian9.8_64bit_gnu630.tar.gz
+RUN cd /opt && wget https://www.earthsystemgrid.org/dataset/ncl.662.dap/file/$PP && \
+    mkdir -p ncl && tar -xvf $PP -C ncl && rm -rf $PP
+
+# clone and build gfs
+RUN cd /opt && ./checkout_gfs.sh && ./patch_gfs.sh && \
+    cd global-workflow/sorc && bash ./build_all.sh && bash ./link_fv3gfs.sh emc linux.gnu
+
+## Rocoto
+#RUN apt-get -y update && \
+#    apt-get -y install ruby-dev python-pip bc && \
+#    pip install numpy && \
+#    cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \ 
+#    cd rocoto && ./INSTALL
+
+# .bashrc
+ARG PP=/etc/bash.bashrc
+RUN echo "GFS_LIBS_DIR=/opt && COMP=gnu source /opt/global-workflow/modulefiles/setup.linux" >> $PP

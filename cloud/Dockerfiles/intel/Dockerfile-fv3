@@ -1,0 +1,8 @@
+ARG REPO
+FROM ${REPO}/esmf-intel:latest
+MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
+
+COPY scripts/build_fv3.sh /opt
+COPY patch_fv3.sh /opt
+COPY patches/ /opt/patches
+COPY scripts/copy_deps.sh /opt
