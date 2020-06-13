@@ -65,8 +65,8 @@ export BUFR_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_8_64.a
 export BUFR_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_d_64.a
 export SIGIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/libsigio_v2.1.0.a
 export SFCIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-sfcio/sfcio_v1.1.0/libsfcio_v1.1.0.a
-export G2_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-g2/gnu/libg2_v3.1.0_4.a
-export G2_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-g2/gnu/libg2_v3.1.0_d.a
+export G2_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_4.a
+export G2_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_d.a
 export LANDSFCUTIL_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/liblandsfcutil_v2.1.0_4.a
 export LANDSFCUTIL_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/liblandsfcutil_v2.1.0_d.a
 
@@ -82,8 +82,8 @@ export W3EMC_INC8=${GFS_LIBS_DIR}/NCEPLIBS-w3emc/w3emc/v2.3.0/include/w3emc_v2.3
 export W3EMC_INCd=${GFS_LIBS_DIR}/NCEPLIBS-w3emc/w3emc/v2.3.0/include/w3emc_v2.3.0_d
 export SIGIO_INC4=${GFS_LIBS_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/incmod/sigio_v2.1.0
 export SFCIO_INC4=${GFS_LIBS_DIR}/NCEPLIBS-sfcio/sfcio_v1.1.0/incmod/sfcio_v1.1.0
-export G2_INC4=${GFS_LIBS_DIR}/NCEPLIBS-g2/gnu/include/g2_v3.1.0_4
-export G2_INCd=${GFS_LIBS_DIR}/NCEPLIBS-g2/gnu/include/g2_v3.1.0_d
+export G2_INC4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_4
+export G2_INCd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_d
 export LANDSFCUTIL_INC4=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/include/landsfcutil_v2.1.0_4
 export LANDSFCUTIL_INCd=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/include/landsfcutil_v2.1.0_d
 
