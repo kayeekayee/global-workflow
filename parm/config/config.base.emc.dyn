@@ -18,7 +18,7 @@ export QUEUE_SERVICE="@QUEUE_SERVICE@"
 export PARTITION_BATCH="@PARTITION_BATCH@"
 
 # Project to use in mass store:
-HPSS_PROJECT=emc-global
+HPSS_PROJECT=fim
 
 # Directories relative to installation areas:
 export HOMEgfs=@HOMEgfs@
@@ -45,6 +45,11 @@ export NOSCRUB="@NOSCRUB@"
 # Base directories for various builds
 export BASE_GIT="@BASE_GIT@"
 export BASE_SVN="@BASE_SVN@"
+
+#### CCPP Suite
+#### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
+export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
+#### export CCPP_SUITE="FV3_GFS_v16beta"        # EMC v16beta
 
 # Toggle to turn on/off GFS downstream processing.
 export DO_BUFRSND="YES"
@@ -107,7 +112,7 @@ export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="@ICSDIR@"
-export ATARDIR="/NCEPDEV/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
+export ATARDIR="/BMC/$HPSS_PROJECT/$USER/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
@@ -136,7 +141,11 @@ if [[ "$CDUMP" == "gdas" ]] ; then
    export FHCYC=1
    export FTSFS=10
 elif [[ "$CDUMP" == "gfs" ]] ; then
-   export FHCYC=24
+   if [[ "$CCPP_SUITE" == "FV3_GSD_v0" ]] ; then
+       export FHCYC=0
+   else
+       export FHCYC=24
+   fi
 fi
 
 # Output frequency of the forecast model (for cycling)
@@ -153,13 +162,13 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=384
-export FHMAX_GFS_06=384
-export FHMAX_GFS_12=384
-export FHMAX_GFS_18=384
+export FHMAX_GFS_00=240
+export FHMAX_GFS_06=240
+export FHMAX_GFS_12=240
+export FHMAX_GFS_18=240
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
-export FHOUT_GFS=3
+export FHOUT_GFS=6
 export FHMAX_HF_GFS=0
 export FHOUT_HF_GFS=1
 export ILPOST=1           # gempak output frequency up to F120
@@ -210,11 +219,15 @@ export DO_GLDAS="YES"
 export gldas_cyc=00
 
 # run wave component
-export DO_WAVE=YES
+export DO_WAVE="NO"                ## JKH
 export WAVE_CDUMP="both"
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
-export imp_physics=11
+if [[ "$CCPP_SUITE" == "FV3_GSD_v0" || "$CCPP_SUITE" == "FV3_GSD_noah" ]] ; then
+       export imp_physics=8
+else
+       export imp_physics=11
+fi
 
 # Shared parameters
 # Hybrid related

@@ -17,6 +17,20 @@ else
     echo 'Skip.  Directory fv3gfs.fd already exists.'
 fi
 
+echo fv3gfs_ccpp checkout ...
+if [[ ! -d fv3gfs_ccpp.fd ]] ; then
+    rm -f ${topdir}/checkout-fv3gfs_ccpp.log
+    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model  fv3gfs_ccpp.fd >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
+    cd fv3gfs_ccpp.fd
+#    git checkout 6671b15df63eb1c728670139b53d59d63cbbf946
+    git submodule sync
+    git submodule update --init --recursive
+    cd ${topdir}
+    ln -fs fv3gfs_ccpp.fd fv3gfs.fd
+else
+    echo 'Skip.  Directory fv3gfs_ccpp.fd already exists.'
+fi
+
 echo gsi checkout ...
 if [[ ! -d gsi.fd ]] ; then
     rm -f ${topdir}/checkout-gsi.log
@@ -85,6 +99,14 @@ if [[ ! -d verif-global.fd ]] ; then
     cd ${topdir}
 else
     echo 'Skip. Directory verif-global.fd already exist.'
+fi
+
+echo aeroconv checkout ...
+if [[ ! -d aeroconv ]] ; then
+    rm -f ${topdir}/checkout-aero.log
+    git clone https://github.com/NCAR/aeroconv aeroconv >> ${topdir}/checkout-aero.log 2>&1
+else
+    echo 'Skip.  Directory aeroconv already exists.'
 fi
 
 exit 0

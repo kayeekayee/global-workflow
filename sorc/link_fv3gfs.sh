@@ -8,16 +8,16 @@ machine=${2}
 
 if [ $# -lt 2 ]; then
     echo '***ERROR*** must specify two arguements: (1) RUN_ENVIR, (2) machine'
-    echo ' Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | orion )'
+    echo ' Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | jet | orion )'
     exit 1
 fi
 
 if [ $RUN_ENVIR != emc -a $RUN_ENVIR != nco ]; then
-    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | orion )'
+    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | jet | orion )'
     exit 1
 fi
-if [ $machine != cray -a $machine != dell -a $machine != hera -a $machine != orion ]; then
-    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | orion )'
+if [ $machine != cray -a $machine != dell -a $machine != hera -a $machine != jet -a $machine != orion ]; then
+    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | jet | orion )'
     exit 1
 fi
 
@@ -36,6 +36,8 @@ elif [ $machine = "dell" ]; then
     FIX_DIR="/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/fv3gfs/fix"
 elif [ $machine = "hera" ]; then
     FIX_DIR="/scratch1/NCEPDEV/global/glopara/fix"
+elif [ $machine = "jet" ]; then
+    FIX_DIR="/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix"
 elif [ $machine = "orion" ]; then
     FIX_DIR="/work/noaa/global/kfriedma/glopara/fix"
 fi
@@ -188,8 +190,10 @@ cd ${pwd}/../ush                ||exit 8
 #------------------------------
 
 cd $pwd/../exec
-[[ -s global_fv3gfs.x ]] && rm -f global_fv3gfs.x
-$LINK ../sorc/fv3gfs.fd/NEMS/exe/global_fv3gfs.x .
+#[[ -s global_fv3gfs.x ]] && rm -f global_fv3gfs.x
+#$LINK ../sorc/fv3gfs.fd/NEMS/exe/global_fv3gfs.x .
+[[ -s global_fv3gfs_ccpp.x ]] && rm -f global_fv3gfs_ccpp.x
+$LINK ../sorc/fv3gfs.fd/NEMS/exe/global_fv3gfs_ccpp.x .
 if [ -d ../sorc/fv3gfs.fd/WW3/exec ]; then # Wave execs
   for waveexe in ww3_gint ww3_grib ww3_grid ww3_multi ww3_ounf ww3_ounp ww3_outf ww3_outp ww3_prep ww3_prnc; do
     [[ -s $waveexe ]] && rm -f $waveexe

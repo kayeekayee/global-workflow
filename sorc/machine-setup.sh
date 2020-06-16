@@ -183,18 +183,21 @@ elif [[ -d /lfs3 ]] ; then
     fi
     target=jet
     module purge
-module load intel/15.0.3.187
-module load  impi
-#export  NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
-     export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
-export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/NCEPLIBS.15X
-     module use $NCEPLIBS/modulefiles
-export WRFPATH=$NCEPLIBS/wrf.shared.new/v1.1.1/src
-export myFC=mpiifort
+    module load intel/18.0.5.274
+    module load impi/2018.4.274
+    export NCEPLIBS=/mnt/lfs4/HFIP/hfv3gfs/nwprod/NCEPLIBS
+    #export  NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
+    #export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
+    #export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/gwv/NCEPLIBS.15X
+    module use $NCEPLIBS/modulefiles
+    export WRFPATH=$NCEPLIBS/wrf.shared.new/v1.1.1/src
+    export myFC=mpiifort
 
+##---------------------------------------------------------------------------
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
 fi
+##---------------------------------------------------------------------------
 
 unset __ms_shell
 unset __ms_ksh_test
