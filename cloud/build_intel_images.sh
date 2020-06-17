@@ -5,6 +5,10 @@ if ! [ -x "$(command -v docker)" ]; then
   exit 1
 fi
 
+if ! [ -d global-workflow ]; then
+  ./scripts/checkout_gfs.sh
+fi
+
 INTEL_COMP_DIR=/data/intel
 COMP=${COMP:-intel}
 REPO=${REPO:-dshawul}

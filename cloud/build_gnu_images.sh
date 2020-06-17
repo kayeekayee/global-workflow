@@ -5,6 +5,10 @@ if ! [ -x "$(command -v docker)" ]; then
   exit 1
 fi
 
+if ! [ -d global-workflow ]; then
+  ./scripts/checkout_gfs.sh
+fi
+
 REPO=${REPO:-dshawul}
 
 #build image
