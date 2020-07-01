@@ -37,16 +37,31 @@ if [ $HPSSARCH = "YES" ]; then
 
   if [ $CDUMP = "gfs" ]; then
   
-      # archive nemsio files (gfs.t00z.atmfHHH.nemsio, gfs.t00z.sfcfHHH.nemsio, gfs.t00z.logfHHH.nemsio )
-      htar -P -cvf $ATARDIR/$CDATE/gfs_nemsio.tar gfs.*nemsio
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "HTAR $CDATE gfs_nemsio.tar failed"
-        exit $status
+      ## nemsio files ##
+      if [ -f *nemsio ]; then
+        # archive nemsio files (gfs.t00z.atmfHHH.nemsio, gfs.t00z.sfcfHHH.nemsio, gfs.t00z.logfHHH.nemsio )
+        htar -P -cvf $ATARDIR/$CDATE/gfs_nemsio.tar gfs.*nemsio
+        status=$?
+        if [ $status -ne 0 ]; then
+          echo "HTAR $CDATE gfs_nemsio.tar failed"
+          exit $status
+        fi
       fi
-      
-      # archive GRIB2 files (gfs.t00z.pgrb2.0p25.fHHH, gfs.t00z.pgrb2.0p50.fHHH)
-      htar -P -cvf $ATARDIR/$CDATE/gfs_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5*
+
+      ## netcdf files ##
+      if [ -f *nc ]; then
+        # archive netcdf files (gfs.t00z.atmfHHH.nc, gfs.t00z.sfcfHHH.nc, gfs.t00z.logfHHH.txt )
+        htar -P -cvf $ATARDIR/$CDATE/gfs_nc.tar gfs*.nc gfs.*log*.txt
+        status=$?
+        if [ $status -ne 0 ]; then
+          echo "HTAR $CDATE gfs_nc.tar failed"
+          exit $status
+        fi
+      fi
+        
+      # archive GRIB2 files (gfs.t00z.pgrb2.0p25.fHHH, gfs.t00z.pgrb2.0p50.fHHH) 
+      # and tracker files (avno.t00z.cyclone.trackatcfunix, avnop.t00z.cyclone.trackatcfunix)
+      htar -P -cvf $ATARDIR/$CDATE/gfs_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5* avno*
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"

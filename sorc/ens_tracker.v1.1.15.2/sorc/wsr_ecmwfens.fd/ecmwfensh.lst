@@ -1,5 +1,5 @@
 Page 1           Source Listing                                                                
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
 ecmwfensh.f(410): warning #8043: The extra characters in the format specification will be ignored.   ['('kpdsread, ichk, jpds, jp...
 	      write (*,'(''kpdsread, ichk, jpds, jpds, rjpds ='',
@@ -21,7 +21,7 @@ ecmwfensh.f(445): warning #8043: The extra characters in the format specificatio
 -----------------------------------------------------------------^
 
 Page 2           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
       1       program ecmwfensh
       2 C$$$  MAIN PROGRAM DOCUMENTATION BLOCK
@@ -82,7 +82,7 @@ Page 2           Source Listing                  ECMWFENSH
      57 C     unit 171 - GRIB output for rh500 stats
 
 Page 3           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
      58 C     unit  72 - GRIB output for rh700
      59 C     unit 172 - GRIB output for rh700 stats
@@ -143,7 +143,7 @@ Page 3           Source Listing                  ECMWFENSH
     114 c     lugb         logical unit of the unblocked grib data file
 
 Page 4           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     115 c     lugi         logical unit of the unblocked grib index file
     116 c
@@ -204,7 +204,7 @@ Page 4           Source Listing                  ECMWFENSH
     171       integer   kholdz200pds(200)
 
 Page 5           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     172       integer   kholdz500pds(200)
     173       integer   kholdz700pds(200)
@@ -265,7 +265,7 @@ Page 5           Source Listing                  ECMWFENSH
     228       real      prcpmean(nlat*nlon),prcpspr(nlat*nlon)
 
 Page 6           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     229       real      tcdcvals(numec,nlat*nlon)
     230       real      tcdcmean(nlat*nlon),tcdcspr(nlat*nlon)
@@ -326,7 +326,7 @@ Page 6           Source Listing                  ECMWFENSH
     285       rh500mean = 0.0
 
 Page 7           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     286       rh500spr =  0.0
     287       rh700vals = 0.0
@@ -387,7 +387,7 @@ Page 7           Source Listing                  ECMWFENSH
     342       z700ct = 0
 
 Page 8           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     343       z850ct = 0
     344       z1000ct = 0
@@ -448,7 +448,7 @@ Page 8           Source Listing                  ECMWFENSH
     399 	  write(*,76) (kgds(mm),mm=1,5) 
 
 Page 9           Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     400 	  write(*,77) (kgds(mm),mm=6,10) 
     401 	  write(*,78) (kgds(mm),mm=11,15) 
@@ -509,7 +509,7 @@ Page 9           Source Listing                  ECMWFENSH
     441 	    endif
 
 Page 10          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     442 	  enddo
     443 	  do ichk=6,200
@@ -570,7 +570,7 @@ Page 10          Source Listing                  ECMWFENSH
     495 c	    write(*,76) (kgds(mm),mm=1,5) 
 
 Page 11          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     496 c	    write(*,77) (kgds(mm),mm=6,10) 
     497 c	    write(*,78) (kgds(mm),mm=11,15) 
@@ -631,7 +631,7 @@ Page 11          Source Listing                  ECMWFENSH
     552 	    newvar = 't700    '
 
 Page 12          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     553             do i = 1,25
     554               kholdt700pds(i) = kpds(i)
@@ -692,7 +692,7 @@ Page 12          Source Listing                  ECMWFENSH
     609           do ip = 1,kf
 
 Page 13          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     610             t2maxvals(t2maxct,ip) = t2maxvals(t2maxct,ip) + f(ip)
     611           enddo
@@ -753,7 +753,7 @@ Page 13          Source Listing                  ECMWFENSH
     666           endif
 
 Page 14          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     667           tcdcct = tcdcct + 1
     668           do ip = 1,kf
@@ -814,7 +814,7 @@ Page 14          Source Listing                  ECMWFENSH
     723           if (gotz200pds .eq. 'n') then
 
 Page 15          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     724             gotz200pds = 'y'
     725 	    newvar = 'z200    '
@@ -875,7 +875,7 @@ Page 15          Source Listing                  ECMWFENSH
     780           if (gotu500 .eq. 'n') then
 
 Page 16          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     781             gotu500 = 'y'
     782             newvar = 'u500'
@@ -936,7 +936,7 @@ Page 16          Source Listing                  ECMWFENSH
     837 	  write(*,72) (kpds(mm),mm=6,10) 
 
 Page 17          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     838 	  write(*,73) (kpds(mm),mm=11,15) 
     839 	  write(*,74) (kpds(mm),mm=16,20) 
@@ -997,7 +997,7 @@ Page 17          Source Listing                  ECMWFENSH
     894      &                  ,lb,t700mean,t700spr)
 
 Page 18          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     895       else
     896 	print *,'no statistics for t700'
@@ -1058,7 +1058,7 @@ Page 18          Source Listing                  ECMWFENSH
     951      &                  ,lb,z500mean,z500spr)
 
 Page 19          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
     952       else
     953 	print *,'no statistics for z500'
@@ -1119,7 +1119,7 @@ Page 19          Source Listing                  ECMWFENSH
    1008       call output_stats ('mslp',181,nlat*nlon,kholdmslppds,kgds
 
 Page 20          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1009      &                  ,lb,mslpmean,mslpspr)
    1010       else
@@ -1169,7 +1169,7 @@ Page 20          Source Listing                  ECMWFENSH
    1054       end
 
 Page 21          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -1230,7 +1230,7 @@ SYMBOL CROSS REFERENCE
  GOTU10M                    Local  150      CHAR            1           scalar                    795,796                           
 
 Page 22          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -1291,7 +1291,7 @@ Page 22          Source Listing                  ECMWFENSH
  KHOLDRH700PDS              Local  177      I(4)            4     1     200                       753,991                           
 
 Page 23          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -1352,7 +1352,7 @@ Page 23          Source Listing                  ECMWFENSH
                                                                                                   9,200,201,202,203,204,205,206,207,
 
 Page 24          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -1413,7 +1413,7 @@ Page 24          Source Listing                  ECMWFENSH
  T200CT                     Local  184      I(4)            4           scalar                    331,581,583,876                   
 
 Page 25          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -1474,7 +1474,7 @@ Page 25          Source Listing                  ECMWFENSH
  Z850MEAN                   Local  214      R(8)            8     1     65160                     278,965,967                       
 
 Page 26          Source Listing                  ECMWFENSH
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -1482,7 +1482,7 @@ Page 26          Source Listing                  ECMWFENSH
  Z850VALS                   Local  213      R(8)            8     2     3388320                   277,696,965                       
 
 Page 27          Source Listing                  ECMWFENSH
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1055 c
    1056 c----------------------------------------------------------------------c
@@ -1543,7 +1543,7 @@ Page 27          Source Listing                  ECMWFENSH
    1111 
 
 Page 28          Source Listing                  CREATE_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1112         do imem = 1,nct
    1113           do n = 1,npts
@@ -1593,7 +1593,7 @@ Page 28          Source Listing                  CREATE_STATS
    1157       end
 
 Page 29          Source Listing                  CREATE_STATS
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -1627,7 +1627,7 @@ SYMBOL CROSS REFERENCE
  XDIFFSQR                   Local  1132     R(8)            8           scalar                    1132,1133                         
 
 Page 30          Source Listing                  CREATE_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1158 c
    1159 c----------------------------------------------------------------------c
@@ -1688,7 +1688,7 @@ Page 30          Source Listing                  CREATE_STATS
    1214 c     2 meter tmax            201 1 0            15 105 2
 
 Page 31          Source Listing                  ADJPDS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1215 c     2 meter tmin            202 1 0            16 105 2
    1216 c     2 meter td              168 1 0            17 105 2
@@ -1749,7 +1749,7 @@ Page 31          Source Listing                  ADJPDS
    1271         if (kpds(7).eq.850) lugout = 54
 
 Page 32          Source Listing                  ADJPDS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1272       else if (kpds(5).eq.131) then
    1273         kpds(5) = 33
@@ -1810,7 +1810,7 @@ Page 32          Source Listing                  ADJPDS
    1328         kpds(5) = 34
 
 Page 33          Source Listing                  ADJPDS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1329         if (kpds(7).eq.0) then
    1330 	  lugout = 110
@@ -1871,7 +1871,7 @@ Page 33          Source Listing                  ADJPDS
    1385       endif
 
 Page 34          Source Listing                  ADJPDS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1386 c
    1387  900  continue
@@ -1915,7 +1915,7 @@ SYMBOL CROSS REFERENCE
  MEMBERCT                   Dummy  1162     I(4)            4     1     2        ARG,INOUT                                          
 
 Page 35          Source Listing                  ADJPDS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1390 c
    1391 c----------------------------------------------------------------------c
@@ -1976,7 +1976,7 @@ Page 35          Source Listing                  ADJPDS
    1446 c     OUTPUT
 
 Page 36          Source Listing                  ADJEXT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1447 c     ------
    1448 c     kens        NCEP ensemble PDS extension (Bytes 41-45)
@@ -2037,7 +2037,7 @@ Page 36          Source Listing                  ADJEXT
    1503       end    
 
 Page 37          Source Listing                  ADJEXT
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -2062,7 +2062,7 @@ SYMBOL CROSS REFERENCE
  MOD                        Func   1478                                 scalar                    1478                              
 
 Page 38          Source Listing                  ADJEXT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1504 c
    1505 c----------------------------------------------------------------------c
@@ -2123,7 +2123,7 @@ Page 38          Source Listing                  ADJEXT
    1560       call putgbe (lugout,kf,kpds,kgds,kens,ld,data,iret)
 
 Page 39          Source Listing                  OUTPUT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1561  
    1562       if (iret.eq.0) then
@@ -2168,7 +2168,7 @@ SYMBOL CROSS REFERENCE
  PUTGBE                     Subr   1560                                                           1560                              
 
 Page 40          Source Listing                  OUTPUT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1579 c
    1580 c----------------------------------------------------------------------c
@@ -2229,7 +2229,7 @@ Page 40          Source Listing                  OUTPUT
    1635 	 if (istat .eq. 1) ctype='mean'
 
 Page 41          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1636 	 if (istat .eq. 2) ctype='spr '
    1637 
@@ -2290,7 +2290,7 @@ Page 41          Source Listing                  OUTPUT_STATS
    1692 	  kpds(6)  = 100
 
 Page 42          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1693 	  kpds(7)  = 500
    1694 	  if (ctype .eq. 'mean') then
@@ -2351,7 +2351,7 @@ Page 42          Source Listing                  OUTPUT_STATS
    1749 	    kpds(22) = 1
 
 Page 43          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1750 	  endif
    1751 	else if (cparm .eq. 'psfc') then
@@ -2412,7 +2412,7 @@ Page 43          Source Listing                  OUTPUT_STATS
    1806 	  write(*,71) (kpds(mm),mm=1,5)
 
 Page 44          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1807 	  write(*,72) (kpds(mm),mm=6,10)
    1808 	  write(*,73) (kpds(mm),mm=11,15)
@@ -2473,7 +2473,7 @@ Page 44          Source Listing                  OUTPUT_STATS
    1863 	    print *,'IRET = 0 after call to putgbe in sub output_stats'
 
 Page 45          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1864 c c         print *,' '
    1865 	  else
@@ -2510,7 +2510,7 @@ ENTRY POINTS
  output_stats_             
 
 Page 46          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
 
 
@@ -2571,7 +2571,7 @@ SYMBOL CROSS REFERENCE
                                                                                                   ,1813,1814,1815                   
 
 Page 47          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -2581,7 +2581,7 @@ Page 47          Source Listing                  OUTPUT_STATS
  SRANGE                     Subr   1819                                                           1819,1824                         
 
 Page 48          Source Listing                  OUTPUT_STATS
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1890 c
    1891 c----------------------------------------------------------------------c
@@ -2642,7 +2642,7 @@ Page 48          Source Listing                  OUTPUT_STATS
    1946             if (outmax.lt.1.0) then
 
 Page 49          Source Listing                  SRANGE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    1947                 outmax =  1.0
    1948             endif
@@ -2703,7 +2703,7 @@ Page 49          Source Listing                  SRANGE
    2003             if (outmin.gt.1.0) then
 
 Page 50          Source Listing                  SRANGE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2004                 outmin =  1.0
    2005             endif
@@ -2736,7 +2736,7 @@ Page 50          Source Listing                  SRANGE
    2032           end
 
 Page 51          Source Listing                  SRANGE
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -2792,7 +2792,7 @@ SYMBOL CROSS REFERENCE
  VAR                        Dummy  1894     R(8)            8     1     0        ARG,INOUT        1904,1905,1906,1914,1915,1924     
 
 Page 52          Source Listing                  SRANGE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2033 c
    2034 c----------------------------------------------------------------------c
@@ -2841,7 +2841,7 @@ Page 52          Source Listing                  SRANGE
    2077       end
 
 Page 53          Source Listing                  GRANGE
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -2867,7 +2867,7 @@ SYMBOL CROSS REFERENCE
  N                          Dummy  2037     I(4)            4           scalar   ARG,INOUT        2064,2069                         
 
 Page 54          Source Listing                  GRANGE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2078 c
    2079 c----------------------------------------------------------------------c
@@ -2928,7 +2928,7 @@ Page 54          Source Listing                  GRANGE
    2134 c
 
 Page 55          Source Listing                  GETGBECE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2135 c     ***********  CODE ADDED FOR ECMWF ORIGINAL ENSEMBLE FILES  ****
    2136 c
@@ -2989,7 +2989,7 @@ Page 55          Source Listing                  GETGBECE
    2191 C     INTEGER KPTR(16)
 
 Page 56          Source Listing                  GETGBECE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2192       INTEGER KPTR(20)
    2193       INTEGER IPDSP(LPDS),JPDSP(LPDS),IGDSP(LGDS),JGDSP(LGDS)
@@ -3050,7 +3050,7 @@ Page 56          Source Listing                  GETGBECE
    2248       LGRIB=0
 
 Page 57          Source Listing                  GETGBECE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2249       KJ=J
    2250       K=J
@@ -3111,7 +3111,7 @@ Page 57          Source Listing                  GETGBECE
    2305               LT=LT+ABS(JGDS(IP)-KGDS(IP))
 
 Page 58          Source Listing                  GETGBECE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2306             ENDDO
    2307           ENDIF
@@ -3166,7 +3166,7 @@ Page 58          Source Listing                  GETGBECE
    2356       END
 
 Page 59          Source Listing                  GETGBECE
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -3227,7 +3227,7 @@ SYMBOL CROSS REFERENCE
                                                                                                   ,2337,2341                        
 
 Page 60          Source Listing                  GETGBECE
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
  Name                       Object Declared Type            Bytes Dimen Elements Attributes       References                        
                                                                                                                                     
@@ -3261,7 +3261,7 @@ Page 60          Source Listing                  GETGBECE
  W3FI63                     Subr   2337                                                           2337                              
 
 Page 61          Source Listing                  GETGBECE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2357 c
    2358 C----------------------------------------------------------------------c
@@ -3322,7 +3322,7 @@ Page 61          Source Listing                  GETGBECE
    2413 C
 
 Page 62          Source Listing                  ECMEXT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2414 C$$$
    2415 C
@@ -3378,7 +3378,7 @@ Page 62          Source Listing                  ECMEXT
    2465       END
 
 Page 63          Source Listing                  ECMEXT
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -3418,7 +3418,7 @@ SYMBOL CROSS REFERENCE
  XPROB                      Local  2418     R(8)            8     1     2                                                           
 
 Page 64          Source Listing                  ECMEXT
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2466 c
    2467 c----------------------------------------------------------------------c
@@ -3479,7 +3479,7 @@ Page 64          Source Listing                  ECMEXT
    2522 
 
 Page 65          Source Listing                  GRIB_CLOSE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2523       unitname(1:11) = "XLFUNIT_   "
    2524       if (lug.lt.100) then
@@ -3517,7 +3517,7 @@ ENTRY POINTS
  grib_close_             
 
 Page 66          Source Listing                  GRIB_CLOSE
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
 
 
@@ -3535,7 +3535,7 @@ SYMBOL CROSS REFERENCE
  UNITNAME                   Local  2520     CHAR            11          scalar                    2523,2525,2527,2529               
 
 Page 67          Source Listing                  GRIB_CLOSE
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2550 c
    2551 c----------------------------------------------------------------------c
@@ -3596,7 +3596,7 @@ Page 67          Source Listing                  GRIB_CLOSE
    2606 
 
 Page 68          Source Listing                  GRIB_OPEN
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2607 c     unitname(1:8) = "XLFUNIT_"
    2608       unitname(1:11) = "XLFUNIT_   "
@@ -3629,7 +3629,7 @@ Page 68          Source Listing                  GRIB_OPEN
    2635       end
 
 Page 69          Source Listing                  GRIB_OPEN
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -3654,7 +3654,7 @@ SYMBOL CROSS REFERENCE
  UNITNAME                   Local  2604     CHAR            11          scalar                    2608,2610,2612,2615               
 
 Page 70          Source Listing                  GRIB_OPEN
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2636 c
    2637 c----------------------------------------------------------------------c
@@ -3715,7 +3715,7 @@ Page 70          Source Listing                  GRIB_OPEN
    2692       character fname*80
 
 Page 71          Source Listing                  GRIB_OPEN_WA
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2693 
    2694 c     unitname(1:8) = "XLFUNIT_"
@@ -3749,7 +3749,7 @@ Page 71          Source Listing                  GRIB_OPEN_WA
    2722       end
 
 Page 72          Source Listing                  GRIB_OPEN_WA
-2020-06-15 22:06 Entry Points                    ecmwfensh.f
+2020-06-22 00:51 Entry Points                    ecmwfensh.f
 
 
 
@@ -3774,7 +3774,7 @@ SYMBOL CROSS REFERENCE
  UNITNAME                   Local  2691     CHAR            11          scalar                    2695,2697,2699,2702               
 
 Page 73          Source Listing                  GRIB_OPEN_WA
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2723 c
    2724 c----------------------------------------------------------------------c
@@ -3835,7 +3835,7 @@ Page 73          Source Listing                  GRIB_OPEN_WA
    2779 c     write(unitname(9:10),'(I2)') lug
 
 Page 74          Source Listing                  GRIB_OPEN_R
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
    2780       call getenv(unitname,fname)
    2781 c     print *,' '
@@ -3867,7 +3867,7 @@ ENTRY POINTS
  grib_open_r_             
 
 Page 75          Source Listing                  GRIB_OPEN_R
-2020-06-15 22:06 Symbol Table                    ecmwfensh.f
+2020-06-22 00:51 Symbol Table                    ecmwfensh.f
 
 
 
@@ -3885,7 +3885,7 @@ SYMBOL CROSS REFERENCE
  UNITNAME                   Local  2769     CHAR            11          scalar                    2773,2775,2777,2780               
 
 Page 76          Source Listing                  GRIB_OPEN_R
-2020-06-15 22:06 Subprograms/Common Blocks       ecmwfensh.f
+2020-06-22 00:51 Subprograms/Common Blocks       ecmwfensh.f
 
 
 
@@ -3946,7 +3946,7 @@ COMPILER OPTIONS BEING USED
        -check nopointers                     -check noshape
 
 Page 77          Source Listing                  GRIB_OPEN_R
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
        -check nostack                        -check nouninitialized
        -coarray-num-procs 0             no   -coarray-config-file
@@ -4007,7 +4007,7 @@ Page 77          Source Listing                  GRIB_OPEN_R
 
 
 Page 78          Source Listing                  GRIB_OPEN_R
-2020-06-15 22:06                                 ecmwfensh.f
+2020-06-22 00:51                                 ecmwfensh.f
 
        -includepath : /apps/intel/parallel_studio_xe_2018.4.057/compilers_and_libraries_2018/linux/tbb/include/,/usr/local/include/,
            .f,./.f,/apps/intel/parallel_studio_xe_2018.4.057/compilers_and_libraries_2018/linux/ipp/include/.f,/apps/intel/parallel_studio_xe_2018.4.057/compilers_and_libraries_2018/linux/mkl/include/.f,

@@ -70,6 +70,9 @@ yyyymmdd=`echo $CDATE | cut -c1-8`
 # Move output data
 echo "copying updated files to $FV3ICS_DIR...."
 cp -p $DATA/OUTPUT/gfs*nc $FV3ICS_DIR
+status=$?
+[[ $status -ne 0 ]] && exit $status
+touch ${FV3ICS_DIR}/aero_done
 
 ###############################################################
 # Force Exit out cleanly

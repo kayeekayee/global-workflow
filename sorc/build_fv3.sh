@@ -20,7 +20,7 @@ if [ $target = hera ]; then target=hera.intel ; fi
 if [ $target = jet ]; then target=jet.intel ; fi
 if [ $target = orion ]; then target=orion.intel ; fi
 
-cd fv3gfs.fd/
+cd fv3gfs_ccpp.fd/
 FV3=$( pwd -P )/FV3
 cd tests/
 #JKH./compile.sh "$FV3" "$target" "WW3=Y 32BIT=Y" 1

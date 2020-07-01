@@ -24,3 +24,8 @@ module load ip/v3.0.1
 module load hdf5_parallel/1.10.6
 module load netcdf_parallel/4.7.4
 module load w3emc_para/v2.4.0
+
+setenv NCEPLIBS  /lfs4/HFIP/hfv3gfs/gwv/l0530/lib/
+module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/modulefiles
+module load esmflocal/8_0_1
+module load netcdfp/4.7.4

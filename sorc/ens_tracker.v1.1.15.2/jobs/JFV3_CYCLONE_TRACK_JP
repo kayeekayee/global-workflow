@@ -50,9 +50,8 @@ export USHens_tracker=${USHens_tracker:-$HOMEens_tracker/ush}
 ##############################
 # Run setpdy and initialize PDY variables
 ##############################
-#setpdy.sh
-#. PDY
-export PDY=20200612
+setpdy.sh
+. PDY
 
 ##############################################
 # Define COM directories
@@ -90,13 +89,10 @@ elif [[ -d /work ]] ; then
 #  export COMINsyn=/work/noaa/global/kfriedma/glopara/git/tracker/syndat
   export COMINsyn=/work/noaa/global/Jiayi.Peng/syndat
 
-elif [[ -d /lfs3 ]] ; then
+elif [[ -d /lfs4 ]] ; then
   # We are on NOAA Jet
-#  export COMINgfs=${COMINgfs:-${COMROOTp1}/gfs/prod/gfs.${PDY}}
-#  export COMINsyn=${COMINsyn:-${COMROOTp1}/arch/prod/syndat}
-#  export COMINgfs=${COMINgfs:-/mnt/lfs3/projects/hwrfv3/Jiayi.Peng/data/gfs.${PDY}}
+  export COMINgfs=${COMINgfs:-${COMROOTp1}/gfs/prod/gfs.${PDY}}
   export COMINsyn=${COMINsyn:-/mnt/lfs4/HFIP/hwrf-data/hwrf-input/SYNDAT}
-  export COMINgfs=${COMINgfs:-/mnt/lfs4/HFIP/hwrfv3/Jiayi.Peng/data/gfs.20200612}
 else
   echo Job failed: unknown platform 1>&2
   err_exit "FAILED ${jobid} - ERROR IN unknown platform - ABNORMAL EXIT"

@@ -4,17 +4,17 @@ set -xue
 topdir=$(pwd)
 echo $topdir
 
-echo fv3gfs checkout ...
-if [[ ! -d fv3gfs.fd ]] ; then
-    rm -f ${topdir}/checkout-fv3gfs.log
-    #git clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
-    git clone https://github.com/DusanJovic-NOAA/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
-    cd fv3gfs.fd
+echo fv3gfs_emc checkout ...
+if [[ ! -d fv3gfs_emc.fd ]] ; then
+    rm -f ${topdir}/checkout-fv3gfs_emc.log
+    #git clone https://github.com/ufs-community/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
+    git clone https://github.com/DusanJovic-NOAA/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
+    cd fv3gfs_emc.fd
     git checkout orion_gfs.v16
     git submodule update --init --recursive
     cd ${topdir}
 else
-    echo 'Skip.  Directory fv3gfs.fd already exists.'
+    echo 'Skip.  Directory fv3gfs_emc.fd already exists.'
 fi
 
 echo fv3gfs_ccpp checkout ...
@@ -22,7 +22,7 @@ if [[ ! -d fv3gfs_ccpp.fd ]] ; then
     rm -f ${topdir}/checkout-fv3gfs_ccpp.log
     git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model  fv3gfs_ccpp.fd >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
     cd fv3gfs_ccpp.fd
-#    git checkout 6671b15df63eb1c728670139b53d59d63cbbf946
+    git checkout 27a8a079baeb436873fc102128feef4ee6625d46
     git submodule sync
     git submodule update --init --recursive
     cd ${topdir}
@@ -102,11 +102,13 @@ else
 fi
 
 echo aeroconv checkout ...
-if [[ ! -d aeroconv ]] ; then
+if [[ ! -d aeroconv.fd ]] ; then
     rm -f ${topdir}/checkout-aero.log
-    git clone https://github.com/NCAR/aeroconv aeroconv >> ${topdir}/checkout-aero.log 2>&1
+    git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${topdir}/checkout-aero.log 2>&1
+    cd aeroconv.fd
+    git checkout b830a6c
 else
-    echo 'Skip.  Directory aeroconv already exists.'
+    echo 'Skip.  Directory aeroconv.fd already exists.'
 fi
 
 exit 0
