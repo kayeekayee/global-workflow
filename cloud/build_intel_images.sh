@@ -20,7 +20,10 @@ build_image() {
                  --build-arg REPO=${REPO} \
                  --build-arg GERRIT_ID=${GERRIT_ID} \
                  -t ${1} -f ${2} .
-    docker build --build-arg REPO=${REPO} -t ${1} -f ${2} .
+    if docker inspect temp &> /dev/null; then
+       echo $'\tremoving existing temp image'
+       docker rm -f temp 
+    fi
     docker run --name temp -v ${INTEL_COMP_DIR}:${INTEL_COMP_DIR} -d -it ${1} bash
     docker exec -it temp /bin/bash -c "${3}"
     docker commit temp ${1}

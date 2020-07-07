@@ -21,7 +21,8 @@ RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan  -p 29418 -t rsa vlab.ncep.noaa.gov >
 ARG GERRIT_ID
 RUN --mount=type=ssh,id=default \
     --mount=type=secret,id=${GERRIT_ID},dst=/root/.ssh/config \
-    ssh-add -L \
+    cat /root/.ssh/config \
+    && ssh-add -L \
     && cd /opt && ./checkout_gfs.sh
 
 ## Rocoto
