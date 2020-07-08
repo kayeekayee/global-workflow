@@ -4,18 +4,18 @@ set -xue
 topdir=$(pwd)
 echo $topdir
 
-echo fv3gfs_emc checkout ...
-if [[ ! -d fv3gfs_emc.fd ]] ; then
-    rm -f ${topdir}/checkout-fv3gfs_emc.log
-    #git clone https://github.com/ufs-community/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
-    git clone https://github.com/DusanJovic-NOAA/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
-    cd fv3gfs_emc.fd
-    git checkout orion_gfs.v16
-    git submodule update --init --recursive
-    cd ${topdir}
-else
-    echo 'Skip.  Directory fv3gfs_emc.fd already exists.'
-fi
+#JKHecho fv3gfs_emc checkout ...
+#JKHif [[ ! -d fv3gfs_emc.fd ]] ; then
+#JKH    rm -f ${topdir}/checkout-fv3gfs_emc.log
+#JKH    #git clone https://github.com/ufs-community/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
+#JKH    git clone https://github.com/DusanJovic-NOAA/ufs-weather-model fv3gfs_emc.fd >> ${topdir}/checkout-fv3gfs_emc.log 2>&1
+#JKH    cd fv3gfs_emc.fd
+#JKH    git checkout orion_gfs.v16
+#JKH    git submodule update --init --recursive
+#JKH    cd ${topdir}
+#JKHelse
+#JKH    echo 'Skip.  Directory fv3gfs_emc.fd already exists.'
+#JKHfi
 
 echo fv3gfs_ccpp checkout ...
 if [[ ! -d fv3gfs_ccpp.fd ]] ; then

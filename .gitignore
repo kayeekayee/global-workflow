@@ -16,7 +16,10 @@ fix/wafs
 # Ignore sorc and logs folders from externals
 sorc/*log
 sorc/logs
+sorc/aeroconv.fd
 sorc/fv3gfs.fd
+sorc/fv3gfs_ccpp.fd
+sorc/fv3gfs_emc.fd
 sorc/gfs_post.fd
 sorc/gsi.fd
 sorc/ufs_utils.fd
