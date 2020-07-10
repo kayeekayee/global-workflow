@@ -19,7 +19,7 @@ module load w3emc/v2.3.0
 module load nemsio/v2.2.3
 
 module load hdf5_parallel/1.10.6
-module load netcdf_parallel/4.7.4
+#JKHmodule load netcdf_parallel/4.7.4
 
 module use /lfs4/HFIP/hwrf-vd/soft/modulefiles
 module load prod_util
@@ -30,3 +30,7 @@ module load hpss
 module load mpiserial
 
 module load gempak/7.4.2
+
+#JKH add new path for netcdfp  -- fix for netcdf HDF errors
+module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
+module load netcdfp/4.7.4

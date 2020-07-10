@@ -34,7 +34,7 @@ module load png/v1.2.44
 module load z/v1.2.6
 
 module load hdf5_parallel/1.10.6
-module load netcdf_parallel/4.7.4
+#JKHmodule load netcdf_parallel/4.7.4
 
 ##
 ### NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
@@ -53,6 +53,9 @@ module load netcdf_parallel/4.7.4
 setenv NCEPLIBS /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/
 module use /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/modulefiles
 module load esmflocal/8_0_1
+#JKH add new path for netcdfp  -- fix for netcdf HDF errors
+module use /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
+module load netcdfp/4.7.4
 
 ##
 ## load cmake
