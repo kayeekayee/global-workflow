@@ -1,0 +1,5 @@
+ARG REPO
+FROM ${REPO}/netcdf-intel:latest
+MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
+
+COPY scripts/build_esmf.sh /opt

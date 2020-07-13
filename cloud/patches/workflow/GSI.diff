@@ -1,0 +1,274 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index bfeb9438b..2c48c40bb 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -268,7 +268,7 @@ project(GSI)
+     add_subdirectory(src/enkf)
+   endif(BUILD_ENKF) 
+   if(BUILD_UTIL)
+-    add_subdirectory(util/EnKF/gfs/src)
++    #add_subdirectory(util/EnKF/gfs/src)
+     add_subdirectory(util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd)
+     add_subdirectory(util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd)
+     add_subdirectory(util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radang.fd)
+diff --git modulefiles/modulefile.ProdGSI.linux modulefiles/modulefile.ProdGSI.linux
+new file mode 100644
+index 000000000..340be5d68
+--- /dev/null
++++ modulefiles/modulefile.ProdGSI.linux
+@@ -0,0 +1,14 @@
++#!/bin/bash
++
++#%Module######################################################################
++##
++
++echo "Setting environment variables for gsi on Linux with gcc/gfortran"
++
++##
++## CRTM
++##
++
++export CRTM_VER=2.3.0
++export CRTM_INC=/opt/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/include
++export CRTM_LIB=/opt/CRTM-${CRTM_VER}/crtm_v${CRTM_VER}/lib/libcrtm.a
+diff --git src/fv3gfs_ncio/CMakeLists.txt src/fv3gfs_ncio/CMakeLists.txt
+index 337a5378c..007b76ff0 100644
+--- src/fv3gfs_ncio/CMakeLists.txt
++++ src/fv3gfs_ncio/CMakeLists.txt
+@@ -3,6 +3,7 @@ if(BUILD_FV3GFS_NCIO)
+   set(Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/include")
+   # NetCDF-4 library
+   include_directories( ${NETCDF_INCLUDES} ${FV3GFS_NCIO_INCS} )
++  message(STATUS "The value of NETCDF_INCLUDES=${NETCDF_INCLUDES}")
+   FILE(GLOB FV3GFS_NCIO_SRC ${CMAKE_CURRENT_SOURCE_DIR}/module_fv3gfs_ncio.f90 )
+   set_source_files_properties( ${FV3GFS_NCIO_SRC} PROPERTIES COMPILE_FLAGS ${FV3GFS_NCIO_Fortran_FLAGS} )
+   add_library(fv3gfs_ncio STATIC ${FV3GFS_NCIO_SRC})
+diff --git src/ncdiag/CMakeLists.txt src/ncdiag/CMakeLists.txt
+index 154a098ed..0f0a412be 100644
+--- src/ncdiag/CMakeLists.txt
++++ src/ncdiag/CMakeLists.txt
+@@ -8,6 +8,7 @@ if(BUILD_NCDIAG)
+   # NetCDF-4 library
+   include_directories( ${NETCDF_INCLUDES} ${NCDIAG_INCS} )
+ 
++  message( STATUS "NETCDF_LIBRARIES=${NETCDF_LIBRARIES} NETCDF_INCLUDES=${NETCDF_INCLUDES}")
+   # 32-bit reals, for now
+   add_definitions(-D_REAL4_ -DUSE_MPI)
+   FILE(GLOB NCDIAG_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+diff --git ush/build_all_cmake.sh ush/build_all_cmake.sh
+index ceaf91d9c..9931ac12a 100755
+--- ush/build_all_cmake.sh
++++ ush/build_all_cmake.sh
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ 
+ set -ex
+ 
+@@ -43,6 +43,8 @@ elif [[ -d /discover ]] ; then
+ elif [[ -d /work ]]; then
+     . $MODULESHOME/init/sh
+     target=orion
++elif [[ -d /dev ]] ; then
++    target=linux
+ else
+     echo "unknown target = $target"
+     exit 9
+diff --git util/EnKF/gfs/src/getsigensmeanp_smooth.fd/CMakeLists.txt util/EnKF/gfs/src/getsigensmeanp_smooth.fd/CMakeLists.txt
+index 0e41e9a84..9cdcafe0d 100644
+--- util/EnKF/gfs/src/getsigensmeanp_smooth.fd/CMakeLists.txt
++++ util/EnKF/gfs/src/getsigensmeanp_smooth.fd/CMakeLists.txt
+@@ -1,7 +1,8 @@
+ cmake_minimum_required(VERSION 2.6)
+ if(BUILD_UTIL)
+   
+-  set(LOCAL_Fortran_FLAGS "-O3 -fp-model source -convert big_endian -assume byterecl -implicitnone  ${OpenMP_Fortran_FLAGS}" )
++  #set(LOCAL_Fortran_FLAGS "-O3 -fp-model source -convert big_endian -assume byterecl -implicitnone  ${OpenMP_Fortran_FLAGS}" )
++  set(LOCAL_Fortran_FLAGS "-O3 -fconvert=big-endian ${OMPFLAG}" )
+   file(GLOB LOCAL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.f90)
+   set_source_files_properties( ${LOCAL_SRC} PROPERTIES COMPILE_FLAGS ${LOCAL_Fortran_FLAGS} )
+   add_executable(getsigensmeanp_smooth.x  ${LOCAL_SRC} )
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/CMakeLists.txt util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/CMakeLists.txt
+index fd434a4da..146ca1e16 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/CMakeLists.txt
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB OZNMON_HORIZ_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(OZNMON_HORIZ_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 ")
++  #set(OZNMON_HORIZ_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 ")
++  set(OZNMON_HORIZ_Fortran_FLAGS "-fconvert=big-endian -ffree-line-length-none -O3 ")
+   set_source_files_properties( ${OZNMON_HORIZ_SRC} PROPERTIES COMPILE_FLAGS ${OZNMON_HORIZ_Fortran_FLAGS} )
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/oznmon_horiz )
+   add_executable(oznmon_horiz.x  ${OZNMON_HORIZ_SRC} )
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
+index 7e592d3a5..774d0a05e 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
+@@ -649,7 +649,7 @@ module read_diag
+   
+     nlevs = header_fix%nlevs 
+ 
+-    if( ncdiag_open_status(cur_idx)%nc_read == .true. ) then 
++    if( ncdiag_open_status(cur_idx)%nc_read .eqv. .true. ) then 
+        iflag = -1  
+     else  
+        iflag = 0
+@@ -663,7 +663,8 @@ module read_diag
+           ntobs = nrecords
+        end if
+ 
+-       write(6,*) 'header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs = ', header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs
++       write(6,*) 'header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs = ', &
++               header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs
+ 
+        !------------------------------------
+        !  allocate the returned structures
+@@ -954,7 +955,7 @@ module read_diag
+         end if 
+      end do 
+ 
+-     if( verify_var_name_nc == .false. ) then
++     if( verify_var_name_nc .eqv. .false. ) then
+         do k=1,num_vars
+            if( test_name == var_names(k) ) then
+               verify_var_name_nc = .true.
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/CMakeLists.txt util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/CMakeLists.txt
+index 5a6c15b41..5864e31e4 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/CMakeLists.txt
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB OZNMON_TIME_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(OZNMON_TIME_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 ")
++  #set(OZNMON_TIME_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 ")
++  set(OZNMON_TIME_Fortran_FLAGS "-fconvert=big-endian -O3 ")
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/oznmon_time )
+   set_source_files_properties( ${OZNMON_TIME_SRC} PROPERTIES COMPILE_FLAGS ${OZNMON_TIME_Fortran_FLAGS} )
+   add_executable(oznmon_time.x  ${OZNMON_TIME_SRC} )
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
+index 7e592d3a5..774d0a05e 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
+@@ -649,7 +649,7 @@ module read_diag
+   
+     nlevs = header_fix%nlevs 
+ 
+-    if( ncdiag_open_status(cur_idx)%nc_read == .true. ) then 
++    if( ncdiag_open_status(cur_idx)%nc_read .eqv. .true. ) then 
+        iflag = -1  
+     else  
+        iflag = 0
+@@ -663,7 +663,8 @@ module read_diag
+           ntobs = nrecords
+        end if
+ 
+-       write(6,*) 'header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs = ', header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs
++       write(6,*) 'header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs = ', &
++               header_fix%nlevs, ncdiag_open_status(id)%num_records, ntobs
+ 
+        !------------------------------------
+        !  allocate the returned structures
+@@ -954,7 +955,7 @@ module read_diag
+         end if 
+      end do 
+ 
+-     if( verify_var_name_nc == .false. ) then
++     if( verify_var_name_nc .eqv. .false. ) then
+         do k=1,num_vars
+            if( test_name == var_names(k) ) then
+               verify_var_name_nc = .true.
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
+index d6402196a..8ee11d325 100755
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
+@@ -330,7 +330,7 @@ program main
+    end do
+ 
+ !  Do validation
+-   if( validate == .TRUE. ) then
++   if( validate .eqv. .TRUE. ) then
+       call load_base( satname, ier )
+ 
+       write(6,*) 'ier from load_base = ', ier
+@@ -345,7 +345,7 @@ program main
+    do j=1,n_levs
+       if ( use(j,k) > 0.0 ) then
+ 
+-         if( validate == .TRUE. .AND. ier >= 0 ) then
++         if( validate .eqv. .TRUE. .AND. ier >= 0 ) then
+ 
+             pbound = 0.00
+             call validate_penalty( j, k, penalty(j,k), valid_penalty, pbound, iret )
+@@ -370,7 +370,7 @@ program main
+       endif
+    end do
+ 
+-   if( validate == .TRUE. ) then
++   if( validate .eqv. .TRUE. ) then
+       close( lupen )
+       close( lucnt )
+    endif
+diff --git util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radang.fd/CMakeLists.txt util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radang.fd/CMakeLists.txt
+index b60da32a7..681725863 100644
+--- util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radang.fd/CMakeLists.txt
++++ util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radang.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB RADMON_ANGLE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(RADMON_ANGLE_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  #set(RADMON_ANGLE_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  set(RADMON_ANGLE_Fortran_FLAGS "-fconvert=big-endian -ffree-line-length-none -O3 -D_REAL8_ ")
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/radmon_angle )
+   set_source_files_properties( ${RADMON_ANGLE_SRC} PROPERTIES COMPILE_FLAGS ${RADMON_ANGLE_Fortran_FLAGS} )
+   add_executable(radmon_angle.x  ${RADMON_ANGLE_SRC} )
+diff --git util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcoef.fd/CMakeLists.txt util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcoef.fd/CMakeLists.txt
+index 4a9474927..612d56946 100644
+--- util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcoef.fd/CMakeLists.txt
++++ util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcoef.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB RADMON_BCOEF_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(RADMON_BCOEF_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  #set(RADMON_BCOEF_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  set(RADMON_BCOEF_Fortran_FLAGS "-fconvert=big-endian -ffree-line-length-none -O3 -D_REAL8_ ")
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/radmon_bcoef )
+   set_source_files_properties( ${RADMON_BCOEF_SRC} PROPERTIES COMPILE_FLAGS ${RADMON_BCOEF_Fortran_FLAGS} )
+   add_executable(radmon_bcoef.x  ${RADMON_BCOEF_SRC} )
+diff --git util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcor.fd/CMakeLists.txt util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcor.fd/CMakeLists.txt
+index 607d841e0..652ac3cf6 100644
+--- util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcor.fd/CMakeLists.txt
++++ util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radbcor.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB RADMON_BCOR_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(RADMON_BCOR_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  #set(RADMON_BCOR_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  set(RADMON_BCOR_Fortran_FLAGS "-fconvert=big-endian -ffree-line-length-none -O3 -D_REAL8_ ")
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/radmon_bcor )
+   set_source_files_properties( ${RADMON_BCOR_SRC} PROPERTIES COMPILE_FLAGS ${RADMON_BCOR_Fortran_FLAGS} )
+   add_executable(radmon_bcor.x  ${RADMON_BCOR_SRC} )
+diff --git util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radtime.fd/CMakeLists.txt util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radtime.fd/CMakeLists.txt
+index 8c59a6349..996524893 100644
+--- util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radtime.fd/CMakeLists.txt
++++ util/Radiance_Monitor/nwprod/radmon_shared.v3.0.0/sorc/verf_radtime.fd/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ cmake_minimum_required(VERSION 2.6)
+   file(GLOB RADMON_TIME_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*90 )
+-  set(RADMON_TIME_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  #set(RADMON_TIME_Fortran_FLAGS "-fp-model strict -assume byterecl -convert big_endian -O3 -traceback -D_REAL8_ ")
++  set(RADMON_TIME_Fortran_FLAGS "-fconvert=big-endian -ffree-line-length-none -O3 -D_REAL8_ ")
+   set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/radmon_time )
+   set_source_files_properties( ${RADMON_TIME_SRC} PROPERTIES COMPILE_FLAGS ${RADMON_TIME_Fortran_FLAGS} )
+   add_executable(radmon_time.x  ${RADMON_TIME_SRC} )
+diff --git util/netcdf_io/calc_analysis.fd/CMakeLists.txt util/netcdf_io/calc_analysis.fd/CMakeLists.txt
+index 06927e8e7..68be1b6be 100644
+--- util/netcdf_io/calc_analysis.fd/CMakeLists.txt
++++ util/netcdf_io/calc_analysis.fd/CMakeLists.txt
+@@ -9,5 +9,5 @@ if(BUILD_NCIO_UTIL)
+   set_target_properties( calc_analysis.x PROPERTIES Fortran_MODULE_DIRECTORY ${Util_MODULE_DIRECTORY} )
+   SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_Fortran_FLAGS}" )
+   include_directories( ${UTIL_INC} ${NEMSIOINC} ${NETCDF_INCLUDES} ${MPI_Fortran_INCLUDE_PATH} ${FV3GFS_NCIO_INCS}) 
+-  target_link_libraries( calc_analysis.x ${NEMSIO_LIBRARY} ${BACIO_LIBRARY} ${W3NCO_4_LIBRARY} ${NETCDF_LIBRARIES_F90} ${NETCDF_LIBRARIES} ${MPI_Fortran_LIBRARIES} ${HDF5_Fortran_HL_LIBRARIES} ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} ${CURL_LIBRARIES} ${FV3GFS_NCIO_LIBRARIES})
++  target_link_libraries( calc_analysis.x ${NEMSIO_LIBRARY} ${BACIO_LIBRARY} ${W3NCO_4_LIBRARY} ${MPI_Fortran_LIBRARIES} ${HDF5_Fortran_HL_LIBRARIES} ${HDF5_LIBRARIES} ${ZLIB_LIBRARIES} ${CURL_LIBRARIES} ${FV3GFS_NCIO_LIBRARIES} ${NETCDF_LIBRARIES_F90} ${NETCDF_LIBRARIES} )
+ endif()

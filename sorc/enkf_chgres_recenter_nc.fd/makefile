@@ -1,6 +1,6 @@
 SHELL=  /bin/sh
 
-LIBS= $(NETCDF)/lib/libnetcdff.so $(FV3GFS_NCIO_LIB) $(BACIO_LIB4) $(W3NCO_LIB4) $(IP_LIB4) $(SP_LIB4)
+LIBS= $(FV3GFS_NCIO_LIB) $(BACIO_LIB4) $(W3NCO_LIB4) $(IP_LIB4) $(SP_LIB4) $(NETCDF)/lib/libnetcdff.so
 
 CMD= chgres_recenter_ncio.exe 
 

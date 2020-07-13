@@ -25,7 +25,11 @@ fi
 
 cd ${cwd}/enkf_chgres_recenter.fd
 
+if [ "${target}" = "linux.gnu" ]; then
+export FFLAGS="-O3 -fdefault-real-8 -fopenmp"
+else
 export FFLAGS="-O3 -r8 -i4 -qopenmp -traceback -fp-model precise"
+fi
 
 make clean
 make

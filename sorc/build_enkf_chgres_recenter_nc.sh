@@ -25,7 +25,12 @@ fi
 
 cd ${cwd}/enkf_chgres_recenter_nc.fd
 
+if [ "${target}" = "linux.gnu" ]; then
+export FFLAGS="-O3 -fdefault-real-8 -fopenmp"
+else
 export FFLAGS="-O3 -qopenmp -traceback -fp-model precise"
+fi
+
 export FV3GFS_NCIO_LIB="${cwd}/gsi.fd/build/lib/libfv3gfs_ncio.a"
 export FV3GFS_NCIO_INC="${cwd}/gsi.fd/build/include"
 
