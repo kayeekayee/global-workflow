@@ -20,12 +20,13 @@ echo $topdir
 echo fv3gfs_ccpp checkout ...
 if [[ ! -d fv3gfs_ccpp.fd ]] ; then
     rm -f ${topdir}/checkout-fv3gfs_ccpp.log
-    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model  fv3gfs_ccpp.fd >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
-    cd fv3gfs_ccpp.fd
-    git checkout 27a8a079baeb436873fc102128feef4ee6625d46
+    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model ufs-weather-model_08jul_04b3ad2 >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
+    cd ufs-weather-model_08jul_04b3ad2
+    git checkout 04b3ad21c3c7d91bbf171b84c6efb8f44d8b75a9 
     git submodule sync
     git submodule update --init --recursive
     cd ${topdir}
+    ln -fs ufs-weather-model_08jul_04b3ad2 fv3gfs_ccpp.fd 
     ln -fs fv3gfs_ccpp.fd fv3gfs.fd
 else
     echo 'Skip.  Directory fv3gfs_ccpp.fd already exists.'
