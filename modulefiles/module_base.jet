@@ -41,6 +41,7 @@ setenv NCEPLIBS  /lfs4/HFIP/hfv3gfs/gwv/l0530/lib/
 module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/modulefiles
 module load esmflocal/8_0_1
 #JKH add new path for netcdfp  -- fix for netcdf HDF errors
+setenv NCEPLIBS  /lfs4/HFIP/hfv3gfs/gwv/l0612/lib/
 module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
 module load netcdfp/4.7.4
 
