@@ -19,7 +19,7 @@ set ver v8.0.0
 module load intel/18.0.5.274
 module load impi/2018.4.274 
 
-module use /contrib/modulefiles
+#JKHmodule use /contrib/modulefiles
 
 # Loding nceplibs modules
 module use -a /mnt/lfs4/HFIP/hfv3gfs/nwprod/NCEPLIBS/modulefiles
@@ -41,14 +41,13 @@ module load crtm/v2.3.0
 module load g2/v3.1.0
 module load g2tmpl/v1.6.0
 module load wrfio/v1.1.1
-#module load netcdf/4.7.0
+#JKHmodule load netcdf/4.7.0
 module load hdf5_parallel/1.10.6
-#JKHmodule load netcdf_parallel/4.7.4
+module load netcdf_parallel/4.7.4
 
-#JKH add new path for netcdfp  -- fix for netcdf HDF errors
-module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
-module load netcdfp/4.7.4
-#JKH
+#JKHsetenv NCEPLIBS /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib
+#JKHmodule use /lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
+#JKHmodule load netcdfp/4.7.4
 
 #setenv NCEPLIBS /mnt/lfs3/projects/hfv3gfs/gwv/ljtjet/lib
 
