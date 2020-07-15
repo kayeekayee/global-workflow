@@ -338,6 +338,7 @@ contains
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
+     real(kind=kind_phys) :: c0    ! HCB
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
