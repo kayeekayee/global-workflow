@@ -93,7 +93,7 @@ begin
   wks_type = "png"
   wks_type@wkWidth = 1200
   wks_type@wkHeight = 1200
-  wks = gsn_open_wks(wks_type, "ocemi_sfc_f00")   ;-- open a workstation
+  wks = gsn_open_wks(wks_type, "ocemi_sfc_f000")   ;-- open a workstation
 
 ;-- set resources
    res                       =  True
