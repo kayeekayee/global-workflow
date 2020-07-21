@@ -1,0 +1,20 @@
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l64.db
+rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l64.db | m
+
+
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.db 
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.db  | m
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.db 
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.db  | m
+
+
+## tracker only
+rocotorun -w trak.xml -d trak.db
+rocotostat  -w trak.xml -d trak.db
+
+## archive only
+rocotorun -w arch.xml -d arch.db
+rocotostat -w arch.xml -d arch.db

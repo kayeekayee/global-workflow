@@ -1,0 +1,27 @@
+  <!-- jet.xml --> 
+
+  <!ENTITY SCHEDULER "slurm">
+  <!ENTITY PROJECT   "gsd-fv3-dev">
+  <!ENTITY SERIALPE "batch">
+  <!ENTITY PE "batch"> 
+  <!ENTITY SERVICE   "service">
+  <!ENTITY MPIRUN    "srun --export=ALL">
+
+  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
+  <!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
+  <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
+  <!ENTITY FV3GFS_POST_DIR "post/fim">
+  <!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
+  <!ENTITY RTFIM_HOME "/home/rtfim">
+
+  <!ENTITY PUB_DIR "/public">
+  <!ENTITY LFS4_ROOT "/lfs4/HFIP/gsd-fv3-hfip">
+  <!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks/">
+
+  <!ENTITY WGRIB "wgrib">
+  <!ENTITY WGRIB2 "wgrib2">
+
+  <!ENTITY CDUMP  "gfs">
+  <!ENTITY CASE   "C768">
+
+  <!ENTITY PARTITION_JET "<partition>ujet,tjet,sjet,vjet,kjet,xjet</partition>">

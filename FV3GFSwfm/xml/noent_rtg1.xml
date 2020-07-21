@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+<!ENTITY FV3GFS_HOME "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite">
+<!ENTITY PSLOT "rt_ufscam_l128">
+<!ENTITY FCST_INTERVAL "6">
+<!ENTITY ATCFNAME "ucs1">
+<!-- External parameter entites --><!ENTITY % SITES SYSTEM "all_sites.xml">
+<!ENTITY % jet SYSTEM "jet.xml">
+<!ENTITY % jet_retro SYSTEM "jet_retro.xml">
+<!ENTITY % hera SYSTEM "hera.xml">
+<!ENTITY % hera_retro SYSTEM "hera_retro.xml">
+<!ENTITY % TASKS SYSTEM "all_tasks.xml">
+<!ENTITY hfipPlot_task SYSTEM "FV3GFS_HfipPlots.xml">
+<!ENTITY hfipPlotG1_task SYSTEM "FV3GFS_HfipPlotsG1.xml">
+<!ENTITY % DEFS SYSTEM "all_defs.xml">
+<!ENTITY % dbi SYSTEM "dbi.xml">
+<!ENTITY % metatasks SYSTEM "metatask_defs.xml">
+<!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks_test/">
+<!ENTITY DATADIR "/lfs4/HFIP/gsd-fv3-hfip/fv3-ccpp">
+<!-- jet.xml --><!ENTITY SCHEDULER "slurm">
+<!ENTITY PROJECT "gsd-fv3-dev">
+<!ENTITY SERIALPE "batch">
+<!ENTITY PE "batch">
+<!ENTITY SERVICE "service">
+<!ENTITY MPIRUN "srun --export=ALL">
+<!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
+<!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
+<!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
+<!ENTITY FV3GFS_POST_DIR "post/fim">
+<!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
+<!ENTITY RTFIM_HOME "/home/rtfim">
+<!ENTITY PUB_DIR "/public">
+<!ENTITY LFS4_ROOT "/lfs4/HFIP/gsd-fv3-hfip">
+<!ENTITY WGRIB "wgrib">
+<!ENTITY WGRIB2 "wgrib2">
+<!ENTITY CDUMP "gfs">
+<!ENTITY CASE "C768">
+<!ENTITY PARTITION_JET "<partition>ujet,tjet,sjet,vjet,kjet,xjet</partition>">
+]>
+<workflow realtime="T" scheduler="slurm" cyclethrottle="8">
+  <log><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/log/workflow/workflow_@Y@m@d@H_hfipPlots_g1.log</cyclestr></log>
+
+  <!-- set this to year month day(s) hour(s) minute - NOTE if you are running this for an earlier time,
+       make sure you delete the .store file or it will not restart -->
+
+  <cycledef>202004230000 202212310000 24:00:00</cycledef>
+
+ <!-- &fv3grib2_task; -->
+  <metatask>
+    <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168</var>
+      <task name="hfip_plots_#T#" maxtries="2">
+    <command>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/scripts/hfipPlots_g1.ksh</command>
+    <account>gsd-fv3-dev</account>
+    <cores>1</cores>
+    <partition>ujet,tjet,sjet,vjet,kjet,xjet</partition>
+    <walltime>00:10:00</walltime>
+    <jobname><cyclestr>hfipPlots_#T#_@H</cyclestr></jobname>
+    <join><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/log/hfipPlots/hfipPlots_#T#_@Y@m@d@H_g1.log</cyclestr></join>
+    <envar><name>FV3GFS_HOME</name><value>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite</value></envar>
+    <envar><name>HFIP_SCRIPT</name><value>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/scripts/hfipGlobalModelGraphics.ksh</value></envar> 
+    <envar><name>TRACKFILE</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks_test//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></value></envar> 
+    <envar><name>FV3GFS_RUN</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/</cyclestr></value></envar>
+    <envar><name>FCST_INTERVAL</name><value>6</value></envar>
+    <envar><name>yyyymmddhhmm</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value></envar>
+    <envar><name>gribVersion</name><value>1</value></envar>
+    <envar><name>gribName</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/post/fim/@y@j@H@M0#T#</cyclestr></value></envar>
+    <envar><name>T</name><value>#T#</value></envar>
+    <dependency>
+      <or>
+        <and>
+          <datadep><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <datadep minsize="1b"><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks_test//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></datadep>
+        </and>
+        <and>
+          <datadep><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <timedep><cyclestr offset="013:30:00">@Y@m@d@H@M00</cyclestr></timedep>
+        </and>
+      </or>
+    </dependency>
+  </task>
+
+  </metatask>
+
+</workflow>

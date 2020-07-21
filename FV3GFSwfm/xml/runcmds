@@ -1,0 +1,9 @@
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlots.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlots.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlots.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlots.db -c: | m
+rocotocheck -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlots.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlots.db -c: | m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlotsg1.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlotsg1.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlotsg1.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlotsg1.db
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/retro_ufscam_hfipPlots.xml -d /home/rtfim/retro_dbfiles/retro_ufscam_hfipPlots.db
+

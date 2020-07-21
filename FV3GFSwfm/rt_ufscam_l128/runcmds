@@ -1,0 +1,13 @@
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly.xml -d /home/rtfim/rt_dbfiles/icsonly_l128.db
+rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly.xml -d /home/rtfim/rt_dbfiles/icsonly_l128.db | m
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/rt_ufscam_l128.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l128.db
+rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/rt_ufscam_l128.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l128.db | m
+
+
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly_nores.db 
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/icsonly_nores.db  | m
+
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/ufscam_nores.db 
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l128/ufscam_nores.db  | m

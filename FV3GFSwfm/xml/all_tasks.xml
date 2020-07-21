@@ -1,0 +1,2 @@
+  <!ENTITY hfipPlot_task       SYSTEM  "FV3GFS_HfipPlots.xml">
+  <!ENTITY hfipPlotG1_task     SYSTEM  "FV3GFS_HfipPlotsG1.xml">

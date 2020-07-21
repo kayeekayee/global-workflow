@@ -1,0 +1,30 @@
+  <task name="hfip_plots_#T#" maxtries="2">
+    <command>&SCRIPTS;/hfipPlots_g1.ksh</command>
+    <account>&PROJECT;</account>
+    <cores>1</cores>
+    &PARTITION_JET;
+    <walltime>00:10:00</walltime>
+    <jobname><cyclestr>hfipPlots_#T#_@H</cyclestr></jobname>
+    <join><cyclestr>&FV3GFS_LOG;/hfipPlots/hfipPlots_#T#_@Y@m@d@H_g1.log</cyclestr></join>
+    <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value></envar>
+    <envar><name>HFIP_SCRIPT</name><value>&SCRIPTS;/hfipGlobalModelGraphics.ksh</value></envar> 
+    <envar><name>TRACKFILE</name><value><cyclestr>&TRACKDIR;/tctrk.atcf.@Y@m@d@H.&ATCFNAME;.txt</cyclestr></value></envar> 
+    <envar><name>FV3GFS_RUN</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/</cyclestr></value></envar>
+    <envar><name>FCST_INTERVAL</name><value>&FCST_INTERVAL;</value></envar>
+    <envar><name>yyyymmddhhmm</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value></envar>
+    <envar><name>gribVersion</name><value>1</value></envar>
+    <envar><name>gribName</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/post/fim/@y@j@H@M0#T#</cyclestr></value></envar>
+    <envar><name>T</name><value>#T#</value></envar>
+    <dependency>
+      <or>
+        <and>
+          <datadep><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <datadep minsize="1b"><cyclestr>&TRACKDIR;/tctrk.atcf.@Y@m@d@H.&ATCFNAME;.txt</cyclestr></datadep>
+        </and>
+        <and>
+          <datadep><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <timedep><cyclestr offset="013:30:00">@Y@m@d@H@M00</cyclestr></timedep>
+        </and>
+      </or>
+    </dependency>
+  </task>
