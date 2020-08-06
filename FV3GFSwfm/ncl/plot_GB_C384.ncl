@@ -120,7 +120,7 @@ begin
 ;    res@cnMinLevelValF        = 0            ;-- minimum contour level
 ;   res@cnMaxLevelValF        =  500           ;-- maximum contour level
 ;   res@cnLevelSpacingF       = 25
-   res@tiMainString          = "FRP-"+idate+""
+   res@tiMainString          = "Fire Radiative Power (MW) - "+idate+""
                                                 ;-- title string
    res@tiMainFontHeightF     =  0.02
 

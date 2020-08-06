@@ -39,7 +39,8 @@ begin
      exit
   end if
 ;levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.14,0.16,0.18,0.20,0.30,0.4,0.5,1/)
-  levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.15,0.20,0.30,0.4,0.5,1,2,3/) 
+;levels = (/0.001,0.002,0.01,0.02,0.04,0.06,0.08,0.10,0.12,0.15,0.20,0.30,0.4,0.5,1,2,3/) 
+  levels = (/ .25,.5,.75,1,1.5,2,2.5,3,4,5,7.5,15,25,50 /)
   ff    = addfile(diri+fi, "r")
   x=ff->grid_lont
   nx=384
@@ -102,7 +103,9 @@ begin
 
    res@cnFillOn              =  True            ;-- turn on contour fill
    ;res@cnFillPalette         = "ncl_default"    ;-- Choose color map
-   res@cnFillPalette         = "wh-bl-gr-ye-re"    ;-- Choose color map
+   ;res@cnFillPalette         = "wh-bl-gr-ye-re"    ;-- Choose color map
+   res@cnFillPalette         = "WhiteBlueGreenYellowRed"    ;-- Choose color map
+   res@cnFillColors          = (/ 2,21,40,59,78,97,116,135,154,173,192,211,230,249,255 /)
    ;res@cnFillMode            = "areaFill"
    ;res@cnFillMode            = "RasterFill"
    res@cnLinesOn             =  False           ;-- Turn lines off
@@ -121,7 +124,7 @@ begin
 ;    res@cnMinLevelValF        = 0            ;-- minimum contour level
 ;   res@cnMaxLevelValF        =  2           ;-- maximum contour level
 ;   res@cnLevelSpacingF       = 0.1
-   res@tiMainString          = "OCemi(*1e-9)-"+idate+""
+   res@tiMainString          = "GBBEPx OC Fire emission (1E-9 kg/m2/s) - "+idate+""
                                                 ;-- title string
    res@tiMainFontHeightF     =  0.02
 
