@@ -25,10 +25,10 @@ if [[ ! -d fv3gfs_ccpp.fd ]] ; then
     git checkout 04b3ad21c3c7d91bbf171b84c6efb8f44d8b75a9 
     git submodule sync
     git submodule update --init --recursive
-    rsync -auv fv3gfs_ccpp.fd_jkh/ fv3gfs_ccpp.fd/        ## copy over changes not in FV3 repository
     cd ${topdir}
     ln -fs ufs-weather-model_08jul_04b3ad2 fv3gfs_ccpp.fd 
     ln -fs fv3gfs_ccpp.fd fv3gfs.fd
+    rsync -ax fv3gfs_ccpp.fd_jkh/ fv3gfs_ccpp.fd/        ## copy over changes not in FV3 repository
 else
     echo 'Skip.  Directory fv3gfs_ccpp.fd already exists.'
 fi
