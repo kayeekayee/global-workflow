@@ -2,30 +2,28 @@
 <!DOCTYPE workflow
 [
   <!ENTITY FV3GFS_HOME "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite">
-  <!ENTITY PSLOT  "rt_ufscam_l128">
+  <!ENTITY PSLOT  "rt_ufscam_l64">
   <!ENTITY FCST_INTERVAL "6">
-  <!ENTITY ATCFNAME "ucs1">
+  <!ENTITY ATCFNAME "gcp1">
+  <!ENTITY FCST_LENGTH "168">
 
   <!-- External parameter entites -->
   <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
   <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
-  <!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks_test/">
-  <!ENTITY DATADIR "/lfs4/HFIP/gsd-fv3-hfip/fv3-ccpp">
   %jet;
 
 ]>
 
-  <workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="8">
+  <workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="8">
   <log><cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_hfipPlots_g1.log</cyclestr></log>
 
   <!-- set this to year month day(s) hour(s) minute - NOTE if you are running this for an earlier time,
        make sure you delete the .store file or it will not restart -->
 
-  <cycledef>202004230000 202212310000 24:00:00</cycledef>
+  <cycledef group="g1">202007250000 202907280000 24:00:00</cycledef>
 
- <!-- &fv3grib2_task; -->
   <metatask>
     <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168</var>
     &hfipPlotG1_task;

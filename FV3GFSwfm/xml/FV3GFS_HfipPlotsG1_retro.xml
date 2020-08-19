@@ -1,4 +1,4 @@
-  <task name="hfip_G1plots_#T#" cycledefs="g1" maxtries="2">
+  <task name="hfip_G1plots_#T#" cycledefs="g1" maxtries="2"> 
     <command>&SCRIPTS;/hfipPlots_g1.ksh</command>
     <account>&PROJECT;</account>
     <cores>1</cores>
@@ -17,7 +17,15 @@
     <envar><name>gribName</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></value></envar>
     <envar><name>T</name><value>#T#</value></envar>
     <dependency>
-      <metataskdep metatask="g2hfipPlots"/>
+      <or>
+        <and>
+          <datadep><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <datadep minsize="1b"><cyclestr>&TRACKDIR;/tctrk.atcf.@Y@m@d@H.&ATCFNAME;.txt</cyclestr></datadep>
+        </and>
+        <and>
+          <datadep><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
+          <timedep><cyclestr offset="013:30:00">@Y@m@d@H@M00</cyclestr></timedep>
+        </and>
+      </or>
     </dependency>
   </task>
-
