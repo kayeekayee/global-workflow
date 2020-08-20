@@ -44,6 +44,12 @@ for dir in 0readme fix_am fix_chem fix_fv3 fix_fv3_gmted2010 fix_gldas fix_gsi_M
     [[ -d $dir ]] && rm -rf $dir
     $LINK $FIX_DIR/$dir .
 done
+$LINK $FIX_DIR/* .
+
+if [ -d ${pwd}/ufs_utils.fd ]; then
+  cd ${pwd}/ufs_utils.fd/sorc
+  ./link_fixdirs.sh $RUN_ENVIR $machine
+fi
 
 #---------------------------------------
 #--add files from external repositories
@@ -64,8 +70,8 @@ cd ${pwd}/../scripts            ||exit 8
     $LINK ../sorc/ufs_utils.fd/scripts/exemcsfc_global_sfc_prep.sh.ecf .
     $LINK ../sorc/gldas.fd/scripts/exgdas_gldas.sh.ecf .             
 cd ${pwd}/../ush                ||exit 8
-    for file in fv3gfs_downstream_nems.sh  fv3gfs_dwn_nems.sh  gfs_nceppost.sh  \
-        gfs_transfer.sh  link_crtm_fix.sh  trim_rh.sh fix_precip.sh; do
+    for file in fv3gfs_downstream_nems.sh fv3gfs_dwn_nems.sh gfs_nceppost.sh  \
+        gfs_transfer.sh mod_icec.sh link_crtm_fix.sh trim_rh.sh fix_precip.sh; do
         $LINK ../sorc/gfs_post.fd/ush/$file                  .
     done
     for file in emcsfc_ice_blend.sh  fv3gfs_driver_grid.sh  fv3gfs_make_orog.sh  global_cycle_driver.sh \
