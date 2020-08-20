@@ -29,12 +29,12 @@ RUN --mount=type=ssh,id=default \
 RUN cd /opt && ./patch_gfs.sh && \
     cd global-workflow/sorc && bash ./build_all.sh && bash ./link_fv3gfs.sh emc linux.gnu
 
-## Rocoto
-#RUN apt-get -y update && \
-#    apt-get -y install ruby-dev python-pip bc && \
-#    pip install numpy && \
-#    cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \ 
-#    cd rocoto && ./INSTALL
+# Rocoto
+RUN apt-get -y update && \
+    apt-get -y install ruby-dev python-pip bc && \
+    pip install numpy && \
+    cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \
+    cd rocoto && bash ./INSTALL
 
 # .bashrc
 ARG PP=/etc/bash.bashrc

@@ -25,12 +25,12 @@ RUN --mount=type=ssh,id=default \
     && ssh-add -L \
     && cd /opt && ./checkout_gfs.sh
 
-## Rocoto
-#RUN apt-get -y update && \
-#    apt-get -y install ruby-dev python-pip bc && \
-#    pip install numpy && \
-#    cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \ 
-#    cd rocoto && ./INSTALL
+# Rocoto
+RUN apt-get -y update && \
+    apt-get -y install ruby-dev python-pip bc && \
+    pip install numpy && \
+    cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \
+    cd rocoto && bash ./INSTALL
 
 # .bashrc
 ARG PP=/etc/bash.bashrc
