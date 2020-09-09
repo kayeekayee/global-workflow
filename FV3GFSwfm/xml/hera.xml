@@ -8,7 +8,7 @@
   <!ENTITY MET_MODULE "/contrib/modulefiles">
   <!ENTITY MET_VERSION "met/7.0">
 
-  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
+  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log_&PSLOT;">
   <!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
   <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
   <!ENTITY FV3GFS_POST_DIR "post/fim">
@@ -20,7 +20,8 @@
   <!ENTITY DATADR2 "&SCRATCH_ROOT;/GFS_RETRO_NEMSIO/">
   <!ENTITY CLIMATE_DIR "&SCRATCH1_ROOT;/cmean/">
 
-  <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">
+  <!ENTITY NCL_ROOT "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">                  <!-- new NCL routines -->
+  <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">                  <!-- old NCL routines -->
   <!ENTITY NCL_DIFF_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimalldiff">
   <!ENTITY COPYGB "/home/rtfim/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
   <!ENTITY CNVGRIB "/apps/cnvgrib/1.4.0/bin/cnvgrib">

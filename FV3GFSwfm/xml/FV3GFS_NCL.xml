@@ -9,12 +9,14 @@
     <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value></envar>
     <envar><name>FV3GFS_RUN</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/</cyclestr></value></envar>
     <envar><name>SCRIPTS</name><value>&SCRIPTS;</value></envar>
-    <envar><name>NCL_HOME</name><value>&NCL_HOME;</value></envar>
+    <envar><name>NCL_ROOT</name><value>&NCL_ROOT;</value></envar>
+    <envar><name>NCL_HOME</name><value>&NCL_ROOT;</value></envar>
     <envar><name>MODL</name><value>&MODL;</value></envar>
     <envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
     <envar><name>yyyymmdd</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
     <envar><name>H</name><value><cyclestr>@H</cyclestr></value></envar>
     <envar><name>yyjjjhhmm</name><value><cyclestr>@y@j@H00</cyclestr></value></envar>
+    <envar><name>PSLOT</name><value>&PSLOT;</value></envar>
     <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
     <envar><name>RES</name><value>&RES;</value></envar>
     <envar><name>T</name><value>#T#</value></envar>
@@ -27,7 +29,6 @@
        <and>
          <taskdep task="remapgrib_#T#"/>
          <datadep age="120"> <cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.&RES;.f#T#</cyclestr></datadep>
-         <datadep age="120"> <cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
        </and>
     </dependency>
   </task>

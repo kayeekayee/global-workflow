@@ -52,7 +52,7 @@ PATH=${NCARG_ROOT}/bin:${PATH}
 
 #ulimit -s 5120000
 
-NCL_ROOT=${FV3GFS_HOME}/FV3GFSwfm/ncl/
+#JKHNCL_ROOT=${FV3GFS_HOME}/FV3GFSwfm/ncl/
 
 # Print run parameters
 ${ECHO}
@@ -109,7 +109,7 @@ ${ECHO} "Finished plot_GB_OC_${CASE}.ncl at `${DATE}`"
 i=0
 #
 OUTPUT_DIR=${OUTPUT_ROOT}/gfs.${START_TIME}/00/ncl/fim
-pngfile=mfrp_sfc_f00.png
+pngfile=mfrp_sfc_f000.png
 ${CONVERT} -trim ${pngfile} ${pngfile}
 ${CONVERT} -colors 255 -border 25 -bordercolor white ${pngfile} ${pngfile}
 fulldir=${OUTPUT_DIR}
@@ -117,7 +117,7 @@ ${MKDIR} -p ${fulldir}
 webfile=${fulldir}/${pngfile}
 echo "moving ${pngfile} to ${webfile}"
 ${MV} ${pngfile} ${webfile}
-pngfile=ocemi_sfc_f00.png
+pngfile=ocemi_sfc_f000.png
 ${CONVERT} -trim ${pngfile} ${pngfile}
 ${CONVERT} -colors 255 -border 25 -bordercolor white ${pngfile} ${pngfile}
 # fulldir=${OUTPUT_DIR}

@@ -9,6 +9,8 @@
 date
 echo "FV3GFS_HOME      = ${FV3GFS_HOME}"
 echo "FV3GFS_RUN       = ${FV3GFS_RUN}"
+echo "SCRIPTS          = ${SCRIPTS}"
+echo "PSLOT            = ${PSLOT}"
 echo "ATCFNAME         = ${ATCFNAME}"
 echo "yyyymmdd         = ${yyyymmdd}"
 echo "H                = ${H}"
@@ -19,12 +21,11 @@ echo "FCST_LENGTH      = ${FCST_LENGTH}"
 echo "CDUMP            = ${CDUMP}"
 echo "RES              = ${RES}"
 echo "GRID_NAMES       = ${GRID_NAMES}"
-echo "NCL_HOME         = ${NCL_HOME}"
+echo "NCL_ROOT         = ${NCL_ROOT}"
 echo "MODL             = ${MODL}"
-echo "SCRIPTS          = ${SCRIPTS}"
 
 # initialize
-LOGDIR=${FV3GFS_HOME}/FV3GFSwfm/log/ncl/
+LOGDIR=${FV3GFS_HOME}/FV3GFSwfm/log_${PSLOT}/ncl/
 
 # make post directory if doesn't exist
 postDir=${FV3GFS_RUN}/post/fim
