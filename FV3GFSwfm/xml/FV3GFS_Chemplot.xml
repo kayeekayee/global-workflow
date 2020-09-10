@@ -10,7 +10,7 @@
       <envar><name>START_TIME</name><value><cyclestr>@Y@m@d</cyclestr></value> </envar>
       <envar><name>FCST_TIME</name><value>00</value></envar>
       <envar><name>DATAROOT</name><value>&PUBEMI;</value></envar>
-      <envar><name>NCL_ROOT</name><value>&NCL_ROOT;</value></envar>
+      <envar><name>NCL_ROOT</name><value>&NCL_ROOT;/..</value></envar>
       <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
       <envar><name>MODEL</name><value>FV3-Chem</value></envar>
       <envar><name>FIXfv3</name><value>&FIXfv3;</value></envar>
