@@ -62,7 +62,7 @@ contains
     implicit none
     type(analysis_grid)                                                  :: anlygrd(ngrids)
     type(varinfo), allocatable, dimension(:)                             :: var_info,var_info2d,var_info3d
-    type(gfs_grid)                                                       :: gfs_grid
+    type(gfs_grid)                                                       :: mgfs_grid
     type(gridvar)                                                        :: invar,invar2
     type(gridvar)                                                        :: outvar,outvar2
     type(nemsio_meta)                                                    :: meta_nemsio2d, meta_nemsio3d
@@ -94,7 +94,7 @@ contains
     ! Define local variables
 
     call init_constants_derived()
-    call gfs_grid_initialize(gfs_grid)
+    call gfs_grid_initialize(mgfs_grid)
 
     ! Loop through local variables
 
@@ -206,8 +206,8 @@ contains
     ncoords                = ncxdim*ncydim
     invar%ncoords          = ncoords*ngrids
     invar2%ncoords          = ncoords*ngrids
-    outvar%ncoords         = gfs_grid%ncoords
-    outvar2%ncoords         = gfs_grid%ncoords
+    outvar%ncoords         = mgfs_grid%ncoords
+    outvar2%ncoords         = mgfs_grid%ncoords
     call interpolation_initialize_gridvar(invar)
     call interpolation_initialize_gridvar(invar2)
     call interpolation_initialize_gridvar(outvar)
@@ -218,8 +218,8 @@ contains
     meta_nemsio3d%nmeta      = 5
     meta_nemsio3d%nmetavari  = 3
     meta_nemsio3d%nmetaaryi  = 1
-    meta_nemsio3d%dimx       = gfs_grid%nlons
-    meta_nemsio3d%dimy       = gfs_grid%nlats
+    meta_nemsio3d%dimx       = mgfs_grid%nlons
+    meta_nemsio3d%dimy       = mgfs_grid%nlats
     meta_nemsio3d%dimz       = nczdim
     meta_nemsio3d%jcap       = ntrunc
     meta_nemsio3d%nsoil      = 4
@@ -239,8 +239,8 @@ contains
     meta_nemsio2d = meta_nemsio3d
     meta_nemsio2d%nrec       = n2dvar
     call mpi_barrier(mpi_comm_world,mpi_ierror)
-    call gfs_nems_meta_initialization(meta_nemsio2d,var_info2d,gfs_grid)
-    call gfs_nems_meta_initialization(meta_nemsio3d,var_info3d,gfs_grid)
+    call gfs_nems_meta_initialization(meta_nemsio2d,var_info2d,mgfs_grid)
+    call gfs_nems_meta_initialization(meta_nemsio3d,var_info3d,mgfs_grid)
 
     ! Allocate memory for local variables
 
@@ -473,19 +473,19 @@ contains
 
              if (mpi_procid == mpi_masternode) then
                   ! receive one level of interpolated data on root task.
-                  if (.not. allocated(workgrid))  allocate(workgrid(gfs_grid%ncoords,nczdim))
-                  if (.not. allocated(recvbuffer)) allocate(recvbuffer(gfs_grid%ncoords))
+                  if (.not. allocated(workgrid))  allocate(workgrid(mgfs_grid%ncoords,nczdim))
+                  if (.not. allocated(recvbuffer)) allocate(recvbuffer(mgfs_grid%ncoords))
                   do nlev=1,nczdim
-                     call mpi_recv(recvbuffer,gfs_grid%ncoords,mpi_real,&
+                     call mpi_recv(recvbuffer,mgfs_grid%ncoords,mpi_real,&
                                    nlev,1,mpi_comm_world,mpi_errorstatus,mpi_ierror)
                      workgrid(:,nlev) = recvbuffer
                   enddo
                   deallocate(recvbuffer)
              else
                   ! send one level of interpolated data to root task.
-                  if (.not. allocated(sendbuffer)) allocate(sendbuffer(gfs_grid%ncoords))
+                  if (.not. allocated(sendbuffer)) allocate(sendbuffer(mgfs_grid%ncoords))
                   sendbuffer(:) = outvar%var(:)
-                  call mpi_send(sendbuffer,gfs_grid%ncoords,mpi_real,&
+                  call mpi_send(sendbuffer,mgfs_grid%ncoords,mpi_real,&
                                 0,1,mpi_comm_world,mpi_errorstatus,mpi_ierror)
              endif
 
@@ -510,19 +510,19 @@ contains
              if(trim(adjustl(var_info(k2)%itrptyp)) .eq. 'vector') then  ! winds
                 if (mpi_procid == mpi_masternode) then
                   ! receive one level of interpolated data on root task.
-                  if (.not. allocated(workgrid))  allocate(workgrid(gfs_grid%ncoords,nczdim))
-                  if (.not. allocated(recvbuffer)) allocate(recvbuffer(gfs_grid%ncoords))
+                  if (.not. allocated(workgrid))  allocate(workgrid(mgfs_grid%ncoords,nczdim))
+                  if (.not. allocated(recvbuffer)) allocate(recvbuffer(mgfs_grid%ncoords))
                   do nlev=1,nczdim
-                     call mpi_recv(recvbuffer,gfs_grid%ncoords,mpi_real,&
+                     call mpi_recv(recvbuffer,mgfs_grid%ncoords,mpi_real,&
                                    nlev,1,mpi_comm_world,mpi_errorstatus,mpi_ierror)
                      workgrid(:,nlev) = recvbuffer
                   enddo
                   deallocate(recvbuffer)
                 else
                   ! send one level of interpolated data to root task.
-                  if (.not. allocated(sendbuffer)) allocate(sendbuffer(gfs_grid%ncoords))
+                  if (.not. allocated(sendbuffer)) allocate(sendbuffer(mgfs_grid%ncoords))
                   sendbuffer(:) = outvar2%var(:)
-                  call mpi_send(sendbuffer,gfs_grid%ncoords,mpi_real,&
+                  call mpi_send(sendbuffer,mgfs_grid%ncoords,mpi_real,&
                                 0,1,mpi_comm_world,mpi_errorstatus,mpi_ierror)
                 endif
 

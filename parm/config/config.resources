@@ -33,6 +33,8 @@ elif [[ "$machine" = "JET" ]]; then
    export npe_node_max=24
 elif [[ "$machine" = "HERA" ]]; then
    export npe_node_max=40
+else
+   export npe_node_max=${GFS_NPE_NODE_MAX:-40}
 fi
 
 if [ $step = "prep" -o $step = "prepbufr" ]; then

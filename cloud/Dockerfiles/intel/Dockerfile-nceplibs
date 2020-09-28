@@ -1,0 +1,43 @@
+ARG REPO
+FROM ${REPO}/esmf-intel:latest
+MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
+
+RUN dnf update -y && \
+    dnf install -y --enablerepo=PowerTools \
+        redhat-lsb-core \
+        curl-devel \
+        lapack-devel \
+        blas-devel \
+        libpng-devel \
+        bzip2-devel \
+        openmotif \
+        openmotif-devel \
+        libX11-devel  \
+        libXt-devel  \
+        libXext-devel  \
+        libXp  \
+        libXp-devel \
+        libXft  \
+        libXtst  \
+        cairo \
+        cairo-devel \
+        pixman-devel \
+        xorg-x11-xbitmaps  \
+        libaec-devel \
+        zlib-devel \
+        libboost-devel \
+        curl \
+        zip \
+        unzip \
+        bzip2 \
+        file \
+        flex  \
+        byacc  \
+        python3-devel \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY scripts/build_crtm_gempak.sh /opt
+
+COPY scripts/checkout_nceplibs.sh /opt
+COPY scripts/build_nceplibs.sh /opt
+COPY patches/nceplibs /opt/patches/nceplibs

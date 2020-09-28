@@ -16,7 +16,7 @@ if [ $RUN_ENVIR != emc -a $RUN_ENVIR != nco ]; then
     echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera )'
     exit 1
 fi
-if [ $machine != cray -a $machine != dell -a $machine != hera ]; then
+if [ $machine != cray -a $machine != dell -a $machine != hera -a $machine != linux.gnu -a $machine != linux.intel ]; then
     echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera )'
     exit 1
 fi
@@ -36,6 +36,8 @@ elif [ $machine = "dell" ]; then
     FIX_DIR="/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/fv3gfs/fix"
 elif [ $machine = "hera" ]; then
     FIX_DIR="/scratch1/NCEPDEV/global/glopara/fix"
+elif [ $machine = "linux.gnu" ] || [ $machine = "linux.intel" ]; then
+    FIX_DIR="/fix"
 fi
 cd ${pwd}/../fix                ||exit 8
 for dir in fix_am fix_fv3_gmted2010 fix_gldas fix_orog fix_verif fix_wave_gfs ; do

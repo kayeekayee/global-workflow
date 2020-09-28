@@ -22,6 +22,8 @@ elif [ "$target" = "wcoss" ] ; then
    echo " "
    echo " "
    exit
+elif [ "$target" = "linux.gnu" ] || [ "$target" = "linux.intel" ] ; then
+   echo " You are on a $target machine."
 else
    echo " "
    echo " Your machine is $target is not recognized as a WCOSS machine."
@@ -38,6 +40,12 @@ module list
 set -x
 
 mkdir -p ../../exec
+if [ "$target" = "linux.gnu" ] ; then
+make -f makefile.linux.gnu
+elif [ "$target" = "linux.intel" ] ; then
+make -f makefile.intel.intel
+else
 make
+fi
 mv webtitle ../../exec
 make clean

@@ -30,8 +30,13 @@ export F77=${FCMP}
 
 export FCFFLAGS="" # "-convert native -assume byterecl -heap-arrays -mcmodel=large -shared-intel"
 export LDFLAGS="${FCFFLAGS}"
+if [ "$target" = "linux.gnu" ]; then
+export OPTIMIZATION="-O3" #-axCORE-AVX2,AVX -xSSE4.2 -O3
+export DEBUG="-g" #-O0 #-C #-fp-stack-check #-check all -fp-stack-check
+else
 export OPTIMIZATION="-O3 -xHOST" #-axCORE-AVX2,AVX -xSSE4.2 -O3
 export DEBUG="-traceback -g" #-O0 #-C #-fp-stack-check #-check all -fp-stack-check
+fi
 
 if [ $target != hera ]; then
   LIBnetcdf=`$NETCDF/bin/nf-config --flibs`

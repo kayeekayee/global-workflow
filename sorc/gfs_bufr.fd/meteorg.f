@@ -1065,7 +1065,7 @@ CC due to rounding and interpolation errors, correct it here -G.P. Lou:
           psn(np) = ps(np)
           call sigio_modpr(1,1,levs,nvcoord,idvc,
      &         idsl,vcoord,iret,
-     &         ps=psn(np)*1000,pd=pd3(np,1:levs))
+     &         ps=psn(1:np)*1000,pd=pd3(1:np,1:levs))
           grids(np,2) = log(psn(np))
           if(np==11)print*,'station H,grud H,psn,ps,new pm',
      &     elevstn(np),grids(np,1),psn(np),ps(np)

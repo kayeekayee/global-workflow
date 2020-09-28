@@ -15,6 +15,8 @@ elif [ "$target" = "wcoss" ] ; then
    echo " "
    echo " "
    exit
+elif [ "$target" = "linux.gnu" ] || [ "$target" = "linux.intel" ] ; then
+   echo " You are on a $target machine."
 else
    echo " "
    echo " Your machine is $target is not recognized as a WCOSS machine."
