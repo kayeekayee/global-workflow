@@ -31,7 +31,7 @@ index e17c43f1..4f503bd3 100644
  real(dp),       dimension(0:3,7)  :: qset7
  real(dp),       dimension(0:3,13) :: qset13
 diff --git ush/build_all_cmake.sh ush/build_all_cmake.sh
-index ceaf91d9..9931ac12 100755
+index a50ec1bb..1c625fb0 100755
 --- ush/build_all_cmake.sh
 +++ ush/build_all_cmake.sh
 @@ -1,4 +1,4 @@
@@ -119,7 +119,7 @@ index 2eb31b83..a7068fe5 100644
    !-----------------------------------------------------------------------
  
 diff --git util/EnKF/gfs/src/calc_increment_ens_ncio.fd/gfs_ncio_interface.f90 util/EnKF/gfs/src/calc_increment_ens_ncio.fd/gfs_ncio_interface.f90
-index 4d3d0723..46b7f232 100644
+index 4d3d0723..8f9c1f16 100644
 --- util/EnKF/gfs/src/calc_increment_ens_ncio.fd/gfs_ncio_interface.f90
 +++ util/EnKF/gfs/src/calc_increment_ens_ncio.fd/gfs_ncio_interface.f90
 @@ -33,8 +33,8 @@ module gfs_ncio_interface
@@ -296,11 +296,11 @@ index aa468e55..d3162ce4 100644
    set_source_files_properties( ${OZNMON_HORIZ_SRC} PROPERTIES COMPILE_FLAGS ${OZNMON_HORIZ_Fortran_FLAGS} )
    set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/oznmon_horiz )
    add_executable(oznmon_horiz.x  ${OZNMON_HORIZ_SRC} )
-diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/oznmon_read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/oznmon_read_diag.f90
-index b2c59e9b..75f90942 100644
---- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/oznmon_read_diag.f90
-+++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/oznmon_read_diag.f90
-@@ -642,7 +642,7 @@ module oznmon_read_diag
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
+index 7e592d3a..774d0a05 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_horiz.fd/read_diag.f90
+@@ -649,7 +649,7 @@ module read_diag
    
      nlevs = header_fix%nlevs 
  
@@ -309,7 +309,7 @@ index b2c59e9b..75f90942 100644
         iflag = -1  
      else  
         iflag = 0
-@@ -656,7 +656,8 @@ module oznmon_read_diag
+@@ -663,7 +663,8 @@ module read_diag
            ntobs = nrecords
         end if
  
@@ -319,7 +319,7 @@ index b2c59e9b..75f90942 100644
  
         !------------------------------------
         !  allocate the returned structures
-@@ -950,7 +951,7 @@ module oznmon_read_diag
+@@ -954,7 +955,7 @@ module read_diag
          end if 
       end do 
  
@@ -341,11 +341,11 @@ index a9f9a575..ffc252d6 100644
    set(Util_MODULE_DIR ${PROJECT_BINARY_DIR}/include/oznmon_time )
    set_source_files_properties( ${OZNMON_TIME_SRC} PROPERTIES COMPILE_FLAGS ${OZNMON_TIME_Fortran_FLAGS} )
    add_executable(oznmon_time.x  ${OZNMON_TIME_SRC} )
-diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/oznmon_read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/oznmon_read_diag.f90
-index b2c59e9b..75f90942 100644
---- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/oznmon_read_diag.f90
-+++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/oznmon_read_diag.f90
-@@ -642,7 +642,7 @@ module oznmon_read_diag
+diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
+index 7e592d3a..774d0a05 100644
+--- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
++++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/read_diag.f90
+@@ -649,7 +649,7 @@ module read_diag
    
      nlevs = header_fix%nlevs 
  
@@ -354,7 +354,7 @@ index b2c59e9b..75f90942 100644
         iflag = -1  
      else  
         iflag = 0
-@@ -656,7 +656,8 @@ module oznmon_read_diag
+@@ -663,7 +663,8 @@ module read_diag
            ntobs = nrecords
         end if
  
@@ -364,7 +364,7 @@ index b2c59e9b..75f90942 100644
  
         !------------------------------------
         !  allocate the returned structures
-@@ -950,7 +951,7 @@ module oznmon_read_diag
+@@ -954,7 +955,7 @@ module read_diag
          end if 
       end do 
  
@@ -374,7 +374,7 @@ index b2c59e9b..75f90942 100644
             if( test_name == var_names(k) ) then
                verify_var_name_nc = .true.
 diff --git util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90 util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
-index d9010cdb..6f865ed4 100755
+index d6402196..8ee11d32 100755
 --- util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
 +++ util/Ozone_Monitor/nwprod/oznmon_shared.v2.0.0/sorc/oznmon_time.fd/time.f90
 @@ -330,7 +330,7 @@ program main
