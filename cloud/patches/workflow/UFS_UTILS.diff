@@ -1198,7 +1198,7 @@ index 00000000..5aaeba50
 +make -f Makefile install
 +make -f Makefile clean
 diff --git sorc/link_fixdirs.sh sorc/link_fixdirs.sh
-index 283019d6..e4434b3e 100755
+index a2face49..20709524 100755
 --- sorc/link_fixdirs.sh
 +++ sorc/link_fixdirs.sh
 @@ -19,7 +19,7 @@ if [ $RUN_ENVIR != emc -a $RUN_ENVIR != nco ]; then
@@ -1206,19 +1206,19 @@ index 283019d6..e4434b3e 100755
      exit 1
  fi
 -if [ $machine != cray -a $machine != hera -a $machine != dell -a $machine != jet -a $machine != orion ]; then
-+if [ $machine != cray -a $machine != hera -a $machine != dell -a $machine != jet -a $machine != orion -a $machine != linux.gnu -a $machine != linux.intel ]; then
++if [ $machine != cray -a $machine != hera -a $machine != dell -a $machine != jet -a $machine != orion -a $machine != "linux.gnu" -a $machine != "linux.intel" ]; then
      set +x
      echo '***ERROR*** unsupported machine'
      echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera | jet | orion )'
-@@ -45,6 +45,8 @@ elif [ $machine = "jet" ]; then
-     FIX_DIR="/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix"
- elif [ $machine = "orion" ]; then
-     FIX_DIR="/work/noaa/global/glopara/fix"
+@@ -43,6 +43,8 @@ elif [ $machine = "hera" ]; then
+     FIX_DIR="/scratch1/NCEPDEV/global/glopara/fix_nco_gfsv16"
+ elif [ $machine = "jet" ]; then
+     FIX_DIR="/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix_nco_gfsv16"
 +elif [ $machine = "linux.gnu" ] || [ $machine = "linux.intel" ]; then
 +    FIX_DIR="/fix"
+ elif [ $machine = "orion" ]; then
+     FIX_DIR="/work/noaa/global/glopara/fix_nco_gfsv16"
  fi
- cd ${pwd}/../fix                ||exit 8
- for dir in fix_am fix_fv3 fix_orog fix_fv3_gmted2010 fix_sfc_climo; do
 diff --git sorc/machine-setup.sh sorc/machine-setup.sh
 index e4bbfda6..eb961b91 100644
 --- sorc/machine-setup.sh
@@ -1371,3 +1371,60 @@ index 46d85319..db21897d 100755
  
  interp.o:  source_grid.o model_grid.o utils.o interp.F90
  	$(FCOMP) $(FFLAGS) $(ESMF_F90COMPILEPATHS) -c interp.F90
+diff --git ush/global_chgres.sh ush/global_chgres.sh
+index d2770ede..2acd5999 100755
+--- ush/global_chgres.sh
++++ ush/global_chgres.sh
+@@ -515,6 +515,7 @@ EOF
+
+ export OMP_NUM_THREADS=${OMP_NUM_THREADS_CH:-${CHGRESTHREAD:-1}}
+
++if [ -z $GFS_SING_CMD ]; then
+  eval $APRUNC $CHGRESEXEC <<EOF $REDOUT$PGMOUT $REDERR$PGMERR
+   &NAMCHG  LEVS=$LEVS, LONB=$LONB, LATB=$LATB,
+            NTRAC=$NTRAC, IDVC=$IDVC, IDSL=$IDSL,
+@@ -524,6 +525,44 @@ export OMP_NUM_THREADS=${OMP_NUM_THREADS_CH:-${CHGRESTHREAD:-1}}
+            HALO=$HALO, NTILES=$ntiles, $CHGRESVARS
+  /
+ EOF
++else
++   set +x
++   cat /dev/null >$PWD/.envr;
++   IFS=$'\n'
++   for i in `printenv`; do
++      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
++         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
++         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
++         echo export $j >>$PWD/.envr
++      fi
++   done
++   set -x
++
++   INP="&NAMCHG  LEVS=$LEVS, LONB=$LONB, LATB=$LATB,
++           NTRAC=$NTRAC, IDVC=$IDVC, IDSL=$IDSL,
++           LSOIL=$LSOIL, IVSSFC=$IVSSFC, OUTTYP=$OUTTYP,
++           IDRT=$IDRT, IALB=$IALB, ISOT=$ISOT,
++           IVEGSRC=$IVEGSRC, TILE_NUM=$TILE_NUM, REGIONAL=$REGIONAL,
++           HALO=$HALO, NTILES=$ntiles, $CHGRESVARS
++    /"
++   echo $INP >$PWD/.mlcommand
++   CMD="eval $APRUNC $CHGRESEXEC < $PWD/.mlcommand"
++   echo "cd $PWD; source $PWD/.envr; $CMD" >${HOME}/.servinp
++
++   if [ $VERBOSE = "YES" ] ; then
++       echo "Waiting for job to finish."
++       set +x
++   fi
++
++   while [ -s ${HOME}/.servinp ]; do sleep 1; done
++
++   if [ $VERBOSE = "YES" ] ; then
++       cat ${HOME}/.output.log
++       echo "Job finished."
++       set -x
++   fi
++fi
++
+
+ export ERR=$?
+ export err=$ERR
