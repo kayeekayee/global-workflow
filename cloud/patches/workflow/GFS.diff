@@ -101,3 +101,106 @@ index 5659b533..b5f3283f 100755
 -./compile.sh "$FV3" "$target" "WW3=Y 32BIT=Y" 1
 +./compile.sh "$FV3" "$target" "WW3=N 32BIT=Y" 1
  mv -f fv3_1.exe ../NEMS/exe/global_fv3gfs.x
+diff --git ush/rocoto/setup_expt_fcstonly.py ush/rocoto/setup_expt_fcstonly.py
+index 65236719..9b74d133 100755
+--- ush/rocoto/setup_expt_fcstonly.py
++++ ush/rocoto/setup_expt_fcstonly.py
+@@ -111,6 +111,10 @@ Create COMROT experiment directory structure'''
+     parser.add_argument('--configdir', help='full path to directory containing the config files', type=str, required=False, default=None)
+     parser.add_argument('--gfs_cyc', help='GFS cycles to run', type=int, choices=[0, 1, 2, 4], default=1, required=False)
+     parser.add_argument('--partition', help='partition on machine', type=str, required=False, default=None)
++    parser.add_argument('--ptmp', help='full path to PTMP', type=str, required=False, default=None)
++    parser.add_argument('--stmp', help='full path to STMP', type=str, required=False, default=None)
++    parser.add_argument('--homedir', help='full path to HOMEDIR', type=str, required=False, default=None)
++    parser.add_argument('--account', help='ACCOUNT to be used for running jobs', type=str, required=False, default=None)
+ 
+     args = parser.parse_args()
+ 
+@@ -159,7 +163,7 @@ Create COMROT experiment directory structure'''
+       account = 'GFS-DEV'
+       queue = 'dev'
+       queue_arch = 'dev_transfer'
+-    elif machine == 'HERA':
++    elif machine == 'HERA' or machine == 'LINUX':
+       base_git = '/scratch1/NCEPDEV/global/glopara/git'
+       base_svn = '/scratch1/NCEPDEV/global/glopara/svn'
+       dmpdir = '/scratch1/NCEPDEV/global/glopara/dump'
+@@ -173,6 +177,15 @@ Create COMROT experiment directory structure'''
+       queue = 'batch'
+       queue_arch = 'service'
+ 
++    if args.homedir:
++      homedir = args.homedir
++    if args.stmp:
++      stmp = args.stmp
++    if args.ptmp:
++      ptmp = args.ptmp
++    if args.account:
++      account = args.account
++
+     # COMROT directory
+     create_comrot = True
+     if os.path.exists(comrot):
+diff --git ush/rocoto/setup_workflow_fcstonly.py ush/rocoto/setup_workflow_fcstonly.py
+index 1b3c91b5..bcc373eb 100755
+--- ush/rocoto/setup_workflow_fcstonly.py
++++ ush/rocoto/setup_workflow_fcstonly.py
+@@ -118,8 +118,12 @@ def get_definitions(base):
+     strings.append('\t<!ENTITY ICSDIR "%s">\n' % base['ICSDIR'])
+     strings.append('\n')
+     strings.append('\t<!-- Directories for driving the workflow -->\n')
+-    strings.append('\t<!ENTITY HOMEgfs  "%s">\n' % base['HOMEgfs'])
+-    strings.append('\t<!ENTITY JOBS_DIR "%s">\n' % base['BASE_JOB'])
++    if machine == 'LINUX':
++       strings.append('\t<!ENTITY HOMEgfs  "/opt/global-workflow">\n')
++       strings.append('\t<!ENTITY JOBS_DIR "/opt/global-workflow/jobs/rocoto">\n')
++    else:
++       strings.append('\t<!ENTITY HOMEgfs  "%s">\n' % base['HOMEgfs'])
++       strings.append('\t<!ENTITY JOBS_DIR "%s">\n' % base['BASE_JOB'])
+     strings.append('\n')
+     strings.append('\t<!-- Machine related entities -->\n')
+     strings.append('\t<!ENTITY ACCOUNT    "%s">\n' % base['ACCOUNT'])
+diff --git ush/rocoto/workflow_utils.py ush/rocoto/workflow_utils.py
+index 6da0b6a3..21586733 100755
+--- ush/rocoto/workflow_utils.py
++++ ush/rocoto/workflow_utils.py
+@@ -145,19 +145,7 @@ def config_parser(files):
+ 
+ def detectMachine():
+ 
+-    machines = ['HERA', 'WCOSS_C', 'WCOSS_DELL_P3', 'LINUX']
+-
+-    if os.path.exists('/scratch1/NCEPDEV'):
+-        return 'HERA'
+-    elif os.path.exists('/gpfs') and os.path.exists('/etc/SuSE-release'):
+-        return 'WCOSS_C'
+-    elif os.path.exists('/gpfs/dell2'):
+-        return 'WCOSS_DELL_P3'
+-    elif os.path.exists('/dev'):
+-        return 'LINUX'
+-    else:
+-        print 'workflow is currently only supported on: %s' % ' '.join(machines)
+-        raise NotImplementedError('Cannot auto-detect platform, ABORT!')
++    return 'LINUX'
+ 
+ def get_scheduler(machine):
+     try:
+@@ -198,6 +186,9 @@ def create_wf_task(task, cdump='gdas', cycledef=None, envar=None, dependency=Non
+                  'dependency': dependency, \
+                  'final': final}
+ 
++    if detectMachine() == 'LINUX':
++        task_dict['command']= '$GFS_DAEMON_RUN; $GFS_SING_CMD &JOBS_DIR;/%s.sh;$GFS_DAEMON_KILL' % task
++
+     if task in ['getic','arch','earc'] and get_scheduler(detectMachine()) in ['slurm']:
+         task_dict['partition'] = '&PARTITION_%s_%s;' % (task.upper(),cdump.upper())
+ 
+@@ -300,7 +291,7 @@ def get_resources(machine, cfg, task, reservation, cdump='gdas'):
+     natstr = ''
+ 
+     if scheduler in ['slurm']:
+-        natstr = '--export=NONE'
++        natstr = '--export=ALL'
+ 
+     if machine in ['HERA', 'WCOSS_C', 'WCOSS_DELL_P3', 'LINUX']:
+ 
