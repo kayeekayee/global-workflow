@@ -13,14 +13,14 @@ index 2fc8d911..30af408e 100755
 +else
 +   set +x
 +   cat /dev/null >$PWD/.envr;
-+   IFS=$'\n'
++   SIFS=$IFS; IFS=$'\n'
 +   for i in `printenv`; do
 +      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
 +         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
 +         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
 +         echo export $j >>$PWD/.envr
 +      fi
-+   done
++   done; IFS=$SIFS
 +   set -x
 +
 +   echo "cd $PWD; source $PWD/.envr; $APRUN_POSTSNDCFP cmdfile" >${HOME}/.servinp
@@ -57,14 +57,14 @@ index 66f0d81d..e975d765 100755
 +else
 +   set +x
 +   cat /dev/null >$PWD/.envr;
-+   IFS=$'\n'
++   SIFS=$IFS; IFS=$'\n'
 +   for i in `printenv`; do
 +      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
 +         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
 +         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
 +         echo export $j >>$PWD/.envr
 +      fi
-+   done
++   done; IFS=$SIFS
 +   set -x
 +
 +   echo "cd $PWD; source $PWD/.envr; $APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2" >${HOME}/.servinp

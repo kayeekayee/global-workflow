@@ -1390,14 +1390,14 @@ index d2770ede..2acd5999 100755
 +else
 +   set +x
 +   cat /dev/null >$PWD/.envr;
-+   IFS=$'\n'
++   SIFS=$IFS; IFS=$'\n'
 +   for i in `printenv`; do
 +      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
 +         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
 +         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
 +         echo export $j >>$PWD/.envr
 +      fi
-+   done
++   done; IFS=$SIFS
 +   set -x
 +
 +   INP="&NAMCHG  LEVS=$LEVS, LONB=$LONB, LATB=$LATB,
