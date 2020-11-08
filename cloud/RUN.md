@@ -160,20 +160,15 @@ Edit lines like below to modify the number of nodes, processors per node, thread
 ## Running the test case
 
 Now that the test case is setup we can run different steps of the workflow using rocoto.
-There is no difference with running GFS on hera without containers
+There is no difference between running GFS on hera with or without containers
 
-If you don't have restricted data access but have some initial conditions for the forecast,
-you have to symlink the INPUT directory to the initial conditons stored under COMROT.
-From the COMROT directory, I do the following for the C48 test case
+For a forecast only run, make sure you have FV3ICS directory under $COMROT.
 
-    ln -sf $COMROT/FV3ICS/2018082700/gfs/C48/INPUT $COMROT/gfs.20180827/00/atmos/INPUT
+To run specific steps of the workflow, run rocotoboot under the $EXPDIR as follows
 
-If you do have restricted access, the first two steps of the workflow `gfsfv3ic` and `gfsfcst`
-will generate the initial condition for you.
-
-To run a specific step of the workflow
-
-    rocotoboot -w c48.xml -d c48.db -c all -t gfsfcst
+    rocotoboot -v 10 -w c48.xml -d c48.db -c all -t gfsfv3ic
+    rocotoboot -v 10 -w c48.xml -d c48.db -c all -t gfsfcst
+    rocotoboot -v 10 -w c48.xml -d c48.db -c all -t gfspost001
 
 Log files for your runs are stored under $COMROT/c48/logs, so you can investigate there
 if something goes wrong.

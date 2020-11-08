@@ -190,7 +190,7 @@ index 6da0b6a3..21586733 100755
                   'final': final}
  
 +    if detectMachine() == 'LINUX':
-+        task_dict['command']= '$GFS_DAEMON_RUN; $GFS_SING_CMD &JOBS_DIR;/%s.sh;$GFS_DAEMON_KILL' % task
++        task_dict['command']= '$GFS_DAEMON_RUN; $GFS_SING_CMD &JOBS_DIR;/%s.sh; $GFS_DAEMON_KILL' % task
 +
      if task in ['getic','arch','earc'] and get_scheduler(detectMachine()) in ['slurm']:
          task_dict['partition'] = '&PARTITION_%s_%s;' % (task.upper(),cdump.upper())
