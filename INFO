@@ -1,3 +1,5 @@
+02 Nov 2020
+    - reservations shut off
 24 Aug 2020
     - corrected labeling of nta_ulwf plots
 20 Aug 2020
@@ -17,7 +19,7 @@
          fd578b9c981b18d24c0729f6d8ec42df51e661e9 NEMS (heads/develop)
          19f3126c832b26ae4c5b27bca6c1dcc676755602 WW3 (6.07.1-36-g19f3126c)
          a8e2cc1c84a1e6a7deb9eef152edec2992b1a859 stochastic_physics (ufs-v1.0.0-52-ga8e2cc1)
-      effective 08/18/20 00Z run
+      effective 08/18/20 00Z run in realtime  (backfilled to 08/01/20 00Z using this version)
 15 Jul 2020
     - updated to 08Jul gsd/develop branch, 04b3ad2, for sorc/fv3gfs_ccpp.fd + GF modifications
 08 Jul 2020
@@ -25,6 +27,7 @@
 01 July 2020
     - merge 23Jun20 portorion branch, ed6b279, into gsd-ccpp-jet
     - additional updates for running on jet
+    - reservations enabled
 17 June 2020
     - created new branch, gsd-ccpp-jet, from 15Jun20 port2orion branch, ed6b279
     - using 09Jun gsd/develop branch for sorc/fv3gfs_ccpp.fd

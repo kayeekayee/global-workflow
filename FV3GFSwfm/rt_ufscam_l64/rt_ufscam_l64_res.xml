@@ -20,7 +20,7 @@
 	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202011030000">
+	<!ENTITY SDATE    "202008290000">
 	<!ENTITY EDATE    "202907010000">
 	<!ENTITY INTERVAL "24:00:00">
 
@@ -31,17 +31,20 @@
 	<!ENTITY EXPDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
 	<!ENTITY ROTDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
 	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
+	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/mnt/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite">
 	<!ENTITY JOBS_DIR "/mnt/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/jobs/rocoto">
 
 	<!-- Machine related entities -->
-	<!ENTITY ACCOUNT       "gsd-fv3-dev">
+	<!ENTITY ACCOUNT       "rtgsd-fv3-hfip">
 	<!ENTITY QUEUE         "batch">
 	<!ENTITY QUEUE_SERVICE "service">
 	<!ENTITY PARTITION_SERVICE "service">
 	<!ENTITY SCHEDULER  "slurm">
+        <!ENTITY RESERVATION_FCST "fv3-hj-fcst-00">
+        <!ENTITY RESERVATION_POST "fv3-hj-post-00">
 
 	<!-- Toggle HPSS archiving -->
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
@@ -56,22 +59,25 @@
 	<!-- BEGIN: Resource requirements for the workflow -->
 
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
-        <!ENTITY PARTITION_FCST_GFS "vjet,sjet">
+        <!ENTITY PARTITION_FCST_GFS "vjet">
 	<!ENTITY WALLTIME_FCST_GFS  "04:00:00">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>168:ppn=8:tpp=2</nodes>">
-	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
+	<!ENTITY NATIVE_FCST_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
 	<!ENTITY WALLTIME_POST_GFS  "01:00:00">
-        <!ENTITY PARTITION_POST_GFS "vjet,xjet">
+        <!ENTITY PARTITION_POST_GFS "vjet">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>3:ppn=16:tpp=1</nodes>">
-	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
+	<!ENTITY NATIVE_POST_GFS    "--reservation=&RESERVATION_POST; --export=NONE">
+	<!ENTITY NATIVE_POST_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 
 	<!ENTITY QUEUE_VRFY_GFS     "&QUEUE;">
         <!ENTITY PARTITION_VRFY_GFS "vjet">
 	<!ENTITY WALLTIME_VRFY_GFS  "00:50:00">
 	<!ENTITY RESOURCES_VRFY_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
+	<!ENTITY NATIVE_VRFY_GFS    "--reservation=&RESERVATION_POST; --export=NONE">
+	<!ENTITY NATIVE_VRFY_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 	<!ENTITY NATIVE_VRFY_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
@@ -80,6 +86,13 @@
 	<!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
 	<!ENTITY MEMORY_ARCH_GFS    "2048M">
 	<!ENTITY NATIVE_ARCH_GFS    "--export=NONE"> 
+	<!ENTITY NATIVE_ARCH_GFS    "--reservation=&RESERVATION_POST; --export=NONE"> 
+
+	<!ENTITY QUEUE_DELRES_GFS     "&QUEUE;">
+        <!ENTITY PARTITION_DELRES_GFS "&PARTITION_SERVICE;">
+	<!ENTITY WALLTIME_DELRES_GFS  "00:05:00">
+	<!ENTITY RESOURCES_DELRES_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
+	<!ENTITY NATIVE_DELRES_GFS    "--export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->
 
@@ -234,4 +247,43 @@
 	</dependency>
 </task>
 
+<!--
+<task name="del_fcstres" cycledefs="gfs" maxtries="1">
+	<command>&JOBS_DIR;/delete_res.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_DELRES_GFS;</queue>
+	<partition>&PARTITION_DELRES_GFS;</partition>
+	&RESOURCES_DELRES_GFS;
+	<walltime>&WALLTIME_DELRES_GFS;</walltime>
+	<native>&NATIVE_DELRES_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/delresfcst.log</cyclestr></join>
+
+	<envar><name>RESERVATION</name><value>&RESERVATION_FCST;</value></envar>
+	<dependency>
+		<taskdep task="gfsfcst"/>
+	</dependency>
+</task>
+
+<task name="del_postres" cycledefs="gfs" maxtries="1" final="true">
+	<command>&JOBS_DIR;/delete_res.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_DELRES_GFS;</queue>
+	<partition>&PARTITION_DELRES_GFS;</partition>
+	&RESOURCES_DELRES_GFS;
+	<walltime>&WALLTIME_DELRES_GFS;</walltime>
+	<native>&NATIVE_DELRES_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/delrespost.log</cyclestr></join>
+
+	<envar><name>RESERVATION</name><value>&RESERVATION_POST;</value></envar>
+	<dependency>
+		<taskdep task="gfsarch"/>
+	</dependency>
+</task>
+-->
 </workflow>
