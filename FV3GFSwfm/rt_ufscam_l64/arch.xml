@@ -17,10 +17,11 @@
 	<!ENTITY PSLOT    "rt_ufscam_l64">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C768">
+	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201907110000">
-	<!ENTITY EDATE    "201907110000">
+	<!ENTITY SDATE    "202009030000">
+	<!ENTITY EDATE    "202009030000">
 	<!ENTITY SDATE    "201909141200">
 	<!ENTITY EDATE    "201909141200">
 	<!ENTITY INTERVAL "24:00:00">
@@ -31,7 +32,7 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
 	<!ENTITY ROTDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
-	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS">
+	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/mnt/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite">
@@ -97,6 +98,7 @@
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 
 	<dependency>
 		<and>

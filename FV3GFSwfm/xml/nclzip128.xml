@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY FV3GFS_HOME "/home/rtfim/UFS-CAMsuite">
+  <!ENTITY PSLOT  "rt_ufscam_l128">
+  <!ENTITY ATCFNAME "rt_ccpp_gsd_L128">               <!-- tracker name -->
+  <!ENTITY MODL "FV3-CCPP_gsd_L128">                   <!-- plot name;  needs to have 'FV3' in name for NCL -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY AC_MODEL_NAME "rt_ccpp_gsd_L128">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "rt_ccpp_gsd_L128">
+  <!ENTITY SURFACE_MODEL_NAME "rt_ccpp_gsd_L128">
+  <!ENTITY RES "0p25">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+  <!-- set this to 3 character str - ex. 96 would be 096 - used for final FV3GFS_GF verification file required -->
+  <!ENTITY FCST_LENGTH_STR "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  %jet;
+  %dbi;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="9">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_&PSLOT;_nclzip.log</cyclestr>
+  </log>
+
+  <cycledef group="24hr">202008310000 2020083100 24:00:00</cycledef>
+
+  &nclzip_retro_task; 
+
+</workflow>

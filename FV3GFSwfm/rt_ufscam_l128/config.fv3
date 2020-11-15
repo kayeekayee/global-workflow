@@ -107,15 +107,16 @@ case $case_in in
         export DELTIM=100                   ## JKH
         export layout_x=12
         export layout_y=8
-        export layout_x_gfs=24
+        #JKHexport layout_x_gfs=24
+        export layout_x_gfs=12             ## JKH
         export layout_y_gfs=12
         export npe_wav=70  
         export npe_wav_gfs=70  
-        export nth_fv3=2                    ## JKH
+        export nth_fv3=4                    ## JKH
         export cdmbgwd="4.0,0.15,1.0,1.0"  # mountain blocking, ogwd, cgwd, cgwd src scaling
         export WRITE_GROUP=2
         export WRTTASK_PER_GROUP=$(echo "2*$npe_node_max" |bc)
-        export WRITE_GROUP_GFS=4
+        export WRITE_GROUP_GFS=2            ## JKH
         export WRTTASK_PER_GROUP_GFS=$(echo "2*$npe_node_max" |bc)
         export WRTIOBUF="32M"
         ;;

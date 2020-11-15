@@ -1,3 +1,4 @@
+####  HFIP Plots ####
 ### 64 levels
 rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlots.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlots.db
 rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlots.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlots.db -c: | m
@@ -11,3 +12,36 @@ rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/retro_u
 ### 128 levels
 rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_hfipPlotsg1_l128.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_hfipPlotsg1_l128.db
 
+####  NCL/vx ####
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_nclvx_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_nclvx_l64.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_nclvx_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_nclvx_l64.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_nclvx_l128.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_nclvx_l128.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/rt_ufscam_nclvx_l128.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_nclvx_l128.db -c `date --date='4 days ago' +%Y%m%d0000`: |  m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_nclvx_l64.xml -d /home/rtfim/retro_dbfiles/ufscam_nclvx_l64.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_nclvx_l64.xml -d /home/rtfim/retro_dbfiles/ufscam_nclvx_l64.db | m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_nclvx_l128.xml -d /home/rtfim/retro_dbfiles/ufscam_nclvx_l128.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_nclvx_l128.xml -d /home/rtfim/retro_dbfiles/ufscam_nclvx_l128.db | m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l128_acc.xml -d /home/rtfim/retro_dbfiles/ufscam_l128_acc.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l128_acc.xml -d /home/rtfim/retro_dbfiles/ufscam_l128_acc.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l64_acc.xml -d /home/rtfim/retro_dbfiles/ufscam_l64_acc.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l64_acc.xml -d /home/rtfim/retro_dbfiles/ufscam_l64_acc.db -c `date --date='4 days ago' +%Y%m%d0000`: | m 
+
+rocotorun   -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l128_surface.xml -d /home/rtfim/retro_dbfiles/ufscam_l128_surface.db
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/xml/ufscam_l128_surface.xml -d /home/rtfim/retro_dbfiles/ufscam_l128_surface.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w nclzip128.xml -d nclzip128.db
+rocotostat -w nclzip128.xml -d nclzip128.db | m
+
+rocotorun -w tmp_sep09.xml -d tmp_sep09.db
+rocotostat -w tmp_sep09.xml -d tmp_sep09.db
+
+rocotorun -w tmp_l64acc.xml -d tmp_l64acc.db
+rocotostat -w tmp_l64acc.xml -d tmp_l64acc.db
+
+rocotorun -w tmp_oct09_l128.xml -d tmp_oct09_l128.db
+rocotostat  -w tmp_oct09_l128.xml -d tmp_oct09_l128.db

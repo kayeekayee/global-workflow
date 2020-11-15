@@ -20,13 +20,13 @@ echo $topdir
 echo fv3gfs_ccpp checkout ...
 if [[ ! -d fv3gfs_ccpp.fd ]] ; then
     rm -f ${topdir}/checkout-fv3gfs_ccpp.log
-    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model ufs-weather-model_08jul_04b3ad2 >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
-    cd ufs-weather-model_08jul_04b3ad2
-    git checkout 04b3ad21c3c7d91bbf171b84c6efb8f44d8b75a9 
+    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model ufs-weather-model_13aug_eff83ae >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
+    cd ufs-weather-model_13aug_eff83ae
+    git checkout eff83ae37d98c66534366ba3c8d773b9522a5c62
     git submodule sync
     git submodule update --init --recursive
     cd ${topdir}
-    ln -fs ufs-weather-model_08jul_04b3ad2 fv3gfs_ccpp.fd 
+    ln -fs ufs-weather-model_13aug_eff83ae fv3gfs_ccpp.fd 
     ln -fs fv3gfs_ccpp.fd fv3gfs.fd
     rsync -ax fv3gfs.fd_jkh/ fv3gfs.fd/        ## copy over changes not in FV3 repository
 else

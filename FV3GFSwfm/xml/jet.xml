@@ -1,27 +1,40 @@
   <!-- jet.xml --> 
 
   <!ENTITY SCHEDULER "slurm">
+  <!ENTITY RES_PROJECT  "rtgsd-fv3-hfip">
   <!ENTITY PROJECT   "gsd-fv3-dev">
-  <!ENTITY SERIALPE "batch">
   <!ENTITY PE "batch"> 
   <!ENTITY SERVICE   "service">
-  <!ENTITY MPIRUN    "srun --export=ALL">
 
-  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log">
+  <!ENTITY MET_MODULE "/contrib/met/modulefiles">
+  <!ENTITY MET_VERSION "met/9.0">
+
+  <!ENTITY FV3GFS_LOG "&FV3GFS_HOME;/FV3GFSwfm/log_&PSLOT;">
   <!ENTITY FV3GFS_RUN "&FV3GFS_HOME;/FV3GFSrun">
   <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
   <!ENTITY FV3GFS_POST_DIR "post/fim">
   <!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
   <!ENTITY RTFIM_HOME "/home/rtfim">
-
-  <!ENTITY PUB_DIR "/public">
   <!ENTITY LFS4_ROOT "/lfs4/HFIP/gsd-fv3-hfip">
+
+  <!ENTITY CLIMATE_DIR "&LFS4_ROOT;/cmean/">
+  <!ENTITY PUB_DIR "/public">
   <!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks/">
 
+  <!ENTITY NCL_ROOT "&LFS4_ROOT;/rtruns/ncl/fimall">
+  <!ENTITY NCL_DIFF_HOME "&LFS4_ROOT;/rtruns/ncl/fimalldiff">
+  <!ENTITY CNVGRIB "cnvgrib">
+  <!ENTITY CNVGRIB "/apps/cnvgrib/1.4.0/bin/cnvgrib">
   <!ENTITY WGRIB "wgrib">
   <!ENTITY WGRIB2 "wgrib2">
 
+  <!ENTITY GFS_VERIF_DIR "&PUB_DIR;/data/grids/gfs/0p5deg/grib2">
+  <!ENTITY GFS_VERIF_RETRO_DIR "&LFS4_ROOT;/GFS_RETRO_VERIF_FILES">
+  <!ENTITY FV3GFS_VERIF_DIR "&FV3GFS_RUN;">
   <!ENTITY CDUMP  "gfs">
   <!ENTITY CASE   "C768">
 
-  <!ENTITY PARTITION_JET "<partition>ujet,tjet,sjet,vjet,kjet,xjet</partition>">
+  <!ENTITY RESERVATION_FCST "fv3-hj-fcst-00">
+
+  <!ENTITY PARTITION_RES "<partition>vjet</partition>">
+  <!ENTITY PARTITION_JET "<partition>sjet,vjet,ujet,tjet,kjet,xjet</partition>">

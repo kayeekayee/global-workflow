@@ -17,10 +17,11 @@
 	<!ENTITY PSLOT    "rt_ufscam_l128">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C768">
+	<!ENTITY ATCFNAME "ucs1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202007150000">
-	<!ENTITY EDATE    "202907150000">
+	<!ENTITY SDATE    "202007240000">
+	<!ENTITY EDATE    "202007240000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -117,6 +118,7 @@
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 
@@ -128,7 +130,6 @@
 -->
 </task>
 
-<!--
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
 
 	<command>&JOBS_DIR;/arch_gsd.sh</command>
@@ -153,13 +154,15 @@
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 
 	<dependency>
+		<datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f168</cyclestr></datadep>
+	</dependency>
+
+</task>
+<!--
 		<and>
 			<metataskdep metatask="gfspost"/>
 			<streq><left>&ARCHIVE_TO_HPSS;</left><right>YES</right></streq>
 		</and>
-	</dependency>
-
-</task>
 -->
 
 </workflow>

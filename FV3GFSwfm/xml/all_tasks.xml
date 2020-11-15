@@ -1,2 +1,12 @@
+  <!ENTITY nclzip_task         SYSTEM  "FV3GFS_NCLzip.xml">
+  <!ENTITY nclzip_retro_task   SYSTEM  "FV3GFS_NCLzip_retro.xml">
+  <!ENTITY remapgrib_task      SYSTEM  "FV3GFS_RemapGrib.xml">
+  <!ENTITY ncl_task            SYSTEM  "FV3GFS_NCL.xml">
+  <!ENTITY nclfim_task         SYSTEM  "FV3GFS_NCLFim.xml">
+  <!ENTITY ac_verif_task       SYSTEM  "Global_Verif.xml">
+  <!ENTITY ac_verif_file_task  SYSTEM  "GFSVerifFileRealTime.xml">
+  <!ENTITY ac_verif_back_task  SYSTEM  "GFSVerifFileBackfill.xml">
   <!ENTITY hfipPlot_task       SYSTEM  "FV3GFS_HfipPlots.xml">
   <!ENTITY hfipPlotG1_task     SYSTEM  "FV3GFS_HfipPlotsG1.xml">
+  <!ENTITY sounding_task       SYSTEM  "FV3GFS_Soundings.xml">
+  <!ENTITY surface_task        SYSTEM  "FV3GFS_Surface.xml">

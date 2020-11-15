@@ -1,4 +1,4 @@
-  <task name="hfip_plots_#T#" maxtries="2">
+  <task name="hfip_plots_#T#" maxtries="3">
     <command>&SCRIPTS;/hfipPlots.ksh</command>
     <account>&PROJECT;</account>
     <cores>2</cores>

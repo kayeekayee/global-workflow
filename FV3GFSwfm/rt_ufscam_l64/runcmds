@@ -1,15 +1,23 @@
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly.xml -d /home/rtfim/rt_dbfiles/icsonly_l64.db
+rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly.xml -d /home/rtfim/rt_dbfiles/icsonly_l64.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
 
-rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l64.db
-rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/rt_ufscam_l64.db | m
-
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/newrt_ufscam_l64.db
+rocotostat -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/rt_ufscam_l64.xml -d /home/rtfim/rt_dbfiles/newrt_ufscam_l64.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
 
 
 rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.db 
 rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/icsonly_nores.db  | m
 
+## xjet fcst; vjet others
 rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.db 
 rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores.db  | m
 
+rocotorun -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores_barry.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores_barry.db 
+rocotostat  -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores_barry.xml -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l64/ufscam_nores_barry.db 
+
+## aeroics with fcst reservation
+rocotorun -w aero.xml -d aero.db
+rocotostat -w aero.xml -d aero.db
 
 ## tracker only
 rocotorun -w trak.xml -d trak.db
@@ -18,3 +26,17 @@ rocotostat  -w trak.xml -d trak.db
 ## archive only
 rocotorun -w arch.xml -d arch.db
 rocotostat -w arch.xml -d arch.db
+
+## post, vfry, arch without reservation
+rocotorun -w nores_ufscam_l64.xml -d nores_ufscam_l64.db
+rocotostat  -w nores_ufscam_l64.xml -d nores_ufscam_l64.db
+
+## fcst without reservation
+rocotorun -w nores_l64_fcstonly.xml -d nores_l64_fcstonly.db
+rocotostat -w nores_l64_fcstonly.xml -d nores_l64_fcstonly.db
+
+## vrfy/arch w/ FCST reservation
+rocotorun  -w restrak.xml  -d restrak.db
+
+## aeroic w/ FCST reservation
+rocotorun  -w resaeroic.xml  -d resaeroic.db

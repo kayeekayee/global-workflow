@@ -19,8 +19,8 @@
 	<!ENTITY CASE     "C768">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201909141200">
-	<!ENTITY EDATE    "201909141200">
+	<!ENTITY SDATE    "202010210000">
+	<!ENTITY EDATE    "202010210000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -29,7 +29,7 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
 	<!ENTITY ROTDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
-	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS">
+	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
 	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/FV3_ICs_GFS">
         <!ENTITY SCR_DIR "/lfs4/HFIP/gsd-fv3-hfip/Judy.K.Henderson/scratch//BMC/gsd-ccpp-jet/FV3GFSwfm/scripts">
         <!ENTITY PUBDIR "/public/data/grids/gfs/nemsio">
@@ -81,7 +81,7 @@
 
 ]>
 
-<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
@@ -89,6 +89,7 @@
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
 <!--
+-->
 <task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/getic.sh</command>
@@ -140,8 +141,8 @@
 	</dependency>
 
 </task>
--->
 
+<!--
 <task name="gfsfv3ic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/fv3ic.sh</command>
@@ -188,6 +189,7 @@
 
 </task>
 
+-->
 <task name="gfsaeroic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/aeroic.sh</command>
@@ -220,8 +222,6 @@
 
 </task>
 
-<!--
--->
 <!--
 <task name="mssFV3ICS" cycledefs="gfs" maxtries="&MAXTRIES;">
 	<command>&SCR_DIR;/archive_fv3ics.ksh</command>

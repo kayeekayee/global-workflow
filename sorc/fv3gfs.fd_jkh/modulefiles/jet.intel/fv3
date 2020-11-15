@@ -4,7 +4,7 @@
 ##
 
 proc ModulesHelp {} {
-     puts stderr "The prerequisites for compiling or running FV3 on Jet."
+     puts stderr "The prerequisites for compiling or running FV3 on Jet/Intel"
 }
 
 module purge
@@ -18,7 +18,10 @@ module load sutils
 
 module load intel/18.0.5.274
 module load impi/2018.4.274
+#JKHmodule load hdf5/1.10.4
+#JKHmodule load netcdf/4.6.1
 
+#JKH
 module use -a /mnt/lfs4/HFIP/hfv3gfs/nwprod/NCEPLIBS/modulefiles
 module load bacio/v2.0.2
 module load ip/v3.0.1
@@ -34,33 +37,40 @@ module load png/v1.2.44
 module load z/v1.2.6
 
 module load hdf5_parallel/1.10.6
-#JKHmodule load netcdf_parallel/4.7.4
-
 ##
-### NCEP libraries (download and build manually for the time being; https://github.com/NCAR/NCEPlibs)
-###
-#module use -a /lfs3/projects/hfv3gfs/GMTB/modulefiles/intel-18.0.5.274
-#module load  NCEPlibs/9.9.9
-
+## use pre-compiled EMSF and NCEP libraries for above compiler / MPI combination
 ##
-### load ESMF library for above compiler / MPI combination
-### use pre-compiled EMSF library for above compiler / MPI combination
-###
-#module load esmf/8.0.0
-#JKHsetenv NCEPLIBS /mnt/lfs3/HFIP/hfv3gfs/gwv/l0414/lib/
-#JKHmodule use /mnt/lfs3/HFIP/hfv3gfs/gwv/l0414/lib/modulefiles
-#JKHmodule load esmflocal/8.0.1.08bs
+module use -a /lfs4/HFIP/hfv3gfs/software/ufs-stack-20200728/intel-18.0.5.274/impi-2018.4.274/modules
+#JKH
+#JKHmodule load esmf/8.0.0
+#JKH
+#JKHmodule load bacio/2.4.0
+#JKHmodule load crtm/2.3.0
+#JKHmodule load g2/3.4.0
+#JKHmodule load g2tmpl/1.9.0
+#JKHmodule load ip/3.3.0
+#JKHmodule load nceppost/dceca26
+#JKHmodule load nemsio/2.5.1
+#JKHmodule load sp/2.3.0
+#JKHmodule load w3emc/2.7.0
+#JKHmodule load w3nco/2.4.0
+
+module load gfsio/1.4.0
+module load sfcio/1.4.0
+module load sigio/2.3.0
+
+#JKH
 setenv NCEPLIBS /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/
 module use /mnt/lfs4/HFIP/hfv3gfs/gwv/l0530/lib/modulefiles
 module load esmflocal/8_0_1
 #JKH add new path for netcdfp  -- fix for netcdf HDF errors
+setenv NCEPLIBS /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/
 module use /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
 module load netcdfp/4.7.4
 
 ##
 ## load cmake
 ##
-module use /apps/modules/modulefiles
 module load cmake/3.16.1
 setenv CMAKE_C_COMPILER mpiicc
 setenv CMAKE_CXX_COMPILER mpiicpc

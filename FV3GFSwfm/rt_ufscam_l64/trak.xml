@@ -19,11 +19,9 @@
 	<!ENTITY CASE     "C768">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201909141200">
-	<!ENTITY EDATE    "201909141200">
-	<!ENTITY SDATE    "201907110000">
-	<!ENTITY EDATE    "201907110000">
-	<!ENTITY INTERVAL "24:00:00">
+	<!ENTITY SDATE    "202009050000">
+	<!ENTITY EDATE    "202009050000">
+	<!ENTITY INTERVAL "65:12:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
@@ -113,6 +111,7 @@
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+	<envar><name>COMINsyn</name><value>/lfs4/HFIP/hfv3gfs/glopara/com/gfs/prod/syndat</value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 
 </task>

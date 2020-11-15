@@ -31,7 +31,7 @@
 	<!ENTITY ROTDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l128">
 	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS">
 	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/FV3_ICs_GFS">
-        <!ENTITY SCR_DIR "/lfs4/HFIP/gsd-fv3-hfip/Judy.K.Henderson/scratch//BMC/gsd-ccpp-jet/FV3GFSwfm/scripts">
+        <!ENTITY SCR_DIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/scripts">
         <!ENTITY PUBDIR "/public/data/grids/gfs/nemsio">
         <!ENTITY RETRODIR "/lfs4/HFIP/gsd-fv3-hfip/GFS_RETRO_NEMSIO/">
 
@@ -231,7 +231,7 @@
 	<jobname><cyclestr>mssfv3ics</cyclestr></jobname>
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/mssfv3ics.log</cyclestr></join>
 	<envar><name>ICSDIR</name><value>&ICSDIR;/<cyclestr>@Y@m@d@H</cyclestr></value></envar>
-	<envar><name>mssDir</name><value>FV3ICS/<cyclestr>@Y</cyclestr>/<cyclestr>@m</cyclestr></value></envar>
+	<envar><name>mssDir</name><value>FV3ICS_L128/<cyclestr>@Y</cyclestr>/<cyclestr>@m</cyclestr></value></envar>
 	<envar><name>yyyymmddhh</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>CASE</name><value>&CASE;</value></envar>

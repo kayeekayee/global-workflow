@@ -4,6 +4,7 @@
 <!ENTITY PSLOT "rt_ufscam_l128">
 <!ENTITY FCST_INTERVAL "6">
 <!ENTITY ATCFNAME "ucs1">
+<!ENTITY FCST_LENGTH "168">
 <!-- External parameter entites --><!ENTITY % SITES SYSTEM "all_sites.xml">
 <!ENTITY % jet SYSTEM "jet.xml">
 <!ENTITY % jet_retro SYSTEM "jet_retro.xml">
@@ -15,8 +16,6 @@
 <!ENTITY % DEFS SYSTEM "all_defs.xml">
 <!ENTITY % dbi SYSTEM "dbi.xml">
 <!ENTITY % metatasks SYSTEM "metatask_defs.xml">
-<!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks_test/">
-<!ENTITY DATADIR "/lfs4/HFIP/gsd-fv3-hfip/fv3-ccpp">
 <!-- jet.xml --><!ENTITY SCHEDULER "slurm">
 <!ENTITY PROJECT "gsd-fv3-dev">
 <!ENTITY SERIALPE "batch">
@@ -31,6 +30,7 @@
 <!ENTITY RTFIM_HOME "/home/rtfim">
 <!ENTITY PUB_DIR "/public">
 <!ENTITY LFS4_ROOT "/lfs4/HFIP/gsd-fv3-hfip">
+<!ENTITY TRACKDIR "&FV3GFS_HOME;/tracks/">
 <!ENTITY WGRIB "wgrib">
 <!ENTITY WGRIB2 "wgrib2">
 <!ENTITY CDUMP "gfs">
@@ -45,7 +45,6 @@
 
   <cycledef>202004230000 202212310000 24:00:00</cycledef>
 
- <!-- &fv3grib2_task; -->
   <metatask>
     <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168</var>
       <task name="hfip_plots_#T#" maxtries="2">
@@ -58,7 +57,7 @@
     <join><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/log/hfipPlots/hfipPlots_#T#_@Y@m@d@H_g1.log</cyclestr></join>
     <envar><name>FV3GFS_HOME</name><value>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite</value></envar>
     <envar><name>HFIP_SCRIPT</name><value>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSwfm/scripts/hfipGlobalModelGraphics.ksh</value></envar> 
-    <envar><name>TRACKFILE</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks_test//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></value></envar> 
+    <envar><name>TRACKFILE</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></value></envar> 
     <envar><name>FV3GFS_RUN</name><value><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/</cyclestr></value></envar>
     <envar><name>FCST_INTERVAL</name><value>6</value></envar>
     <envar><name>yyyymmddhhmm</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value></envar>
@@ -69,7 +68,7 @@
       <or>
         <and>
           <datadep><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>
-          <datadep minsize="1b"><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks_test//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></datadep>
+          <datadep minsize="1b"><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/tracks//tctrk.atcf.@Y@m@d@H.ucs1.txt</cyclestr></datadep>
         </and>
         <and>
           <datadep><cyclestr>/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l128/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f#T#</cyclestr></datadep>

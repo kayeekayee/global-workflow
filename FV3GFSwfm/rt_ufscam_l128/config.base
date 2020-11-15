@@ -38,8 +38,8 @@ export RTMFIX=$CRTM_FIX
 
 # USER specific paths
 export HOMEDIR="/lfs4/HFIP/gsd-fv3-hfip/NCEPDEV/global/$USER"
-export STMP="/lfs4/HFIP/gsd-fv3-hfip/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER"
-export PTMP="/lfs4/HFIP/gsd-fv3-hfip/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER"
+export STMP="${HOMEgfs}/FV3GFSrun/"
+export PTMP="${HOMEgfs}/FV3GFSrun/"
 export NOSCRUB="$HOMEDIR"
 
 # Base directories for various builds

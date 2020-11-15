@@ -17,10 +17,11 @@
 	<!ENTITY PSLOT    "rt_ufscam_l128">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C768">
+	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202007210000">
-	<!ENTITY EDATE    "202907010000">
+	<!ENTITY SDATE    "202008200000">
+	<!ENTITY EDATE    "202908010000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -58,6 +59,7 @@
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
         <!ENTITY PARTITION_FCST_GFS "vjet">
 	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=8:tpp=2</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 
@@ -66,30 +68,40 @@
         <!ENTITY PARTITION_POST_GFS "vjet">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>3:ppn=16:tpp=1</nodes>">
 	<!ENTITY NATIVE_POST_GFS    "--reservation=&RESERVATION_POST; --export=NONE">
+	<!ENTITY NATIVE_POST_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 
 	<!ENTITY QUEUE_VRFY_GFS     "&QUEUE;">
         <!ENTITY PARTITION_VRFY_GFS "vjet">
 	<!ENTITY WALLTIME_VRFY_GFS  "00:30:00">
 	<!ENTITY RESOURCES_VRFY_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
 	<!ENTITY NATIVE_VRFY_GFS    "--reservation=&RESERVATION_POST; --export=NONE">
+	<!ENTITY NATIVE_VRFY_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
+	<!ENTITY NATIVE_VRFY_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_ARCH_GFS "&PARTITION_SERVICE;">
 	<!ENTITY WALLTIME_ARCH_GFS  "06:00:00">
 	<!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
 	<!ENTITY MEMORY_ARCH_GFS    "2048M">
+	<!ENTITY NATIVE_ARCH_GFS    "--export=NONE"> 
 	<!ENTITY NATIVE_ARCH_GFS    "--reservation=&RESERVATION_POST; --export=NONE"> 
+
+	<!ENTITY QUEUE_DELRES_GFS     "&QUEUE;">
+        <!ENTITY PARTITION_DELRES_GFS "&PARTITION_SERVICE;">
+	<!ENTITY WALLTIME_DELRES_GFS  "00:05:00">
+	<!ENTITY RESOURCES_DELRES_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
+	<!ENTITY NATIVE_DELRES_GFS    "--export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;" cyclelifespan="0:25:00:00">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
-	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+	<cycledef activation_offset="04:00:00" group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
 <task name="gfsfcst" cycledefs="gfs" maxtries="&MAXTRIES_FCST;">
 
@@ -125,6 +137,8 @@
 	</dependency>
 
 </task>
+<!--
+-->
 
 <metatask name="gfspost">
 
@@ -168,7 +182,7 @@
 
 <task name="gfsvrfy" cycledefs="gfs" maxtries="&MAXTRIES;">
 
-	<command>&JOBS_DIR;/vrfy.sh</command>
+	<command>&JOBS_DIR;/vrfy_l128.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsvrfy_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>
@@ -186,19 +200,20 @@
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 
 	<dependency>
-		<and>
-			<metataskdep metatask="gfspost"/>
-			<datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/gfs.t@Hz.pgrb2.0p25.f168</cyclestr></datadep>
-		</and>
+		<metataskdep metatask="gfspost"/>
 	</dependency>
 
 </task>
 
-<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
+<!--
+-->
+<!--<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true"> -->
+<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/arch_gsd.sh</command>
 
@@ -220,6 +235,7 @@
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 
 	<dependency>
 		<and>
@@ -227,9 +243,50 @@
 			<streq><left>&ARCHIVE_TO_HPSS;</left><right>YES</right></streq>
 		</and>
 	</dependency>
-
 </task>
+
 <!--
 -->
+<!--
+-->
+<task name="del_fcstres" cycledefs="gfs" maxtries="1">
+	<command>&JOBS_DIR;/delete_res.sh</command>
 
+	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_DELRES_GFS;</queue>
+	<partition>&PARTITION_DELRES_GFS;</partition>
+	&RESOURCES_DELRES_GFS;
+	<walltime>&WALLTIME_DELRES_GFS;</walltime>
+	<native>&NATIVE_DELRES_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/delresfcst.log</cyclestr></join>
+
+	<envar><name>RESERVATION</name><value>&RESERVATION_FCST;</value></envar>
+	<dependency>
+		<taskdep task="gfsfcst"/>
+	</dependency>
+</task>
+
+<task name="del_postres" cycledefs="gfs" maxtries="1" final="true">
+	<command>&JOBS_DIR;/delete_res.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_DELRES_GFS;</queue>
+	<partition>&PARTITION_DELRES_GFS;</partition>
+	&RESOURCES_DELRES_GFS;
+	<walltime>&WALLTIME_DELRES_GFS;</walltime>
+	<native>&NATIVE_DELRES_GFS;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/delrespost.log</cyclestr></join>
+
+	<envar><name>RESERVATION</name><value>&RESERVATION_POST;</value></envar>
+	<dependency>
+             <and>
+		<taskdep task="gfsarch"/>
+		<taskdep task="del_fcstres"/>
+             </and>
+	</dependency>
+</task>
 </workflow>

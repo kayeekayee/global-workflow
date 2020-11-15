@@ -51,16 +51,17 @@
 	<!-- ROCOTO parameters that control workflow -->
 	<!ENTITY CYCLETHROTTLE "5">
 	<!ENTITY TASKTHROTTLE  "25">
-	<!ENTITY MAXTRIES_FCST "1">
-	<!ENTITY MAXTRIES      "1">
+	<!ENTITY MAXTRIES_FCST "2">
+	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
 
-	<!ENTITY QUEUE_FCST_GFS     "&QUEUE_DEBUG;">
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
+	<!ENTITY QUEUE_FCST_GFS     "&QUEUE_DEBUG;">
 	<!ENTITY WALLTIME_FCST_GFS  "00:30:00">
 	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
-        <!ENTITY PARTITION_FCST_GFS "vjet">
+        <!ENTITY PARTITION_FCST_GFS "xjet">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>160:ppn=6:tpp=4</nodes>">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=8:tpp=2</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
@@ -173,7 +174,7 @@
 
 <task name="gfsvrfy" cycledefs="gfs" maxtries="&MAXTRIES;">
 
-	<command>&JOBS_DIR;/vrfy.sh</command>
+	<command>&JOBS_DIR;/vrfy_l128.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsvrfy_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>

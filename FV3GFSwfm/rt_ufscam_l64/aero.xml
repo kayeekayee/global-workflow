@@ -19,8 +19,8 @@
 	<!ENTITY CASE     "C768">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201909141200">
-	<!ENTITY EDATE    "201909141200">
+	<!ENTITY SDATE    "202009170000">
+	<!ENTITY EDATE    "202009170000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -29,7 +29,7 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
 	<!ENTITY ROTDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
-	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS">
+	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
 	<!ENTITY ICSDIR "/lfs4/HFIP/gsd-fv3-hfip/FV3_ICs_GFS">
         <!ENTITY SCR_DIR "/lfs4/HFIP/gsd-fv3-hfip/Judy.K.Henderson/scratch//BMC/gsd-ccpp-jet/FV3GFSwfm/scripts">
         <!ENTITY PUBDIR "/public/data/grids/gfs/nemsio">
@@ -47,6 +47,7 @@
 	<!ENTITY SCHEDULER  "slurm">
         <!ENTITY RESERVATION_PRE "fv3-hj-pre-00">
         <!ENTITY RESERVATION_FCST "fv3-hj-fcst-00">
+        <!ENTITY RESERVATION_POST "fv3-hj-post-00">
 
 	<!-- Toggle HPSS archiving -->
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
@@ -76,6 +77,7 @@
 	<!ENTITY PARTITION_AEROIC_GFS "vjet">
         <!ENTITY WALLTIME_AEROIC_GFS  "00:40:00">
         <!ENTITY RESOURCES_AEROIC_GFS "<nodes>1:ppn=3</nodes>">
+	<!ENTITY NATIVE_AEROIC_GFS    "--reservation=&RESERVATION_POST; --export=NONE">
 	<!ENTITY NATIVE_AEROIC_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->

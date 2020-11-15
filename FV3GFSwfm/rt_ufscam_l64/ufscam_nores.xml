@@ -21,8 +21,7 @@
 	<!-- Experiment parameters such as starting, ending dates -->
 	<!ENTITY SDATE    "201909141200">
 	<!ENTITY EDATE    "201909141200">
-	<!ENTITY EDATE    "201907110000">
-	<!ENTITY INTERVAL "24:00:00">
+	<!ENTITY INTERVAL "12:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
@@ -58,11 +57,11 @@
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
         <!ENTITY PARTITION_FCST_GFS "xjet">
 	<!ENTITY WALLTIME_FCST_GFS  "03:00:00">
-	<!ENTITY RESOURCES_FCST_GFS "<nodes>112:ppn=8:tpp=2</nodes>">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>112:ppn=12:tpp=2</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
-	<!ENTITY WALLTIME_POST_GFS  "01:00:00">
+	<!ENTITY WALLTIME_POST_GFS  "00:45:00">
         <!ENTITY PARTITION_POST_GFS "vjet">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>3:ppn=16:tpp=1</nodes>">
 	<!ENTITY NATIVE_POST_GFS    "--export=NONE">

@@ -12,7 +12,7 @@
   <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
-  <!ENTITY PARTITION_JET "<partition>sjet,vjet,tjet,xjet</partition>">
+  <!ENTITY PARTITION_JET "<partition>sjet,vjet,xjet,kjet</partition>">
   %jet;
 
 ]>
@@ -26,11 +26,11 @@
   <cycledef>202007240000 202909030000 24:00:00</cycledef>
   <cycledef group="g1">0 0 23-31 * 2020-2021 * </cycledef>
 
-  <metatask name="g2hfipPlots">
+  <metatask name="g2hfipPlots" >
     <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168</var>
     &hfipPlot_task;
   </metatask>  
-  <metatask name="g1hfipPlots">
+  <metatask name="g1hfipPlots" >
     <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168</var>
     &hfipPlotG1_task;
   </metatask>  
