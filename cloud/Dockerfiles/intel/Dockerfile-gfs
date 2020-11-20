@@ -42,5 +42,5 @@ COPY ./scripts/copy_deps.sh /opt/copy_deps.sh
 
 # .bashrc
 ARG PP=/etc/bashrc
-RUN sed -i '1i source /opt/setup.linux.intel && GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP
+RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP
 

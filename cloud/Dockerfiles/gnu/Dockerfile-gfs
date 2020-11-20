@@ -45,4 +45,4 @@ RUN cd /opt && ./patch_gfs.sh && \
 
 # .bashrc
 ARG PP=/etc/bash.bashrc
-RUN sed -i '1i source /opt/setup.linux.gnu && GFS_LIBS_DIR=/opt && COMP=gnu source /opt/global-workflow/modulefiles/setup.linux' $PP
+RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=gnu source /opt/global-workflow/modulefiles/setup.linux' $PP
