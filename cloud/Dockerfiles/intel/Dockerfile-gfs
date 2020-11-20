@@ -14,9 +14,9 @@ RUN ln -sf /bin/echo /usr/bin/module && \
     ln -sf /bin/bash /usr/bin/sbatch
 
 # Rocoto
-RUN apt-get -y update && \
-    apt-get -y install ruby-dev python-pip bc && \
-    pip install numpy && \
+RUN dnf -y update && \
+    dnf -y install ruby-devel python3-pip sqlite-devel bc && \
+    pip3 install numpy && \
     cd /opt && git clone https://github.com/christopherwharrop/rocoto.git && \
     cd rocoto && bash ./INSTALL
 
@@ -38,8 +38,9 @@ COPY ./patch_fv3.sh /opt/patch_fv3.sh
 COPY ./scripts/build_gfs.sh /opt/build_gfs.sh
 COPY ./scripts/run_bash_command /usr/bin
 COPY ./patches /opt/patches
+COPY ./scripts/copy_deps.sh /opt/copy_deps.sh
 
 # .bashrc
-ARG PP=/etc/bash.bashrc
-RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP
+ARG PP=/etc/bashrc
+RUN sed -i '1i source /opt/setup.linux.intel && GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP
 

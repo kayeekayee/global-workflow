@@ -235,7 +235,7 @@ index cb622350..fa180c58 100644
    ! if a 5th arg present, it's a filename to write out ensemble spread
    ! (only used for ncio)
 -  if (nargs() > 5) then
-+  if (nargc() > 5) then
++  if (nargs() > 5) then
       call getarg(5,filenameoutsprd)
       write_spread_ncio = .true.
       if (mype == 0) print *,'computing ensemble spread'

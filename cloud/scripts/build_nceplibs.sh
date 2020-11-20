@@ -23,19 +23,6 @@ else
 fi
 
 #################################
-## wgrib2
-#################################
-cd $SRC_DIR && rm -rf /usr/local/grib2 && \
-   mkdir -p /usr/local/grib2 && \
-   wget ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz.v2.0.8 -O wgrib2.tgz && \
-   tar -xf wgrib2.tgz && \
-   mv grib2/ /usr/local/grib2 && \
-   cd /usr/local/grib2/grib2 && \
-   FC=$FC CC=$CC make && FC=$FC CC=$CC make lib && rm -rf /usr/local/bin/wgrib2 && \
-   ln -s /usr/local/grib2/grib2/wgrib2/wgrib2 /usr/local/bin/wgrib2 && \
-   rm -rf wgrib2.tgz
-
-#################################
 ## libjasper
 #################################
 cd $SRC_DIR && git clone https://github.com/mdadams/jasper.git && \
@@ -46,34 +33,55 @@ cd $SRC_DIR && git clone https://github.com/mdadams/jasper.git && \
     cd ../.. && \
     rm -fr jasper
 
+#################################
+## wgrib2
+#################################
+if [ "$COMP" = "intel" ]; then
+   export COMP_SYS=intel_linux
+fi
+cd $SRC_DIR && rm -rf /usr/local/grib2 && \
+   mkdir -p /usr/local/grib2 && \
+   wget ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz.v2.0.8 -O wgrib2.tgz && \
+   tar -xf wgrib2.tgz && \
+   mv grib2/ /usr/local/grib2 && \
+   cd /usr/local/grib2/grib2 && \
+   FC=$FC CC=$CC make && FC=$FC CC=$CC make lib && rm -rf /usr/local/bin/wgrib2 && \
+   ln -s /usr/local/grib2/grib2/wgrib2/wgrib2 /usr/local/bin/wgrib2 && \
+   rm -rf wgrib2.tgz
+
 #######################################
 ## Old nceplibs
 #######################################
 VER=NCEPlibs-20190820
 export JASPER_INC=/usr/local/include/jasper
+if [ "$COMP" = "gnu" ]; then
 export PNG_INC=/usr/include/x86_64-linux-gnu
+else
+export PNG_INC=/usr/include
+fi
 export NETCDF=/usr/local
 export NETCDF_INC=/usr/local/include
 cd $SRC_DIR && \
     git clone https://github.com/NCAR/NCEPlibs.git && \
     mv NCEPlibs $VER && \
     cd $VER && \
-    git checkout 500fa50e234fa34c7336b61ea41 -b nov5 && \
+    git checkout 93c9f7b9560336f340c44a -b temp && \
+    sed '15,16d' Makefile > a && mv a Makefile && \
     mkdir $INSTALL_DIR/$VER && \
     yes | ./make_ncep_libs.sh -s linux -c ${COMP} -d ${INSTALL_DIR}/${VER} -a upp -o 0 && \
+    ln -sf ${INSTALL_DIR}/${VER}/lib/libw3emc_v2.2.0_d.a ${INSTALL_DIR}/${VER}/lib/libw3emc_d.a && \
     cd .. && \
     rm -fr ${VER}
-
 #############################################################
 # Compile NCEP libraries needed for gfs. Clone the required 
 # reposistories from https://vlab.ncep.noaa.gov
 #############################################################
 
 # g2tmpl
-cd $SRC_DIR/NCEPLIBS-g2tmpl && libver='g2tmpl_v1.6.0' bash ./build_g2tmpl.sh gnu_general build && cd ../..
+cd $SRC_DIR/NCEPLIBS-g2tmpl && libver='g2tmpl_v1.6.0' bash ./build_g2tmpl.sh ${COMP}_general build && cd ../..
 
 # gfsio
-cd ${SRC_DIR}/NCEPLIBS-gfsio && bash ./build_gfsio.sh gnu_general build prefix=${PWD} && cd ../..
+cd ${SRC_DIR}/NCEPLIBS-gfsio && bash ./build_gfsio.sh ${COMP}_general build prefix=${PWD} && cd ../..
 
 #bufr
 cd ${SRC_DIR}/NCEPLIBS-bufr/src && COMP=${COMP} ./makebufrlib.sh && cd ../..
@@ -147,8 +155,10 @@ export BUFR_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_4_64.a
 export G2_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_4.a
 export G2_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_d.a
 export G2_INC4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_4
+export G2_INCd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_d
+export IP_INCd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/v3.0.1/include/ip_v3.0.1_d
 export JASPER_LIB=-ljasper
 export PNG_LIB=-lpng
 export Z_LIB=-lz
-cd /opt/NCEPLIBS-grib_util/sorc && bash ./install_all_grib_util_linux.sh  && cd ../..
+cd /opt/NCEPLIBS-grib_util/sorc && machine_lc=linux.${COMP} bash ./install_all_grib_util_linux.sh  && cd ../..
 )

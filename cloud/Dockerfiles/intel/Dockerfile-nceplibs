@@ -3,10 +3,10 @@ FROM ${REPO}/esmf-intel:latest
 MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
 
 RUN dnf update -y && \
+    dnf --enablerepo=PowerTools install -y lapack-devel && \
     dnf install -y --enablerepo=PowerTools \
         redhat-lsb-core \
         curl-devel \
-        lapack-devel \
         blas-devel \
         libpng-devel \
         bzip2-devel \
@@ -25,7 +25,7 @@ RUN dnf update -y && \
         xorg-x11-xbitmaps  \
         libaec-devel \
         zlib-devel \
-        libboost-devel \
+        boost-devel \
         curl \
         zip \
         unzip \

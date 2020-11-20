@@ -100,7 +100,11 @@ export W3NCO_DIR=${GFS_LIBS_DIR}/NCEPlibs-w3nco/src
 
 export JASPER_INC=${INSTALL_DIR}/include/jasper
 export JASPER_LIB=-ljasper
+if [ "$COMP" = "gnu" ]; then
 export PNG_INC=/usr/include/x86_64-linux-gnu
+else
+export PNG_INC=/usr/include
+fi
 export PNG_LIB=-lpng
 export Z_LIB=-lz
 export Z_INC=${INSTALL_DIR}/include

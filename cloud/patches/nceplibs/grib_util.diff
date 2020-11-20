@@ -80,10 +80,10 @@ index 0000000..8c78282
 +	-rm -f $(SRCS) makefile
 diff --git sorc/cnvgrib.fd/makefile_linux.intel sorc/cnvgrib.fd/makefile_linux.intel
 new file mode 100755
-index 0000000..bc969cc
+index 0000000..0a7bc7f
 --- /dev/null
 +++ sorc/cnvgrib.fd/makefile_linux.intel
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,56 @@
 +SHELL=/bin/sh
 +#
 +SRCS=	gds2gdt.f pds2pdt.f pds2pdtens.f cnvgrib.f cnv12.f cnv22.f \
@@ -99,13 +99,10 @@ index 0000000..bc969cc
 +# CMD		Name of the executable
 +# PROFLIB	Library needed for profiling
 +#
-+FC =		ftn
++FC =		ifort
 +
-+#INC= /nwprod/lib/incmod/g2_4
 +INC= ${G2_INC4}
 +
-+#LIBS= -L/nwprod/lib -lg2_4 -lw3nco_4 -lbacio_4 \
-+	-ljasper -lpng -lz
 +LIBS=   ${G2_LIB4} ${W3NCO_LIB4} ${BACIO_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB}
 +CMD =		cnvgrib
 +PROFLIB =	-lprof
@@ -114,14 +111,14 @@ index 0000000..bc969cc
 +# To compile with flowtracing turned on, use the second line
 +# To compile giving profile additonal information, use the third line
 +# WARNING:  SIMULTANEOUSLY PROFILING AND FLOWTRACING IS NOT RECOMMENDED 
-+FFLAGS =        -g -O3 -I $(INC) -axCORE-AVX2
++FFLAGS =        -O3 -g -I $(INC)
 +#FFLAGS =	 -F
 +#FFLAGS =	 -Wf"-ez"
 +
 +# Lines from here on down should not need to be changed.  They are the
 +# actual rules which make uses to build a.out.
 +#
-+all:		$(CMD)
++$(phony all):	$(CMD)
 +
 +$(CMD):		$(OBJS)
 +	$(FC) $(LDFLAGS) -o $(@) $(OBJS) $(LIBS)
@@ -342,7 +339,7 @@ index 0000000..1395d23
 +	-rm -f $(OBJS)
 diff --git sorc/copygb2.fd/makefile_linux.intel sorc/copygb2.fd/makefile_linux.intel
 new file mode 100755
-index 0000000..cf2a8e6
+index 0000000..2104f87
 --- /dev/null
 +++ sorc/copygb2.fd/makefile_linux.intel
 @@ -0,0 +1,61 @@
@@ -351,7 +348,7 @@ index 0000000..cf2a8e6
 +SHELL=	/bin/sh
 +FC =ifort
 +CMD=	copygb2
-+FOPTS=  -O3 -g -r8 -convert big_endian -auto -mkl
++FOPTS=  -fpp -O3 -g -r8 -convert big_endian -auto -mkl
 +LOPTS=  -static-intel -mkl -qopenmp
 +INCS= -I${G2_INCd} -I${IP_INCd}
 +OBJS  = copygb2.o \
@@ -634,7 +631,7 @@ index 0000000..40905c5
 +	-rm -f $(OBJS)
 diff --git sorc/grb2index.fd/makefile_linux.intel sorc/grb2index.fd/makefile_linux.intel
 new file mode 100755
-index 0000000..4d38e9b
+index 0000000..157117d
 --- /dev/null
 +++ sorc/grb2index.fd/makefile_linux.intel
 @@ -0,0 +1,21 @@
@@ -642,7 +639,7 @@ index 0000000..4d38e9b
 +# This makefile was produced by fmjif at 17:21:11 on 97/02/24.
 +SHELL=	/bin/sh
 +CMD=	grb2index
-+FOPTS=  -g -O3 -convert big_endian
++FOPTS=  -fpp -g -O3 -convert big_endian
 +LOPTS=	
 +INCS=	
 +OBJS=	grb2index.o
@@ -737,7 +734,7 @@ index 0000000..e32deaf
 +	-rm -f $(OBJS)
 diff --git sorc/grbindex.fd/makefile_linux.intel sorc/grbindex.fd/makefile_linux.intel
 new file mode 100755
-index 0000000..d6a920d
+index 0000000..325bc6e
 --- /dev/null
 +++ sorc/grbindex.fd/makefile_linux.intel
 @@ -0,0 +1,21 @@
@@ -745,7 +742,7 @@ index 0000000..d6a920d
 +# This makefile was produced by fmjif at 17:21:11 on 97/02/24.
 +SHELL=  /bin/sh
 +CMD=    grbindex
-+FOPTS=  -g -O3 -assume noold_ldout_format -convert big_endian 
++FOPTS=  -fpp -g -O3 -assume noold_ldout_format -convert big_endian 
 +LOPTS=
 +INCS=
 +OBJS=   grbindex.o
@@ -894,7 +891,7 @@ index 0000000..827337f
 +	-rm -f $(SRCS) makefile
 diff --git sorc/grib2grib.fd/makefile_linux.intel sorc/grib2grib.fd/makefile_linux.intel
 new file mode 100755
-index 0000000..851bf5a
+index 0000000..16609ca
 --- /dev/null
 +++ sorc/grib2grib.fd/makefile_linux.intel
 @@ -0,0 +1,83 @@
@@ -951,7 +948,7 @@ index 0000000..851bf5a
 +# To compile with flowtracing turned on, use the second line
 +# To compile giving profile additonal information, use the third line
 +# WARNING:  SIMULTANEOUSLY PROFILING AND FLOWTRACING IS NOT RECOMMENDED 
-+FFLAGS =        -g -O3 -r8 -i8 -assume noold_ldout_format
++FFLAGS =        -fpp -g -O3 -r8 -i8 -assume noold_ldout_format
 +#FFLAGS =	 -F
 +#FFLAGS =	 -Wf"-ez"
 +

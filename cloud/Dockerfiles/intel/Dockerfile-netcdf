@@ -4,7 +4,6 @@ MAINTAINER Daniel Abdi <daniel.abdi@noaa.gov>
 RUN dnf update -y && \
     dnf install -y \
         ca-certificates \
-        environment-modules \
         make \
         cmake \
         gcc \
