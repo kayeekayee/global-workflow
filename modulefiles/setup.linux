@@ -10,7 +10,7 @@ export COMP=${COMP:-gnu}
 #%Module######################################################################
 ##
 
-echo "Setting environment variables for gnu compilers"
+echo "Setting environment variables for $COMP compilers"
 
 ##
 ## load programming environment: compiler, flags, paths
@@ -18,19 +18,19 @@ echo "Setting environment variables for gnu compilers"
 
 if [ "$COMP" = "gnu" ]; then
 
-export CC=$(which mpicc)
-export CXX=$(which mpicxx)
-export F77=$(which mpif77)
-export F90=$(which mpif90)
-export FC=$(which mpif90)
+export CC=mpicc
+export CXX=mpicxx
+export F77=mpif77
+export F90=mpif90
+export FC=mpif90
 
 else
 
-export CC=$(which mpiicc)
-export CXX=$(which mpiicpc)
-export F77=$(which mpiifort)
-export F90=$(which mpiifort)
-export FC=$(which mpiifort)
+export CC=mpiicc
+export CXX=mpiicpc
+export F77=mpiifort
+export F90=mpiifort
+export FC=mpiifort
 
 fi
 
