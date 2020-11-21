@@ -1453,7 +1453,7 @@ index d2770ede..d3269584 100755
 +       cat ${HOME}/.output.log
 +       echo "Job finished."
 +       set -x
-+   fi
++   fi; $( exit `tail -1 ${HOME}/.output.log` )
 +fi
 +
  

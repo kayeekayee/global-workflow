@@ -11,5 +11,6 @@ tail -f $IPC_FILE 2>/dev/null |
 while read line; do
    cat /dev/null >$OUT_FILE
    bash -c "$line" &>$OUT_FILE
+   echo $? &>>$OUT_FILE
    cat /dev/null >$IPC_FILE
 done &

@@ -156,7 +156,7 @@ index 7e8bc36..025233d 100755
 +       cat ${HOME}/.output.log
 +       echo "Job finished."
 +       set -x
-+   fi
++   fi; $( exit `tail -1 ${HOME}/.output.log` )
 +fi
  
  export ERR=$?

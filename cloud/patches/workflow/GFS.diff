@@ -36,7 +36,7 @@ index 2fc8d911..30af408e 100755
 +       cat ${HOME}/.output.log
 +       echo "Job finished."
 +       set -x
-+   fi
++   fi; $( exit `tail -1 ${HOME}/.output.log` )
 +fi
  
  sh $USHbufrsnd/gfs_bfr2gpk.sh
@@ -80,7 +80,7 @@ index 66f0d81d..e975d765 100755
 +       cat ${HOME}/.output.log
 +       echo "Job finished."
 +       set -x
-+   fi
++   fi; $( exit `tail -1 ${HOME}/.output.log` )
 +fi
  export ERR=$?
  export err=$ERR
