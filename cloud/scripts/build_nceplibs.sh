@@ -47,7 +47,7 @@ cd $SRC_DIR && rm -rf /usr/local/grib2 && \
    cd /usr/local/grib2/grib2 && \
    FC=$FC CC=$CC make && FC=$FC CC=$CC make lib && rm -rf /usr/local/bin/wgrib2 && \
    ln -s /usr/local/grib2/grib2/wgrib2/wgrib2 /usr/local/bin/wgrib2 && \
-   rm -rf wgrib2.tgz
+   rm -rf /opt/wgrib2.tgz
 
 #######################################
 ## Old nceplibs

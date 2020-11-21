@@ -5,7 +5,7 @@ if ! [ -x "$(command -v docker)" ]; then
   exit 1
 fi
 
-REPO=${REPO:-dshawul}
+REPO=${REPO:-noaagsl}
 GERRIT_ID=${GERRIT_ID:-gerrit}
 SSH_CONFIG=${SSH_CONFIG:-${HOME}/.ssh/config}
 
@@ -51,7 +51,7 @@ build_image ${IMAGE_NAME} ${DOCKER_FILE} "${COMMAND}"
 #gfs
 IMAGE_NAME=${REPO}/gfs-intel
 DOCKER_FILE=Dockerfiles/intel/Dockerfile-gfs
-COMMAND="cd /opt; source intel_comp.sh; ./patch_gfs.sh; cd global-workflow/sorc; ./build_all.sh; ./link_fv3gfs.sh emc linux.intel; ./copy_deps.sh"
+COMMAND="cd /opt; source intel_comp.sh; ./patch_gfs.sh; cd global-workflow/sorc; ./build_all.sh; ./link_fv3gfs.sh emc linux.intel; cd /opt && ./copy_deps.sh"
 build_image ${IMAGE_NAME} ${DOCKER_FILE} "${COMMAND}"
 
 #fv3
