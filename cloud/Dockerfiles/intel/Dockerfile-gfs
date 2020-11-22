@@ -10,8 +10,7 @@ RUN cd /opt && wget https://www.earthsystemgrid.org/dataset/ncl.662.dap/file/$PP
 
 # Paths
 RUN ln -sf /bin/echo /usr/bin/module && \
-    ln -sf /bin/bash /bin/sh && \
-    ln -sf /bin/bash /usr/bin/sbatch
+    ln -sf /bin/bash /bin/sh
 
 # Rocoto
 RUN dnf -y update && \
@@ -42,5 +41,6 @@ COPY ./scripts/copy_deps.sh /opt/copy_deps.sh
 
 # .bashrc
 ARG PP=/etc/bashrc
-RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP
+RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP && \
+    /opt/global-workflow/cloud/scripts/link_slurm.sh
 
