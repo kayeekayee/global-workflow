@@ -49,7 +49,8 @@ cd NCEPLIBS-landsfcutil; git checkout  ff60eee8f56a0b178d58a -b temp; cd -
 
 #nemsio
 git clone https://github.com/NOAA-EMC/NCEPLIBS-nemsio.git
-cd NCEPLIBS-nemsio; git checkout  c2c7700f9062f6c699192 -b temp; cd -
+#cd NCEPLIBS-nemsio; git checkout  c2c7700f9062f6c699192 -b temp; cd -
+cd NCEPLIBS-nemsio; git checkout  9f55d8be09d29f8ebad8b49644 -b temp; cd -
 
 #nemsiogfs
 git clone https://github.com/NOAA-EMC/NCEPLIBS-nemsiogfs.git

@@ -44,7 +44,7 @@ export HDF5=${INSTALL_DIR}
 ##
 ## NCEP libraries
 ##
-export NEMSIO_LIB=${GFS_LIBS_DIR}/NCEPLIBS-nemsio/libnemsio_v2.2.4.a
+export NEMSIO_LIB=${GFS_LIBS_DIR}/NCEPLIBS-nemsio/libnemsio_v2.2.3.a
 export NEMSIOGFS_LIB=${GFS_LIBS_DIR}/NCEPLIBS-nemsiogfs/libnemsiogfs_v2.2.0.a
 export BACIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_4/libbacio_v2.1.0_4.a
 export BACIO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_8/libbacio_v2.1.0_8.a
@@ -72,7 +72,7 @@ export GFSIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-gfsio/src/libgfsio_v1.1.0_4.a
 export LANDSFCUTIL_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/liblandsfcutil_v2.1.0_4.a
 export LANDSFCUTIL_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-landsfcutil/landsfcutil/v2.1.0/liblandsfcutil_v2.1.0_d.a
 
-export NEMSIO_INC=${GFS_LIBS_DIR}/NCEPLIBS-nemsio/nemsio_v2.2.4
+export NEMSIO_INC=${GFS_LIBS_DIR}/NCEPLIBS-nemsio/nemsio_v2.2.3
 export NEMSIOGFS_INC=${GFS_LIBS_DIR}/NCEPLIBS-nemsiogfs/nemsiogfs_v2.2.0
 export BACIO_INC4=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_4/incmod/bacio_v2.1.0_4
 export BACIO_INC8=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_8/incmod/bacio_v2.1.0_8

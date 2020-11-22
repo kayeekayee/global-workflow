@@ -102,18 +102,19 @@ cd ${SRC_DIR}/NCEPLIBS-sfcio && ./make_sfcio_lib.sh ${FC}.setup && cd ..
 cd ${SRC_DIR}/NCEPLIBS-sigio && ./make_sigio_lib.sh ${FC}.setup && cd ..
 
 #nemsio
-cd ${SRC_DIR}/NCEPLIBS-nemsio/src && VER="v2.2.4" FCOMP=${FCOMP} LIBDIR=../ make && cd ..
+NEMSIO_VER="v2.2.3"
+cd ${SRC_DIR}/NCEPLIBS-nemsio/src && VER=$NEMSIO_VER FCOMP=${FCOMP} LIBDIR=../ make && cd ..
 
 #nemsiogfs
 cd ${SRC_DIR}/NCEPLIBS-nemsiogfs/src && \
-   VER="v2.2.0" FCOMP=${FCOMP} FCFLAGS="-O3 -I${SRC_DIR}/NCEPLIBS-nemsio/nemsio_v2.2.4" LIBDIR=../ make && cd ..
+   VER="v2.2.0" FCOMP=${FCOMP} FCFLAGS="-O3 -I${SRC_DIR}/NCEPLIBS-nemsio/nemsio_${NEMSIO_VER}" LIBDIR=../ make && cd ..
 
 #w3emc
 cd ${SRC_DIR}/NCEPLIBS-w3emc && \
     SIGIO_INC4=${SRC_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/incmod/sigio_v2.1.0 \
     SIGIO_LIB4=${SRC_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/libsigio_v2.1.0.a \
-    NEMSIO_INC=${SRC_DIR}/NCEPLIBS-nemsio/nemsio_v2.2.4 \
-    NEMSIO_LIB=${SRC_DIR}/NCEPLIBS-nemsio/libnemsio_v2.2.4.a \
+    NEMSIO_INC=${SRC_DIR}/NCEPLIBS-nemsio/nemsio_${NEMSIO_VER} \
+    NEMSIO_LIB=${SRC_DIR}/NCEPLIBS-nemsio/libnemsio_${NEMSIO_VER}.a \
     ./make_w3emc_lib.sh ${FC}.setup && cd ..
 
 #w3nco
