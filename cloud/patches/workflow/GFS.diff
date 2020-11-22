@@ -1,3 +1,47 @@
+diff --git jobs/rocoto/getic.sh jobs/rocoto/getic.sh
+index 23607069..e308a4ca 100755
+--- jobs/rocoto/getic.sh
++++ jobs/rocoto/getic.sh
+@@ -110,15 +110,17 @@ if [ $ics_from = "opsgfs" ]; then
+     # Get initial conditions from HPSS
+     if [ $rc -ne 0 ]; then
+ 
++        source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++
+         # check if the tarball exists
+-        hsi ls -l $tarball
++        run_command hsi ls -l $tarball
+         rc=$?
+         if [ $rc -ne 0 ]; then
+             echo "$tarball does not exist and should, ABORT!"
+             exit $rc
+         fi
+         # get the tarball
+-        htar -xvf $tarball $flanal
++        run_command htar -xvf $tarball $flanal
+         rc=$?
+         if [ $rc -ne 0 ]; then
+             echo "untarring $tarball failed, ABORT!"
+@@ -158,15 +160,17 @@ elif [ $ics_from = "pargfs" ]; then
+     # Get initial conditions from HPSS from retrospective parallel
+     tarball="$HPSS_PAR_PATH/${CDATE}${CDUMP}.tar"
+ 
++    source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++
+     # check if the tarball exists
+-    hsi ls -l $tarball
++    run_command hsi ls -l $tarball
+     rc=$?
+     if [ $rc -ne 0 ]; then
+         echo "$tarball does not exist and should, ABORT!"
+         exit $rc
+     fi
+     # get the tarball
+-    htar -xvf $tarball $flanal
++    run_command htar -xvf $tarball $flanal
+     rc=$?
+     if [ $rc -ne 0 ]; then
+         echo "untarring $tarball failed, ABORT!"
 diff --git scripts/exgfs_postsnd.sh scripts/exgfs_postsnd.sh
 index 2fc8d911..663c4753 100755
 --- scripts/exgfs_postsnd.sh
