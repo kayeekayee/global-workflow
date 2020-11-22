@@ -42,10 +42,16 @@ DOCKER_FILE=Dockerfiles/intel/Dockerfile-esmf
 COMMAND="cd /opt; source intel_comp.sh; COMP=${COMP} ./build_esmf.sh"
 build_image ${IMAGE_NAME} ${DOCKER_FILE} "${COMMAND}"
 
+#crtm-gempak
+IMAGE_NAME=${REPO}/crtm-gempak-intel
+DOCKER_FILE=Dockerfiles/intel/Dockerfile-crtm-gempak
+COMMAND="cd /opt; source intel_comp.sh; COMP=${COMP} ./build_crtm_gempak.sh"
+build_image ${IMAGE_NAME} ${DOCKER_FILE} "${COMMAND}"
+
 #nceplibs
 IMAGE_NAME=${REPO}/nceplibs-intel
 DOCKER_FILE=Dockerfiles/intel/Dockerfile-nceplibs
-COMMAND="cd /opt; ./checkout_nceplibs.sh; source intel_comp.sh; COMP=${COMP} ./build_crtm_gempak.sh; COMP=${COMP} ./build_nceplibs.sh"
+COMMAND="cd /opt; ./checkout_nceplibs.sh; source intel_comp.sh; COMP=${COMP} ./build_nceplibs.sh"
 build_image ${IMAGE_NAME} ${DOCKER_FILE} "${COMMAND}"
 
 #gfs

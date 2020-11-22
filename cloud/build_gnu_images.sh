@@ -29,6 +29,11 @@ IMAGE_NAME=${REPO}/esmf-gnu
 DOCKER_FILE=Dockerfiles/gnu/Dockerfile-esmf
 build_image ${IMAGE_NAME} ${DOCKER_FILE}
 
+#crtm-gempak
+IMAGE_NAME=${REPO}/crtm-gempak-gnu
+DOCKER_FILE=Dockerfiles/gnu/Dockerfile-crtm-gempak
+build_image ${IMAGE_NAME} ${DOCKER_FILE}
+
 #nceplibs
 IMAGE_NAME=${REPO}/nceplibs-gnu
 DOCKER_FILE=Dockerfiles/gnu/Dockerfile-nceplibs
