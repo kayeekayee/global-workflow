@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Emulates htar command = hsi + tar
+
+CMDS=""
+
+while (( "$#" )); do
+  case "$1" in
+     -T)
+       shift 2
+       ;;
+     *)
+       CMDS="$CMDS $1"
+       shift
+       ;;
+  esac
+done
+
+echo "exec tar ${CMDS}"
+exec tar ${CMDS}

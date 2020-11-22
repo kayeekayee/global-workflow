@@ -42,5 +42,6 @@ COPY ./scripts/copy_deps.sh /opt/copy_deps.sh
 # .bashrc
 ARG PP=/etc/bashrc
 RUN sed -i '1i GFS_LIBS_DIR=/opt && COMP=intel source /opt/global-workflow/modulefiles/setup.linux' $PP && \
-    /opt/global-workflow/cloud/scripts/link_slurm.sh
+    /opt/global-workflow/cloud/scripts/link_slurm.sh && \
+    /opt/global-workflow/cloud/scripts/link_hpss.sh
 
