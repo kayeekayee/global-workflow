@@ -1401,61 +1401,28 @@ index 343ca4cb..253eaef2 100644
 + Building sfc_climo_gen (sfc_climo_gen) ................ yes
   
  # -- END --
- 
+
 diff --git ush/global_chgres.sh ush/global_chgres.sh
-index d2770ede..d3269584 100755
+index d2770ede..3b8474b4 100755
 --- ush/global_chgres.sh
 +++ ush/global_chgres.sh
-@@ -515,6 +515,7 @@ EOF
+@@ -515,7 +515,9 @@ EOF
  
  export OMP_NUM_THREADS=${OMP_NUM_THREADS_CH:-${CHGRESTHREAD:-1}}
  
-+if [ -z $GFS_SING_CMD ]; then
-  eval $APRUNC $CHGRESEXEC <<EOF $REDOUT$PGMOUT $REDERR$PGMERR
+- eval $APRUNC $CHGRESEXEC <<EOF $REDOUT$PGMOUT $REDERR$PGMERR
++#launch job
++source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++run_command "eval $APRUNC $CHGRESEXEC <<EOF $REDOUT$PGMOUT $REDERR$PGMERR
    &NAMCHG  LEVS=$LEVS, LONB=$LONB, LATB=$LATB,
             NTRAC=$NTRAC, IDVC=$IDVC, IDSL=$IDSL,
-@@ -524,6 +525,44 @@ export OMP_NUM_THREADS=${OMP_NUM_THREADS_CH:-${CHGRESTHREAD:-1}}
+            LSOIL=$LSOIL, IVSSFC=$IVSSFC, OUTTYP=$OUTTYP,
+@@ -523,7 +525,7 @@ export OMP_NUM_THREADS=${OMP_NUM_THREADS_CH:-${CHGRESTHREAD:-1}}
+            IVEGSRC=$IVEGSRC, TILE_NUM=$TILE_NUM, REGIONAL=$REGIONAL,
             HALO=$HALO, NTILES=$ntiles, $CHGRESVARS
   /
- EOF
-+else
-+   set +x
-+   cat /dev/null >$PWD/.envr;
-+   SIFS=$IFS; IFS=$'\n'
-+   for i in `printenv`; do
-+      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
-+         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
-+         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
-+         echo export $j >>$PWD/.envr
-+      fi
-+   done; IFS=$SIFS
-+   set -x
-+
-+   INP="&NAMCHG  LEVS=$LEVS, LONB=$LONB, LATB=$LATB,
-+           NTRAC=$NTRAC, IDVC=$IDVC, IDSL=$IDSL,
-+           LSOIL=$LSOIL, IVSSFC=$IVSSFC, OUTTYP=$OUTTYP,
-+           IDRT=$IDRT, IALB=$IALB, ISOT=$ISOT,
-+           IVEGSRC=$IVEGSRC, TILE_NUM=$TILE_NUM, REGIONAL=$REGIONAL,
-+           HALO=$HALO, NTILES=$ntiles, $CHGRESVARS
-+    /"
-+   echo $INP >$PWD/.mlcommand
-+   CMD="eval $APRUNC $CHGRESEXEC < $PWD/.mlcommand"
-+   echo "cd $PWD; source $PWD/.envr; $CMD" >${HOME}/.servinp
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       echo "Waiting for job to finish."
-+       set +x
-+   fi
-+
-+   while [ -s ${HOME}/.servinp ]; do sleep 1; done
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       cat ${HOME}/.output.log
-+       echo "Job finished."
-+       set -x
-+   fi; $( exit `tail -1 ${HOME}/.output.log` )
-+fi
-+
+-EOF
++EOF"
  
  export ERR=$?
  export err=$ERR

@@ -119,45 +119,17 @@ index 099f802..951c908 100755
  .SUFFIXES: .F .f .o .f90 .c
  
 diff --git ush/gfs_nceppost.sh ush/gfs_nceppost.sh
-index 7e8bc36..025233d 100755
+index 7e8bc36..2119b20 100755
 --- ush/gfs_nceppost.sh
 +++ ush/gfs_nceppost.sh
-@@ -345,7 +345,37 @@ export CTL=`basename $CTLFILE`
+@@ -345,7 +345,9 @@ export CTL=`basename $CTLFILE`
  ln -sf griddef.out fort.110
  cp ${PARMpost}/nam_micro_lookup.dat ./eta_micro_lookup.dat
  
 -${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}
 +#launch job
-+if [ -z $GFS_SING_CMD ]; then
-+   ${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}
-+else
-+   set +x
-+   cat /dev/null >$PWD/.envr;
-+   SIFS=$IFS; IFS=$'\n'
-+   for i in `printenv`; do
-+      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
-+         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
-+         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
-+         echo export $j >>$PWD/.envr
-+      fi
-+   done; IFS=$SIFS
-+   set -x
-+
-+   echo "cd $PWD; source $PWD/.envr; ${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}" >${HOME}/.servinp
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       echo "Waiting for job to finish."
-+       set +x
-+   fi
-+
-+   while [ -s ${HOME}/.servinp ]; do sleep 1; done
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       cat ${HOME}/.output.log
-+       echo "Job finished."
-+       set -x
-+   fi; $( exit `tail -1 ${HOME}/.output.log` )
-+fi
++source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++run_command ${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}
  
  export ERR=$?
  export err=$ERR

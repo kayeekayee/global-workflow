@@ -1,87 +1,31 @@
 diff --git scripts/exgfs_postsnd.sh scripts/exgfs_postsnd.sh
-index 2fc8d911..30af408e 100755
+index 2fc8d911..663c4753 100755
 --- scripts/exgfs_postsnd.sh
 +++ scripts/exgfs_postsnd.sh
-@@ -161,7 +161,37 @@ mv poe_col cmdfile
+@@ -161,7 +161,9 @@ mv poe_col cmdfile
  cat cmdfile
  chmod +x cmdfile
  
 -${APRUN_POSTSNDCFP} cmdfile
 +#launch job
-+if [ -z $GFS_SING_CMD ]; then
-+   ${APRUN_POSTSNDCFP} cmdfile
-+else
-+   set +x
-+   cat /dev/null >$PWD/.envr;
-+   SIFS=$IFS; IFS=$'\n'
-+   for i in `printenv`; do
-+      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
-+         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
-+         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
-+         echo export $j >>$PWD/.envr
-+      fi
-+   done; IFS=$SIFS
-+   set -x
-+
-+   echo "cd $PWD; source $PWD/.envr; $APRUN_POSTSNDCFP cmdfile" >${HOME}/.servinp
-+   
-+   if [ $VERBOSE = "YES" ] ; then
-+       echo "Waiting for job to finish."
-+       set +x
-+   fi
-+
-+   while [ -s ${HOME}/.servinp ]; do sleep 1; done
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       cat ${HOME}/.output.log
-+       echo "Job finished."
-+       set -x
-+   fi; $( exit `tail -1 ${HOME}/.output.log` )
-+fi
++source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++run_command ${APRUN_POSTSNDCFP} cmdfile
  
  sh $USHbufrsnd/gfs_bfr2gpk.sh
  fi
 diff --git scripts/exglobal_fcst_nemsfv3gfs.sh scripts/exglobal_fcst_nemsfv3gfs.sh
-index 66f0d81d..e975d765 100755
+index 6ed55331..21ceeecc 100755
 --- scripts/exglobal_fcst_nemsfv3gfs.sh
 +++ scripts/exglobal_fcst_nemsfv3gfs.sh
-@@ -1304,8 +1304,38 @@ fi
- # run the executable
+@@ -1305,7 +1305,10 @@ fi
  
  $NCP $FCSTEXECDIR/$FCSTEXEC $DATA/.
-+#launch job
  export OMP_NUM_THREADS=$NTHREADS_FV3
 -$APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
-+if [ -z $GFS_SING_CMD ]; then
-+   $APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
-+else
-+   set +x
-+   cat /dev/null >$PWD/.envr;
-+   SIFS=$IFS; IFS=$'\n'
-+   for i in `printenv`; do
-+      if [[ "$i" = *=* ]] && [[ ! "$i" = *\(* ]] && [[ ! "$i" = *\"* ]] &&  \
-+         [[ ! "$i" = *PATH=* ]] && [[ ! "$i" = *LD_LIBRARY_PATH* ]]; then
-+         j=`echo $i | awk -F'=' '{print $1"=\""$2"\""}'`
-+         echo export $j >>$PWD/.envr
-+      fi
-+   done; IFS=$SIFS
-+   set -x
++#launch job
++source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++run_command $APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
 +
-+   echo "cd $PWD; source $PWD/.envr; $APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2" >${HOME}/.servinp
-+   
-+   if [ $VERBOSE = "YES" ] ; then
-+       echo "Waiting for job to finish."
-+       set +x
-+   fi
-+
-+   while [ -s ${HOME}/.servinp ]; do sleep 1; done
-+
-+   if [ $VERBOSE = "YES" ] ; then
-+       cat ${HOME}/.output.log
-+       echo "Job finished."
-+       set -x
-+   fi; $( exit `tail -1 ${HOME}/.output.log` )
-+fi
  export ERR=$?
  export err=$ERR
  $ERRSCRIPT || exit $err
