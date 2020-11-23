@@ -77,8 +77,24 @@ cd $SRC_DIR && \
 # reposistories from https://vlab.ncep.noaa.gov
 #############################################################
 
+NEMSIO_VER="v2.2.3"
+NEMSIO_GFS_VER="v2.2.0"
+BACIO_VER="v2.1.0"
+SP_VER="v2.0.2"
+W3EMC_VER="v2.3.0"
+W3NCO_VER="v2.0.6"
+IP_VER="v3.0.1"
+BUFR_VER="v11.3.0"
+SIGIO_VER="v2.1.0"
+SFCIO_VER="v1.1.0"
+G2_vER="v3.1.0"
+G2TMPL_VER="v1.6.0"
+GFSIO_VER="v1.1.0"
+LANDSFCUTIL_VER="v2.1.0"
+GRAPHICS_VER="v2.0.0"
+
 # g2tmpl
-cd $SRC_DIR/NCEPLIBS-g2tmpl && libver='g2tmpl_v1.6.0' bash ./build_g2tmpl.sh ${COMP}_general build && cd ../..
+cd $SRC_DIR/NCEPLIBS-g2tmpl && libver="g2tmpl_${G2TMPL_VER}" bash ./build_g2tmpl.sh ${COMP}_general build && cd ../..
 
 # gfsio
 cd ${SRC_DIR}/NCEPLIBS-gfsio && bash ./build_gfsio.sh ${COMP}_general build prefix=${PWD} && cd ../..
@@ -102,24 +118,23 @@ cd ${SRC_DIR}/NCEPLIBS-sfcio && ./make_sfcio_lib.sh ${FC}.setup && cd ..
 cd ${SRC_DIR}/NCEPLIBS-sigio && ./make_sigio_lib.sh ${FC}.setup && cd ..
 
 #nemsio
-NEMSIO_VER="v2.2.3"
 cd ${SRC_DIR}/NCEPLIBS-nemsio/src && VER=$NEMSIO_VER FCOMP=${FCOMP} LIBDIR=../ make && cd ..
 
 #nemsiogfs
 cd ${SRC_DIR}/NCEPLIBS-nemsiogfs/src && \
-   VER="v2.2.0" FCOMP=${FCOMP} FCFLAGS="-O3 -I${SRC_DIR}/NCEPLIBS-nemsio/nemsio_${NEMSIO_VER}" LIBDIR=../ make && cd ..
+   VER=${NEMSIO_GFS_VER} FCOMP=${FCOMP} FCFLAGS="-O3 -I${SRC_DIR}/NCEPLIBS-nemsio/nemsio_${NEMSIO_VER}" LIBDIR=../ make && cd ..
 
 #w3emc
 cd ${SRC_DIR}/NCEPLIBS-w3emc && \
-    SIGIO_INC4=${SRC_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/incmod/sigio_v2.1.0 \
-    SIGIO_LIB4=${SRC_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/libsigio_v2.1.0.a \
+    SIGIO_INC4=${SRC_DIR}/NCEPLIBS-sigio/sigio_${SIGIO_VER}/incmod/sigio_${SIGIO_VER} \
+    SIGIO_LIB4=${SRC_DIR}/NCEPLIBS-sigio/sigio_${SIGIO_VER}/libsigio_${SIGIO_VER}.a \
     NEMSIO_INC=${SRC_DIR}/NCEPLIBS-nemsio/nemsio_${NEMSIO_VER} \
     NEMSIO_LIB=${SRC_DIR}/NCEPLIBS-nemsio/libnemsio_${NEMSIO_VER}.a \
     ./make_w3emc_lib.sh ${FC}.setup && cd ..
 
 #w3nco
 cd ${SRC_DIR}/NCEPLIBS-w3nco && \
-    SIGIO_INC4=${SRC_DIR}/NCEPLIBS-sigio/sigio_v2.1.0/incmod/sigio_v2.1.0 \
+    SIGIO_INC4=${SRC_DIR}/NCEPLIBS-sigio/sigio_${SIGIO_VER}/incmod/sigio_${SIGIO_VER} \
     COMP=${COMP} ./makelibw3_nco.sh  && cd ..
 
 #sp 
@@ -132,32 +147,31 @@ cd ${SRC_DIR}/NCEPLIBS-g2 && COMP=${COMP} source ./modulefiles/g2.linux \
 #prod_util
 cd ${SRC_DIR}/NCEPLIBS-prod_util/sorc && \
    cd fsync_file.cd && CC=${CC} make && cd .. && \
-   cd mdate.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_4.a make && cd .. && \
-   cd ndate.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_4.a make && cd .. && \
-   cd nhour.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_4.a make && cd .. && \
+   cd mdate.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_4.a make && cd .. && \
+   cd ndate.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_4.a make && cd .. && \
+   cd nhour.fd && FC=${FC} W3NCO_LIB4=${SRC_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_4.a make && cd .. && \
    cd ../../
 
 #graphics
-cd ${SRC_DIR}/NCEPLIBS-graphics/v2.0.0/src && \
+cd ${SRC_DIR}/NCEPLIBS-graphics/${GRAPHICS_VER}/src && \
    GFS_LIBS_DIR=/opt COMP=${COMP} ./compile_all_graphics_lib_wcoss.sh linux && cd ../../../
 
 # grib_util
 (
 GFS_LIBS_DIR=/opt
-export W3NCO_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_d.a
-export IP_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/v3.0.1/libip_v3.0.1_d.a
-export SP_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-sp/libsp_v2.0.2_d.a
-export BACIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_4/libbacio_v2.1.0_4.a
-export BACIO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_v2.1.0_8/libbacio_v2.1.0_8.a
-export W3NCO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_4.a
-export W3NCO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_8.a
-export W3NCO_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_v2.0.6_d.a
-export BUFR_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_v11.3.0_4_64.a
-export G2_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_4.a
-export G2_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_v3.1.0_d.a
-export G2_INC4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_4
-export G2_INCd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_v3.1.0_d
-export IP_INCd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/v3.0.1/include/ip_v3.0.1_d
+export IP_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/${IP_VER}/libip_${IP_VER}_d.a
+export SP_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-sp/libsp_${SP_VER}_d.a
+export BACIO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_${BACIO_VER}_4/libbacio_${BACIO_VER}_4.a
+export BACIO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-bacio/bacio_${BACIO_VER}_8/libbacio_${BACIO_VER}_8.a
+export W3NCO_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_4.a
+export W3NCO_LIB8=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_8.a
+export W3NCO_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-w3nco/libw3nco_${W3NCO_VER}_d.a
+export BUFR_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-bufr/libbufr_${BUFR_VER}_4_64.a
+export G2_LIB4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_${G2_VER}_4.a
+export G2_LIBd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/libg2_${G2_VER}_d.a
+export G2_INC4=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_${G2_VER}_4
+export G2_INCd=${GFS_LIBS_DIR}/NCEPLIBS-g2/${COMP}/include/g2_${G2_VER}_d
+export IP_INCd=${GFS_LIBS_DIR}/NCEPLIBS-ip/ip/${IP_VER}/include/ip_${IP_VER}_d
 export JASPER_LIB=-ljasper
 export PNG_LIB=-lpng
 export Z_LIB=-lz
