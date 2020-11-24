@@ -19,14 +19,14 @@ function prep_job {
 
 # Wait until we get a signal job has finished running on host
 function post_job {
-   if [ $VERBOSE = "YES" ] ; then
+   if [ "$VERBOSE" != "NO" ] ; then
        echo "Waiting for job to finish."
        set +x
    fi
 
    while [ -s ${HOME}/.servinp ]; do sleep 1; done
 
-   if [ $VERBOSE = "YES" ] ; then
+   if [ "$VERBOSE" != "NO" ] ; then
        cat ${HOME}/.output.log
        echo "Job finished."
        set -x
