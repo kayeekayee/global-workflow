@@ -1,6 +1,7 @@
 diff --git conf/configure.fv3.linux.intel conf/configure.fv3.linux.intel
-index e69de29..6235397 100644
---- conf/configure.fv3.linux.intel
+new file mode 100644
+index 0000000..e6337b2
+--- /dev/null
 +++ conf/configure.fv3.linux.intel
 @@ -0,0 +1,212 @@
 +## NEMS configuration file
@@ -215,9 +216,23 @@ index e69de29..6235397 100644
 +CPPFLAGS += -traditional
 +EXTLIBS = $(NCEPLIBS) $(ESMF_LIB) $(LDFLAGS) $(NETCDF_LIB)
 +endif
+diff --git modulefiles/linux.gnu/fv3 modulefiles/linux.gnu/fv3
+index c5ee2e1..dcd6f7e 100755
+--- modulefiles/linux.gnu/fv3
++++ modulefiles/linux.gnu/fv3
+@@ -33,7 +33,7 @@ fi
+ ##
+ ## use pre-compiled EMSF library for above compiler / MPI combination
+ ##
+-ESMF_VERSION=8.0.0
++ESMF_VERSION=8.0.0_bs50
+ export ESMFMKFILE=${ESMFMKFILE:-/usr/local/${ESMF_VERSION}/lib/esmf.mk}
+ 
+ ##
 diff --git modulefiles/linux.intel/fv3 modulefiles/linux.intel/fv3
-index e69de29..ae0020d 100755
---- modulefiles/linux.intel/fv3
+new file mode 100644
+index 0000000..cc03139
+--- /dev/null
 +++ modulefiles/linux.intel/fv3
 @@ -0,0 +1,48 @@
 +#!/bin/bash
@@ -255,7 +270,7 @@ index e69de29..ae0020d 100755
 +##
 +## use pre-compiled EMSF library for above compiler / MPI combination
 +##
-+ESMF_VERSION=8.0.0_bs40
++ESMF_VERSION=8.0.0_bs50
 +export ESMFMKFILE=${ESMFMKFILE:-/usr/local/${ESMF_VERSION}/lib/esmf.mk}
 +
 +##

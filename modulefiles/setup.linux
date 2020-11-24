@@ -161,7 +161,7 @@ export CRTM_FIX=${HOMECRTM}/fix
 ## ESMF
 ##
 
-export ESMF_VERSION=${INSTALL_DIR}/esmf-8.0.0_bs40
+export ESMF_VERSION=${INSTALL_DIR}/esmf-8.0.0_bs50
 export ESMF_DIR=${ESMF_VERSION}/
 export ESMF_INC=${ESMF_VERSION}/include
 export ESMF_BIN=${ESMF_VERSION}/bin

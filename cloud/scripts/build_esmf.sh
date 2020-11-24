@@ -13,10 +13,10 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${INSTALL_DIR}/lib
 # esmf
 #####################################
 
-VER=esmf-8.0.0_bs40
+VER=esmf-8.0.0_bs50
 
 #clone the specific snapshot of the repo
-git clone -b ESMF_8_0_0_beta_snapshot_40 --depth 1 https://git.code.sf.net/p/esmf/esmf esmf
+git clone -b ESMF_8_0_0_beta_snapshot_50 --depth 1 https://git.code.sf.net/p/esmf/esmf esmf
 
 #set compiler
 if [ "$COMP" = "intel" ]; then
