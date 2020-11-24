@@ -87,7 +87,7 @@ IP_VER="v3.0.1"
 BUFR_VER="v11.3.0"
 SIGIO_VER="v2.1.0"
 SFCIO_VER="v1.1.0"
-G2_vER="v3.1.0"
+G2_VER="v3.1.0"
 G2TMPL_VER="v1.6.0"
 GFSIO_VER="v1.1.0"
 LANDSFCUTIL_VER="v2.1.0"
@@ -140,9 +140,11 @@ cd ${SRC_DIR}/NCEPLIBS-w3nco && \
 #sp 
 cd ${SRC_DIR}/NCEPLIBS-sp && COMP=${COMP} ./makelibsp.sh_Linux && cd ..
 
-#g2 
+#g2
+(
 cd ${SRC_DIR}/NCEPLIBS-g2 && COMP=${COMP} source ./modulefiles/g2.linux \
 	&& cd src && COMP=${COMP} bash ./makeg2lib_linux.sh && cd ..
+)
 
 #prod_util
 cd ${SRC_DIR}/NCEPLIBS-prod_util/sorc && \
