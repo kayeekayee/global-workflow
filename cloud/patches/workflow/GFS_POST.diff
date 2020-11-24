@@ -117,7 +117,35 @@ index 099f802..951c908 100755
 +endif
  
  .SUFFIXES: .F .f .o .f90 .c
+
+diff --git ush/fv3gfs_downstream_nems.sh ush/fv3gfs_downstream_nems.sh
+index 2833119..8d4f327 100755
+--- ush/fv3gfs_downstream_nems.sh
++++ ush/fv3gfs_downstream_nems.sh
+@@ -99,7 +99,7 @@ fi
  
+ #-----------------------------------------------------
+ #-----------------------------------------------------
+-if [ $machine = WCOSS -o $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 -o $machine = HERA -o $machine = ORION ]; then
++if [ $machine = WCOSS -o $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 -o $machine = HERA -o $machine = ORION -o $machine = LINUX ]; then
+ #-----------------------------------------------------
+ #-----------------------------------------------------
+ export nset=1
+@@ -182,6 +182,14 @@ date
+          nm=$((nm+1))
+      done
+      ${launcher:-"srun --export=ALL"}  -n $nm --multi-prog $DATA/poescript_srun
++  elif [ $machine = LINUX ] ; then
++     if [ -s $DATA/poescript_mpirun ]; then rm -f $DATA/poescript_mpirun; fi
++     touch $DATA/poescript_mpirun
++     cat $DATA/poescript | while read line; do
++         echo "-n 1 $GFS_SING_CMD $line" >> $DATA/poescript_mpirun 
++     done
++     source ${HOMEgfs}/cloud/scripts/run_on_host.sh
++     run_command mpirun --configfile $DATA/poescript_mpirun
+   else
+      $launcher
+   fi
 diff --git ush/gfs_nceppost.sh ush/gfs_nceppost.sh
 index 7e8bc36..2119b20 100755
 --- ush/gfs_nceppost.sh
