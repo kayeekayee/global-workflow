@@ -68,7 +68,7 @@ index 6ed55331..21ceeecc 100755
 -$APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
 +#launch job
 +source ${HOMEgfs}/cloud/scripts/run_on_host.sh
-+run_command $APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2
++run_command "$APRUN_FV3 $DATA/$FCSTEXEC 1>&1 2>&2"
 +
  export ERR=$?
  export err=$ERR

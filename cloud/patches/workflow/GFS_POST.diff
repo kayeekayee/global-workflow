@@ -157,7 +157,7 @@ index 7e8bc36..2119b20 100755
 -${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}
 +#launch job
 +source ${HOMEgfs}/cloud/scripts/run_on_host.sh
-+run_command ${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}
++run_command "${APRUN:-mpirun.lsf} $POSTGPEXEC < itag > outpost_gfs_${VDATE}_${CTL}"
  
  export ERR=$?
  export err=$ERR
