@@ -156,6 +156,13 @@ otherwise, you will get an error message
 
     Cubic: cubed-sphere domain layout(1) must be divided by io_layout(1)
 
+### config.post
+
+We don't have the HWRF coefficient files needed by post (CRTM one's don't work) so
+we need to turn off
+
+    GOESF=NO
+
 ### the rocoto xml file, c48.xml
 
 If necessary, edit lines like below to modify the number of nodes, processors per node, threads per process
