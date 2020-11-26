@@ -1,10 +1,11 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DEST=${1:-/usr/bin}
 
-ln -sf ${DIR}/slurm/sbatch /usr/bin/sbatch
-ln -sf ${DIR}/slurm/scancel /usr/bin/scancel
-ln -sf ${DIR}/slurm/squeue /usr/bin/squeue
-ln -sf ${DIR}/slurm/sacct /usr/bin/sacct
-ln -sf ${DIR}/slurm/sinfo /usr/bin/sinfo
-ln -sf ${DIR}/slurm/srun /usr/bin/srun
+ln -sf ${DIR}/slurm/sbatch $DEST/sbatch
+ln -sf ${DIR}/slurm/scancel $DEST/scancel
+ln -sf ${DIR}/slurm/squeue $DEST/squeue
+ln -sf ${DIR}/slurm/sacct $DEST/sacct
+ln -sf ${DIR}/slurm/sinfo $DEST/sinfo
+ln -sf ${DIR}/slurm/srun $DEST/srun
