@@ -13,7 +13,15 @@ Then, convert the docker image to singularity image using
     singularity pull docker://dshawul/gfs-gnu
 
 You can't do these steps directly on hera so you will have to do it on your laptop
-and copy the singularity image to hera.
+and copy the singularity image to hera. The second step requires a lot of disk space, so
+if it doesn't work you can try a different method
+
+    docker save dshawul/gfs-gnu -o gfs-gnu.tar
+
+Then untar it on HERA
+
+    setenv SINGULARITY_DISABLE_CACHE  1
+    singularity build --sandbox workflow docker-archive://gfs-gnu.tar
 
 ## Sandbox
 
@@ -117,7 +125,9 @@ You can set the hours of forecast and write interval, e.g. for 3 hrs fcst
    
     export FHOUT_GFS=3
 
-Comment out or set to .false. the inline postprocessing option
+Comment out or set to .false. the inline postprocessing option.
+This is needed because the Linux binaries for FV3 ( and on Orion too I believe) are built
+without inline post-processing. The same post-processing code is available in global-workflow so nothing missed.
    
     export WRITE_DOPOST=".false."
 
