@@ -1,3 +1,4 @@
 export PATH=$PATH:/opt/bin:/usr/local/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/lib:/usr/local/lib:/usr/local/lib64
 ulimit -s unlimited
+export I_MPI_ROOT=/opt

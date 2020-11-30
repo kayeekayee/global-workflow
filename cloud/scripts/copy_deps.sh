@@ -2,9 +2,12 @@
 
 mkdir -p /opt/lib
 
-cp /opt/intel/compilers_and_libraries_2018.0.128/linux/mpi/intel64/lib/release_mt/libmpi.so.12 /opt/lib/
-cp /opt/intel/compilers_and_libraries_2018.0.128/linux/mpi/intel64/lib/libmpicxx.so.12 /opt/lib
-cp /opt/intel/compilers_and_libraries_2018.0.128/linux/mpi/intel64/lib/libmpifort.so.12 /opt/lib/
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib/release_mt/libmpi.so.12 /opt/lib/
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib/libmpicxx.so.12 /opt/lib
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib/libmpifort.so.12 /opt/lib/
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/lib/libfabric.so.1 /opt/lib
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/lib/prov/* /opt/lib
+
 cp /opt/intel/lib/intel64/libiomp5.so /opt/lib
 cp /opt/intel/lib/intel64/libimf.so /opt/lib
 cp /opt/intel/lib/intel64/libsvml.so /opt/lib
@@ -19,5 +22,6 @@ cp /opt/intel/compilers_and_libraries_2020.0.166/linux/mkl/lib/intel64_lin/libmk
 cp /opt/intel/compilers_and_libraries_2020.0.166/linux/mkl/lib/intel64_lin/libmkl_core.so /opt/lib
 cp /opt/intel/compilers_and_libraries_2020.0.166/linux/compiler/lib/intel64_lin/libcilkrts.so.5 /opt/lib
 
-cp -r /opt/intel/compilers_and_libraries_2020.0.166/linux/mpi/intel64/bin /opt
+cp -r /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/bin /opt
+cp /opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/bin/* /opt/bin
 
