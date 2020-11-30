@@ -67,9 +67,9 @@ if [ $LEVS = "128" ]; then
    export  d2_bg_k1=0.20
    export  d2_bg_k2=0.0
   fi
-  if [[ "$CCPP_SUITE" == "FV3_GSD_v0" || "$CCPP_SUITE" == "FV3_GSD_noah" ]] ; then
-   export n_sponge=42
-  fi
+  export n_sponge=42
+elif [ $LEVS = "65" ]; then
+  export n_sponge=23
 fi
 
 # PBL/turbulence schemes
@@ -130,11 +130,11 @@ export output_1st_tstep_rst=".false."                                        #JK
 
 # Convection Options: 2-SASAS, 3-GF
 if [[ "$CCPP_SUITE" == "FV3_GSD_v0" || "$CCPP_SUITE" == "FV3_GSD_noah" ]] ; then
-    export imfdeepcnv=3
-    export imfshalcnv=3
+	export imfdeepcnv=3
+	export imfshalcnv=3
 else
-    export imfdeepcnv=2
-    export imfshalcnv=2
+	export imfdeepcnv=2
+	export imfshalcnv=2
 fi
 
 # Microphysics configuration
