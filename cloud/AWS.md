@@ -975,3 +975,23 @@ Results for the forecast using GNU are two times slower than using intels
     Number of Voluntary Context Switches                 = 1110
     Number of InVoluntary Context Switches               = 647
     *****************END OF RESOURCE STATISTICS*************************
+
+## Running with EFA
+
+To run with elastic fabric adaptor (EFA) you will need a container built with the latest
+Intel mpi library that has libfabric support. Also cluster is launched with EFA support,
+by adding the following under the cluster section
+
+     [cluster default]
+     enable_efa = compute
+
+This enables EFA on the compute nodes. The name of the container you should pull is `gfs-intel-fabric`
+
+     $ singularity build --fix-perms --sandbox workflow docker://dshawul/gfs-intel-fabric
+
+Modify the `aws_fix.sh` file to specifiy the fabric provider
+
+     export FI_PROVIDER=tcp
+     export FI_PROVIDER_PATH=/opt/lib
+
+The rest of the steps are the same as running without EFA.
