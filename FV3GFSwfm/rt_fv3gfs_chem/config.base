@@ -194,7 +194,7 @@ export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS"
-export ATARDIR="/BMC/$HPSS_PROJECT/1year/rt_FV3-Chem/"
+export ATARDIR="/BMC/$HPSS_PROJECT/2year/rt_FV3-Chem/"
 
 export EMITYPE=2 # 1: MODIS, 2: GBBEPx !lzhang
 
@@ -242,10 +242,10 @@ export FHMIN_GFS=0
 #JKHexport FHMAX_GFS_06=24
 #JKHexport FHMAX_GFS_12=24
 #JKHexport FHMAX_GFS_18=24
-export FHMAX_GFS_00=168
-export FHMAX_GFS_06=168
-export FHMAX_GFS_12=168
-export FHMAX_GFS_18=168
+export FHMAX_GFS_00=120
+export FHMAX_GFS_06=120
+export FHMAX_GFS_12=120
+export FHMAX_GFS_18=120
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=6

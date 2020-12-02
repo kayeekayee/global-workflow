@@ -1,3 +1,10 @@
+12/02/20
+  change from 168h to 120h forecasts
+     effective 00Z 11/29/20 cycle
+
+11/01/20
+  switch archiving to /BMC/fim/2year/rt_FV3-Chem instead of /BMC/fim/1year/rt_FV3-Chem
+
 02/01/20
   update to ms090 tag of EMC_FV3GFS_GSDCHEM  (modified scripts/exglobal_fcst_nemsfv3gfs.sh)
 

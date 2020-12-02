@@ -59,7 +59,7 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "4">
+	<!ENTITY CYCLETHROTTLE "5">
 	<!ENTITY TASKTHROTTLE  "20">
 	<!ENTITY MAXTRIES      "2">
 
@@ -81,6 +81,7 @@
         <!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
         <!ENTITY QUEUE_FCST_GFS     "&QUEUE_URG;">
 	<!ENTITY WALLTIME_FCST_GFS  "06:00:00">
+	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
 	<!--<!ENTITY RESOURCES_FCST_GFS "<nodes>9:ppn=20</nodes>"> -->
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>14:ppn=20</nodes>">
 	<!ENTITY MEMORY_FCST_GFS    "">
@@ -225,9 +226,13 @@
 </task>
 
 <metatask name="gfspost">
-        <var name="grp">001 002 003 004 005</var>
+<!--        <var name="grp">001 002 003 004 005</var>
         <var name="dep">f030 f066 f102 f138 f168</var>
         <var name="lst">f000_f006_f012_f018_f024_f030 f036_f042_f048_f054_f060_f066 f072_f078_f084_f090_f096_f102 f108_f114_f120_f126_f132_f138 f144_f150_f156_f162_f168</var>
+-->
+        <var name="grp">001 002 003 004 005</var>
+        <var name="dep">f018 f042 f066 f090 f120</var>
+        <var name="lst">f000_f006_f012_f018 f024_f030_f036_f042 f048_f054_f060_f066 f072_f078_f084_f090 f096_f102_f108_f114_f120</var>
 
 	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 		<command>&JOBS_DIR;/post.sh</command>
