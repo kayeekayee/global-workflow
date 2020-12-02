@@ -39,7 +39,7 @@ this directory in place of the raw singularity image.
 
 This particular image uses GNU compilers and MPICH library so we will load modules that
 will work with it. Moreover, we need to set environement variables needed for running
-the workflow. Here is the content of my `set_environment.sh` script I use for this purpose
+the workflow. Here is the content of my `set_environment_gnu.sh` script I use for this purpose
 
     #!/bin/tcsh
     
@@ -50,6 +50,7 @@ the workflow. Here is the content of my `set_environment.sh` script I use for th
     setenv GFS_SING_CMD "singularity exec --bind $GFS_FIX_DIR$COLON/fix $GFS_IMG_DIR run_bash_command"
     setenv GFS_DAEMON_RUN "$GFS_IMG_DIR/opt/global-workflow/cloud/scripts/run_sing_job.sh"
     setenv GFS_DAEMON_KILL "$GFS_IMG_DIR/opt/global-workflow/cloud/scripts/kill_sing_job.sh"
+    setenv GFS_ADD_SCRIPT ". $HOME/hera.sh"
     
     module use /scratch2/BMC/gsd-hpcs/bass/modulefiles/ 
     module use /scratch2/BMC/gsd-hpcs/dlibs/modulefiles/ 
@@ -62,7 +63,13 @@ the workflow. Here is the content of my `set_environment.sh` script I use for th
 
 Then we source this script
    
-    source ./set_environment.sh
+    source ~/.set_environment_gnu.sh
+
+We also create a `hera.sh` script in our `$HOME` directory with no content for now
+
+    #!/bin/bash
+
+but we will modify this script later for the INTEL run.
 
 ## Setting up a test case
 
@@ -341,3 +348,36 @@ gfspost.log
      119.926 + err_chk
      postcheck completed cleanly
 
+## Running the INTEL container
+
+To run with the INTEL container, you will need a container built with the latest
+Intel mpi library that has libfabric support.
+
+     singularity pull docker://dshawul/gfs-intel-fabric
+
+Then we create a sandbox named `workflow-intel-fabric`.
+We need to modify `hera.sh` file to specifiy the fabric provider
+
+     export FI_PROVIDER=tcp
+     export FI_PROVIDER_PATH=/opt/lib
+
+The environement is set with this script `set_environment_intel.sh`
+
+     #!/bin/tcsh
+     
+     set COLON=':'
+     setenv GFS_FIX_DIR "/scratch1/NCEPDEV/global/glopara/fix"
+     setenv GFS_IMG_DIR "/scratch2/BMC/gsd-hpcs/NCEPDEV/stmp3/Daniel.Abdi/containers/workflow-intel-fabric"
+     setenv GFS_NPE_NODE_MAX 24
+     setenv GFS_SING_CMD "singularity exec --bind $GFS_FIX_DIR$COLON/fix $GFS_IMG_DIR run_bash_command"
+     setenv GFS_DAEMON_RUN "$GFS_IMG_DIR/opt/global-workflow/cloud/scripts/run_sing_job.sh"
+     setenv GFS_DAEMON_KILL "$GFS_IMG_DIR/opt/global-workflow/cloud/scripts/kill_sing_job.sh"
+     setenv GFS_ADD_SCRIPT ". $HOME/hera.sh"
+     
+     module purge
+     module load rocoto
+     module load hpss
+     module load intel/19.0.5.281
+     module load impi/2018.0.4
+
+The rest of the steps are the same as running with GNU.

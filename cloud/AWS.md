@@ -57,7 +57,7 @@ Contens of `~/.parallelcluster/configure`
     export_path = s3://fv3-bucket/.
     import_path = s3://fv3-bucket
 
-So I am launching the parallel cluster in the same region as aws-config with the following details: Centos OS with slurm as the job scheduler,
+So I am launching the parallel cluster in the same region as aws-config with the following details: Ubuntu16.04 with slurm as the job scheduler,
 c5n.18xlarge instances for both login and compute nodes. You may want to use a cheaper instance for the login node. For this run, I am using 80 GB storage for
 both master and compute nodes. Also loading data from S3 to a lustre file system. This has the "fix" files of ~160 GB in size, and an HPSS tar file
 we will use for this example.
@@ -97,8 +97,8 @@ Then we can login to the master node via ssh using the IP of the master node
     ubuntu@ip-137-75-88-119:~$ 
 
 You can also use `pcluster ssh mycluster` to login to the master node. 
-Lets quickly checkout what we have. 
 
+Lets quickly checkout what we have. 
 Our lustre file system mapped to `/NCEPPROD` have these files
 
     $ ls /NCEPPROD/
@@ -238,6 +238,7 @@ We will load the intelmpi module we need
 ## Quick forecast run using C96 on one node
 
 If you are only interested in running global-workflow, skip to the next section.
+
 The C96 test case is available on our Lustre file system
 
     $ tar -xvf /NCEPPROD/C96.tar.gz 
@@ -260,7 +261,7 @@ Lets switch to the C96 directory, and see what we have
 
 The quickest way to run this test case is to run it inside the container, since the case needs only one node
 
-    $ singularity shell ../workflow/
+    $ singularity shell -e ../workflow/
     Singularity> source /opt/setup.linux.intel 
 
     Singularity> export OMP_NUM_THREADS=1
@@ -461,8 +462,8 @@ Run the script to generate test case
     sourcing config.metp
     sourcing config.arch
 
-Now our directories are setup under $HOME/RUNS. Lets goto the EXPDIR and edit some config files
-At this point you may want to create aliases for the EXPDIR and COMROT which we will be using a lot
+Now our directories are setup under `$HOME/RUNS`. Lets goto the `EXPDIR` and edit some config files
+At this point you may want to create aliases for the `EXPDIR` and `COMROT` which we will be using a lot
 
     $ alias cdexp="cd $HOME/RUNS/global/save/$USER/fv3gfs/expdir"
     $ alias cdcom="cd $HOME/RUNS/global/noscrub/$USER/fv3gfs/comrot"
@@ -958,7 +959,8 @@ The file only contains symlinking bash to sh
     sudo ln -sf /bin/bash /bin/sh
 
 Why the Intel container needs unsetting of SLURM variables need to be investigated and fixed.
-Results for the forecast using GNU are two times slower than using intels
+
+Results for the forecast using GNU are two times slower than using INTEL's
 
          ENDING DATE-TIME    NOV 28,2020  17:09:28.605  333  SAT   2459182
          PROGRAM nems      HAS ENDED.
