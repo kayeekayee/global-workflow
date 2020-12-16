@@ -33,7 +33,6 @@ Contens of `~/.parallelcluster/configure`
     base_os = ubuntu1604
     scheduler = slurm
     max_queue_size = 30
-    maintain_initial_size = true
     vpc_settings = default
     master_instance_type = c5n.18xlarge
     compute_instance_type = c5n.18xlarge
@@ -130,6 +129,7 @@ Note that singularity is installed in our home directory so that all compute nod
     $ cp /NCEPPROD/install-ubuntu.sh .
     $ ./install-ubuntu.sh
 
+If the installation fails for some reason, just re-run the script again.
 Then we source `~/.bashrc` to get singularity and rocoto
 
     $ source ~/.bashrc
@@ -137,6 +137,7 @@ Then we source `~/.bashrc` to get singularity and rocoto
     singularity version 3.7.0+2-gdf720ce
     $ rocotostat --version
     Rocoto Version 1.3.3-SNAPSHOT
+
 
 Next we pull gfs-intel image and extract it directly to a sandbox.
 
@@ -290,8 +291,9 @@ The quickest way to run this test case is to run it inside the container, since 
     [0] Number of Voluntary Context Switches                 = 543
     [0] Number of InVoluntary Context Switches               = 71
     [0] *****************END OF RESOURCE STATISTICS*************************
+    Singularity> exit
 
-We can run the same problem from outside the container using the intempi on the host as follows
+Then we exit the container and run the same same problem from outside the container using the intempi on the host as follows
 
     $ export OMP_NUM_THREADS=1
     $ export I_MPI_SHM_LMT=shm
@@ -315,6 +317,10 @@ We can run the same problem from outside the container using the intempi on the 
 
 So there is no performance difference by running multiple copies of the container.
 
+Then we go back to our home directory
+
+     cd ..
+
 ## Running the workflow
 
 We can use the sandbox we created to create test cases to run such as C48.
@@ -329,10 +335,10 @@ On the AWS ubuntu nodes `/bin/sh` is symlinked to `/bin/dash` instead.
 
 Then we need to set some environment variables 
     
-    $ touch set_environement.sh aws_fix.sh
-    $ chmod +x set_environement.sh aws_fix.sh
+    $ touch set_environment.sh aws_fix.sh
+    $ chmod +x set_environment.sh aws_fix.sh
 
-Then copy and paste this into `set_environement.sh`
+Then copy and paste this into `set_environment.sh`
 
     #!/bin/tcsh
 
@@ -367,7 +373,7 @@ fully. In any case you can use this script, to handle changes you want to make t
 
 Then we source the script
 
-    $ source set_environement.sh
+    $ source set_environment.sh
     $ printenv | grep GFS
     GFS_NPE_NODE_MAX=18
     GFS_NCEPPROD=/NCEPPROD
@@ -382,7 +388,7 @@ The `global-workflow` is located under the `/opt` directory.
 
     $ cd ~/workflow/opt/global-workflow
 
-For running `getic` step of workflow we will use emulator for hpcc.
+For running `getic` step of workflow we will use emulator for HPSS.
 
     $ ./cloud/scripts/link_hpss.sh ~/opt/bin
 
@@ -583,12 +589,14 @@ Comment out lines 257-275
          #     input += "#SBATCH --mem=#{amount}\n"
          #   end
 
+Optionally, you can remove the time limits placed on jobs in the c48.xml file to avoid modifying rocoto code.
+
 ### Executing workflow steps
 
 #### First step `fv3getic`
 
 Now we are ready to execute some workflow steps
-Lets boot up the first step `getic`
+Lets boot up the first step `getic`. Say yes (`y`) when prompted if you want to boot the job.
 
     $ rocotoboot -v 10 -w c48.xml -d c48.dl -c all -t gfsgetic
     Booting task 'gfsgetic' for cycle '201909270000' will activate cycle '201909270000' for the first time.
@@ -919,6 +927,10 @@ Post processed files should be in your COMROT directory
     gfs.t00z.master.grb2f000   gfs.t00z.pgrb2.0p25.f003.idx  gfs.t00z.pgrb2.1p00.f003      gfs.t00z.pgrb2b.0p50.f000.idx  gfs.t00z.sfcf000.nc
     gfs.t00z.master.grb2f003   gfs.t00z.pgrb2.0p50.f000      gfs.t00z.pgrb2.1p00.f003.idx  gfs.t00z.pgrb2b.0p50.f003      gfs.t00z.sfcf003.nc
     gfs.t00z.master.grb2if000  gfs.t00z.pgrb2.0p50.f000.idx  gfs.t00z.pgrb2b.0p25.f000     gfs.t00z.pgrb2b.0p50.f003.idx  gfs.t00z.sfluxgrbf000.grib2
+
+If a job fails to run successfully, try cancelling the job and re-running it again.
+Also, this step idly waits for 10 minutes waiting to post-process jobs for 006Z and 009Z. This can be avoided
+by editing the c48.xml file to remove those.
 
 #### Cleanup
 
