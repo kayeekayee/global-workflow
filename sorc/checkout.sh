@@ -20,15 +20,14 @@ echo $topdir
 echo fv3gfs_ccpp checkout ...
 if [[ ! -d fv3gfs_ccpp.fd ]] ; then
     rm -f ${topdir}/checkout-fv3gfs_ccpp.log
-    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model ufs-weather-model_13aug_eff83ae >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
-    cd ufs-weather-model_13aug_eff83ae
-    git checkout eff83ae37d98c66534366ba3c8d773b9522a5c62
+    git clone --recursive -b gsd/develop https://github.com/NOAA-GSD/ufs-weather-model ufs-weather-model_18dec_57a8258  >> ${topdir}/checkout-fv3gfs_ccpp.log 2>&1
+    cd ufs-weather-model_18dec_57a8258
+    git checkout 57a825847f51e18705faf5216e93c4ddbb1307a7 
     git submodule sync
     git submodule update --init --recursive
     cd ${topdir}
-    ln -fs ufs-weather-model_13aug_eff83ae fv3gfs_ccpp.fd 
+    ln -fs ufs-weather-model_08jul_04b3ad2 fv3gfs_ccpp.fd 
     ln -fs fv3gfs_ccpp.fd fv3gfs.fd
-    rsync -ax fv3gfs.fd_jkh/ fv3gfs.fd/        ## copy over changes not in FV3 repository
 else
     echo 'Skip.  Directory fv3gfs_ccpp.fd already exists.'
 fi
@@ -65,7 +64,6 @@ if [[ ! -d ufs_utils.fd ]] ; then
     cd ufs_utils.fd
     #git checkout release/ops-gfsv16 
     git checkout feature/orion
-    rsync -ax ufs_utils.fd_jkh/ ufs_utils.fd/        ## copy over changes not in UFS_UTILS repository
     cd ${topdir}
 else
     echo 'Skip.  Directory ufs_utils.fd already exists.'
@@ -77,7 +75,6 @@ if [[ ! -d gfs_post.fd ]] ; then
     git clone https://github.com/NOAA-EMC/EMC_post.git gfs_post.fd >> ${topdir}/checkout-gfs_post.log 2>&1
     cd gfs_post.fd
     git checkout upp_gfsv16_release.v1.0.9
-    rsync -ax gfs_post.fd_jkh/ gfs_post.fd/        ## copy over changes not in EMC_post repository
     cd ${topdir}
 else
     echo 'Skip.  Directory gfs_post.fd already exists.'

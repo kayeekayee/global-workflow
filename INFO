@@ -1,25 +1,16 @@
-02 Nov 2020
-    - reservations shut off
+30 Dec 2020
+    - update to 13Dec gsl/develop branch, 57a8258, for sorc/fv3gfs_ccpp.fd
+      effective 00Z 31 Dec 2020
+30 Nov 2020
+    - change n_sponge=23 for L64 runs, effective 00Z 01 Dec 2020
 24 Aug 2020
     - corrected labeling of nta_ulwf plots
-20 Aug 2020
-    - changed nsponge=42 for L128
-      effective 08/21/20 00Z run
 19 Aug 2020
     - update to new NCL graphic routines
       * NOAA logo
       * new domains
-17 Aug 2020
-    - updated to 13aug gsd/develop branch, eff83ae, for sorc/fv3gfs_ccpp.fd
-         f61416fef691d9ba39a40df1ce72aa574f54c390 FMS (2019.01.03)
-         e904618219aee0de8a1962c13fa51c13b1eaa452 FV3 (heads/gsd/develop)
-            e8896bc0f582c7c825eaa198cbbb83c206a29d43 atmos_cubed_sphere (heads/gsd/develop)
-            0b84becf3ca7f541b37fc9cf8d11a45aa2b14407 ccpp/framework (ccpp_transition_to_vlab_master_20190705-205-g0b84bec)
-            ae9e0e293ae5e450de4dcb94f62cde7c7f29c161 ccpp/physics (ccpp_transition_to_vlab_master_20190705-685-gae9e0e2)
-         fd578b9c981b18d24c0729f6d8ec42df51e661e9 NEMS (heads/develop)
-         19f3126c832b26ae4c5b27bca6c1dcc676755602 WW3 (6.07.1-36-g19f3126c)
-         a8e2cc1c84a1e6a7deb9eef152edec2992b1a859 stochastic_physics (ufs-v1.0.0-52-ga8e2cc1)
-      effective 08/18/20 00Z run in realtime  (backfilled to 08/01/20 00Z using this version)
+18 Aug 2020
+    - updated to 13Aug gsd/develop branch,  for sorc/fv3gfs_ccpp.fd
 15 Jul 2020
     - updated to 08Jul gsd/develop branch, 04b3ad2, for sorc/fv3gfs_ccpp.fd + GF modifications
 08 Jul 2020
@@ -27,7 +18,6 @@
 01 July 2020
     - merge 23Jun20 portorion branch, ed6b279, into gsd-ccpp-jet
     - additional updates for running on jet
-    - reservations enabled
 17 June 2020
     - created new branch, gsd-ccpp-jet, from 15Jun20 port2orion branch, ed6b279
     - using 09Jun gsd/develop branch for sorc/fv3gfs_ccpp.fd
