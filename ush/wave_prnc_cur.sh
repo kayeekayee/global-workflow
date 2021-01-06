@@ -27,6 +27,7 @@ set -x
 ymdh_rtofs=$1
 curfile=$2
 fhr=$3
+flagfirst=$4
 fh3=`printf "%03d" "${fhr#0}"`
 
 # Timing has to be made relative to the single 00z RTOFS cycle for that PDY
@@ -37,8 +38,7 @@ cd rtofs_${ymdh_rtofs}
 ncks -x -v sst,sss,layer_density  $curfile cur_uv_${PDY}_${fext}${fh3}.nc
 ncks -O -a -h -x -v Layer cur_uv_${PDY}_${fext}${fh3}.nc cur_temp1.nc
 ncwa -h -O -a Layer cur_temp1.nc cur_temp2.nc
-ncrename -h -O -v MT,time cur_temp2.nc
-ncrename -h -O -d MT,time cur_temp2.nc
+ncrename -h -O -v MT,time -d MT,time cur_temp2.nc
 ncks -v u_velocity,v_velocity cur_temp2.nc cur_temp3.nc
 mv -f cur_temp3.nc cur_uv_${PDY}_${fext}${fh3}_flat.nc
 
@@ -62,18 +62,35 @@ fi
 # Cleanup
 rm -f cur_temp[123].nc cur_5min_??.nc cur_glo_uv_${PDY}_${fext}${fh3}.nc weights.nc
 
-if [ ${fhr} -gt 0 ] 
+if [ ${flagfirst}  = "T" ] 
 then
-  sed -e "s/HDRFL/F/g" ${FIXwave}/ww3_prnc.cur.${WAVECUR_FID}.inp.tmpl > ww3_prnc.inp
-else
   sed -e "s/HDRFL/T/g" ${FIXwave}/ww3_prnc.cur.${WAVECUR_FID}.inp.tmpl > ww3_prnc.inp
+else
+  sed -e "s/HDRFL/F/g" ${FIXwave}/ww3_prnc.cur.${WAVECUR_FID}.inp.tmpl > ww3_prnc.inp
 fi
 
 rm -f cur.nc
 ln -s cur_glo_uv_${PDY}_${fext}${fh3}_5min.nc cur.nc
 ln -s ${DATA}/mod_def.${WAVECUR_FID} ./mod_def.ww3
 
+export pgm=ww3_prnc;. prep_step
 $EXECwave/ww3_prnc 1> prnc_${WAVECUR_FID}_${ymdh_rtofs}.out 2>&1
+
+export err=$?; err_chk
+
+if [ "$err" != '0' ]
+then
+  cat prnc_${WAVECUR_FID}_${ymdh_rtofs}.out
+  set $setoff
+  echo ' '
+  echo '******************************************** '
+  echo '*** WARNING: NON-FATAL ERROR IN ww3_prnc *** '
+  echo '******************************************** '
+  echo ' '
+  set $seton
+  postmsg "$jlogfile" "WARNING: NON-FATAL ERROR IN ww3_prnc."
+  exit 4
+fi
 
 mv -f current.ww3 ${DATA}/${WAVECUR_DID}.${ymdh_rtofs}
 

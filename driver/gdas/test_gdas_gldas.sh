@@ -54,7 +54,7 @@ module load CFP/2.0.1
 module load impi/18.0.1
 module load lsf/10.1
 module load prod_envir/1.0.2
-module load prod_util/1.1.0
+module load prod_util/1.1.4
 module load grib_util/1.1.0
 module load NetCDF/4.5.0
 ###########################################
@@ -120,8 +120,8 @@ export JOBGLOBAL=$HOMEgldas/jobs
 #############################################################
 # Execute job
 #############################################################
-echo $JOBGLOBAL/JGDAS_GLDAS
-$JOBGLOBAL/JGDAS_GLDAS
+echo $JOBGLOBAL/JGDAS_ATMOS_GLDAS
+$JOBGLOBAL/JGDAS_ATMOS_GLDAS
 
 exit
 

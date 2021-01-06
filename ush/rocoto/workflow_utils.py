@@ -245,7 +245,6 @@ def create_firstcyc_task(cdump='gdas'):
                  'native': '&NATIVE_ARCH_%s;' % cdump.upper(), \
                  'resources': '&RESOURCES_ARCH_%s;' % cdump.upper(), \
                  'log': '&ROTDIR;/logs/@Y@m@d@H/%s.log' % taskstr, \
-                 'queue': '&QUEUE_SERVICE_%s;' % cdump.upper(), \
                  'dependency': dependencies}
 
     if get_scheduler(detectMachine()) in ['slurm']:
@@ -382,7 +381,7 @@ def create_crontab(base, cronint=5):
 
     # On WCOSS, rocoto module needs to be loaded everytime cron runs
     if base['machine'] in ['WCOSS']:
-        rocotoloadstr = '. /usrx/local/Modules/default/init/sh; module use -a /usrx/local/emc_rocoto/modulefiles; module load rocoto/20170119-master)'
+        rocotoloadstr = '. /usrx/local/Modules/default/init/sh; module use -a /usrx/local/emc_rocoto/modulefiles; module load rocoto/1.3.0rc2)'
         rocotorunstr = '(%s %s)' % (rocotoloadstr, rocotorunstr)
 
     try:

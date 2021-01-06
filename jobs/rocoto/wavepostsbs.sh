@@ -11,9 +11,9 @@ status=$?
 echo
 echo "=============== START TO RUN WAVE POST_SBS ==============="
 # Execute the JJOB
-$HOMEgfs/jobs/JWAVE_POST_SBS
+$HOMEgfs/jobs/JGLOBAL_WAVE_POST_SBS
 status=$?
-exit $status
+[[ $status -ne 0 ]] && exit $status
 
 ###############################################################
 # Force Exit out cleanly

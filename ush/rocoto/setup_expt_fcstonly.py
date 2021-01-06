@@ -13,7 +13,7 @@ import sys
 import glob
 import shutil
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import workflow_utils as wfu
 
@@ -62,13 +62,14 @@ def edit_baseconfig():
                 line = line.replace('@MACHINE@', machine.upper()) \
                     .replace('@PSLOT@', pslot) \
                     .replace('@SDATE@', idate.strftime('%Y%m%d%H')) \
+                    .replace('@FDATE@', fdate.strftime('%Y%m%d%H')) \
                     .replace('@EDATE@', edate.strftime('%Y%m%d%H')) \
                     .replace('@CASECTL@', 'C%d' % res) \
                     .replace('@HOMEgfs@', top) \
                     .replace('@BASE_GIT@', base_git) \
-                    .replace('@BASE_SVN@', base_svn) \
                     .replace('@DMPDIR@', dmpdir) \
                     .replace('@NWPROD@', nwprod) \
+                    .replace('@COMROOT@', comroot) \
                     .replace('@HOMEDIR@', homedir) \
                     .replace('@STMP@', stmp) \
                     .replace('@PTMP@', ptmp) \
@@ -80,6 +81,7 @@ def edit_baseconfig():
                     .replace('@EXP_WARM_START@', exp_warm_start) \
                     .replace('@CHGRP_RSTPROD@', chgrp_rstprod) \
                     .replace('@CHGRP_CMD@', chgrp_cmd) \
+                    .replace('@HPSSARCH@', hpssarch) \
                     .replace('@gfs_cyc@', '%d' % gfs_cyc)
                 if expdir is not None:
                     line = line.replace('@EXPDIR@', os.path.dirname(expdir))
@@ -141,12 +143,16 @@ Create COMROT experiment directory structure'''
     elif start == 'warm':
       exp_warm_start = '.true.'
 
+    # Set FDATE (first full cycle)
+    fdate = idate + timedelta(hours=6)
+
     # Set machine defaults
     if machine == 'WCOSS_DELL_P3':
       base_git = '/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git'
       base_svn = '/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git'
       dmpdir = '/gpfs/dell3/emc/global/dump'
-      nwprod = '/gpfs/dell1/nco/ops/nwprod'
+      nwprod = '${NWROOT:-"/gpfs/dell1/nco/ops/nwprod"}'
+      comroot = '${COMROOT:-"/gpfs/dell1/nco/ops/com"}'
       homedir = '/gpfs/dell2/emc/modeling/noscrub/$USER'
       stmp = '/gpfs/dell3/stmp/$USER'
       ptmp = '/gpfs/dell3/ptmp/$USER'
@@ -160,11 +166,13 @@ Create COMROT experiment directory structure'''
         queue_service = 'dev2_transfer'
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'WCOSS_C':
       base_git = '/gpfs/hps3/emc/global/noscrub/emc.glopara/git'
       base_svn = '/gpfs/hps3/emc/global/noscrub/emc.glopara/svn'
       dmpdir = '/gpfs/dell3/emc/global/dump'
-      nwprod = '/gpfs/hps/nco/ops/nwprod'
+      nwprod = '${NWROOT:-"/gpfs/hps/nco/ops/nwprod"}'
+      comroot = '${COMROOT:-"/gpfs/hps/nco/ops/com"}'
       homedir = '/gpfs/hps3/emc/global/noscrub/$USER'
       stmp = '/gpfs/hps2/stmp/$USER'
       ptmp = '/gpfs/hps2/ptmp/$USER'
@@ -175,11 +183,13 @@ Create COMROT experiment directory structure'''
       partition_batch = ''
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'HERA':
       base_git = '/scratch1/NCEPDEV/global/glopara/git'
       base_svn = '/scratch1/NCEPDEV/global/glopara/svn'
       dmpdir = '/scratch1/NCEPDEV/global/glopara/dump'
       nwprod = '/scratch1/NCEPDEV/global/glopara/nwpara'
+      comroot = '/scratch1/NCEPDEV/rstprod/com'
       homedir = '/scratch1/NCEPDEV/global/$USER'
       stmp = '/scratch1/NCEPDEV/stmp2/$USER'
       ptmp = '/scratch1/NCEPDEV/stmp4/$USER'
@@ -190,11 +200,13 @@ Create COMROT experiment directory structure'''
       partition_batch = ''
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'JET':
       base_git = '/lfs4/HFIP/hfv3gfs/glopara/git'
       base_svn = '/dev/null/global/save/glopara/svn/'
       dmpdir = '/lfs3/HFIP/hfv3gfs/glopara/noscrub/dump'
       nwprod = '/lfs3/HFIP/hfv3gfs/glopara/nwpara'
+      comroot = '/lfs4/HFIP/hfv3gfs/glopara/com'
       homedir = '/lfs4/HFIP/gsd-fv3-hfip/NCEPDEV/global/$USER'
       #JKHstmp = '/lfs4/HFIP/gsd-fv3-hfip/rtruns/${PSLOT}/FV3GFSrun/$USER'
       #JKHptmp = '/lfs4/HFIP/gsd-fv3-hfip/rtruns/${PSLOT}/FV3GFSrun/$USER'
@@ -208,11 +220,13 @@ Create COMROT experiment directory structure'''
       chgrp_rstprod = 'YES'          
       chgrp_cmd = 'chgrp rstprrod'
       exp_warm_start = '.false.'
+      hpssarch = 'YES'
     elif machine == 'ORION':
       base_git = '/work/noaa/global/glopara/git'
       base_svn = '/work/noaa/global/glopara/svn'
       dmpdir = '/work/noaa/global/glopara/dump'
       nwprod = '/work/noaa/global/glopara/nwpara'
+      comroot = '/work/noaa/global/glopara/com'
       homedir = '/work/noaa/global/$USER'
       stmp = '/work/noaa/stmp/$USER'
       ptmp = '/work/noaa/stmp/$USER'
@@ -223,6 +237,7 @@ Create COMROT experiment directory structure'''
       partition_batch = 'orion'
       chgrp_rstprod = 'NO'          # No rstprod on Orion
       chgrp_cmd = 'ls'
+      hpssarch = 'NO'
 
     # COMROT directory
     create_comrot = True

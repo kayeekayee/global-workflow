@@ -13,7 +13,7 @@ import sys
 import glob
 import shutil
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import workflow_utils as wfu
 
@@ -86,15 +86,16 @@ def edit_baseconfig():
                 line = line.replace('@MACHINE@', machine.upper()) \
                     .replace('@PSLOT@', pslot) \
                     .replace('@SDATE@', idate.strftime('%Y%m%d%H')) \
+                    .replace('@FDATE@', fdate.strftime('%Y%m%d%H')) \
                     .replace('@EDATE@', edate.strftime('%Y%m%d%H')) \
                     .replace('@CASEENS@', 'C%d' % resens) \
                     .replace('@CASECTL@', 'C%d' % resdet) \
                     .replace('@NMEM_ENKF@', '%d' % nens) \
                     .replace('@HOMEgfs@', top) \
                     .replace('@BASE_GIT@', base_git) \
-                    .replace('@BASE_SVN@', base_svn) \
                     .replace('@DMPDIR@', dmpdir) \
                     .replace('@NWPROD@', nwprod) \
+                    .replace('@COMROOT@', comroot) \
                     .replace('@HOMEDIR@', homedir) \
                     .replace('@STMP@', stmp) \
                     .replace('@PTMP@', ptmp) \
@@ -106,6 +107,7 @@ def edit_baseconfig():
                     .replace('@EXP_WARM_START@', exp_warm_start) \
                     .replace('@CHGRP_RSTPROD@', chgrp_rstprod) \
                     .replace('@CHGRP_CMD@', chgrp_cmd) \
+                    .replace('@HPSSARCH@', hpssarch) \
                     .replace('@gfs_cyc@', '%d' % gfs_cyc)
                 if expdir is not None:
                     line = line.replace('@EXPDIR@', os.path.dirname(expdir))
@@ -175,12 +177,16 @@ link initial condition files from $ICSDIR to $COMROT'''
     elif start == 'warm':
       exp_warm_start = '.true.'
 
+    # Set FDATE (first full cycle)
+    fdate = idate + timedelta(hours=6)
+
     # Set machine defaults
     if machine == 'WCOSS_DELL_P3':
       base_git = '/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git'
       base_svn = '/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git'
       dmpdir = '/gpfs/dell3/emc/global/dump'
-      nwprod = '/gpfs/dell1/nco/ops/nwprod'
+      nwprod = '${NWROOT:-"/gpfs/dell1/nco/ops/nwprod"}'
+      comroot = '${COMROOT:-"/gpfs/dell1/nco/ops/com"}'
       homedir = '/gpfs/dell2/emc/modeling/noscrub/$USER'
       stmp = '/gpfs/dell3/stmp/$USER'
       ptmp = '/gpfs/dell3/ptmp/$USER'
@@ -194,11 +200,13 @@ link initial condition files from $ICSDIR to $COMROT'''
         queue_service = 'dev2_transfer'
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'WCOSS_C':
       base_git = '/gpfs/hps3/emc/global/noscrub/emc.glopara/git'
       base_svn = '/gpfs/hps3/emc/global/noscrub/emc.glopara/svn'
       dmpdir = '/gpfs/dell3/emc/global/dump'
-      nwprod = '/gpfs/hps/nco/ops/nwprod'
+      nwprod = '${NWROOT:-"/gpfs/hps/nco/ops/nwprod"}'
+      comroot = '${COMROOT:-"/gpfs/hps/nco/ops/com"}'
       homedir = '/gpfs/hps3/emc/global/noscrub/$USER'
       stmp = '/gpfs/hps2/stmp/$USER'
       ptmp = '/gpfs/hps2/ptmp/$USER'
@@ -209,11 +217,13 @@ link initial condition files from $ICSDIR to $COMROT'''
       partition_batch = ''
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'HERA':
       base_git = '/scratch1/NCEPDEV/global/glopara/git'
       base_svn = '/scratch1/NCEPDEV/global/glopara/svn'
       dmpdir = '/scratch1/NCEPDEV/global/glopara/dump'
       nwprod = '/scratch1/NCEPDEV/global/glopara/nwpara'
+      comroot = '/scratch1/NCEPDEV/rstprod/com'
       homedir = '/scratch1/NCEPDEV/global/$USER'
       stmp = '/scratch1/NCEPDEV/stmp2/$USER'
       ptmp = '/scratch1/NCEPDEV/stmp4/$USER'
@@ -224,11 +234,13 @@ link initial condition files from $ICSDIR to $COMROT'''
       partition_batch = ''
       chgrp_rstprod = 'YES'
       chgrp_cmd = 'chgrp rstprod'
+      hpssarch = 'YES'
     elif machine == 'ORION':
       base_git = '/work/noaa/global/glopara/git'
       base_svn = '/work/noaa/global/glopara/svn'
       dmpdir = '/work/noaa/global/glopara/dump'
       nwprod = '/work/noaa/global/glopara/nwpara'
+      comroot = '/work/noaa/global/glopara/com'
       homedir = '/work/noaa/global/$USER'
       stmp = '/work/noaa/stmp/$USER'
       ptmp = '/work/noaa/stmp/$USER'
@@ -239,6 +251,7 @@ link initial condition files from $ICSDIR to $COMROT'''
       partition_batch = 'orion'
       chgrp_rstprod = 'NO'
       chgrp_cmd = 'ls'
+      hpssarch = 'NO'
 
     if args.icsdir is not None and not os.path.exists(icsdir):
         msg = 'Initial conditions do not exist in %s' % icsdir
