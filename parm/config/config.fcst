@@ -17,8 +17,7 @@ fi
 
 export FORECASTSH="$HOMEgfs/scripts/exglobal_forecast.sh"
 export FCSTEXECDIR="$HOMEgfs/exec"
-#export FCSTEXEC="global_fv3gfs.x"
-export FCSTEXEC="global_fv3gfs_ccpp.x"
+export FCSTEXEC="global_fv3gfs.x"
 export npe_fv3=$npe_fcst 
 
 if [[ "$CDUMP" == "gfs" ]] ; then

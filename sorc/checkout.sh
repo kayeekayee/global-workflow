@@ -29,15 +29,23 @@ echo $topdir
 echo fv3gfs checkout ...
 if [[ ! -d fv3gfs.fd ]] ; then
     rm -f ${topdir}/checkout-fv3gfs.log
-    git clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
-    cd fv3gfs.fd
+    #JKHgit clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
+    #JKHcd fv3gfs.fd
     if [ ${run_ccpp:-"NO"} = "NO" ]; then
-     git checkout GFS.v16.0.14
+        git clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
+        cd fv3gfs.fd
+        git checkout GFS.v16.0.14
     else
-     git checkout b771e5be7e35eaea5ee7f762d644afccab019ed3
+        git clone --recursive -b gsl/develop https://github.com/NOAA-GSL/ufs-weather-model ufs-weather-model_18dec_57a8258  >> ${topdir}/checkout-fv3gfs.log
+g 2>&1
+        cd ufs-weather-model_18dec_57a8258
+        git checkout 57a825847f51e18705faf5216e93c4ddbb1307a7
+        #git checkout b771e5be7e35eaea5ee7f762d644afccab019ed3
     fi
     git submodule update --init --recursive
     cd ${topdir}
+    ln -fs ufs-weather-model_18dec_57a8258 fv3gfs.fd 
+    rsync -ax fv3gfs.fd_gsl/ fv3gfs.fd/        ## copy over changes not in FV3 repository
 else
     echo 'Skip.  Directory fv3gfs.fd already exists.'
 fi
@@ -72,6 +80,7 @@ if [[ ! -d ufs_utils.fd ]] ; then
     cd ufs_utils.fd
     git checkout ops-gfsv16.0.0
     cd ${topdir}
+    rsync -ax ufs_utils.fd_gsl/ ufs_utils.fd/        ## copy over changes not in UFS_UTILS repository
 else
     echo 'Skip.  Directory ufs_utils.fd already exists.'
 fi
@@ -95,6 +104,7 @@ if [[ ! -d gfs_post.fd ]] ; then
       cp sorc/post_gtg.fd/gtg.config.gfs parm/gtg.config.gfs
     fi
     cd ${topdir}
+    rsync -ax gfs_post.fd_gsl/ gfs_post.fd/        ## copy over GSL changes not in EMC_post repository
 else
     echo 'Skip.  Directory gfs_post.fd already exists.'
 fi

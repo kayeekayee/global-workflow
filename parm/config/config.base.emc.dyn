@@ -46,11 +46,6 @@ export NOSCRUB="@NOSCRUB@"
 # Base directories for various builds
 export BASE_GIT="@BASE_GIT@"
 
-#### CCPP Suite
-#### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
-export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
-#### export CCPP_SUITE="FV3_GFS_v16beta"        # EMC v16beta
-
 # Toggle to turn on/off GFS downstream processing.
 export DO_BUFRSND="YES"    # BUFR sounding products
 export DO_GEMPAK="NO"      # GEMPAK products
@@ -145,8 +140,10 @@ export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 
 # Run with CCPP physics
-export RUN_CCPP="NO"
-export CCPP_SUITE="FV3_GFS_v16beta"
+export RUN_CCPP="YES"
+#### export CCPP_SUITE="FV3_GFS_v16beta"   # EMC v16beta
+#### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
+export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
 
 # Surface cycle update frequency
 if [[ "$CDUMP" == "gdas" ]] ; then

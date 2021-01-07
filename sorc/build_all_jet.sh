@@ -9,6 +9,18 @@ set +x
 #                   Anything other than "true"  will use libraries locally.
 #------------------------------------
 
+while getopts "c" option;
+do
+ case $option in
+  c)
+   echo "Received -c flag, check out ufs-weather-model develop branch with CCPP physics"
+   RUN_CCPP="YES"
+   ;;
+ esac
+done
+
+
+
 export USE_PREINST_LIBS="true"
 
 #------------------------------------
@@ -56,15 +68,16 @@ echo " .... Library build not currently supported .... "
 }
 
 #------------------------------------
-# build fv3_ccpp
+# build fv3
 #------------------------------------
 $Build_fv3gfs && {
 echo " .... Building fv3 .... "
-./build_ufswm_13aug.sh > $logs_dir/build_ufswm_13aug.log 2>&1
+export RUN_CCPP=${RUN_CCPP:-"NO"}
+./build_fv3.sh > $logs_dir/build_fv3.log 2>&1
 rc=$?
 if [[ $rc -ne 0 ]] ; then
     echo "Fatal error in building fv3."
-    echo "The log file is in $logs_dir/build_ufswm_13aug.log"
+    echo "The log file is in $logs_dir/build_fv3.log"
 fi
 ((err+=$rc))
 }

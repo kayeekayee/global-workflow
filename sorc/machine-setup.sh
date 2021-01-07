@@ -175,7 +175,7 @@ export FCOMP=ftn
 # END GWV ADD
 
 ##---------------------------------------------------------------------------
-elif [[ -d /lfs3 ]] ; then
+elif [[ -d /lfs4 ]] ; then
     # We are on NOAA Jet
     if ( ! eval module help > /dev/null 2>&1 ) ; then
         echo load the module command 1>&2

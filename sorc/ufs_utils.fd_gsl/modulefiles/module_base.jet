@@ -32,5 +32,5 @@ module load mpiserial
 module load gempak/7.4.2
 
 #JKH add new path for netcdfp  -- fix for netcdf HDF errors
-module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0612/lib/modulefiles
+module use -a /mnt/lfs4/HFIP/hfv3gfs/gwv/l0701/lib/modulefiles
 module load netcdfp/4.7.4

@@ -1101,6 +1101,7 @@ if [ $RUN_CCPP = "YES" ]; then
   iovr         = ${iovr:-"3"}
   ltaerosol    = ${ltaerosol:-".false."}
   lradar       = ${lradar:-".false."}
+  nord_tr      = ${nord_tr:-"2"}
   ttendlim     = ${ttendlim:-"0.005"}
   oz_phys      = ${oz_phys:-".false."}
   oz_phys_2015 = ${oz_phys_2015:-".true."}

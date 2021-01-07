@@ -6,7 +6,7 @@ EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPD
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 #cp $GITDIR/parm/config/config.base.emc.dyn $GITDIR/parm/config/config.base
 
-PSLOT=ff_l128
+PSLOT=ff_l64
 IDATE=2020120700
 EDATE=2020120700
 RESDET=768               ## 96 192 384 768
