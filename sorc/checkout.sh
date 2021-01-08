@@ -136,7 +136,9 @@ if [[ ! -d aeroconv.fd ]] ; then
     rm -f ${topdir}/checkout-aero.log
     git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${topdir}/checkout-aero.log 2>&1
     cd aeroconv.fd
-    git checkout b830a6c
+    git checkout 24f6ddc
+    cd ${topdir}
+    ./aero_extract.sh
 else
     echo 'Skip.  Directory aeroconv.fd already exists.'
 fi

@@ -1,6 +1,6 @@
-30 Dec 2020
-    - update to 13Dec gsl/develop branch, 57a8258, for sorc/fv3gfs_ccpp.fd
-      effective 00Z 31 Dec 2020
+06 Jan 2021
+    - update to 04Jan21 develop global-workflow branch, ef8b641 
+    - update to 18Dec gsl/develop branch, 57a8258, for sorc/fv3gfs_ccpp.fd
 30 Nov 2020
     - change n_sponge=23 for L64 runs, effective 00Z 01 Dec 2020
 24 Aug 2020
