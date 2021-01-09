@@ -18,7 +18,7 @@ export QUEUE_SERVICE="@QUEUE_SERVICE@"
 export PARTITION_BATCH="@PARTITION_BATCH@"
 
 # Project to use in mass store:
-HPSS_PROJECT=fim
+HPSS_PROJECT=fim                                  ## JKH
 
 # Directories relative to installation areas:
 export HOMEgfs=@HOMEgfs@
@@ -108,7 +108,7 @@ export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="@ICSDIR@"
-export ATARDIR="/BMC/$HPSS_PROJECT/$USER/scratch/$PSLOT"
+export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
@@ -135,7 +135,8 @@ export SENDDBN=${SENDDBN:-"NO"}
 export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 
 # Resolution specific parameters
-export LEVS=128
+#JKHexport LEVS=128
+export LEVS=65
 export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 
@@ -171,10 +172,10 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=168
-export FHMAX_GFS_06=168
-export FHMAX_GFS_12=168
-export FHMAX_GFS_18=168
+export FHMAX_GFS_00=120
+export FHMAX_GFS_06=120
+export FHMAX_GFS_12=120
+export FHMAX_GFS_18=120
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=6
@@ -193,7 +194,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".false."     # JKH
+export WRITE_DOPOST=".true."     # JKH
 
 # suffix options depending on file format
 if [ $OUTPUT_FILE = "netcdf" ]; then
@@ -207,7 +208,7 @@ else
 fi
 
 # IAU related parameters
-export DOIAU="NO"        # Enable 4DIAU for control with 3 increments   # JKH
+export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
 export IAU_FHROT=`echo $IAUFHRS | cut -c1`
 export IAU_DELTHRS=6

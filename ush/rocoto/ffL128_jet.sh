@@ -1,5 +1,5 @@
 USER=Judy.K.Henderson
-GITDIR=/home/Judy.K.Henderson/scratch/update_jet/           ## where your git checkout is located
+GITDIR=/home/Judy.K.Henderson/scratch/gsd-ccpp-jet/           ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 
@@ -7,9 +7,13 @@ EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPD
 #cp $GITDIR/parm/config/config.base.emc.dyn $GITDIR/parm/config/config.base
 
 PSLOT=ff_l128
-IDATE=2020120700
-EDATE=2020120700
+IDATE=2020070100
+EDATE=2029070100
 RESDET=768               ## 96 192 384 768
+
+ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_jet ${GITDIR}/parm/config/config.base.emc.dyn
+ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_jet ${GITDIR}/parm/config/config.base
+ln -fs ${GITDIR}/parm/config/config.postsnd_jet ${GITDIR}/parm/config/config.postsnd
 
 ### gfs_cyc 1  00Z only;  gfs_cyc 2  00Z and 12Z
 

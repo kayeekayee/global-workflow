@@ -1,5 +1,5 @@
 USER=Judy.K.Henderson
-GITDIR=/home/Judy.K.Henderson/scratch/update_jet/           ## where your git checkout is located
+GITDIR=/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/test/update_jet/           ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 
@@ -22,6 +22,6 @@ RESDET=768               ## 96 192 384 768
 ./setup_workflow_fcstonly_gsd.py --expdir $EXPDIR/$PSLOT
 
 ## call jobs/rocoto/makefv3ic_link.sh for fv3ic task
-#sed -i "s/fv3ic.sh/makefv3ic_link.sh/" $EXPDIR/$PSLOT/$PSLOT.xml
+sed -i "s/fv3ic.sh/makefv3ic_link.sh/" $EXPDIR/$PSLOT/$PSLOT.xml
 # call jobs/rocoto/arch_gsd.sh for gfsarch task
 sed -i "s/arch.sh/arch_gsd.sh/" $EXPDIR/$PSLOT/$PSLOT.xml
