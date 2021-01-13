@@ -34,6 +34,8 @@
         <!ENTITY SCR_DIR "/lfs4/HFIP/gsd-fv3-hfip/Judy.K.Henderson/scratch//BMC/gsd-ccpp-jet/FV3GFSwfm/scripts">
         <!ENTITY PUBDIR "/public/data/grids/gfs/nemsio">
         <!ENTITY RETRODIR "/lfs4/HFIP/gsd-fv3-hfip/GFS_RETRO_NEMSIO/">
+        <!ENTITY FIXDIR "/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix_nco_gfsv16/">
+
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/mnt/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite">
@@ -72,9 +74,10 @@
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
         <!ENTITY QUEUE_AEROIC_GFS     "&QUEUE;">
-	<!ENTITY PARTITION_AEROIC_GFS "vjet">
-        <!ENTITY WALLTIME_AEROIC_GFS  "00:10:00">
+	<!ENTITY PARTITION_AEROIC_GFS "vjet,xjet">
+        <!ENTITY WALLTIME_AEROIC_GFS  "00:40:00">
 	<!ENTITY NATIVE_AEROIC_GFS    "--export=NONE">
+        <!ENTITY RESOURCES_AEROIC_GFS "<nodes>2:ppn=3</nodes>">
         <!ENTITY RESOURCES_AEROIC_GFS "<nodes>1:ppn=3</nodes>">
 
 	<!-- END: Resource requirements for the workflow -->
@@ -209,7 +212,7 @@
 	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
 	<envar><name>CASE</name><value>&CASE;</value></envar>
 	<envar><name>FV3ICS_DIR</name><value><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/</cyclestr></value></envar>
-	<envar><name>FIXfv3</name><value>&HOMEgfs;/fix/fix_fv3</value></envar>
+	<envar><name>FIXfv3</name><value>&FIXDIR;/fix_fv3</value></envar>
 
 	<dependency>
 		<and>

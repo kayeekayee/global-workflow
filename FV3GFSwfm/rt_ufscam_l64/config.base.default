@@ -18,7 +18,7 @@ export QUEUE_SERVICE="@QUEUE_SERVICE@"
 export PARTITION_BATCH="@PARTITION_BATCH@"
 
 # Project to use in mass store:
-HPSS_PROJECT=fim
+HPSS_PROJECT=fim                                  ## JKH
 
 # Directories relative to installation areas:
 export HOMEgfs=@HOMEgfs@
@@ -33,6 +33,7 @@ export SCRgfs=$HOMEgfs/scripts
 
 # GLOBAL static environment parameters
 export NWPROD="@NWPROD@"
+export COMROOT="@COMROOT@"
 export DMPDIR="@DMPDIR@"
 export RTMFIX=$CRTM_FIX
 
@@ -44,17 +45,12 @@ export NOSCRUB="@NOSCRUB@"
 
 # Base directories for various builds
 export BASE_GIT="@BASE_GIT@"
-export BASE_SVN="@BASE_SVN@"
-
-#### CCPP Suite
-#### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
-export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
-#### export CCPP_SUITE="FV3_GFS_v16beta"        # EMC v16beta
 
 # Toggle to turn on/off GFS downstream processing.
-export DO_BUFRSND="YES"
-export DO_GEMPAK="NO"
-export DO_AWIPS="NO"
+export DO_BUFRSND="YES"    # BUFR sounding products
+export DO_GEMPAK="NO"      # GEMPAK products
+export DO_AWIPS="NO"       # AWIPS products
+export WAFSF="NO"          # WAFS products
 
 # NO for retrospective parallel; YES for real-time parallel
 #  arch.sh uses REALTIME for MOS.  Need to set REALTIME=YES
@@ -70,14 +66,13 @@ export REALTIME="YES"
 # CLEAR
 ####################################################
 # Build paths relative to $HOMEgfs
-export HOMEgsi="$HOMEgfs"
 export FIXgsi="$HOMEgfs/fix/fix_gsi"
 export HOMEfv3gfs="$HOMEgfs/sorc/fv3gfs.fd"
 export HOMEpost="$HOMEgfs"
-export HOMEobsproc_prep="$BASE_GIT/obsproc/gfsv16b/obsproc_prep.iss70457.netcdfhistory"
-export HOMEobsproc_network="$BASE_GIT/obsproc/gfsv16b/obsproc_global.iss71402.supportGFSv16"
+export HOMEobsproc_prep="$BASE_GIT/obsproc/gfsv16b/obsproc_prep_RB-5.4.0"
+export HOMEobsproc_network="$BASE_GIT/obsproc/gfsv16b/obsproc_global_RB-3.4.0"
 export HOMEobsproc_global=$HOMEobsproc_network
-export BASE_VERIF="$BASE_SVN/verif/global/tags/vsdb"
+export BASE_VERIF="$BASE_GIT/verif/global/tags/vsdb"
 
 # CONVENIENT utility scripts and other environment parameters
 export NCP="/bin/cp -p"
@@ -97,6 +92,7 @@ export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
 export SDATE=@SDATE@
+export FDATE=@FDATE@
 export EDATE=@EDATE@
 export EXP_WARM_START="@EXP_WARM_START@"
 export assim_freq=6
@@ -112,12 +108,17 @@ export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="@ICSDIR@"
-export ATARDIR="/BMC/$HPSS_PROJECT/$USER/scratch/$PSLOT"
+export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/$machine/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
 export NET="gfs"
 export RUN=${RUN:-${CDUMP:-"gfs"}}
+export COMINatmos=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/atmos
+export COMOUTatmos=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/atmos
+export COMINwave=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/wave
+export COMOUTwave=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/wave
+
 export jlogfile="${EXPDIR}/logs/jlogfile"
 export ERRSCRIPT=${ERRSCRIPT:-'eval [[ $err = 0 ]]'}
 export LOGSCRIPT=${LOGSCRIPT:-""}
@@ -126,15 +127,24 @@ export LOGSCRIPT=${LOGSCRIPT:-""}
 export REDOUT="1>"
 export REDERR="2>"
 
-export SENDECF="NO"
-export SENDCOM="NO"
-export SENDDBN="NO"
-export SENDSDM="NO"
+export SENDECF=${SENDECF:-"NO"}
+export SENDCOM=${SENDCOM:-"NO"}
+export SENDSDM=${SENDSDM:-"NO"}
+export SENDDBN_NTC=${SENDDBN_NTC:-"NO"}
+export SENDDBN=${SENDDBN:-"NO"}
+export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 
 # Resolution specific parameters
-export LEVS=128
+#JKHexport LEVS=128
+export LEVS=65
 export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
+
+# Run with CCPP physics
+export RUN_CCPP="YES"
+#### export CCPP_SUITE="FV3_GFS_v16beta"   # EMC v16beta
+#### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
+export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
 
 # Surface cycle update frequency
 if [[ "$CDUMP" == "gdas" ]] ; then
@@ -184,7 +194,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".true."
+export WRITE_DOPOST=".false."     # JKH
 
 # suffix options depending on file format
 if [ $OUTPUT_FILE = "netcdf" ]; then
@@ -198,15 +208,15 @@ else
 fi
 
 # IAU related parameters
-export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
+export DOIAU="NO"        # Enable 4DIAU for control with 3 increments   # JKH
 export IAUFHRS="3,6,9"
 export IAU_FHROT=`echo $IAUFHRS | cut -c1`
 export IAU_DELTHRS=6
 export IAU_OFFSET=6
-export DOIAU_ENKF="YES"   # Enable 4DIAU for EnKF ensemble
+export DOIAU_ENKF=${DOIAU:-"YES"}   # Enable 4DIAU for EnKF ensemble
 export IAUFHRS_ENKF="3,6,9"
 export IAU_DELTHRS_ENKF=6
-if [[ "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]]; then # Cold starting
+if [[ "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]] || [[ "$DOIAU" = "NO" ]] ; then # Cold starting or IAU off
   export IAU_OFFSET=0
   export IAU_FHROT=0
 fi
@@ -275,10 +285,11 @@ export netcdf_diag=".true."
 export binary_diag=".false."
 
 # Verification options
-export DO_METP="YES"                  # Run MET+ jobs
+export DO_METP="YES"         # Run METPLUS jobs - set METPLUS settings in config.metp
+export DO_VSDB="YES"         # Run VSDB package - set VSDB settings in config.vrfy
 
 # Archiving options
-export HPSSARCH="YES"        # save data to HPSS archive
+export HPSSARCH="@HPSSARCH@"        # save data to HPSS archive
 export ARCH_CYC=00           # Archive data at this cycle for warm_start capability
 export ARCH_WARMICFREQ=4     # Archive frequency in days for warm_start capability
 export ARCH_FCSTICFREQ=1     # Archive frequency in days for gdas and gfs forecast-only capability
