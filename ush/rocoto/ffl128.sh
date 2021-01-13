@@ -1,5 +1,5 @@
 USER=Judy.K.Henderson
-GITDIR=/home/Judy.K.Henderson/scratch/gsd-ccpp-jet/           ## where your git checkout is located
+GITDIR=/home/Judy.K.Henderson/scratch/gslv16_dev/           ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 

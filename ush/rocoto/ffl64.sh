@@ -1,12 +1,12 @@
 USER=Judy.K.Henderson
-GITDIR=/home/Judy.K.Henderson/scratch/gsd-ccpp-jet/           ## where your git checkout is located
+GITDIR=/home/Judy.K.Henderson/scratch/gslv16_dev/           ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 #cp $GITDIR/parm/config/config.base.emc.dyn $GITDIR/parm/config/config.base
 
-PSLOT=ff_l128
+PSLOT=ff_l64
 IDATE=2020070100
 EDATE=2029070100
 RESDET=768               ## 96 192 384 768
