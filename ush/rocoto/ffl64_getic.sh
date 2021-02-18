@@ -6,7 +6,7 @@ EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPD
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 #cp $GITDIR/parm/config/config.base.emc.dyn $GITDIR/parm/config/config.base
 
-PSLOT=ff_l128
+PSLOT=test
 IDATE=2020070100
 EDATE=2029070100
 RESDET=768               ## 96 192 384 768
@@ -32,7 +32,7 @@ ln -fs ${GITDIR}/parm/config/config.postsnd_${machine} ${GITDIR}/parm/config/con
        --res $RESDET --comrot $COMROT --expdir $EXPDIR
 
 #for running chgres, forecast, and post 
-./setup_workflow_fcstonly_gsd.py --expdir $EXPDIR/$PSLOT
+./setup_workflow_fcstonly_gsd_getic.py --expdir $EXPDIR/$PSLOT
 
 ## call jobs/rocoto/makefv3ic_link.sh for fv3ic task
 sed -i "s/fv3ic.sh/makefv3ic_link.sh/" $EXPDIR/$PSLOT/$PSLOT.xml

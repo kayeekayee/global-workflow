@@ -29,8 +29,7 @@ import workflow_utils as wfu
 
 #taskplan = ['getic', 'fv3ic', 'waveinit', 'waveprep', 'fcst', 'post', 'wavepostsbs', 'wavegempak', 'waveawipsbulls', 'waveawipsgridded', 'wavepost', 'wavestat', 'wafs', 'wafsgrib2', 'wafsblending', 'wafsgcip', 'wafsgrib20p25', 'wafsblending0p25', 'vrfy', 'metp', 'arch']
 #JKHtaskplan = ['getic', 'fv3ic', 'waveinit', 'waveprep', 'fcst', 'post', 'wavepostsbs', 'wavepostbndpnt', 'wavepostpnt', 'wavegempak', 'waveawipsbulls', 'waveawipsgridded', 'wafs', 'wafsgrib2', 'wafsblending', 'wafsgcip', 'wafsgrib20p25', 'wafsblending0p25', 'vrfy', 'metp', 'arch']
-#taskplan = ['getic', 'fv3ic', 'fcst', 'post', 'vrfy', 'metp', 'arch']
-taskplan = ['fv3ic', 'fcst', 'post', 'vrfy', 'metp', 'arch']
+taskplan = ['getic', 'fv3ic', 'fcst', 'post', 'vrfy', 'metp', 'arch']
 
 def main():
     parser = ArgumentParser(description='Setup XML workflow and CRONTAB for a forecast only experiment.', formatter_class=ArgumentDefaultsHelpFormatter)
@@ -250,47 +249,21 @@ def get_workflow(dict_configs, cdump='gdas'):
 
     tasks = []
 
-##JKH    # getics
-##JKH    deps = []
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/siganl.&CDUMP;.@Y@m@d@H'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.sanl'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/gfnanl.&CDUMP;.@Y@m@d@H'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmanl.nemsio'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    dependencies = rocoto.create_dependency(dep_condition='or', dep=deps)
-##JKH
-##JKH    deps = []
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc'
-##JKH    dep_dict = {'type':'data', 'data':data}
-##JKH    deps.append(rocoto.add_dependency(dep_dict))
-##JKH    deps = rocoto.create_dependency(dep_condition='and', dep=deps)
-##JKH    dependencies2 = rocoto.create_dependency(dep_condition='not', dep=deps)
-##JKH
-##JKH    deps = []
-##JKH    deps.append(dependencies)
-##JKH    deps.append(dependencies2)
-##JKH    dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
-##JKH
-##JKH    task = wfu.create_wf_task('getic', cdump=cdump, envar=envars, dependency=dependencies)
-##JKH    tasks.append(task)
-##JKH    tasks.append('\n')
-
-    # chgres fv3ic
+    # getics
     deps = []
-    data = '&ROTDIR;/&CDUMP;.@Y@m@d/@H/INPUT'
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/siganl.&CDUMP;.@Y@m@d@H'
     dep_dict = {'type':'data', 'data':data}
     deps.append(rocoto.add_dependency(dep_dict))
-    dependencies = rocoto.create_dependency(dep_condition='not', dep=deps)
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.sanl'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/gfnanl.&CDUMP;.@Y@m@d@H'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmanl.nemsio'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    dependencies = rocoto.create_dependency(dep_condition='or', dep=deps)
 
     deps = []
     data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc'
@@ -299,22 +272,50 @@ def get_workflow(dict_configs, cdump='gdas'):
     data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc'
     dep_dict = {'type':'data', 'data':data}
     deps.append(rocoto.add_dependency(dep_dict))
-    dependencies2 = rocoto.create_dependency(dep_condition='and', dep=deps)
+    deps = rocoto.create_dependency(dep_condition='and', dep=deps)
+    dependencies2 = rocoto.create_dependency(dep_condition='not', dep=deps)
 
     deps = []
     deps.append(dependencies)
     deps.append(dependencies2)
     dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
 
-    fv3_envars = []
-    fv3_envars.append(rocoto.create_envar(name='ROTDIR', value='&ROTDIR;'))
-    fv3_envars.append(rocoto.create_envar(name='CDATE', value='<cyclestr>@Y@m@d@H</cyclestr>'))
-    fv3_envars.append(rocoto.create_envar(name='CDUMP', value='&CDUMP;'))
-    fv3_envars.append(rocoto.create_envar(name='COMPONENT', value='atmos'))
-    fv3_envars.append(rocoto.create_envar(name='CASE', value='&CASE;'))
-    fv3_envars.append(rocoto.create_envar(name='ICSDIR', value='&ICSDIR;'))
+    task = wfu.create_wf_task('getic', cdump=cdump, envar=envars, dependency=dependencies)
+    tasks.append(task)
+    tasks.append('\n')
 
-    task = wfu.create_wf_task('fv3ic', cdump=cdump, envar=fv3_envars, dependency=dependencies)
+    # chgres fv3ic
+    deps = []
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/siganl.&CDUMP;.@Y@m@d@H'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.sanl'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/gfnanl.&CDUMP;.@Y@m@d@H'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmanl.nemsio'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    dependencies = rocoto.create_dependency(dep_condition='or', dep=deps)
+
+    deps = []
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc'
+    dep_dict = {'type':'data', 'data':data}
+    deps.append(rocoto.add_dependency(dep_dict))
+    deps = rocoto.create_dependency(dep_condition='and', dep=deps)
+    dependencies2 = rocoto.create_dependency(dep_condition='not', dep=deps)
+
+    deps = []
+    deps.append(dependencies)
+    deps.append(dependencies2)
+    dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
+
+    task = wfu.create_wf_task('fv3ic', cdump=cdump, envar=envars, dependency=dependencies)
     tasks.append(task)
     tasks.append('\n')
 

@@ -1,5 +1,5 @@
 USER=Judy.K.Henderson
-GITDIR=/home/Judy.K.Henderson/scratch/gslv16_dev/           ## where your git checkout is located
+GITDIR=/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gslv16_dev/           ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 
@@ -11,8 +11,14 @@ IDATE=2020070100
 EDATE=2029070100
 RESDET=768               ## 96 192 384 768
 
-machine=jet
-#machine=hera
+# set machine
+if [[ -d /scratch1 ]] ; then
+  machine=hera
+elif [[ -d /lfs4 ]] ; then
+  machine=jet
+else
+  echo "machine not found!"
+fi
 
 ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_${machine} ${GITDIR}/parm/config/config.base.emc.dyn
 ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_${machine} ${GITDIR}/parm/config/config.base
