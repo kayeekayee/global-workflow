@@ -285,8 +285,8 @@ export netcdf_diag=".true."
 export binary_diag=".false."
 
 # Verification options
-export DO_METP="YES"         # Run METPLUS jobs - set METPLUS settings in config.metp
-export DO_VSDB="YES"         # Run VSDB package - set VSDB settings in config.vrfy
+export DO_METP="NO"         # Run METPLUS jobs - set METPLUS settings in config.metp          ## JKH
+export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy             ## JKH
 
 # Archiving options
 export HPSSARCH="@HPSSARCH@"        # save data to HPSS archive

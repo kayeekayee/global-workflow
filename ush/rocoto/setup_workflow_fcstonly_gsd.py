@@ -675,8 +675,8 @@ def get_workflow(dict_configs, cdump='gdas'):
     deps = []
     dep_dict = {'type':'metatask', 'name':'%spost' % cdump}
     deps.append(rocoto.add_dependency(dep_dict))
-    dep_dict = {'type':'task', 'name':'%svrfy' % cdump}
-    deps.append(rocoto.add_dependency(dep_dict))
+#JKH    dep_dict = {'type':'task', 'name':'%svrfy' % cdump}
+#JKH    deps.append(rocoto.add_dependency(dep_dict))
     dep_dict = {'type':'streq', 'left':'&ARCHIVE_TO_HPSS;', 'right':'YES'}
     deps.append(rocoto.add_dependency(dep_dict))
     dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)

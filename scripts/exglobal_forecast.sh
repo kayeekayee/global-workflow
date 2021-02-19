@@ -1353,8 +1353,11 @@ else
   done
 fi
 
-# Copy namelist file
+# Copy namelist file    #JKH
 $NCP input.nml $memdir
+
+# Copy model_configure file   #JKH
+$NCP model_configure $memdi
 
 #------------------------------------------------------------------
 # run the executable
