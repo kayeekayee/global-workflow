@@ -336,13 +336,13 @@ def get_workflow(dict_configs, cdump='gdas'):
 
     # fcst
     deps = []
-    data = '&ROTDIR;/&CDUMP;.@Y@m@d/@H/RESTART/@Y@m@d.@H0000.sfcanl_data.tile6.nc'
+    data = '&ROTDIR;/&CDUMP;.@Y@m@d/@H/atmos/RESTART/@Y@m@d.@H0000.sfcanl_data.tile6.nc'
     dep_dict = {'type':'data', 'data':data}
     deps.append(rocoto.add_dependency(dep_dict))
     dependencies = rocoto.create_dependency(dep=deps)
 
     deps2 = []
-    data = '&ROTDIR;/&CDUMP;.@Y@m@d/@H/INPUT'
+    data = '&ROTDIR;/&CDUMP;.@Y@m@d/@H/atmos/INPUT'
     dep_dict = {'type':'data', 'data':data}
     deps2.append(rocoto.add_dependency(dep_dict))
     data = '&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc'
