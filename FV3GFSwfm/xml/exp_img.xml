@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY EXP_HOME "/scratch2/BMC/gsd-fv3-dev/test/nclvx/">
+  <!ENTITY FV3GFS_HOME "/scratch2/BMC/gsd-fv3-dev/test/nclvx/">
+  <!ENTITY PSLOT  "GSLnoah">
+  <!ENTITY ATCFNAME "FV3GSLnoah">               <!-- tracker name -->
+  <!ENTITY MODL "FV3GSLnoah">                   <!-- plot name;  needs to have 'FV3' in name for NCL -->
+  <!ENTITY RES "0p25">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+<!--  uncomment the line below if you do not have 'atmos' in your paths -->
+<!--  <!ENTITY COMPONENT   "">  -->
+  %hera;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="4">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_ncl.log</cyclestr>
+  </log>
+
+<!--  
+     nclcyc is used for NCL images
+        run for each initialization time        [every 10 days for 2016 retro]
+                                                [every 05 days for 2019 retro]
+                                                [every day at 00Z for realtime]  
+
+  <cycledef group="nclcyc">201601010000 201603310000 240:00:00</cycledef> 
+-->
+  <cycledef group="nclcyc">201910200000 201912310000 120:00:00</cycledef> 
+
+  <metatask name="remap_ncl" throttle="25">
+    &fcst_168hr_metatask;
+    &t168hr_metatask;
+    &remapgrib_task; 
+    &ncl_task;
+  </metatask>
+  &nclzip_task;  
+</workflow>
