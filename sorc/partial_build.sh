@@ -4,11 +4,13 @@
  declare -a Build_prg=("Build_libs" "Build_fv3gfs" \
                        "Build_gsi" "Build_ncep_post" \
                        "Build_ufs_utils" \
+                       "Build_nemsio2nc" \
                        "Build_gfs_wafs" \
                        "Build_gdas" \
                        "Build_sfcanl_nsttfchg" \
                        "Build_tropcy" \
                        "Build_enkf_chgres_recenter" \
+                       "Build_enkf_chgres_recenter_nc" \
                        "Build_gfs_fbwndgfs" "Build_gfs_overpdtg2" \
                        "Build_gfs_wintemv" \
                        "Build_gfs_bufrsnd" \

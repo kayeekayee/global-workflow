@@ -68,14 +68,6 @@
     </param>
 
     <param>
-       <shortname>REFD_ON_SPEC_HGT_LVL_ABOVE_GRND</shortname>
-       <pname>REFD</pname>
-       <table_info>NCEP</table_info>
-       <level>1000.</level>
-       <scale>4.0</scale>
-    </param>
-
-    <param>
        <shortname> DUST1_ON_HYBRID_LVL</shortname>
        <table_info>NCEP</table_info>
        <level>1.</level>
@@ -181,6 +173,11 @@
     </param>
 
     <param>
+       <shortname>PRES_ON_MEAN_SEA_LVL</shortname>
+       <scale>6.0</scale>
+    </param>
+
+    <param>
        <shortname>TMP_ON_SURFACE</shortname>
        <scale>4.0</scale>
     </param>
@@ -212,6 +209,11 @@
 
     <param>
        <shortname>BLACK_CARBON_AER_OPT_DEP_at550</shortname>
+       <scale>9.0</scale>
+    </param>
+
+    <param>
+       <shortname>MIE_OPT_DEP_at550</shortname>
        <scale>9.0</scale>
     </param>
 
@@ -289,7 +291,6 @@
        <table_info>NCEP</table_info>
        <scale>4.0</scale>
     </param>
-
     <param>
        <shortname>ACM_APCP_ON_SURFACE</shortname>
        <scale>-4.0</scale>

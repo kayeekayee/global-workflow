@@ -1,0 +1,11 @@
+#!/bin/ksh -x
+
+########## config.getic ##########
+# Fetching GFS initial conditions specific
+
+echo "BEGIN: config.checkgdas"
+
+# Get task specific resources
+. $EXPDIR/config.resources checkgdas
+
+echo "END: config.checkgdas"

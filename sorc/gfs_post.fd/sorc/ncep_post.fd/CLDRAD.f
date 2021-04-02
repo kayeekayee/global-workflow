@@ -109,7 +109,7 @@
                          SWDDIFC, SWUPBC, LWDNBC, LWUPBC, SWUPT,              &
                          TAOD5502D, AERSSA2D, AERASY2D, MEAN_FRP, LWP, IWP,   &
                          TAOD5502D, AERSSA2D, AERASY2D,                       &
-                         DUSTCB,SSCB,BCCB,OCCB,SULFCB,DUSTPM,SSPM
+                         DUSTCB,SSCB,BCCB,OCCB,SULFCB,DUSTPM,SSPM,MAOD
       use masks,    only: LMH, HTM
       use params_mod, only: TFRZ, D00, H99999, QCLDMIN, SMALL, D608, H1, ROG, &
                             GI, RD, QCONV, ABSCOEFI, ABSCOEF, STBOL, PQ0, A2, &
@@ -5139,46 +5139,43 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
 
 #if 0
 !! Multiply by 1.E-6 to revert these fields back
-      IF (IGET(659).GT.0) THEN
+      IF (IGET(667).GT.0) THEN
          GRID1=SPVAL
 !$omp parallel do private(i,j)
          DO J = JSTA,JEND
             DO I = 1,IM
-               GRID1(I,J) = DUEM(I,J,1)*1.E-6
-               DO K=2,NBIN_DU
-                GRID1(I,J) = GRID1(I,J) + DUEM(I,J,K)*1.E-6
+               GRID1(I,J) = BCEM(I,J,1)
+               DO K=2,NBIN_BC
+                GRID1(I,J) = GRID1(I,J) + BCEM(I,J,K)
                END DO
             END DO
          END DO
          ID(1:25) = 0
          ID(02)=141
          if(grib=='grib1') then
-          CALL GRIBIT(IGET(659),LVLS(1,IGET(659)),GRID1,IM,JM)
+          CALL GRIBIT(IGET(667),LVLS(1,IGET(667)),GRID1,IM,JM)
          elseif(grib=='grib2') then
           cfld=cfld+1
-          fld_info(cfld)%ifld=IAVBLFLD(IGET(659))
+          fld_info(cfld)%ifld=IAVBLFLD(IGET(667))
           datapd(1:im,1:jend-jsta+1,cfld)=GRID1(1:im,jsta:jend)
          endif
       ENDIF
 
-      IF (IGET(660).GT.0) THEN
+      IF (IGET(699).GT.0) THEN
          GRID1=SPVAL
 !$omp parallel do private(i,j)
          DO J = JSTA,JEND
             DO I = 1,IM
-               GRID1(I,J) = DUSD(I,J,1)*1.E-6
-               DO K=2,NBIN_DU
-                GRID1(I,J) = GRID1(I,J)+ DUSD(I,J,K)*1.E-6
-               END DO
+               GRID1(I,J) = MAOD(I,J)
             END DO
          END DO
          ID(1:25) = 0
          ID(02)=141
          if(grib=='grib1') then
-          CALL GRIBIT(IGET(660),LVLS(1,IGET(660)),GRID1,IM,JM)
+          CALL GRIBIT(IGET(699),LVLS(1,IGET(699)),GRID1,IM,JM)
          elseif(grib=='grib2') then
           cfld=cfld+1
-          fld_info(cfld)%ifld=IAVBLFLD(IGET(660))
+          fld_info(cfld)%ifld=IAVBLFLD(IGET(699))
           datapd(1:im,1:jend-jsta+1,cfld)=GRID1(1:im,jsta:jend)
          endif
       ENDIF
@@ -5471,6 +5468,9 @@ snow_check:   IF (QQS(I,J,L)>=QCLDmin) THEN
       IF (IGET(674).GT.0) call wrt_aero_diag(674,nbin_oc,ocwt)
       IF (IGET(682).GT.0) call wrt_aero_diag(682,nbin_oc,ocsv)
       print *,'aft wrt disg ocwt'
+!! wrt MIE AOD at 550nm
+      IF (IGET(699).GT.0) call wrt_aero_diag(699,1,maod)
+      print *,'aft wrt disg maod'
 
 !! wrt SU diag field
 !      IF (IGET(675).GT.0) call wrt_aero_diag(675,nbin_su,suem)

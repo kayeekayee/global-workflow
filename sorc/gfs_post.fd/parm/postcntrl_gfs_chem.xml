@@ -243,6 +243,11 @@
        <scale>9.0</scale>
     </param>
 
+     <param>
+       <shortname>MIE_OPT_DEP_at550</shortname>
+       <scale>9.0</scale>
+    </param>
+
     <param>
        <shortname>SINGLE_SCAT_ALBD_at340</shortname>
        <scale>9.0</scale>

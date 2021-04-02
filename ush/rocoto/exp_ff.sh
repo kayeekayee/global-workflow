@@ -1,15 +1,15 @@
 USER=Judy.K.Henderson
-COMROT=/scratch4/BMC/fim/NCEPDEV/global/noscrub/$USER/fv3gfs/comrot ## default COMROT directory
-EXPDIR=/scratch4/BMC/fim/NCEPDEV/global/save/$USER/fv3gfs/expdir    ## default EXPDIR directory
-PTMP=/scratch4/BMC/fim/NCEPDEV/stmp4/$USER                          ## default PTMP directory
-STMP=/scratch4/BMC/fim/NCEPDEV/stmp3/$USER                          ## default STMP directory
-GITDIR=/home/Judy.K.Henderson/scratch/git_local/gerrit_master_05Mar19_595d44c
+GITDIR=/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/test/rt_fv3chem_v16
+COMROT=${GITDIR}/FV3GFSrun                                          ## default COMROT directory
+EXPDIR=${GITDIR}/FV3GFSwfm                                          ## default EXPDIR directory
+PTMP=/scratch2/BMC/gsd-fv3-dev/NCEPDEV/stmp4/$USER                  ## default PTMP directory
+STMP=/scratch2/BMC/gsd-fv3-dev/NCEPDEV/stmp3/$USER                  ## default STMP directory
 
 #    ICSDIR is assumed to be under $COMROT/FV3ICS
 #         create link $COMROT/FV3ICS to point to /scratch4/BMC/rtfim/rtruns/FV3GFS/FV3ICS
 
 
-PSLOT=slurm_beta
+PSLOT=testv16
 IDATE=2019032000
 EDATE=2019032000
 RESDET=384               ## 96 192 384 768

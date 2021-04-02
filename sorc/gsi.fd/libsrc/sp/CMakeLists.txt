@@ -1,5 +1,0 @@
-cmake_minimum_required(VERSION 2.6)
-if(BUILD_SP)
-  add_subdirectory(./i4r8)
-  add_subdirectory(./i4r4)
-endif()

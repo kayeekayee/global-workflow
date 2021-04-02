@@ -1,3 +1,0 @@
-[submodule "libsrc"]
-	path = libsrc
-	url = gerrit:GSI-libsrc

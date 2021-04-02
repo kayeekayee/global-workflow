@@ -19,21 +19,23 @@ fi
 echo gsi checkout ...
 if [[ ! -d gsi.fd ]] ; then
     rm -f ${topdir}/checkout-gsi.log
-    git clone --recursive gerrit:ProdGSI gsi.fd >> ${topdir}/checkout-gsi.fd.log 2>&1
+    git clone --recursive https://github.com/NOAA-EMC/GSI.git gsi.fd >> ${topdir}/checkout-gsi.log 2>&1
     cd gsi.fd
-    git checkout 3664477befd7ef2ba8299c3a5461747a78da30a0
+    git checkout release/gfsda.v16.0.0
     git submodule update
     cd ${topdir}
+    rsync -ax gsi.fd_chem/ gsi.fd/
 else
     echo 'Skip.  Directory gsi.fd already exists.'
 fi
 
+
 echo ufs_utils checkout ...
 if [[ ! -d ufs_utils.fd ]] ; then
     rm -f ${topdir}/checkout-ufs_utils.log
-    git clone https://github.com/NOAA-EMC/UFS_UTILS.git ufs_utils.fd >> ${topdir}/checkout-ufs_utils.fd.log 2>&1
+    git clone --recursive https://github.com/NOAA-EMC/UFS_UTILS.git ufs_utils.fd >> ${topdir}/checkout-ufs_utils.fd.log 2>&1
     cd ufs_utils.fd
-    git checkout v1.1.0
+    git checkout 7371edaf3b7c94b5557c254296e1d17a68f7c5b1
     cd ${topdir}
 else
     echo 'Skip.  Directory ufs_utils.fd already exists.'

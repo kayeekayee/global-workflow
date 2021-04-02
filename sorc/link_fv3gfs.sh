@@ -8,16 +8,16 @@ machine=${2}
 
 if [ $# -lt 2 ]; then
     echo '***ERROR*** must specify two arguements: (1) RUN_ENVIR, (2) machine'
-    echo ' Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | theia | hera )'
+    echo ' Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera )'
     exit 1
 fi
 
 if [ $RUN_ENVIR != emc -a $RUN_ENVIR != nco ]; then
-    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | theia | hera )'
+    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera )'
     exit 1
 fi
-if [ $machine != cray -a $machine != theia -a $machine != dell -a $machine != hera ]; then
-    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | theia | hera )'
+if [ $machine != cray -a $machine != dell -a $machine != hera ]; then
+    echo 'Syntax: link_fv3gfs.sh ( nco | emc ) ( cray | dell | hera )'
     exit 1
 fi
 
@@ -34,8 +34,6 @@ if [ $machine == "cray" ]; then
     FIX_DIR="/gpfs/hps3/emc/global/noscrub/emc.glopara/git/fv3gfs/fix"
 elif [ $machine = "dell" ]; then
     FIX_DIR="/gpfs/dell2/emc/modeling/noscrub/emc.glopara/git/fv3gfs/fix"
-elif [ $machine = "theia" ]; then
-    FIX_DIR="/scratch4/NCEPDEV/global/save/glopara/git/fv3gfs/fix"
 elif [ $machine = "hera" ]; then
     FIX_DIR="/scratch1/NCEPDEV/global/glopara/fix"
 fi
@@ -67,7 +65,7 @@ cd ${pwd}/../ush                ||exit 8
     done
     for file in emcsfc_ice_blend.sh  fv3gfs_driver_grid.sh  fv3gfs_make_orog.sh  global_cycle_driver.sh \
         emcsfc_snow.sh  fv3gfs_filter_topo.sh  global_chgres_driver.sh  global_cycle.sh \
-        fv3gfs_chgres.sh  fv3gfs_make_grid.sh  global_chgres.sh ; do
+        fv3gfs_chgres.sh  fv3gfs_make_grid.sh  global_chgres.sh chgres_cube.sh; do
         $LINK ../sorc/ufs_utils.fd/ush/$file                  .
     done
 cd ${pwd}/../util               ||exit 8
@@ -99,23 +97,37 @@ fi
 #------------------------------
 cd ${pwd}/../jobs               ||exit 8
     $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ANALYSIS           .
+    $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ANALCALC           .
+    $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ANALDIAG           .
     $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ENKF_SELECT_OBS    .
+    $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ENKF_ANALDIAG      .
     $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ENKF_INNOVATE_OBS  .
     $LINK ../sorc/gsi.fd/jobs/JGLOBAL_ENKF_UPDATE        .
     $LINK ../sorc/gsi.fd/jobs/JGDAS_ENKF_RECENTER        .
+    $LINK ../sorc/gsi.fd/jobs/JGDAS_ENKF_SURFACE         .    
     $LINK ../sorc/gsi.fd/jobs/JGDAS_ENKF_FCST            .
     $LINK ../sorc/gsi.fd/jobs/JGDAS_ENKF_POST            .
+    $LINK ../sorc/gsi.fd/jobs/JGDAS_ENKF_CHGRES          .
 cd ${pwd}/../scripts            ||exit 8
     $LINK ../sorc/gsi.fd/scripts/exglobal_analysis_fv3gfs.sh.ecf           .
+    $LINK ../sorc/gsi.fd/scripts/exglobal_analcalc_fv3gfs.sh.ecf           .
+    $LINK ../sorc/gsi.fd/scripts/exglobal_analdiag_fv3gfs.sh.ecf           .
     $LINK ../sorc/gsi.fd/scripts/exglobal_innovate_obs_fv3gfs.sh.ecf       .
     $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_innovate_obs_fv3gfs.sh.ecf  .
     $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_update_fv3gfs.sh.ecf        .
     $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_recenter_fv3gfs.sh.ecf      .
+    $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_surface_fv3gfs.sh.ecf       .
     $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_fcst_fv3gfs.sh.ecf          .
     $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_post_fv3gfs.sh.ecf          .
+    $LINK ../sorc/gsi.fd/scripts/exglobal_enkf_chgres_fv3gfs.sh.ecf        .
 cd ${pwd}/../fix                ||exit 8
     [[ -d fix_gsi ]] && rm -rf fix_gsi
     $LINK ../sorc/gsi.fd/fix  fix_gsi
+cd ${pwd}/../ush                ||exit 8
+    $LINK ../sorc/gsi.fd/ush/gsi_utils.py        .
+    $LINK ../sorc/gsi.fd/ush/calcanl_gfs.py      .
+    $LINK ../sorc/gsi.fd/ush/calcinc_gfs.py      .
+    $LINK ../sorc/gsi.fd/ush/getncdimlen         .
 
 
 #------------------------------
@@ -180,6 +192,10 @@ $LINK ../sorc/gfs_post.fd/exec/ncep_post gfs_ncep_post
 #lzhang link NEMS.x
 [[ -s NEMS.x ]] && rm -f NEMS.x
 $LINK ../sorc/fv3gfs.fd/NEMS/exe/NEMS.x .
+#lzhang link 
+[[ -s nemsioatm2nc ]] && rm -f 
+$LINK ../sorc/nemsio2nc.fd/bin/nemsioatm2nc .
+
 #if [ $machine = dell ]; then 
 #    for wafsexe in wafs_awc_wafavn  wafs_blending  wafs_cnvgrib2  wafs_gcip  wafs_makewafs  wafs_setmissing; do
 #        [[ -s $wafsexe ]] && rm -f $wafsexe
@@ -195,15 +211,16 @@ if [ $machine = dell -o $machine = hera ]; then
 fi
 
 for ufs_utilsexe in \
-     chgres_cube.exe   fregrid           make_hgrid           nemsio_get    shave.x \
+     chgres_cube   fregrid           make_hgrid           nemsio_get    shave \
      emcsfc_ice_blend  fregrid_parallel  make_hgrid_parallel  nemsio_read \
-     emcsfc_snow2mdl   global_chgres     make_solo_mosaic     nst_tf_chg.x \
-     filter_topo       global_cycle      mkgfsnemsioctl       orog.x ; do
+     emcsfc_snow2mdl   global_chgres     make_solo_mosaic     nst_tf_chg \
+     filter_topo       global_cycle      mkgfsnemsioctl       orog ; do
     [[ -s $ufs_utilsexe ]] && rm -f $ufs_utilsexe
     $LINK ../sorc/ufs_utils.fd/exec/$ufs_utilsexe .
 done
 
 for gsiexe in  global_gsi.x global_enkf.x calc_increment_ens.x  getsfcensmeanp.x  getsigensmeanp_smooth.x  \
+    calc_increment_ens_ncio.x calc_analysis.x interp_inc.x \
     getsigensstatp.x  nc_diag_cat_serial.x nc_diag_cat.x recentersigp.x oznmon_horiz.x oznmon_time.x \
     radmon_angle.x radmon_bcoef.x radmon_bcor.x radmon_time.x ;do
     [[ -s $gsiexe ]] && rm -f $gsiexe
@@ -216,7 +233,10 @@ done
 #------------------------------
 
 cd ${pwd}/../sorc   ||   exit 8
+    $SLINK gsi.fd/util/netcdf_io/calc_analysis.fd                                          calc_analysis.fd
+    $SLINK gsi.fd/util/netcdf_io/interp_inc.fd                                             interp_inc.fd 
     $SLINK gsi.fd/util/EnKF/gfs/src/calc_increment_ens.fd                                  calc_increment_ens.fd
+    $SLINK gsi.fd/util/EnKF/gfs/src/calc_increment_ens_ncio.fd                             calc_increment_ens_ncio.fd
     $SLINK gsi.fd/util/EnKF/gfs/src/getsfcensmeanp.fd                                      getsfcensmeanp.fd
     $SLINK gsi.fd/util/EnKF/gfs/src/getsigensmeanp_smooth.fd                               getsigensmeanp_smooth.fd
     $SLINK gsi.fd/util/EnKF/gfs/src/getsigensstatp.fd                                      getsigensstatp.fd

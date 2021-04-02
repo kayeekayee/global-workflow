@@ -30,6 +30,7 @@ ABSV:950 mb
 ABSV:975 mb
 ABSV:0.4 mb
 ACPCP:surface
+AEMFLX:surface
 ALBDO:surface
 AOTK:entire atmosphere
 APCP:surface
@@ -74,6 +75,7 @@ CRAIN:surface
 CSNOW:surface
 CWAT:entire atmosphere (considered as a single layer)
 CWORK:entire atmosphere (considered as a single layer)
+DDMFLX:entire atmosphere
 DLWRF:surface
 DPT:2 m above ground
 DSWRF:surface
@@ -407,6 +409,7 @@ RWMR:950 mb
 RWMR:975 mb
 RWMR:1 hybrid level
 SCTAOTK:entire atmosphere
+SEDMFLX:entire atmosphere
 SHTFL:surface
 SOILW:0-0.1 m below ground
 SOILW:0.1-0.4 m below ground
@@ -724,5 +727,6 @@ VWSH:tropopause
 WATR:surface
 WEASD:surface
 WILT:surface
+WLSMFLX:entire atmosphere
 SNOD:surface
 VIS:surface

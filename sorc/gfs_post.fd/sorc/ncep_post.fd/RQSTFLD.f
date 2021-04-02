@@ -2116,8 +2116,9 @@
      &                      /1,'INST AER FN SMASS   ',164,001,     &
                              'instn aer fine mode sfc mass con  '/
 #endif
-
-
+      DATA IFILV(699),AVBL(699),IQ(699),IS(699),AVBLGRB2(699)      &
+     &                      /1,'MIE OPT DEP AT 550  ',129,200,     &
+                             'mie aerosol optical depth at 550  '/
 ! Reserving Index 601-700 for GOCART
 !
 

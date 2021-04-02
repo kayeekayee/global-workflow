@@ -80,6 +80,15 @@ echo " .... Building ufs_utils .... "
 }
 
 #------------------------------------
+# build nemsio2nc
+#------------------------------------
+$Build_nemsio2nc && {
+echo " .... Building nemsio2nc .... "
+./build_nemsio2nc.sh > $logs_dir/build_nemsio2nc.log 2>&1
+}
+
+
+#------------------------------------
 # build gfs_wafs 
 #------------------------------------
 # Only build on WCOSS
@@ -104,6 +113,14 @@ echo " .... Building gaussian_sfcanl and nst_tf_chg .... "
 $Build_enkf_chgres_recenter && {
 echo " .... Building enkf_chgres_recenter .... "
 ./build_enkf_chgres_recenter.sh > $logs_dir/build_enkf_chgres_recenter.log 2>&1
+}
+
+#------------------------------------
+# build enkf_chgres_recenter_nc
+#------------------------------------
+$Build_enkf_chgres_recenter_nc && {
+echo " .... Building enkf_chgres_recenter_nc .... "
+./build_enkf_chgres_recenter_nc.sh > $logs_dir/build_enkf_chgres_recenter_nc.log 2>&1
 }
 
 #------------------------------------
