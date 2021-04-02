@@ -79,22 +79,20 @@ cd $tiledir
     eval $NLN ${CASE}-T-${emiss_date}0000-SO2-bb.bin ebu_so2.dat
     fi
     if [ $EMITYPE -eq 2 ]; then
-    DIRGB=/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx
-    emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
-    print "emiss_date: $emiss_date1"
-    mkdir -p $DIRGB/$emiss_date1
-    $NCP $PUBEMI/${emiss_date1}.*.bin $DIRGB/$emiss_date1/
-#    eval $NLN $DIRGB/${emiss_date1}/${emiss_date1}.GBBEPx.bc.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
-#    eval $NLN $DIRGB/${emiss_date1}/${emiss_date1}.GBBEPx.oc.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
-#    eval $NLN $DIRGB/${emiss_date1}/${emiss_date1}.GBBEPx.so2.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
-#    eval $NLN $DIRGB/${emiss_date1}/${emiss_date1}.GBBEPx.pm25.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
-#    eval $NLN $DIRGB/${emiss_date1}/${emiss_date1}.meanFRP.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
-    eval $NLN $DIRGB/${emiss_date1}/GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
-    eval $NLN $DIRGB/${emiss_date1}/GBBEPx.oc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
-    eval $NLN $DIRGB/${emiss_date1}/GBBEPx.so2.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
-    eval $NLN $DIRGB/${emiss_date1}/GBBEPx.pm25.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
-    eval $NLN $DIRGB/${emiss_date1}/meanFRP.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
-cd ..
+        emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
+        print "emiss_date: $emiss_date1"
+        mkdir -p $DIRGB/$emiss_date1
+        if [[ -f $PUBEMI/GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
+          $NCP $PUBEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
+        else
+          $NCP $ARCEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
+        fi
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.oc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.so2.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.pm25.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
+        eval $NLN $DIRGB/${emiss_date1}/meanFRP.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
+        cd ..
     fi
     #eval $NLN ${CASE}-T-${emiss_date}0000-ALD-bb.bin ebu_ald.dat
     #eval $NLN ${CASE}-T-${emiss_date}0000-ASH-bb.bin ebu_ash.dat    
@@ -117,32 +115,32 @@ cd ..
     #eval $NLN ${CASE}-T-${emiss_date}0000-TOL-bb.bin ebu_tol.dat
     #eval $NLN ${CASE}-T-${emiss_date}0000-XYL-bb.bin ebu_xyl.dat
     if [ $EMITYPE -eq 1 ]; then 
-    rm *-ab.bin
-    rm ${CASE}-T-${emiss_date}0000-ALD-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-ASH-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-CO-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-CSL-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-DMS-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-ETH-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-HC3-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-HC5-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-HC8-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-HCHO-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-ISO-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-KET-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-NH3-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-NO2-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-NO-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-OLI-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-OLT-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-ORA2-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-TOL-bb.bin
-    rm ${CASE}-T-${emiss_date}0000-XYL-bb.bin
-cd ..
-    rm *-g${n}.ctl *-g${n}.vfm *-g${n}.gra
-   fi
+        rm *-ab.bin
+        rm ${CASE}-T-${emiss_date}0000-ALD-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-ASH-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-CO-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-CSL-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-DMS-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-ETH-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-HC3-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-HC5-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-HC8-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-HCHO-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-ISO-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-KET-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-NH3-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-NO2-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-NO-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-OLI-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-OLT-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-ORA2-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-TOL-bb.bin
+        rm ${CASE}-T-${emiss_date}0000-XYL-bb.bin
+        cd ..
+        rm *-g${n}.ctl *-g${n}.vfm *-g${n}.gra
+    fi
 done
-  rc=$?
+rc=$?
 if [ $rc -ne 0 ]; then
      echo "error prepchem $rc "
      exit $rc
