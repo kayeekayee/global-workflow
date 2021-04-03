@@ -50,7 +50,7 @@ if [[ -f $PUBDIR/${pubsfc_file} ]]; then
   echo "link $pubatm_file to $gdas_atm_file"
   ln -fs $PUBDIR/${pubsfc_file} $sfc_file 
   ln -fs $PUBDIR/${pubatm_file} $atm_file 
-  ln -fs $PUBDIR/${pubatm_file} $gdasatm_file 
+  ln -fs $PUBDIR/${pubatm_file} $gdas_atm_file 
 elif  [[ -f $RETRODIR/${pubsfc_file} ]]; then
   echo "linking $RETRODIR...."
   echo "pubsfc_file:  $pubsfc_file"
