@@ -9,3 +9,8 @@ rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_i
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_nclzip.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_nclzip.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/xml/fv3gfs_retro_nclzip.xml -d /home/rtfim/rt_dbfiles/fv3gfs_chem_retro_nclzip.db
 
+
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/xml/retro_chemplot.xml -d /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/xml/retro_chemplot.db
+
+rocotorun -w retro_chemplot.xml -d retro_chemplot.db
+rocotostat -w retro_chemplot.xml -d retro_chemplot.db

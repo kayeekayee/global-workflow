@@ -11,7 +11,7 @@
   <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
   <!ENTITY RES "0p50">
   <!ENTITY FCST_INTERVAL "6">
-  <!ENTITY FCST_LENGTH "168">
+  <!ENTITY FCST_LENGTH "120">
 
   <!-- External parameter entites -->
   <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
@@ -24,10 +24,10 @@
 
 <workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="8">
   <log>
-    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretrozip.log</cyclestr>
   </log>
 
-  <cycledef>201911020000 201911020000 24:00:00</cycledef>
+  <cycledef>202102150000 202102180000 72:00:00</cycledef>
 
   &nclzipretro_task;  
 <!--    

@@ -12,3 +12,6 @@ rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt
 
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d /home/rtfim/retro_dbfiles/chem_regrid.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d /home/rtfim/retro_dbfiles/chem_regrid.db
+
+rocotorun -w rt_fv3gfs_chem_pre.xml -d rt_fv3gfs_chem_pre.db
+rocotostat  -w rt_fv3gfs_chem_pre.xml -d rt_fv3gfs_chem_pre.db

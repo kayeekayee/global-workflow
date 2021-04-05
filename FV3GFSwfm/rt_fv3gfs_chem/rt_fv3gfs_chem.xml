@@ -10,17 +10,18 @@
 		rahul.mahajan@noaa.gov
 
 	NOTES:
-		This workflow was automatically generated at 2019-10-04 23:10:43.398162
+		This workflow was automatically generated at 2021-04-02 22:11:38.777230
 	-->
 
 	<!-- Experiment parameters such as name, cycle, resolution -->
 	<!ENTITY PSLOT    "rt_fv3gfs_chem">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C384">
+	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "201910020000">
-	<!ENTITY EDATE    "202901310000">
+	<!ENTITY SDATE    "202103020000">
+	<!ENTITY EDATE    "202909200000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -30,14 +31,13 @@
 	<!ENTITY EXPDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
 	<!ENTITY ROTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
-        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
+        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
         <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/sdsu/emissions">
 	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
         <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
         <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
-        <!ENTITY GDASDIR "/scratch2/BMC/public/data/grids/gdas/bufr">
-        <!ENTITY RETROGDAS  "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/gdas_atmanl">
         <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
         <!ENTITY OUTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem/">
          
@@ -59,7 +59,7 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "5">
+	<!ENTITY CYCLETHROTTLE "2">
 	<!ENTITY TASKTHROTTLE  "20">
 	<!ENTITY MAXTRIES      "2">
 
@@ -132,7 +132,10 @@
         <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
         <dependency>
 	        <and>
-                      <datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H</cyclestr></datadep>
+		      <or>
+                      		<datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H</cyclestr></datadep>
+                      		<datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H.nc</cyclestr></datadep>
+		      </or>
 	              <datadep><cyclestr offset="-24:00:00">&OUTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf024.nemsio</cyclestr></datadep>  
                 </and> 
         </dependency>
@@ -175,6 +178,13 @@
 		<datadep><cyclestr>&PUBEMI;/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 		<datadep><cyclestr>&PUBEMI;/GBBEPx.oc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 		<datadep><cyclestr>&PUBEMI;/GBBEPx.bc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+	     </and>
+<!--
+-->
+	     <and>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.oc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.bc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 	     </and>
 	  </or>
 	</dependency>

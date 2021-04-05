@@ -70,7 +70,7 @@ case $case_in in
         export DELTIM=300
         export layout_x=4
         export layout_y=6
-        export layout_x_gfs=4
+        export layout_x_gfs=6
         export layout_y_gfs=6
         #JKHexport npe_node_fcst=12
         export npe_node_fcst=20
