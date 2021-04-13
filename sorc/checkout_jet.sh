@@ -36,15 +36,14 @@ if [[ ! -d fv3gfs.fd ]] ; then
         cd fv3gfs.fd
         git checkout GFS.v16.0.14
     else
-        git clone --recursive -b gsl/develop https://github.com/NOAA-GSL/ufs-weather-model ufs-weather-model_18dec_57a8258  >> ${topdir}/checkout-fv3gfs.log
+        git clone --recursive -b gsl/develop https://github.com/NOAA-GSL/ufs-weather-model ufs-weather-model_18mar_f204bfd >> ${topdir}/checkout-fv3gfs.log
 g 2>&1
-        cd ufs-weather-model_18dec_57a8258
-        git checkout 57a825847f51e18705faf5216e93c4ddbb1307a7
-        #git checkout b771e5be7e35eaea5ee7f762d644afccab019ed3
+        cd ufs-weather-model_18mar_f204bfd 
+        git checkout f204bfd922318c6dc39619d1c7f217fe49de7292 
     fi
     git submodule update --init --recursive
     cd ${topdir}
-    ln -fs ufs-weather-model_18dec_57a8258 fv3gfs.fd 
+    ln -fs ufs-weather-model_18mar_f204bfd fv3gfs.fd 
     rsync -ax fv3gfs.fd_gsl/ fv3gfs.fd/        ## copy over changes not in FV3 repository
 else
     echo 'Skip.  Directory fv3gfs.fd already exists.'
@@ -76,9 +75,10 @@ fi
 echo ufs_utils checkout ...
 if [[ ! -d ufs_utils.fd ]] ; then
     rm -f ${topdir}/checkout-ufs_utils.log
-    git clone https://github.com/NOAA-EMC/UFS_UTILS.git ufs_utils.fd >> ${topdir}/checkout-ufs_utils.fd.log 2>&1
+    git clone --recursive https://github.com/GeorgeGayno-NOAA/UFS_UTILS.git ufs_utils.fd >> ${topdir}/checkout-ufs_utils.fd.log 2>&1
     cd ufs_utils.fd
-    git checkout ops-gfsv16.0.0
+    git checkout feature/gdas_init.v16
+    git submodule update
     cd ${topdir}
     rsync -ax ufs_utils.fd_gsl/ ufs_utils.fd/        ## copy over changes not in UFS_UTILS repository
 else
@@ -125,7 +125,7 @@ if [[ ! -d verif-global.fd ]] ; then
     rm -f ${topdir}/checkout-verif-global.log
     git clone --recursive https://github.com/NOAA-EMC/EMC_verif-global.git verif-global.fd >> ${topdir}/checkout-verif-global.log 2>&1
     cd verif-global.fd
-    git checkout verif_global_v1.11.0
+    git checkout verif_global_v1.13.1
     cd ${topdir}
 else
     echo 'Skip. Directory verif-global.fd already exist.'
