@@ -79,6 +79,7 @@ def edit_baseconfig():
                     .replace('@QUEUE_SERVICE@', queue_service) \
                     .replace('@PARTITION_BATCH@', partition_batch) \
                     .replace('@EXP_WARM_START@', exp_warm_start) \
+                    .replace('@MODE@', 'free') \
                     .replace('@CHGRP_RSTPROD@', chgrp_rstprod) \
                     .replace('@CHGRP_CMD@', chgrp_cmd) \
                     .replace('@HPSSARCH@', hpssarch) \
@@ -207,11 +208,11 @@ Create COMROT experiment directory structure'''
       dmpdir = '/lfs4/HFIP/hfv3gfs/glopara/dump'
       nwprod = '/lfs4/HFIP/hfv3gfs/glopara/nwpara'
       comroot = '/lfs4/HFIP/hfv3gfs/glopara/com'
-      homedir = '/lfs4/HFIP/gsd-fv3-hfip/NCEPDEV/global/$USER'
-      #JKHstmp = '/lfs4/HFIP/gsd-fv3-hfip/rtruns/${PSLOT}/FV3GFSrun/$USER'
-      #JKHptmp = '/lfs4/HFIP/gsd-fv3-hfip/rtruns/${PSLOT}/FV3GFSrun/$USER'
-      stmp = '/lfs4/HFIP/gsd-fv3-hfip/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER'
-      ptmp = '/lfs4/HFIP/gsd-fv3-hfip/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER'
+      homedir = '/lfs4/BMC/gsd-fv3-dev/NCEPDEV/global/$USER'
+      #JKHstmp = '/lfs4/BMC/gsd-fv3-dev/rtruns/${PSLOT}/FV3GFSrun/$USER'
+      #JKHptmp = '/lfs4/BMC/gsd-fv3-dev/rtruns/${PSLOT}/FV3GFSrun/$USER'
+      stmp = '/lfs4/BMC/gsd-fv3-dev/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER'
+      ptmp = '/lfs4/BMC/gsd-fv3-dev/${USER}/scratch/${PSLOT}/FV3GFSrun/$USER'
       noscrub = '$HOMEDIR'
       account = 'gsd-fv3-dev'
       queue = 'batch'
