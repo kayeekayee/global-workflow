@@ -10,28 +10,28 @@
 		rahul.mahajan@noaa.gov
 
 	NOTES:
-		This workflow was automatically generated at 2021-04-17 15:50:28.063959
+		This workflow was automatically generated at 2021-04-17 15:50:33.224465
 	-->
 
 	<!-- Experiment parameters such as name, cycle, resolution -->
-	<!ENTITY PSLOT    "rt_ufscam_l64">
+	<!ENTITY PSLOT    "rt_ufscam_l127">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C768">
 	<!ENTITY COMPONENT "atmos">
 	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202104170000">
-	<!ENTITY EDATE    "203104170000">
-	<!ENTITY INTERVAL "24:00:00">
+	<!ENTITY SDATE    "202105090000">
+	<!ENTITY EDATE    "202105150000">
+	<!ENTITY INTERVAL "06:00:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
 
 	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "/home/rtfim/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
-	<!ENTITY ROTDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
-	<!ENTITY ICSDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
+	<!ENTITY EXPDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l127">
+	<!ENTITY ROTDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l127">
+	<!ENTITY ICSDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/home/rtfim/UFS-CAMsuite">
@@ -56,15 +56,15 @@
 	<!-- BEGIN: Resource requirements for the workflow -->
 
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
-	<!ENTITY PARTITION_FCST_GFS "vjet,sjet">
 	<!ENTITY PARTITION_FCST_GFS "xjet">
-	<!ENTITY WALLTIME_FCST_GFS  "04:00:00">
-	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
+	<!ENTITY PARTITION_FCST_GFS "vjet,sjet">
+	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>160:ppn=6:tpp=4</nodes>">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
-	<!ENTITY WALLTIME_POST_GFS  "01:00:00">
+	<!ENTITY WALLTIME_POST_GFS  "00:30:00">
         <!ENTITY PARTITION_POST_GFS "vjet,xjet">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>3:ppn=16:tpp=1</nodes>">
 	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
@@ -93,7 +93,7 @@
 
 <!--<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;" cyclelifespan="0:25:00:00"> -->
 <!--<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;" cyclelifespan="0:65:00:00"> -->
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
@@ -102,7 +102,7 @@
 
 <task name="gfsfcst" cycledefs="gfs" maxtries="&MAXTRIES_FCST;">
 
-	<command>&JOBS_DIR;/fcst.sh</command>
+	<command>&JOBS_DIR;/fcst_xjet.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsfcst_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>
@@ -251,5 +251,7 @@
 
 </task>
 
+<!--
+-->
 
 </workflow>

@@ -6,22 +6,22 @@
 echo "BEGIN: config.base"
 
 # Machine environment
-export machine="@MACHINE@"
+export machine="JET"
 
 # EMC parallel or NCO production
 export RUN_ENVIR="emc"
 
 # Account, queue, etc.
-export ACCOUNT="@ACCOUNT@"
-export QUEUE="@QUEUE@"
-export QUEUE_SERVICE="@QUEUE_SERVICE@"
-export PARTITION_BATCH="@PARTITION_BATCH@"
+export ACCOUNT="gsd-fv3-dev"
+export QUEUE="batch"
+export QUEUE_SERVICE="service"
+export PARTITION_BATCH="vjet"
 
 # Project to use in mass store:
 HPSS_PROJECT=fim                                  ## JKH
 
 # Directories relative to installation areas:
-export HOMEgfs=@HOMEgfs@
+export HOMEgfs=/home/rtfim/UFS-CAMsuite
 export PARMgfs=$HOMEgfs/parm
 export FIXgfs=$HOMEgfs/fix
 export USHgfs=$HOMEgfs/ush
@@ -32,19 +32,19 @@ export SCRgfs=$HOMEgfs/scripts
 ########################################################################
 
 # GLOBAL static environment parameters
-export NWPROD="@NWPROD@"
-export COMROOT="@COMROOT@"
-export DMPDIR="@DMPDIR@"
+export NWPROD="/lfs4/HFIP/hfv3gfs/glopara/nwpara"
+export COMROOT="/lfs4/HFIP/hfv3gfs/glopara/com"
+export DMPDIR="/lfs4/HFIP/hfv3gfs/glopara/dump"
 export RTMFIX=$CRTM_FIX
 
 # USER specific paths
-export HOMEDIR="@HOMEDIR@"
-export STMP="@STMP@"
-export PTMP="@PTMP@"
-export NOSCRUB="@NOSCRUB@"
+export HOMEDIR="/lfs4/BMC/gsd-fv3-dev/NCEPDEV/global/$USER"
+export STMP="${HOMEgfs}/FV3GFSrun/"
+export PTMP="${HOMEgfs}/FV3GFSrun/"
+export NOSCRUB="$HOMEDIR"
 
 # Base directories for various builds
-export BASE_GIT="@BASE_GIT@"
+export BASE_GIT="/lfs4/HFIP/hfv3gfs/glopara/git"
 
 # Toggle to turn on/off GFS downstream processing.
 export DO_BUFRSND="NO"     # BUFR sounding products
@@ -58,6 +58,8 @@ export WAFSF="NO"          # WAFS products
 #  use RUNMOS flag (currently in config.vrfy)
 export REALTIME="YES"
 
+# Experiment mode (cycled or free-forecast)
+export MODE="free" # cycled/free
 
 ####################################################
 # DO NOT ADD MACHINE DEPENDENT STUFF BELOW THIS LINE
@@ -80,8 +82,8 @@ export NMV="/bin/mv"
 export NLN="/bin/ln -sf"
 export VERBOSE="YES"
 export KEEPDATA="NO"
-export CHGRP_RSTPROD="@CHGRP_RSTPROD@"
-export CHGRP_CMD="@CHGRP_CMD@"
+export CHGRP_RSTPROD="YES"
+export CHGRP_CMD="chgrp rstprrod"
 export NEMSIOGET="$HOMEgfs/exec/nemsio_get"
 export NCDUMP="$NETCDF/bin/ncdump"
 export NCLEN="$HOMEgfs/ush/getncdimlen"
@@ -91,14 +93,14 @@ export BASE_ENV="$HOMEgfs/env"
 export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
-export SDATE=@SDATE@
-export FDATE=@FDATE@
-export EDATE=@EDATE@
-export EXP_WARM_START="@EXP_WARM_START@"
+export SDATE=2021041700
+export FDATE=2021041706
+export EDATE=2021041700
+export EXP_WARM_START=".false."
 export assim_freq=6
-export PSLOT="@PSLOT@"
-export EXPDIR="@EXPDIR@/$PSLOT"
-export ROTDIR="@ROTDIR@/$PSLOT"
+export PSLOT="rt_ufscam_l127"
+export EXPDIR="/home/rtfim/UFS-CAMsuite/FV3GFSwfm/$PSLOT"
+export ROTDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/$PSLOT"
 export ROTDIR_DUMP="YES"                #Note: A value of "NO" does not currently work
 export DUMP_SUFFIX=""
 if [[ "$CDATE" -ge "2019092100" && "$CDATE" -le "2019110700" ]]; then
@@ -107,8 +109,9 @@ fi
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="@ICSDIR@"
-export ATARDIR="/BMC/$HPSS_PROJECT/1year/GSL_phys_tst_2021/$PSLOT"
+export ICSDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127"
+export ATARDIR="/BMC/$HPSS_PROJECT/2year/$PSLOT"
+#export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
@@ -135,16 +138,15 @@ export SENDDBN=${SENDDBN:-"NO"}
 export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 
 # Resolution specific parameters
-#JKHexport LEVS=128
-export LEVS=65
-export CASE="@CASECTL@"
+export LEVS=128
+export CASE="C768"
 export CASE_ENKF="@CASEENS@"
 
 # Run with CCPP physics
 export RUN_CCPP="YES"
-#### export CCPP_SUITE="FV3_GFS_v16beta"   # EMC v16beta
+#### export CCPP_SUITE="FV3_GFS_v16"       # EMC v16
 #### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
-export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
+export CCPP_SUITE="FV3_GSD_noah"           # GSDsuite + NOAH LSM  
 
 # Surface cycle update frequency
 if [[ "$CDUMP" == "gdas" ]] ; then
@@ -167,15 +169,15 @@ export FHOUT=3
 export EUPD_CYC="gdas"
 
 # GFS cycle info
-export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
+export gfs_cyc=1 # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
 
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=120
-export FHMAX_GFS_06=120
-export FHMAX_GFS_12=120
-export FHMAX_GFS_18=120
+export FHMAX_GFS_00=168
+export FHMAX_GFS_06=168
+export FHMAX_GFS_12=168
+export FHMAX_GFS_18=168
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=6
@@ -194,7 +196,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".true."     # JKH
+export WRITE_DOPOST=".false."     # JKH
 
 # suffix options depending on file format
 if [ $OUTPUT_FILE = "netcdf" ]; then
@@ -208,7 +210,7 @@ else
 fi
 
 # IAU related parameters
-export DOIAU="NO"        # Enable 4DIAU for control with 3 increments   ## JKH
+export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
 export IAU_FHROT=`echo $IAUFHRS | cut -c1`
 export IAU_DELTHRS=6
@@ -216,7 +218,8 @@ export IAU_OFFSET=6
 export DOIAU_ENKF=${DOIAU:-"YES"}   # Enable 4DIAU for EnKF ensemble
 export IAUFHRS_ENKF="3,6,9"
 export IAU_DELTHRS_ENKF=6
-if [[ "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]] || [[ "$DOIAU" = "NO" ]] ; then # Cold starting or IAU off
+# Check if cycle is cold starting, DOIAU off, or free-forecast mode
+if [[ "$MODE" = "cycled" && "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]] || [[ "$DOIAU" = "NO" ]] || [[ "$MODE" = "free" && $EXP_WARM_START = ".false." ]] ; then
   export IAU_OFFSET=0
   export IAU_FHROT=0
 fi
@@ -230,6 +233,7 @@ export gldas_cyc=00
 
 # run wave component
 export DO_WAVE="NO"                ## JKH
+if [[ "$SDATE" -lt "2019020100" ]]; then DO_WAVE="NO" ; fi # no rtofs in GDA
 export WAVE_CDUMP="both"
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
@@ -285,11 +289,11 @@ export netcdf_diag=".true."
 export binary_diag=".false."
 
 # Verification options
-export DO_METP="NO"         # Run METPLUS jobs - set METPLUS settings in config.metp    ## JKH
-export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy       ## JKH
+export DO_METP="NO"         # Run METPLUS jobs - set METPLUS settings in config.metp          ## JKH
+export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy             ## JKH
 
 # Archiving options
-export HPSSARCH="@HPSSARCH@"        # save data to HPSS archive
+export HPSSARCH="YES"        # save data to HPSS archive
 export ARCH_CYC=00           # Archive data at this cycle for warm_start capability
 export ARCH_WARMICFREQ=4     # Archive frequency in days for warm_start capability
 export ARCH_FCSTICFREQ=1     # Archive frequency in days for gdas and gfs forecast-only capability

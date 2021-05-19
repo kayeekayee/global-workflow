@@ -131,16 +131,27 @@ else
     echo 'Skip. Directory verif-global.fd already exist.'
 fi
 
-echo aeroconv checkout ...
-if [[ ! -d aeroconv.fd ]] ; then
-    rm -f ${topdir}/checkout-aero.log
-    git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${topdir}/checkout-aero.log 2>&1
-    cd aeroconv.fd
-    git checkout 24f6ddc
-    cd ${topdir}
-    ./aero_extract.sh
+#JKHecho aeroconv checkout ...
+#JKHif [[ ! -d aeroconv.fd ]] ; then
+#JKH    rm -f ${topdir}/checkout-aero.log
+#JKH    git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${topdir}/checkout-aero.log 2>&1
+#JKH    cd aeroconv.fd
+#JKH    git checkout 24f6ddc
+#JKH    cd ${topdir}
+#JKH    ./aero_extract.sh
+#JKHelse
+#JKH    echo 'Skip.  Directory aeroconv.fd already exists.'
+#JKHfi
+
+echo nclvx checkout ...
+wfmdir=../FV3GFSwfm
+cd $wfmdir
+
+if [[ ! -d nclvx ]]; then
+    rm -f ${topdir}/checkout-nclvx.log
+    git clone -b realtime/nclvx gerritt:FV3_ESRL nclvx >> ${topdir}/checkout-nclvx.log 2>&1
 else
-    echo 'Skip.  Directory aeroconv.fd already exists.'
+    echo 'Skip.  Directory nclvx already exists.'
 fi
 
 exit 0

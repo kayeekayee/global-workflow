@@ -1,3 +1,7 @@
+17 Apr 2021
+    - update to 18Mar21 gsl/develop branch, f204bfd, for sorc/fv3gfs_ccpp.fd
+    - switch to using chgres_cube to generate FV3 ICs, including aerosol variables
+       ufs_utils:  GeorgeGayno-NOAA/UFS_UTILS:feature/gdas_init.v16
 12 Jan 2021
     - update to 04Jan21 global-workflow develop branch, ef8b641
          post:       upp_gfsv16_release.v1.1.1

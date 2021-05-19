@@ -21,7 +21,7 @@ export PARTITION_BATCH="vjet"
 HPSS_PROJECT=fim                                  ## JKH
 
 # Directories relative to installation areas:
-export HOMEgfs=/mnt/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite
+export HOMEgfs=/home/rtfim/UFS-CAMsuite
 export PARMgfs=$HOMEgfs/parm
 export FIXgfs=$HOMEgfs/fix
 export USHgfs=$HOMEgfs/ush
@@ -38,7 +38,7 @@ export DMPDIR="/lfs4/HFIP/hfv3gfs/glopara/dump"
 export RTMFIX=$CRTM_FIX
 
 # USER specific paths
-export HOMEDIR="/lfs4/HFIP/gsd-fv3-hfip/NCEPDEV/global/$USER"
+export HOMEDIR="/lfs4/BMC/gsd-fv3-dev/NCEPDEV/global/$USER"
 export STMP="${HOMEgfs}/FV3GFSrun/"
 export PTMP="${HOMEgfs}/FV3GFSrun/"
 export NOSCRUB="$HOMEDIR"
@@ -47,7 +47,7 @@ export NOSCRUB="$HOMEDIR"
 export BASE_GIT="/lfs4/HFIP/hfv3gfs/glopara/git"
 
 # Toggle to turn on/off GFS downstream processing.
-export DO_BUFRSND="YES"    # BUFR sounding products
+export DO_BUFRSND="NO"     # BUFR sounding products
 export DO_GEMPAK="NO"      # GEMPAK products
 export DO_AWIPS="NO"       # AWIPS products
 export WAFSF="NO"          # WAFS products
@@ -56,8 +56,10 @@ export WAFSF="NO"          # WAFS products
 #  arch.sh uses REALTIME for MOS.  Need to set REALTIME=YES
 #  if want MOS written to HPSS.   Should update arch.sh to
 #  use RUNMOS flag (currently in config.vrfy)
-export REALTIME="NO"
+export REALTIME="YES"
 
+# Experiment mode (cycled or free-forecast)
+export MODE="free" # cycled/free
 
 ####################################################
 # DO NOT ADD MACHINE DEPENDENT STUFF BELOW THIS LINE
@@ -91,14 +93,14 @@ export BASE_ENV="$HOMEgfs/env"
 export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
-export SDATE=2021011300
-export FDATE=2021011306
-export EDATE=2021011300
+export SDATE=2021041700
+export FDATE=2021041706
+export EDATE=2021041700
 export EXP_WARM_START=".false."
 export assim_freq=6
 export PSLOT="rt_ufscam_l64"
-export EXPDIR="/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/$PSLOT"
-export ROTDIR="/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/$PSLOT"
+export EXPDIR="/home/rtfim/UFS-CAMsuite/FV3GFSwfm/$PSLOT"
+export ROTDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/$PSLOT"
 export ROTDIR_DUMP="YES"                #Note: A value of "NO" does not currently work
 export DUMP_SUFFIX=""
 if [[ "$CDATE" -ge "2019092100" && "$CDATE" -le "2019110700" ]]; then
@@ -107,8 +109,9 @@ fi
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="/lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64"
-export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/scratch/$PSLOT"
+export ICSDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/FV3ICS_L64"
+#export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/scratch/$PSLOT"
+export ATARDIR="/BMC/$HPSS_PROJECT/2year/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
@@ -142,9 +145,9 @@ export CASE_ENKF="@CASEENS@"
 
 # Run with CCPP physics
 export RUN_CCPP="YES"
-#### export CCPP_SUITE="FV3_GFS_v16beta"   # EMC v16beta
+#### export CCPP_SUITE="FV3_GFS_v16"       # EMC v16
 #### export CCPP_SUITE="FV3_GSD_v0"        # GSDsuite 
-export CCPP_SUITE="FV3_GSD_noah"      # GSDsuite + NOAH LSM  
+export CCPP_SUITE="FV3_GSD_noah"           # GSDsuite + NOAH LSM  
 
 # Surface cycle update frequency
 if [[ "$CDUMP" == "gdas" ]] ; then
@@ -208,7 +211,7 @@ else
 fi
 
 # IAU related parameters
-export DOIAU="NO"        # Enable 4DIAU for control with 3 increments   # JKH
+export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
 export IAU_FHROT=`echo $IAUFHRS | cut -c1`
 export IAU_DELTHRS=6
@@ -216,7 +219,8 @@ export IAU_OFFSET=6
 export DOIAU_ENKF=${DOIAU:-"YES"}   # Enable 4DIAU for EnKF ensemble
 export IAUFHRS_ENKF="3,6,9"
 export IAU_DELTHRS_ENKF=6
-if [[ "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]] || [[ "$DOIAU" = "NO" ]] ; then # Cold starting or IAU off
+# Check if cycle is cold starting, DOIAU off, or free-forecast mode
+if [[ "$MODE" = "cycled" && "$SDATE" = "$CDATE" && $EXP_WARM_START = ".false." ]] || [[ "$DOIAU" = "NO" ]] || [[ "$MODE" = "free" && $EXP_WARM_START = ".false." ]] ; then
   export IAU_OFFSET=0
   export IAU_FHROT=0
 fi
@@ -230,6 +234,7 @@ export gldas_cyc=00
 
 # run wave component
 export DO_WAVE="NO"                ## JKH
+if [[ "$SDATE" -lt "2019020100" ]]; then DO_WAVE="NO" ; fi # no rtofs in GDA
 export WAVE_CDUMP="both"
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
@@ -285,8 +290,8 @@ export netcdf_diag=".true."
 export binary_diag=".false."
 
 # Verification options
-export DO_METP="YES"         # Run METPLUS jobs - set METPLUS settings in config.metp
-export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy     ## JKH
+export DO_METP="NO"         # Run METPLUS jobs - set METPLUS settings in config.metp          ## JKH
+export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy             ## JKH
 
 # Archiving options
 export HPSSARCH="YES"        # save data to HPSS archive

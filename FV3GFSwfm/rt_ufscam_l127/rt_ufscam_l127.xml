@@ -10,11 +10,11 @@
 		rahul.mahajan@noaa.gov
 
 	NOTES:
-		This workflow was automatically generated at 2021-04-17 15:50:28.063959
+		This workflow was automatically generated at 2021-04-17 15:50:33.224465
 	-->
 
 	<!-- Experiment parameters such as name, cycle, resolution -->
-	<!ENTITY PSLOT    "rt_ufscam_l64">
+	<!ENTITY PSLOT    "rt_ufscam_l127">
 	<!ENTITY CDUMP    "gfs">
 	<!ENTITY CASE     "C768">
 	<!ENTITY COMPONENT "atmos">
@@ -29,9 +29,9 @@
 	<!ENTITY RUN_ENVIR "emc">
 
 	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "/home/rtfim/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l64">
-	<!ENTITY ROTDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l64">
-	<!ENTITY ICSDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/FV3ICS_L64">
+	<!ENTITY EXPDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l127">
+	<!ENTITY ROTDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l127">
+	<!ENTITY ICSDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/home/rtfim/UFS-CAMsuite">
@@ -48,7 +48,7 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "2">
+	<!ENTITY CYCLETHROTTLE "5">
 	<!ENTITY TASKTHROTTLE  "25">
 	<!ENTITY MAXTRIES_FCST "2">
 	<!ENTITY MAXTRIES      "2">
@@ -58,7 +58,7 @@
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_FCST_GFS "vjet,sjet">
 	<!ENTITY PARTITION_FCST_GFS "xjet">
-	<!ENTITY WALLTIME_FCST_GFS  "04:00:00">
+	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>160:ppn=6:tpp=4</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">

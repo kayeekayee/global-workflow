@@ -10,6 +10,8 @@
 ## CDUMP  : cycle name (gdas / gfs)
 ## PDY    : current date (YYYYMMDD)
 ## cyc    : current cycle (HH)
+## ATCFNAME  : atcf track identifier
+## COMPONENT : component (atmos/wave)
 ###############################################################
 
 ###############################################################
@@ -27,9 +29,10 @@ for config in $configs; do
     [[ $status -ne 0 ]] && exit $status
 done
 
-COMIN="$ROTDIR/$CDUMP.$PDY/$cyc"
+COMIN="$ROTDIR/$CDUMP.$PDY/$cyc/$COMPONENT"
 cd $COMIN
 
+YYYY=`echo $PDY|cut -c1-4`
 ###############################################################
 # Archive data to HPSS
 if [ $HPSSARCH = "YES" ]; then
@@ -40,7 +43,7 @@ if [ $HPSSARCH = "YES" ]; then
       ## nemsio files ##
       if [ -f *nemsio ]; then
         # archive nemsio files (gfs.t00z.atmfHHH.nemsio, gfs.t00z.sfcfHHH.nemsio, gfs.t00z.logfHHH.nemsio )
-        htar -P -cvf $ATARDIR/$CDATE/gfs_nemsio.tar gfs.*nemsio
+        htar -P -cvf $ATARDIR/$YYYY/$CDATE/gfs_nemsio.tar gfs.*nemsio
         status=$?
         if [ $status -ne 0 ]; then
           echo "HTAR $CDATE gfs_nemsio.tar failed"
@@ -51,7 +54,7 @@ if [ $HPSSARCH = "YES" ]; then
       ## netcdf files ##
       if [ -f *nc ]; then
         # archive netcdf files (gfs.t00z.atmfHHH.nc, gfs.t00z.sfcfHHH.nc, gfs.t00z.logfHHH.txt )
-        htar -P -cvf $ATARDIR/$CDATE/gfs_nc.tar gfs*.nc gfs.*log*.txt
+        htar -P -cvf $ATARDIR/$YYYY/$CDATE/gfs_nc.tar gfs*.nc gfs.*log*.txt
         status=$?
         if [ $status -ne 0 ]; then
           echo "HTAR $CDATE gfs_nc.tar failed"
@@ -60,8 +63,12 @@ if [ $HPSSARCH = "YES" ]; then
       fi
         
       # archive GRIB2 files (gfs.t00z.pgrb2.0p25.fHHH, gfs.t00z.pgrb2.0p50.fHHH) 
-      # and tracker files (avno.t00z.cyclone.trackatcfunix, avnop.t00z.cyclone.trackatcfunix)
-      htar -P -cvf $ATARDIR/$CDATE/gfs_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5* avno*
+      #   and tracker files (tctrk.atcf.YYYYMMDDHH.gcp1.txt)
+      if [ -f tctrk.atcf.${CDATE}.${ATCFNAME}.txt ]; then
+        htar -P -cvf $ATARDIR/$YYYY/$CDATE/gfs_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5* tctrk.atcf.${CDATE}.${ATCFNAME}.txt
+      else
+        htar -P -cvf $ATARDIR/$YYYY/$CDATE/gfs_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5* 
+      fi
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"
