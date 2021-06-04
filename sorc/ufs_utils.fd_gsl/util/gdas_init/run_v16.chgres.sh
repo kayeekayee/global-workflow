@@ -79,6 +79,7 @@ cat << EOF > fort.41
  input_type="gaussian_netcdf"
  tracers="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
  tracers_input="spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"
+ thomp_mp_climo_file="/home/rtfim/UFS-CAMsuite/fix/fix_am/Thompson_MP_MONTHLY_CLIMO.nc"
 /
 EOF
 
