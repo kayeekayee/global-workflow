@@ -1,6 +1,0 @@
-
-#################### rt_ufscam_l128 ####################
-MAILTO=""
-*/5 * * * * /apps/rocoto/1.3.2/bin/rocotorun -d /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l128/rt_ufscam_l128.db -w /lfs4/HFIP/gsd-fv3-hfip/rtruns/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l128/rt_ufscam_l128.xml
-#################################################################
-
