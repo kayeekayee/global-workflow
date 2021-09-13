@@ -1,10 +1,10 @@
-  <task name="ncl_#T#" maxtries="3">
+  <task name="ncl_#T#" maxtries="2">
     <command>&SCRIPTS;/nclfv3_driver.ksh</command>
     <account>&PROJECT;</account>
     <memory>4G</memory>
     <cores>1</cores>
-    <walltime>00:35:00</walltime>
-    <jobname><cyclestr>ncl_#T#</cyclestr></jobname>
+    <walltime>01:35:00</walltime>
+    <jobname><cyclestr>ncl_#T#_&PSLOT;</cyclestr></jobname>
     <join><cyclestr>&FV3GFS_LOG;/ncl/ncl#T#_@Y@m@d@H00.log</cyclestr></join>
     <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value></envar>
     <envar><name>FV3GFS_RUN</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/</cyclestr></value></envar>

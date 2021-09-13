@@ -3,7 +3,7 @@
     <account>&PROJECT;</account>
     <cores>1</cores>
     <walltime>00:10:00</walltime>
-    <jobname><cyclestr>remapgrib</cyclestr></jobname>
+    <jobname><cyclestr>remapgrib_#T#_&PSLOT;</cyclestr></jobname>
     <join><cyclestr>&FV3GFS_LOG;/remapgrib/remapgrib_@Y@m@d@H_#T#.log</cyclestr></join>
     <envar><name>FV3GFS_RUN</name><value>&FV3GFS_RUN;</value></envar>
     <envar><name>PSLOT</name><value>&PSLOT;</value></envar>

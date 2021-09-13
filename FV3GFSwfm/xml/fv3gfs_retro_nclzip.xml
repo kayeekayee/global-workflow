@@ -11,6 +11,7 @@
   <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
   <!ENTITY RES "0p50">
   <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "048">
   <!ENTITY FCST_LENGTH "120">
 
   <!-- External parameter entites -->
@@ -27,7 +28,7 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretrozip.log</cyclestr>
   </log>
 
-  <cycledef>202102150000 202102180000 72:00:00</cycledef>
+  <cycledef>202108140000 202108140000 24:00:00</cycledef>
 
   &nclzipretro_task;  
 <!--    

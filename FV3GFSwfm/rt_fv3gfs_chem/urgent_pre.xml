@@ -20,8 +20,8 @@
 	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202103230000">
-	<!ENTITY EDATE    "202909200000">
+	<!ENTITY SDATE    "202108040000">
+	<!ENTITY EDATE    "202108060000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -46,9 +46,8 @@
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/jobs/rocoto">
 
 	<!-- Machine related entities -->
-	<!ENTITY ACCOUNT    "gsd-fv3">
-	<!ENTITY ACCOUNT    "gsd-fv3-dev">
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
+	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
@@ -59,26 +58,27 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "3">
-	<!ENTITY TASKTHROTTLE  "20">
+	<!ENTITY CYCLETHROTTLE "1">
+	<!ENTITY TASKTHROTTLE  "1">
 	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
         
+      	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE_URG;">
       	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE;">
       	<!ENTITY QUEUE_GETIC_GFS     "&QUEUE_DEBUG;">
 	<!ENTITY WALLTIME_GETIC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_GETIC_GFS "<nodes>1:ppn=1</nodes>">
 	<!ENTITY NATIVE_GETIC_GFS    "--export=NONE">
 
-	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE;">
 	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE_URG;">
+	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE;">
 	<!ENTITY WALLTIME_FV3IC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_FV3IC_GFS "<nodes>4:ppn=6:tpp=1</nodes>">
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
-        <!ENTITY QUEUE_REGRID     "&QUEUE;">
         <!ENTITY QUEUE_REGRID     "&QUEUE_URG;">
+        <!ENTITY QUEUE_REGRID     "&QUEUE;">
         <!ENTITY WALLTIME_REGRID  "00:30:00">
         <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
         <!ENTITY NATIVE_REGRID    "--export=NONE">
@@ -87,15 +87,15 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_pre.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+<!--
 
-<!--<task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">-->
-<task name="gfsgetic" cycledefs="gfs" >
+<task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
 	<command>&JOBS_DIR;/getic.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsgetic_@H</cyclestr></jobname>
@@ -130,12 +130,10 @@
                  <datadep><cyclestr>&PUBDIR;/@y@j@H00.gfs.t@Hz.atmanl.nc</cyclestr></datadep>
                  <datadep><cyclestr>&PUBDIR;/@y@j@H00.gfs.t@Hz.sfcanl.nc</cyclestr></datadep>
                </and>
-                <!--  JKH -->
                <and>
                  <datadep><cyclestr>&RETRODIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.atmanl.nc</cyclestr></datadep>
                  <datadep><cyclestr>&RETRODIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.sfcanl.nc</cyclestr></datadep>
                </and>
-                <!--  JKH -->
                <and>
                  <datadep><cyclestr>&RETRODIR;/@y@j@H00.gfs.t@Hz.atmanl.nc</cyclestr></datadep>
                  <datadep><cyclestr>&RETRODIR;/@y@j@H00.gfs.t@Hz.sfcanl.nc</cyclestr></datadep>
@@ -144,6 +142,7 @@
 	</dependency>
 </task>
 
+-->
 <task name="gfsfv3ic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/fv3ic.sh</command>
@@ -221,5 +220,6 @@
            </and>  
         </dependency>
 </task>
-
+<!--
+-->
 </workflow>

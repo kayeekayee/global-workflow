@@ -11,7 +11,7 @@
   <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
   <!ENTITY RES "0p50">
   <!ENTITY FCST_INTERVAL "6">
-  <!ENTITY FCST_LENGTH "120">
+  <!ENTITY FCST_LENGTH "048">
 
   <!-- External parameter entites -->
   <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
@@ -19,8 +19,8 @@
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
   %hera;
-  <!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
   <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
+  <!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
   <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
@@ -34,11 +34,11 @@
   <cycledef>201910010000 202806190000 24:00:00</cycledef>
 
   <metatask name="remap_ncl" throttle="25">
-    &fcst_120hr_metatask;
-    &t120hr_metatask;
+    &fcst_048hr_metatask;
+    &t048hr_metatask;
     &remapgrib_task; 
     &ncl_task;
   </metatask>
-<!-- Mar24   &chemplot_task; -->
+  &chemplot_task;
   &nclzip_task;  
 </workflow>

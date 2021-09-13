@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+	<!--
+	PROGRAM
+		Main workflow manager for Forecast only Global Forecast System
+
+	AUTHOR:
+		Rahul Mahajan
+		rahul.mahajan@noaa.gov
+
+	NOTES:
+		This workflow was automatically generated at 2021-04-02 22:11:38.777230
+	-->
+
+	<!-- Experiment parameters such as name, cycle, resolution -->
+	<!ENTITY PSLOT    "rt_fv3gfs_chem">
+	<!ENTITY CDUMP    "gfs">
+	<!ENTITY CASE     "C384">
+	<!ENTITY COMPONENT "atmos">
+
+	<!-- Experiment parameters such as starting, ending dates -->
+	<!ENTITY SDATE    "202108040000">
+	<!ENTITY EDATE    "202108040000">
+	<!ENTITY INTERVAL "24:00:00">
+
+	<!-- Run Envrionment -->
+	<!ENTITY RUN_ENVIR "emc">
+
+	<!-- Experiment related directories -->
+	<!ENTITY EXPDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem">
+	<!ENTITY ROTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem">
+	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
+        <!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
+        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
+        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/sdsu/emissions">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
+        <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
+        <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
+        <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
+        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY OUTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem/">
+         
+	<!-- Directories for driving the workflow -->
+	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
+	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/jobs/rocoto">
+
+	<!-- Machine related entities -->
+	<!ENTITY ACCOUNT    "gsd-fv3">
+	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
+	<!ENTITY QUEUE      "batch">
+	<!ENTITY QUEUE_URG  "urgent">
+	<!ENTITY QUEUE_DEBUG "debug">
+	<!ENTITY QUEUE_ARCH "service">
+	<!ENTITY PARTITION_ARCH "service">
+	<!ENTITY SCHEDULER  "slurm">
+
+	<!-- Toggle HPSS archiving -->
+	<!ENTITY ARCHIVE_TO_HPSS "YES">
+
+	<!-- ROCOTO parameters that control workflow -->
+	<!ENTITY CYCLETHROTTLE "4">
+	<!ENTITY TASKTHROTTLE  "20">
+	<!ENTITY MAXTRIES      "1">
+	<!ENTITY MAXTRIES      "2">
+
+	<!-- BEGIN: Resource requirements for the workflow -->
+        
+	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
+	<!ENTITY PARTITION_ARCH_GFS "&PARTITION_ARCH;">
+	<!ENTITY WALLTIME_ARCH_GFS  "06:00:00">
+	<!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1</nodes>">
+	<!ENTITY MEMORY_ARCH_GFS    "2048M">
+	<!ENTITY NATIVE_ARCH_GFS    "--export=NONE">
+
+	<!-- END: Resource requirements for the workflow -->
+
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+
+	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
+
+	<!-- Define the cycles -->
+	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+
+<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
+
+        <command>&JOBS_DIR;/arch.sh</command>
+
+        <jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
+        <account>&ACCOUNT;</account>
+        <queue>&QUEUE_ARCH_GFS;</queue>
+        <partition>&PARTITION_ARCH_GFS;</partition>
+        &RESOURCES_ARCH_GFS;
+        <walltime>&WALLTIME_ARCH_GFS;</walltime>
+        <memory>&MEMORY_ARCH_GFS;</memory>
+        <native>&NATIVE_ARCH_GFS;</native>
+
+        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsarch.log</cyclestr></join>
+
+        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>RUNDIR</name><value>&RUNDIR;</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+
+        <dependency>
+                <and>
+<!--
+                        <metataskdep metatask="gfspost"/>
+-->
+                        <streq><left>&ARCHIVE_TO_HPSS;</left><right>YES</right></streq>
+                        <datadep age="600"><cyclestr>&OUTDIR;/&CDUMP;.@Y@m@d/@H/ncl/a2/files.zip</cyclestr></datadep> 
+                </and>
+        </dependency>
+
+</task>
+
+</workflow>

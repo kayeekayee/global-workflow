@@ -20,8 +20,8 @@
 	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202108100000">
-	<!ENTITY EDATE    "202909200000">
+	<!ENTITY SDATE    "202109020000">
+	<!ENTITY EDATE    "202109020000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -47,7 +47,6 @@
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
-	<!ENTITY ACCOUNT    "gsd-fv3-dev">
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_URG  "urgent">
@@ -68,7 +67,6 @@
 	<!-- BEGIN: Resource requirements for the workflow -->
         
         <!ENTITY QUEUE_CALCINC     "&QUEUE;">
-        <!ENTITY QUEUE_CALCINC     "&QUEUE_URG;">
         <!ENTITY WALLTIME_CALCINC  "00:30:00">
         <!ENTITY RESOURCES_CALCINC "<nodes>1:ppn=2</nodes>">
         <!ENTITY MEMORY_CALCINC    "">
@@ -81,8 +79,6 @@
         <!ENTITY NATIVE_PREP_CHEM_SRC    "--export=NONE">
 	
         <!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
-        <!ENTITY QUEUE_FCST_GFS     "&QUEUE_URG;">
-	<!ENTITY WALLTIME_FCST_GFS  "02:00:00">
 	<!ENTITY WALLTIME_FCST_GFS  "06:00:00">
 	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
 	<!--<!ENTITY RESOURCES_FCST_GFS "<nodes>9:ppn=20</nodes>"> -->
@@ -106,8 +102,7 @@
 
 ]>
 
-<!--<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;" cyclelifespan="0:72:00:00"> -->
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;" >
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 

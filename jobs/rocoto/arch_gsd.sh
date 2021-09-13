@@ -30,6 +30,7 @@ done
 COMIN="$ROTDIR/$CDUMP.$PDY/$cyc"
 cd $COMIN
 
+YYYY=`echo $PDY|cut -c1-4`
 ###############################################################
 # Archive data to HPSS
 if [ $HPSSARCH = "YES" ]; then
@@ -38,7 +39,7 @@ if [ $HPSSARCH = "YES" ]; then
   if [ $CDUMP = "gfs" ]; then
   
       # archive nemsio files (gfs.t00z.atmfHHH.nemsio, gfs.t00z.sfcfHHH.nemsio, gfs.t00z.logfHHH.nemsio )
-      htar -P -cvf $ATARDIR/$CDATE/${CDATE}_nemsio.tar *nemsio*
+      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_nemsio.tar *nemsio*
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_nemsio.tar failed"
@@ -46,7 +47,7 @@ if [ $HPSSARCH = "YES" ]; then
       fi
       
       # archive RESTART directory 
-      htar -P -cvf $ATARDIR/$CDATE/${CDATE}_restart.tar RESTART
+      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_restart.tar RESTART
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"
@@ -54,7 +55,7 @@ if [ $HPSSARCH = "YES" ]; then
       fi
 
       # archive GRIB2 files (gfs.t00z.pgrb2.0p25.fHHH, gfs.t00z.pgrb2.0p50.fHHH)
-      htar -P -cvf $ATARDIR/$CDATE/${CDATE}_pgrb2.tar *pgrb2*
+      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_pgrb2.tar *pgrb2*
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"
@@ -62,7 +63,7 @@ if [ $HPSSARCH = "YES" ]; then
       fi
       
       # archive NCL files (files.zip)
-      htar -P -cvf $ATARDIR/$CDATE/${CDATE}_ncl.tar ncl/*/files.zip
+      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_ncl.tar ncl/*/files.zip
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"
@@ -71,7 +72,7 @@ if [ $HPSSARCH = "YES" ]; then
 
       # archive regrid directory from RUNDIRS
       cd ${RUNDIR}/${CDATE}/gfs
-      htar -P -cvf $ATARDIR/$CDATE/${CDATE}_regrid.tar regrid
+      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_regrid.tar regrid
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE regrid.tar failed"

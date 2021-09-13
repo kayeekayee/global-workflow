@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/ksh -x
 
 ## this script makes links to GFS nemsio files under /public and copies over GFS analysis file for verification
 ##   /scratch4/BMC/rtfim/rtfuns/FV3GFS/FV3ICS/YYYYMMDDHH/gfs
