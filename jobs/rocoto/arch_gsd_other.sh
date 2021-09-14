@@ -38,14 +38,6 @@ if [ $HPSSARCH = "YES" ]; then
 
   if [ $CDUMP = "gfs" ]; then
   
-      # archive nemsio files (gfs.t00z.atmfHHH.nemsio, gfs.t00z.sfcfHHH.nemsio, gfs.t00z.logfHHH.nemsio )
-      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_nemsio.tar *nemsio*
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "HTAR $CDATE gfs_nemsio.tar failed"
-        exit $status
-      fi
-      
       # archive RESTART directory 
       htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_restart.tar RESTART
       status=$?
@@ -54,20 +46,14 @@ if [ $HPSSARCH = "YES" ]; then
         exit $status
       fi
 
-      # archive GRIB2 files (gfs.t00z.pgrb2.0p25.fHHH, gfs.t00z.pgrb2.0p50.fHHH)
-      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_pgrb2.tar gfs.*pgrb2.0p25* gfs.*pgrb2.0p5*
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "HTAR $CDATE gfs_pgrb2.tar failed"
-        exit $status
-      fi
-
       # archive NCL files (files.zip)
-      htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_ncl.tar ncl/*/files.zip
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "HTAR $CDATE gfs_pgrb2.tar failed"
-        exit $status
+      if [ -d ncl ]; then
+        htar -P -cvf $ATARDIR/$YYYY/$CDATE/${CDATE}_ncl.tar ncl/*/files.zip
+        status=$?
+        if [ $status -ne 0 ]; then
+          echo "HTAR $CDATE gfs_pgrb2.tar failed"
+          exit $status
+        fi
       fi
 
       # archive regrid directory from RUNDIRS

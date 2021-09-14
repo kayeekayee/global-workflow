@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY EXP_HOME "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
+  <!ENTITY FV3GFS_HOME "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
+  <!ENTITY PSLOT  "rt_ccpp_c384">
+  <!ENTITY ATCFNAME "FV3CCPP_C384">          <!-- tracker name -->
+  <!ENTITY MODL "FV3CCPP_C384">              <!-- plot name;  needs to have 'FV3' in name for NCL -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY ATCFNAME "FV3CCPP_C384">               <!-- tracker name -->
+  <!ENTITY AC_MODEL_NAME "FV3CCPP_C384">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "FV3CCPP_C384">
+  <!ENTITY SURFACE_MODEL_NAME "FV3CCPP_C384">
+  <!ENTITY RES "0p25">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+  <!-- set this to 3 character str - ex. 96 would be 096 - used for final FV3GFS_GF verification file required -->
+  <!ENTITY FCST_LENGTH_STR "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  <!ENTITY CASE        "C384">
+  <!ENTITY COMPONENT   "">
+  %hera;
+  %dbi;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="10">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_&PSLOT;_acc_retro.log</cyclestr>
+  </log>
+
+  <!--  
+        accvx is used for Anomaly Corr
+        anomaly corr is run every 12 hours over time range [00z, 12z]
+  -->                                                           
+
+  <cycledef group="accvx">  202107280000 202108191200 12:00:00</cycledef>
+
+  <!--  Anomaly Correlation  -->
+  &ac_verif_back_task; 
+  &ac_verif_task;
+
+</workflow>

@@ -19,8 +19,8 @@
 	<!ENTITY CASE     "C384">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202103230000">
-	<!ENTITY EDATE    "203001100000">
+	<!ENTITY SDATE    "202108120000">
+	<!ENTITY EDATE    "202108140000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -41,6 +41,7 @@
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
+	<!ENTITY ACCOUNT    "gsd-fv3-test">
 	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_DEBUG  "debug">
@@ -51,8 +52,9 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "6">
-	<!ENTITY TASKTHROTTLE  "30">
+	<!ENTITY CYCLETHROTTLE "2">
+	<!ENTITY TASKTHROTTLE  "10">
+	<!ENTITY TASKTHROTTLE  "1">
 	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
@@ -63,6 +65,8 @@
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
         <!ENTITY QUEUE_CALCINC     "&QUEUE;">
+        <!ENTITY QUEUE_CALCINC     "&QUEUE_URG;">
+        <!ENTITY QUEUE_CALCINC     "&QUEUE_DEBUG;">
         <!ENTITY WALLTIME_CALCINC  "00:30:00">
         <!ENTITY RESOURCES_CALCINC "<nodes>1:ppn=2</nodes>">
         <!ENTITY MEMORY_CALCINC    "">
@@ -93,13 +97,14 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
+<!--
 <task name="gfsfv3ic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/makefv3ic_link.sh</command>
@@ -133,12 +138,12 @@
 	</dependency>
 
 </task>
-
+-->
 <task name="calcinc" cycledefs="gfs" maxtries="&MAXTRIES;">
 
         <command>&JOBS_DIR;/calcinc.sh</command>
 
-        <jobname><cyclestr>&PSLOT;_clacinc_@H</cyclestr></jobname>
+        <jobname><cyclestr>&PSLOT;_calcinc_@H</cyclestr></jobname>
         <account>&ACCOUNT;</account>
         <queue>&QUEUE_CALCINC;</queue>
         &RESOURCES_CALCINC;
@@ -242,6 +247,7 @@
 
 </metatask>
 
+<!--
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
 
 	<command>&JOBS_DIR;/arch_gsd.sh</command>
@@ -274,6 +280,6 @@
 	</dependency>
 
 </task>
-
+-->
 
 </workflow>
