@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY EXP_HOME "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
+  <!ENTITY FV3GFS_HOME "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
+  <!ENTITY PSLOT  "rt_ccpp-chem">
+  <!ENTITY ATCFNAME "FV3CCPP_Chem">          <!-- tracker name -->
+  <!ENTITY MODL "FV3CCPP_Chem">              <!-- plot name;  needs to have 'FV3' in name for NCL -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY ATCFNAME "FV3CCPP_Chem">               <!-- tracker name -->
+  <!ENTITY AC_MODEL_NAME "FV3CCPP_Chem">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "FV3CCPP_Chem">
+  <!ENTITY SURFACE_MODEL_NAME "FV3CCPP_Chem">
+  <!ENTITY RES "0p25">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "168">
+  <!-- set this to 3 character str - ex. 96 would be 096 - used for final FV3GFS_GF verification file required -->
+  <!ENTITY FCST_LENGTH_STR "168">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  <!ENTITY CASE        "C384">
+  <!ENTITY COMPONENT   "">
+  %hera;
+  %dbi;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="10">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_&PSLOT;_raobvx_retro.log</cyclestr>
+  </log>
+
+  <!--  raobvx is used for raob verification
+        accvx is used for Anomaly Corr
+        sfcvx is used for surface verification 
+
+        anomaly corr is run every 12 hours over time range [00z, 12z]
+        surface vx is run every 06 hours over time range   [00z, 06z, 12z, 18z]
+        raob vx is run for each initialization time        [every 10 days for 2016 retro]
+                                                           [every day at 00Z for realtime]  -->
+
+<!-- 
+  <cycledef group="sfcvx">  202012010000 202102200000 06:00:00</cycledef> 
+  <cycledef group="accvx">  202012010000 202102070000 12:00:00</cycledef> -->
+  <cycledef group="raobvx"> 202107280000 202108190000 24:00:00</cycledef>   
+
+  <!--  Anomaly Correlation  
+  &ac_verif_file_task; 
+  &ac_verif_task;-->
+
+  <!--  Raob Verification  -->
+  <metatask throttle="10">
+    &sounding_168hr_metatask;
+    &sounding_task;
+  </metatask>
+
+  <!--  Surface Verification 
+  <metatask>
+    &surface_72hr_metatask;
+    &surface_task;
+  </metatask> -->
+
+</workflow>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow [
+
+  <!ENTITY EXP_HOME "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/test/update_jet">
+  <!ENTITY FV3GFS_HOME "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/test/update_jet">
+  <!ENTITY NCLVX_HOME "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/scratch2/test_nclvx">
+  <!ENTITY PSLOT  "gsdnoahcyc384">
+  <!ENTITY MODL "FV3-gsdnoahcyc384">         <!-- plot name;  needs to have 'FV3' in name for NCL -->
+  <!ENTITY ANX_MODEL "GFS">                 <!-- model analysis to use for AC stats -->
+  <!ENTITY ATCFNAME "gsdnoahcyc384">               <!-- tracker name -->
+  <!ENTITY AC_MODEL_NAME "gsdnoahcyc384">          <!-- AC stats name -->
+  <!ENTITY SOUNDING_MODEL_NAME "gsdnoahcyc384">
+  <!ENTITY SURFACE_MODEL_NAME "gsdnoahcyc384">
+  <!ENTITY RES "0p25">
+  <!ENTITY FCST_INTERVAL "6">
+  <!ENTITY FCST_LENGTH "120">
+  <!-- set this to 3 character str - ex. 96 would be 096 - used for final FV3GFS_GF verification file required -->
+  <!ENTITY FCST_LENGTH_STR "120">
+
+  <!-- External parameter entites -->
+  <!ENTITY % SITES  SYSTEM "all_sites.xml">  %SITES;
+  <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
+  <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
+
+  %hera;
+  %dbi;
+  %metatasks;
+]>
+
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="10">
+  <log>
+    <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_&PSLOT;_vx.log</cyclestr>
+  </log>
+
+  <!--  raobvx is used for raob verification
+        accvx is used for Anomaly Corr
+        sfcvx is used for surface verification 
+
+        anomaly corr is run every 12 hours over time range [00z, 12z]
+        surface vx is run every 06 hours over time range   [00z, 06z, 12z, 18z]
+        raob vx is run for each initialization time        [every 10 days for 2016 retro]
+                                                           [every day at 00Z for realtime]
+
+  2016 retro:  01 Jan - 31 Mar, every 10 days
+  2019 retro:  20 Oct - 31 Dec, every  5 days
+  <cycledef group="raobvx"> 201601010000 201603310000 240:00:00</cycledef>   
+  <cycledef group="raobvx"> 201910200000 201912310000 120:00:00</cycledef>   
+  -->
+  <cycledef group="raobvx"> 202008200000 202008300000 24:00:00</cycledef>   
+<!--  <cycledef group="accvx">  202008200000 202009050000 12:00:00</cycledef> -->
+  <cycledef group="accvx">  202008240000 202009130000 12:00:00</cycledef>
+  <cycledef group="sfcvx">  202008200000 202008300000 06:00:00</cycledef>
+
+  <!--  Anomaly Correlation  -->
+  &ac_verif_back_task; 
+  &ac_verif_task;
+
+  <!--  Raob Verification  -->
+  <metatask throttle="10">
+    &sounding_120hr_metatask;
+    &sounding_task;
+  </metatask>
+
+  <!--  Surface Verification 
+  <metatask>
+    &surface_72hr_metatask;
+    &surface_task;
+  </metatask> -->
+
+</workflow>

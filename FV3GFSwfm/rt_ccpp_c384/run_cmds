@@ -6,5 +6,17 @@ rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/rt_
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/ccpp_c384.xml -d /home/rtfim/retro_dbfiles/ccpp_c384.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/ccpp_c384.xml -d /home/rtfim/retro_dbfiles/ccpp_c384.db | m
 
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/archc384_other.xml -d /home/rtfim/retro_dbfiles/archc384_other.db
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/archc384_other.xml -d /home/rtfim/retro_dbfiles/archc384_other.db
+
+
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/ccpp_c384_arch.xml -d /home/rtfim/retro_dbfiles/ccpp_c384_arch.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/ccpp_c384_arch.xml -d /home/rtfim/retro_dbfiles/ccpp_c384_arch.db | m
+
+
+## 08/02-08/10, 08/12-08/14
+rocotorun -w urg_c384.xml -d urg_c384.db
+rocotostat -w urg_c384.xml -d urg_c384.db
+
+#rocotorun -w urg_fcst.xml -d urg_fcst.db
+#rocotostat -w urg_fcst.xml -d urg_fcst.db

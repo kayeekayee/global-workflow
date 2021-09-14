@@ -29,21 +29,21 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef group="nclcyc">202109020000 202109040000 24:00:00</cycledef>
+  <cycledef group="nclcyc">202108170000 202108190000 24:00:00</cycledef>
 
   <metatask name="remap_ncl" throttle="100">
 <!--
 <var name="fcst"> 0 6 12 18 24 30 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 126 132 138 144 150 156 162 168 </var>
 <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 </var>
+  &chemplot_task;
+    &remapgrib_task; 
 -->
     &fcst_168hr_metatask;
     &t168hr_metatask;
-    &remapgrib_task; 
-    &ncl_task;
+    &nclretro_task;
   </metatask>
   &nclzip_task;  
 <!--    
-  &chemplot_task;
   &nclzipretro_task;  
 -->
 </workflow>

@@ -28,11 +28,11 @@
 <!ENTITY QUEUE_URG "urgent">
 <!ENTITY QUEUE "batch">
 <!ENTITY QUEUE_DEBUG "debug">
-<!ENTITY QUEUE_ARCH "service">
+<!ENTITY PARTITION_ARCH "service">
 <!ENTITY SCHEDULER "slurm">
 <!-- Toggle HPSS archiving --><!ENTITY ARCHIVE_TO_HPSS "YES">
 <!-- ROCOTO parameters that control workflow --><!ENTITY CYCLETHROTTLE "6">
-<!ENTITY TASKTHROTTLE "25">
+<!ENTITY TASKTHROTTLE "30">
 <!ENTITY MAXTRIES "2">
 <!-- BEGIN: Resource requirements for the workflow --><!ENTITY QUEUE_FV3IC_GFS "&QUEUE;">
 <!ENTITY WALLTIME_FV3IC_GFS "00:30:00">
@@ -48,16 +48,17 @@
 <!ENTITY RESOURCES_FCST_GFS "<nodes>8:ppn=40:tpp=1</nodes>">
 <!ENTITY NATIVE_FCST_GFS "--export=NONE">
 <!ENTITY QUEUE_POST_GFS "&QUEUE;">
-<!ENTITY WALLTIME_POST_GFS "00:30:00">
+<!ENTITY WALLTIME_POST_GFS "00:15:00">
 <!ENTITY RESOURCES_POST_GFS "<nodes>4:ppn=12:tpp=1</nodes>">
 <!ENTITY NATIVE_POST_GFS "--export=NONE">
 <!ENTITY QUEUE_ARCH_GFS "&QUEUE;">
+<!ENTITY PARTITION_ARCH_GFS "&PARTITION_ARCH;">
 <!ENTITY WALLTIME_ARCH_GFS "06:00:00">
 <!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
 <!ENTITY MEMORY_ARCH_GFS "2048M">
 <!ENTITY NATIVE_ARCH_GFS "--export=NONE">
 <!-- END: Resource requirements for the workflow -->]>
-<workflow realtime="T" scheduler="slurm" cyclethrottle="6" taskthrottle="25">
+<workflow realtime="T" scheduler="slurm" cyclethrottle="6" taskthrottle="30">
 
 	<log verbosity="10"><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384/logs/@Y@m@d@H.log</cyclestr></log>
 
@@ -89,16 +90,10 @@
 			<not>
 				<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSrun/rt_ccpp_c384/gfs.@Y@m@d/@H/INPUT</cyclestr></datadep>
 			</not>
-			<or>
-				<and>
-					<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/gfs_data.tile6.nemsio</cyclestr></datadep>
-					<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/sfc_data.tile6.nemsio</cyclestr></datadep>
-				</and>
-				<and>
-					<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
-					<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
-				</and>
-			</or>
+			<and>
+				<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
+				<datadep><cyclestr>/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS/@Y@m@d@H/gfs/C384/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
+			</and>
 		</and>
 	</dependency>
 
@@ -187,7 +182,7 @@
 		<account>gsd-fv3</account>
 		<queue>batch</queue>
 		<nodes>4:ppn=12:tpp=1</nodes>
-		<walltime>00:30:00</walltime>
+		<walltime>00:15:00</walltime>
 		
 		<native>--export=NONE</native>
 
@@ -219,6 +214,7 @@
 	<jobname><cyclestr>rt_ccpp_c384_gfsarch_@H</cyclestr></jobname>
 	<account>gsd-fv3</account>
 	<queue>batch</queue>
+	<partition>service</partition>
 	<nodes>1:ppn=1:tpp=1</nodes>
 	<walltime>06:00:00</walltime>
 	<memory>2048M</memory>

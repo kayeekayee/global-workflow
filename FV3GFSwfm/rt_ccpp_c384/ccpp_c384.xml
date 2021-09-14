@@ -19,8 +19,8 @@
 	<!ENTITY CASE     "C384">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202103230000">
-	<!ENTITY EDATE    "203001100000">
+	<!ENTITY SDATE    "202012080000">
+	<!ENTITY EDATE    "202102220000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -30,11 +30,14 @@
 	<!ENTITY EXPDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384">
 	<!ENTITY ROTDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSrun/rt_ccpp_c384">
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS">
-
         <!-- use RUNDIR1 as long as FV3-CHEM is still running in realtime   -->
         <!ENTITY RUNDIR1 "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/nemsio">
+        <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
+        <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
+        <!-- use lzhang GBBEPx directory as long as FV3-CHEM is still running in realtime  -->
         <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_ccpp_c384">
-
+         
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/jobs/rocoto">
@@ -44,6 +47,7 @@
 	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_DEBUG  "debug">
+	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY PARTITION_ARCH "service">
 	<!ENTITY SCHEDULER  "slurm">
 
@@ -51,8 +55,8 @@
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "6">
-	<!ENTITY TASKTHROTTLE  "30">
+	<!ENTITY CYCLETHROTTLE "4">
+	<!ENTITY TASKTHROTTLE  "25">
 	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
@@ -77,8 +81,7 @@
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
-	<!ENTITY QUEUE_POST_GFS     "&QUEUE_DEBUG;">
-	<!ENTITY WALLTIME_POST_GFS  "00:15:00">
+	<!ENTITY WALLTIME_POST_GFS  "06:00:00">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>4:ppn=12:tpp=1</nodes>">
 	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
 
@@ -93,9 +96,9 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;">
 
-	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
+	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_rerun.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
@@ -157,12 +160,7 @@
         <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
         <dependency>
 	        <and>
-			<or>
-                      		<!--<datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H</cyclestr></datadep> -->
-                      		<!--<datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H.nc</cyclestr></datadep> -->
-                      		<datadep><cyclestr>&RUNDIR1;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H</cyclestr></datadep>
-                      		<datadep><cyclestr>&RUNDIR1;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H.nc</cyclestr></datadep>
-			</or>
+                      <datadep><cyclestr>&RUNDIR1;/@Y@m@d@H/&CDUMP;/regrid/atmanl.@Y@m@d@H</cyclestr></datadep>
 	              <datadep><cyclestr offset="-24:00:00">&ROTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf024.nemsio</cyclestr></datadep>  
                 </and> 
         </dependency>
@@ -196,7 +194,6 @@
 		<and>
                        <taskdep task="calcinc"/>
                        <datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/INPUT</cyclestr></datadep>
-                       <datadep><cyclestr>&RUNDIR;/@Y@m@d@H/&CDUMP;/calcinc/atminc.nc</cyclestr></datadep>
                        <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
                        <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
                </and>
@@ -242,6 +239,7 @@
 
 </metatask>
 
+<!--
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
 
 	<command>&JOBS_DIR;/arch_gsd.sh</command>
@@ -275,5 +273,6 @@
 
 </task>
 
+-->
 
 </workflow>

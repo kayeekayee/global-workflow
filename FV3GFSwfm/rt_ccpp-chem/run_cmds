@@ -5,3 +5,19 @@ rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp-chem/rt_
 
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp-chem/ccpp-chem.xml -d /home/rtfim/retro_dbfiles/ccpp-chem.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp-chem/ccpp-chem.xml -d /home/rtfim/retro_dbfiles/ccpp-chem.db | m
+
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp-chem/archchem_other.xml -d /home/rtfim/retro_dbfiles/archchem_other.db
+rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp-chem/archchem_other.xml -d /home/rtfim/retro_dbfiles/archchem_other.db
+
+rocotorun -w urg_chem.xml -d urg_chem.db
+rocotostat -w urg_chem.xml -d urg_chem.db
+
+rocotorun -w urg_fcst.xml -d urg_fcst.db
+rocotostat -w urg_fcst.xml -d urg_fcst.db
+
+rocotorun  -w urg_post.xml -d urg_post.db
+rocotostat -w urg_post.xml -d urg_post.db
+
+rocotorun  -w arch.xml -d arch.db
+rocotostat  -w arch.xml -d arch.db
+

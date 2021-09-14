@@ -1746,8 +1746,8 @@
             bccb(i,j) = MAX(bccb(i,j), 0.0)
             occb(i,j) = MAX(occb(i,j), 0.0)
             sulfcb(i,j) = MAX(sulfcb(i,j), 0.0)
-            pp25cb(i,j) = MAX(sulfcb(i,j), 0.0)
-            pp10cb(i,j) = MAX(sulfcb(i,j), 0.0)
+            pp25cb(i,j) = MAX(pp25cb(i,j), 0.0)
+            pp10cb(i,j) = MAX(pp10cb(i,j), 0.0)
 !      PM10 concentration
        dusmass(i,j)=(dust(i,j,l,1)+dust(i,j,l,2)+dust(i,j,l,3)+ &
        0.74*dust(i,j,l,4)+salt(i,j,l,1)+salt(i,j,l,2)+salt(i,j,l,3)+ &

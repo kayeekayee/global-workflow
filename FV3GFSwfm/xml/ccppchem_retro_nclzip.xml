@@ -14,6 +14,8 @@
   <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
+  <!ENTITY CASE        "C384">
+  <!ENTITY COMPONENT   "">
   %hera;
   %metatasks;
 ]>
