@@ -1431,7 +1431,7 @@
 
            dustallcb(1:im,jsta_2l:jend_2u)=dustallcb(1:im,jsta_2l:jend_2u)+ &
            (dust(1:im,jsta_2l:jend_2u,ll,1)+dust(1:im,jsta_2l:jend_2u,ll,2)+ &
-           dust(1:im,jsta_2l:jend_2u,ll,3)+0.67*dust(1:im,jsta_2l:jend_2u,ll,4))* &
+           dust(1:im,jsta_2l:jend_2u,ll,3)+0.74*dust(1:im,jsta_2l:jend_2u,ll,4))* &
            dpres(1:im,jsta_2l:jend_2u,ll)/grav
 
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,dust(isa,jsa,ll,5)
@@ -1488,7 +1488,7 @@
           ,salt(1:im,jsta_2l:jend_2u,ll,3))
 
             sscb(1:im,jsta_2l:jend_2u)=sscb(1:im,jsta_2l:jend_2u)+ &
-         (salt(1:im,jsta_2l:jend_2u,ll,2)+0.75*salt(1:im,jsta_2l:jend_2u,ll,3))* &
+         (salt(1:im,jsta_2l:jend_2u,ll,2)+0.83*salt(1:im,jsta_2l:jend_2u,ll,3))* &
            dpres(1:im,jsta_2l:jend_2u,ll)/grav
      
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,3)
@@ -1519,7 +1519,7 @@
           ssallcb(1:im,jsta_2l:jend_2u)=ssallcb(1:im,jsta_2l:jend_2u)+ &
          (salt(1:im,jsta_2l:jend_2u,ll,1)+salt(1:im,jsta_2l:jend_2u,ll,2)+ &
           salt(1:im,jsta_2l:jend_2u,ll,3)+ &
-          salt(1:im,jsta_2l:jend_2u,ll,4)*0.83)* &
+          salt(1:im,jsta_2l:jend_2u,ll,4))* &
            dpres(1:im,jsta_2l:jend_2u,ll)/grav
 
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,5)
@@ -1751,8 +1751,7 @@
 !      PM10 concentration
        dusmass(i,j)=(dust(i,j,l,1)+dust(i,j,l,2)+dust(i,j,l,3)+ &
        0.74*dust(i,j,l,4)+salt(i,j,l,1)+salt(i,j,l,2)+salt(i,j,l,3)+ &
-       salt(i,j,l,4) + &
-       salt(i,j,l,5)+soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
+       salt(i,j,l,4) + soot(i,j,l,1)+soot(i,j,l,2)+waso(i,j,l,1)+ &
        waso(i,j,l,2) +suso(i,j,l,1)+pp25(i,j,l,1)+pp10(i,j,l,1)) &
        *RHOMID(i,j,l)  !ug/m3
 !      PM25 dust and seasalt      
