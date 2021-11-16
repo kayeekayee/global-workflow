@@ -1359,7 +1359,7 @@ fi
 $NCP input.nml $memdir
 
 # Copy model_configure file   #JKH
-$NCP model_configure $memdi
+$NCP model_configure $memdir
 
 #------------------------------------------------------------------
 # run the executable

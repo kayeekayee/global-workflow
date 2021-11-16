@@ -92,7 +92,7 @@ fi
 
 if [ ${MEMBER} == 'gdas' ] || [ ${MEMBER} == 'gfs' ]; then
   #SAVEDIR=$OUTDIR/${MEMBER}.${yy}${mm}${dd}/${hh}/atmos/INPUT
-  SAVEDIR=${ICSDIR}/INPUT
+  SAVEDIR=${ICSDIR}/${yy}${mm}${dd}${hh}/${CDUMP}/${CASE}/INPUT
   copy_data
   touch $SAVEDIR/../${MEMBER}.t${hh}z.loginc.txt
   touch $SAVEDIR/chgres_done                 ## JKH
