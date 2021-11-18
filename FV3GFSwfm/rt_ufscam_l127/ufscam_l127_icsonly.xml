@@ -20,8 +20,10 @@
 	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202111170000">
-	<!ENTITY EDATE    "203104170000">
+	<!ENTITY SDATE    "202106010000">
+	<!ENTITY EDATE    "202106030000">
+	<!ENTITY SDATE1   "202106100000">
+	<!ENTITY EDATE1   "202106140000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -72,14 +74,15 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
+	<cycledef group="gfs1">&SDATE1; &EDATE1; &INTERVAL;</cycledef>
 
-<task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
+<task name="gfsgetic" cycledefs="gfs,gfs1" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/getic_gsd_fv3gfsv16.sh</command>
 
@@ -127,7 +130,7 @@
 
 </task>
 
-<task name="gfsinit" cycledefs="gfs" maxtries="&MAXTRIES;">
+<task name="gfsinit" cycledefs="gfs,gfs1" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/init.sh</command>
 
@@ -165,7 +168,7 @@
 
 </task>
 
-<task name="mssFV3ICS" cycledefs="gfs" maxtries="&MAXTRIES;">
+<task name="mssFV3ICS" cycledefs="gfs,gfs1" maxtries="&MAXTRIES;">
 	<command>&SCR_DIR;/archive_fv3ics.ksh</command>
 	<account>&ACCOUNT;</account>
 	<memory>2G</memory>
@@ -181,8 +184,10 @@
 	<envar><name>CASE</name><value>&CASE;</value></envar>
 	<dependency>
 		<and>
-		<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
-		<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
+			<taskdep task="gfsinit"/>
+			<taskdep task="gfsgetic"/>
+			<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
+			<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
 		</and>
 	</dependency>
 </task>

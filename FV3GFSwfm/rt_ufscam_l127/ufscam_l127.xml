@@ -21,9 +21,9 @@
 	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202105200000">
-	<!ENTITY EDATE    "202105200000">
-	<!ENTITY INTERVAL "06:00:00:00">
+	<!ENTITY SDATE    "202105120000">
+	<!ENTITY EDATE    "202105150000">
+	<!ENTITY INTERVAL "00:72:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
@@ -56,11 +56,11 @@
 	<!-- BEGIN: Resource requirements for the workflow -->
 
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
-	<!ENTITY PARTITION_FCST_GFS "xjet">
 	<!ENTITY PARTITION_FCST_GFS "vjet,sjet">
-	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
-	<!ENTITY RESOURCES_FCST_GFS "<nodes>160:ppn=6:tpp=4</nodes>">
+	<!ENTITY PARTITION_FCST_GFS "xjet">
+	<!ENTITY WALLTIME_FCST_GFS  "07:50:00">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>160:ppn=6:tpp=4</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
@@ -102,7 +102,7 @@
 
 <task name="gfsfcst" cycledefs="gfs" maxtries="&MAXTRIES_FCST;">
 
-	<command>&JOBS_DIR;/fcst_xjet.sh</command>
+	<command>&JOBS_DIR;/fcst.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsfcst_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>

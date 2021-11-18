@@ -109,7 +109,7 @@ fi
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127"
+export ICSDIR="/lfs4/BMC/gsd-fv3-dev/rtruns/FV3ICS_L127"
 export ATARDIR="/BMC/$HPSS_PROJECT/2year/$PSLOT"
 
 # Commonly defined parameters in JJOBS

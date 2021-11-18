@@ -21,9 +21,9 @@
 	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202101220000">
-	<!ENTITY EDATE    "202101220000">
-	<!ENTITY INTERVAL "24:00:00">
+	<!ENTITY SDATE    "202105040000">
+	<!ENTITY EDATE    "202105100000">
+	<!ENTITY INTERVAL "72:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
@@ -31,7 +31,6 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "/home/rtfim/UFS-CAMsuite//FV3GFSwfm/rt_ufscam_l127">
 	<!ENTITY ROTDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/rt_ufscam_l127">
-	<!ENTITY ICSDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/FV3ICS">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/home/rtfim/UFS-CAMsuite">

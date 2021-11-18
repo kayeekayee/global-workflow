@@ -31,7 +31,7 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_ufscam_l127">
 	<!ENTITY ROTDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/rt_ufscam_l127">
-	<!ENTITY ICSDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127">
+	<!ENTITY ICSDIR "/lfs4/BMC/gsd-fv3-dev/rtruns/FV3ICS_L127">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/home/rtfim/UFS-CAMsuite">
