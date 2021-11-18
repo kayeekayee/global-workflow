@@ -1,3 +1,8 @@
+17 Nov 2021
+    - run in realtime on JET
+    - use NOAA-EMC/UFS_UTILS:ufs_utils_1_4_0 tag
+01 Jun 2021
+    - run in realtime on HERA
 17 Apr 2021
     - update to 18Mar21 gsl/develop branch, f204bfd, for sorc/fv3gfs_ccpp.fd
     - switch to using chgres_cube to generate FV3 ICs, including aerosol variables

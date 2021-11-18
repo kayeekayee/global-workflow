@@ -21,7 +21,7 @@
 	<!ENTITY ATCFNAME "gcp1">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202104170000">
+	<!ENTITY SDATE    "202111170000">
 	<!ENTITY EDATE    "203104170000">
 	<!ENTITY INTERVAL "24:00:00">
 

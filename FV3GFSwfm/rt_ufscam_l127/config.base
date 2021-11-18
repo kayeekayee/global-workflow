@@ -83,7 +83,7 @@ export NLN="/bin/ln -sf"
 export VERBOSE="YES"
 export KEEPDATA="NO"
 export CHGRP_RSTPROD="YES"
-export CHGRP_CMD="chgrp rstprrod"
+export CHGRP_CMD="chgrp rstprod"
 export NEMSIOGET="$HOMEgfs/exec/nemsio_get"
 export NCDUMP="$NETCDF/bin/ncdump"
 export NCLEN="$HOMEgfs/ush/getncdimlen"
@@ -111,7 +111,6 @@ export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
 export ICSDIR="/home/rtfim/UFS-CAMsuite/FV3GFSrun/FV3ICS_L127"
 export ATARDIR="/BMC/$HPSS_PROJECT/2year/$PSLOT"
-#export ATARDIR="/BMC/$HPSS_PROJECT/1year/$USER/scratch/$PSLOT"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}

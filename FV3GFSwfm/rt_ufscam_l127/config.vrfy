@@ -166,10 +166,10 @@ if [ "$VRFYTRAK" = "YES" ]; then
         export FHOUT_CYCLONE=6            
         export FHMAX_CYCLONE=$(( FHMAX_GFS<240 ? FHMAX_GFS : 240 ))
     fi
-    export COMINsyn=${COMINsyn:-${COMROOT}/gfs/prod/syndat}
     if [ $machine = "JET" ]; then
-#JKH       export COMINsyn=${COMINsyn:-/mnt/lfs4/HFIP/hfv3gfs/glopara/com/gfs/prod/syndat}
-        export COMINsyn=${COMINsyn:-/mnt/lfs4/HFIP/hwrf-data/hwrf-input/SYNDAT}
+        export COMINsyn=${COMINsyn:-/mnt/lfs4/HFIP/hwrf-data/hwrf-input/SYNDAT-PLUS}
+    else 
+        export COMINsyn=${COMINsyn:-${COMROOT}/gfs/prod/syndat}
     fi
 fi
 
