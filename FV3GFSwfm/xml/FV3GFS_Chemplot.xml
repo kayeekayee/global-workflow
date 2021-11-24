@@ -17,14 +17,24 @@
       <envar><name>CASE</name><value>&CASE;</value></envar>
 
       <dependency>
-         <and>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-         </and>
+         <or>
+              <and>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+              </and>
+              <and>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+              </and>
+         </or>
       </dependency>
 
   </task>

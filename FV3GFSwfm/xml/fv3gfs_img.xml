@@ -21,6 +21,7 @@
   %hera;
   <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
   <!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
+  <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
   <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
