@@ -9,7 +9,7 @@
   <!ENTITY AC_MODEL_NAME "FV3GFS_CHEM">          <!-- AC stats name -->
   <!ENTITY SOUNDING_MODEL_NAME "FV3GFS_CHEM">
   <!ENTITY SURFACE_MODEL_NAME "FV3GFS_CHEM">
-  <!ENTITY RES "0p50">
+  <!ENTITY RES "0p25">
   <!ENTITY FCST_INTERVAL "6">
   <!ENTITY FCST_LENGTH "048">
   <!ENTITY FCST_LENGTH "120">
@@ -31,7 +31,7 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef>202109020000 202109040000 24:00:00</cycledef>
+  <cycledef>202202180000 202202180000 24:00:00</cycledef>
 
   <metatask name="remap_ncl" throttle="100">
 <!--

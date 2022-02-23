@@ -9,7 +9,8 @@
     <envar><name>FV3GFS_HOME</name><value>&FV3GFS_HOME;</value></envar>
     <envar><name>FV3GFS_RUN</name><value><cyclestr>&FV3GFS_RUN;/&PSLOT;/&CDUMP;.@Y@m@d/@H/</cyclestr></value></envar>
     <envar><name>SCRIPTS</name><value>&SCRIPTS;</value></envar>
-    <envar><name>NCL_HOME</name><value>&NCL_HOME;</value></envar>
+    <envar><name>NCL_ROOT</name><value>&NCL_ROOT;</value></envar>
+    <envar><name>NCL_HOME</name><value>&NCL_ROOT;</value></envar>
     <envar><name>MODL</name><value>&MODL;</value></envar>
     <envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
     <envar><name>yyyymmdd</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>

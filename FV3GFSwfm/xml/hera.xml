@@ -22,7 +22,6 @@
   <!ENTITY CLIMATE_DIR "&SCRATCH1_ROOT;/cmean/">
 
   <!ENTITY NCL_ROOT "&RTRUN_ROOT;/nclvx/FV3GFSwfm/ncl/fimall">                  <!-- new NCL routines -->
-  <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">                  <!-- old NCL routines -->
   <!ENTITY NCL_DIFF_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimalldiff">
   <!ENTITY COPYGB "/home/rtfim/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
   <!ENTITY CNVGRIB "/apps/cnvgrib/1.4.0/bin/cnvgrib">
