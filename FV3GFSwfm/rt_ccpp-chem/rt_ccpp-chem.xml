@@ -81,6 +81,7 @@
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE_DEBUG;">
 	<!ENTITY WALLTIME_POST_GFS  "00:30:00">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>4:ppn=12:tpp=1</nodes>">
+        <!ENTITY MEMORY_POST_GFS    "40G">
 	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
@@ -217,7 +218,7 @@
 		<queue>&QUEUE_POST_GFS;</queue>
 		&RESOURCES_POST_GFS;
 		<walltime>&WALLTIME_POST_GFS;</walltime>
-		
+	        <memory>&MEMORY_POST_GFS;</memory>
 		<native>&NATIVE_POST_GFS;</native>
 
 		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfspost#grp#.log</cyclestr></join>

@@ -1,4 +1,50 @@
 ============
+Feb 07, 2022
+============
+added memory parameter to post tasks
+
+============
+Nov 12, 2021
+============
+  ** effective 00Z 11/12/21 **
+corrected inconsistencies in the PM2.5 and PM10 column calculation 
+ - modify INITPOST_GFS_NEMS_MPIIO.f
+ - recompile gfs_post.fd
+
+============
+Aug 04, 2021
+============
+  ** effective 00Z 07/29/21 **
+corrected bugs in the UPP to calculate the PM25 and PM10 column
+ - merge in Li's changes from
+    /scratch1/BMC/gsd-fv3-dev/lzhang/aerosols-workflow/sorc/gfs_post.fd/sorc/ncep_post.fd/
+     INITPOST_GFS_NEMS_MPIIO.f
+          pp25cb(i,j) = MAX(pp25cb(i,j), 0.0)
+          pp10cb(i,j) = MAX(pp10cb(i,j), 0.0)
+ - recompile gfs_post.fd
+
+============
+May 04, 2021
+============
+added FENGSHA dust bugfix -- effective 00Z 05/03/21 cycle
+ - copy Li's modified files
+       /scratch1/BMC/gsd-fv3-dev/lzhang/gsd-ccpp-chem/sorc/fv3gfs_ccpp_chem.fd/FV3/ccpp/physics/gsdchem/
+           dust_fengsha_mod.F90
+           dust_afwa_mod.F90
+ - recompile fv3_ccpp_chem
+ - update FENGSHA dust tuning factors alpha and gamma in scripts/exglobal_fcst_nemsfv3gfs.sh 
+           dust_alpha = 2.0 ==> 2.2
+           dust_gamma = 1.8 ==> 1.0
+
+============
+Apr 11, 2021
+============
+effective wtih 00Z 03/23/21 cycle
+Switched to using v16 netcdf analysis files
+  -- added new v16 scripts for checkgdas, fv3ic, and getic
+  -- use GFS atmanl file for regridding instead of GDAS atmanl file
+
+============
 Oct 20, 2020
 ============
 updated to 18May2020 gsd/develop-chem branch from Haiqin Li's fork, 433fc66

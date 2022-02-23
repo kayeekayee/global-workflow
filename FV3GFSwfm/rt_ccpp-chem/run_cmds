@@ -15,9 +15,14 @@ rocotostat -w urg_chem.xml -d urg_chem.db
 rocotorun -w urg_fcst.xml -d urg_fcst.db
 rocotostat -w urg_fcst.xml -d urg_fcst.db
 
-rocotorun  -w urg_post.xml -d urg_post.db
-rocotostat -w urg_post.xml -d urg_post.db
+rocotorun  -w batch_post.xml -d batch_post.db
+rocotostat -w batch_post.xml -d batch_post.db
 
 rocotorun  -w arch.xml -d arch.db
 rocotostat  -w arch.xml -d arch.db
 
+rocotorun  -w arch_regrid.xml -d arch_regrid.db
+rocotostat  -w arch_regrid.xml -d arch_regrid.db
+
+rocotorun  -w arch_nclgrb2.xml -d arch_nclgrb2.db
+rocotostat  -w arch_nclgrb2.xml -d arch_nclgrb2.db
