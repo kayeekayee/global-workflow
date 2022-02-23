@@ -79,8 +79,8 @@
         <!ENTITY MEMORY_PREP_CHEM_SRC    "">
         <!ENTITY NATIVE_PREP_CHEM_SRC    "--export=NONE">
 	
-        <!ENTITY QUEUE_FCST_GFS     "&QUEUE_URG;">
         <!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
+        <!ENTITY QUEUE_FCST_GFS     "&QUEUE_URG;">
 	<!ENTITY WALLTIME_FCST_GFS  "06:00:00">
 	<!ENTITY WALLTIME_FCST_GFS  "08:00:00">
 	<!--<!ENTITY RESOURCES_FCST_GFS "<nodes>9:ppn=20</nodes>"> -->

@@ -44,6 +44,7 @@
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/jobs/rocoto">
+        <!ENTITY SCR_DIR  "&HOMEgfs;/FV3GFSwfm/scripts">
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
@@ -52,14 +53,14 @@
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
-	<!ENTITY QUEUE_ARCH "service">
+	<!ENTITY PARTITION_SERVICE "service">
 	<!ENTITY SCHEDULER  "slurm">
 
 	<!-- Toggle HPSS archiving -->
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
-	<!ENTITY CYCLETHROTTLE "3">
+	<!ENTITY CYCLETHROTTLE "5">
 	<!ENTITY TASKTHROTTLE  "20">
 	<!ENTITY MAXTRIES      "2">
 
@@ -75,6 +76,7 @@
 	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE_URG;">
 	<!ENTITY WALLTIME_FV3IC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_FV3IC_GFS "<nodes>4:ppn=6:tpp=1</nodes>">
+        <!ENTITY MEMORY_FV3IC_GFS     "100G">
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
         <!ENTITY QUEUE_REGRID     "&QUEUE;">
@@ -82,6 +84,13 @@
         <!ENTITY WALLTIME_REGRID  "00:30:00">
         <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
         <!ENTITY NATIVE_REGRID    "--export=NONE">
+
+	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
+	<!ENTITY PARTITION_ARCH_GFS "&PARTITION_SERVICE;">
+	<!ENTITY WALLTIME_ARCH_GFS  "06:00:00">
+	<!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
+	<!ENTITY MEMORY_ARCH_GFS    "2048M">
+	<!ENTITY NATIVE_ARCH_GFS    "--export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->
 
@@ -153,6 +162,7 @@
 	<queue>&QUEUE_FV3IC_GFS;</queue>
 	&RESOURCES_FV3IC_GFS;
 	<walltime>&WALLTIME_FV3IC_GFS;</walltime>
+        <memory>&MEMORY_FV3IC_GFS;</memory>
 	<native>&NATIVE_FV3IC_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfv3ic.log</cyclestr></join>
@@ -220,6 +230,30 @@
                <datadep><cyclestr offset="-24:00:00">&OUTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf000.nemsio</cyclestr></datadep>
            </and>  
         </dependency>
+</task>
+
+<task name="mssFV3ICS" cycledefs="gfs" maxtries="&MAXTRIES;">
+	<command>&SCR_DIR;/archive_ics384.ksh</command>
+	<account>&ACCOUNT;</account>
+	<queue>&QUEUE_ARCH_GFS;</queue>
+	<partition>&PARTITION_ARCH_GFS;</partition>
+	&RESOURCES_ARCH_GFS;
+	<walltime>&WALLTIME_ARCH_GFS;</walltime>
+	<memory>&MEMORY_ARCH_GFS;</memory>
+	<native>&NATIVE_ARCH_GFS;</native>
+	<jobname><cyclestr>mssfv3ics</cyclestr></jobname>
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/mssfv3ics.log</cyclestr></join>
+	<envar><name>ICSDIR</name><value>&ICSDIR;/<cyclestr>@Y@m@d@H</cyclestr></value></envar>
+	<envar><name>mssDir</name><value>FV3_ICs_GFS/<cyclestr>@Y</cyclestr>/<cyclestr>@m</cyclestr></value></envar>
+	<envar><name>yyyymmddhh</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+	<envar><name>CASE</name><value>&CASE;</value></envar>
+	<dependency>
+		<and>
+		<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
+		<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
+		</and>
+	</dependency>
 </task>
 
 </workflow>
