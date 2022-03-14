@@ -2130,7 +2130,7 @@ module GFS_typedefs
 !! | GFS_Data(cdata%blk_no)%Intdiag%wetdpl               | instantaneous_large-scale_wet_deposition                                  | instantaneous large-scale wet deposition                               | kg m-2 s-1    |    2 | real        | kind_phys | none   | F        |
 !! | GFS_Data(cdata%blk_no)%Intdiag%wetdpc               | instantaneous_convective-scale_wet_deposition                             | instantaneous convective-scale wet deposition                          | kg m-2 s-1    |    2 | real        | kind_phys | none   | F        |
 !! | GFS_Data(cdata%blk_no)%Intdiag%abem                 | instantaneous_anthopogenic_and_biomass_burning_emissions | instantaneous anthopogenic and biomass burning emissions for black carbon, organic carbon, and sulfur dioxide | ug m-2 s-1 | 2 | real | kind_phys | none | F |
-!! | GFS_Data(cdata%blk_no)%Intdiag%aecm                 | instantaneous_aerosol_column_mass_densities              | instantaneous aerosol column mass densities for pm2.5, black carbon, organic carbon, sulfate, dust, sea salt  | g m-2      | 2 | real | kind_phys | none | F |
+!! | GFS_Data(cdata%blk_no)%Intdiag%aecm                 | instantaneous_aerosol_column_mass_densities              | instantaneous aerosol column mass densities for pm2.5, black carbon, organic carbon, sulfate, dust, sea salt  | kg m-2      | 2 | real | kind_phys | none | F |
 !! | GFS_Data(cdata%blk_no)%Intdiag%edmf_a               | emdf_updraft_area                                                         | updraft area from mass flux scheme                                     | frac          |    2 | real        | kind_phys | none   | F        |
 !! | GFS_Data(cdata%blk_no)%Intdiag%edmf_w               | emdf_updraft_vertical_velocity                                            | updraft vertical velocity from mass flux scheme                        | m s-1         |    2 | real        | kind_phys | none   | F        |
 !! | GFS_Data(cdata%blk_no)%Intdiag%edmf_qt              | emdf_updraft_total_water                                                  | updraft total water from mass flux scheme                              | kg kg-1       |    2 | real        | kind_phys | none   | F        |
@@ -3617,13 +3617,14 @@ module GFS_typedefs
       allocate (Coupling%ushfsfci  (IM))
       allocate (Coupling%dkt       (IM,Model%levs))
       allocate (Coupling%dqdti     (IM,Model%levs))
+      
       !--- accumulated convective rainfall
       allocate (Coupling%rainc_cpl (IM))
 
-      Coupling%rainc_cpl = clear_val
-      Coupling%ushfsfci  = clear_val
-      Coupling%dkt       = clear_val
-      Coupling%dqdti     = clear_val
+      Coupling%rainc_cpl  = clear_val
+      Coupling%ushfsfci   = clear_val
+      Coupling%dkt        = clear_val
+      Coupling%dqdti      = clear_val
     endif
 
     !--- stochastic physics option
@@ -4698,8 +4699,8 @@ module GFS_typedefs
         Model%ntdiag(1)  = .false.
         Model%ntdiag(2:) = .true.
         ! -- turn off diagnostics for DMS
-        n = get_tracer_index(Model%tracer_names, 'DMS', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-        if (n > 0) Model%ntdiag(n) = .false.
+        !n = get_tracer_index(Model%tracer_names, 'DMS', Model%me, Model%master, Model%debug) - Model%ntchs + 1
+        !if (n > 0) Model%ntdiag(n) = .false.
         ! -- turn off diagnostics for msa
         n = get_tracer_index(Model%tracer_names, 'msa', Model%me, Model%master, Model%debug) - Model%ntchs + 1
         if (n > 0) Model%ntdiag(n) = .false.
@@ -4709,17 +4710,17 @@ module GFS_typedefs
     allocate(Model%fscav(Model%ntchm))
     if (Model%ntchm > 0) then
       ! -- initialize to default
-      Model%fscav = 0.6_kind_phys
+      Model%fscav = 0.5_kind_phys
       n = get_tracer_index(Model%tracer_names, 'seas1', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-      if (n > 0) Model%fscav(n) = 1.0_kind_phys
+      if (n > 0) Model%fscav(n) = 0.4_kind_phys
       n = get_tracer_index(Model%tracer_names, 'seas2', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-      if (n > 0) Model%fscav(n) = 1.0_kind_phys
+      if (n > 0) Model%fscav(n) = 0.4_kind_phys
       n = get_tracer_index(Model%tracer_names, 'seas3', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-      if (n > 0) Model%fscav(n) = 1.0_kind_phys
+      if (n > 0) Model%fscav(n) = 0.4_kind_phys
       n = get_tracer_index(Model%tracer_names, 'seas4', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-      if (n > 0) Model%fscav(n) = 1.0_kind_phys
+      if (n > 0) Model%fscav(n) = 0.4_kind_phys
       n = get_tracer_index(Model%tracer_names, 'seas5', Model%me, Model%master, Model%debug) - Model%ntchs + 1
-      if (n > 0) Model%fscav(n) = 1.0_kind_phys
+      if (n > 0) Model%fscav(n) = 0.4_kind_phys
       ! -- read factors from namelist
       do i = 1, size(fscav_aero)
         j = index(fscav_aero(i),":")
@@ -6424,7 +6425,6 @@ module GFS_typedefs
     if (associated(Model%ntdiag)) then
       ! -- get number of tracers with enabled diagnostics
       n = count(Model%ntdiag)
-
       ! -- initialize sedimentation
       allocate (Diag%sedim(IM,n))
       Diag%sedim = zero
@@ -6446,7 +6446,8 @@ module GFS_typedefs
     ! -- burning emission diagnostics for
     ! -- (in order): black carbon,
     ! -- organic carbon, and sulfur dioxide
-    allocate (Diag%abem(IM,6))
+    !allocate (Diag%abem(IM,6))
+    allocate (Diag%abem(IM,7)) !lzhang add AOD as 7
     Diag%abem = zero
 
     ! -- initialize column burden diagnostics

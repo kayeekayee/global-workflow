@@ -461,7 +461,8 @@ contains
              ! Update dust mixing ratio at first model level.
              tc(i,j,1,n) = tc(i,j,1,n) + dsrc / airmas(i,j,1) ! (kg/kg)
              !   bems(i,j,n) = dsrc  ! diagnostic
-             bems(i,j,n) = 1000.*dsrc/(dxy(j)*dt1) ! diagnostic (g/m2/s)
+             !bems(i,j,n) = 1000.*dsrc/(dxy(j)*dt1) ! diagnostic (g/m2/s)
+             bems(i,j,n) = 1.e+9*dsrc/(dxy(j)*dt1) ! diagnostic (ug/m2/s) !lzhang
           END DO
        END DO
     END DO

@@ -966,6 +966,8 @@ subroutine get_atmos_model_ungridded_dim(nlev, nsoillev, ntracers,     &
         num_diag_type_down_flux = num_diag_type_down_flux + 1
       if (associated(IPD_Data(1)%IntDiag%wetdpc)) &
         num_diag_type_down_flux = num_diag_type_down_flux + 1
+  !    if (associated(IPD_Data(1)%IntDiag%wet_dep)) &
+  !      num_diag_type_down_flux = num_diag_type_down_flux + 1
     end if
   end if
 
@@ -1162,11 +1164,27 @@ subroutine update_atmos_chemistry(state, rc)
             IPD_Data(nb)%IntDiag%sedim (ix,it) = qd(i,j,it,1)
             IPD_Data(nb)%IntDiag%drydep(ix,it) = qd(i,j,it,2)
             IPD_Data(nb)%IntDiag%wetdpl(ix,it) = qd(i,j,it,3)
-            IPD_Data(nb)%IntDiag%wetdpc(ix,it) = qd(i,j,it,4)
           enddo
         enddo
       enddo
 
+! Get the GF convective wet deposition from GSDChem when trans_trac=.true. 
+      if ( .not.IPD_control%trans_trac ) then !lzhang
+      do it = 1, size(qd, dim=3)
+!$OMP parallel do default (none) &
+!$OMP             shared  (it, nj, ni, Atm_block, IPD_Data, qd)  &
+!$OMP             private (j, jb, i, ib, nb, ix)
+        do j = 1, nj
+          jb = j + Atm_block%jsc - 1
+          do i = 1, ni
+            ib = i + Atm_block%isc - 1
+            nb = Atm_block%blkno(ib,jb)
+            ix = Atm_block%ixp(ib,jb)
+            IPD_Data(nb)%IntDiag%wetdpc(ix,it) = qd(i,j,it,4)
+          enddo
+        enddo
+      enddo
+      endif
       !--- (d) anthropogenic and biomass burning emissions
       do it = 1, size(qb, dim=3)
 !$OMP parallel do default (none) &

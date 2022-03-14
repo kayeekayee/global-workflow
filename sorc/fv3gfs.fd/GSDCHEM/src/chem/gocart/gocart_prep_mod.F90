@@ -202,7 +202,7 @@ contains
     real(CHEM_KIND_R4), parameter :: percen_mass_umbrel = 0.75
     real(CHEM_KIND_R4), parameter :: base_umbrel        = 0.25    ! fraction
     real(CHEM_KIND_R4), parameter :: base_umbrel2       = 1.0     ! evenly distribution
-    real(CHEM_KIND_R4), parameter :: frac_so2_ant       = 0.5_CHEM_KIND_R4     ! antropogenic so2 fraction
+    real(CHEM_KIND_R4), parameter :: frac_so2_ant       = 1.0_CHEM_KIND_R4     ! antropogenic so2 fraction
     real(CHEM_KIND_R4), parameter :: frp2plume          = 1.e+06_CHEM_KIND_R4  ! FRP-to-plume conversion factor
     real(CHEM_KIND_R4), parameter :: frpc               = 1.e+09_CHEM_KIND_R4  ! FRP conversion factor
 
@@ -389,8 +389,10 @@ contains
       do j=jts,jte
         do i=its,ite
           emis_ant(i,k,j,p_e_bc)=emiss_ab(i,j,p_e_bc)
-          emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc) + emiss_ab(i,j,p_e_pm_25)
+          !emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc) + emiss_ab(i,j,p_e_pm_25)
+          emis_ant(i,k,j,p_e_oc)=emiss_ab(i,j,p_e_oc)
           emis_ant(i,k,j,p_e_sulf)=emiss_ab(i,j,p_e_sulf)
+          !emis_ant(i,k,j,p_e_sulf)=(emiss_ab(i,j,p_e_pm_25)-emiss_ab(i,j,p_e_bc)-emiss_ab(i,j,p_e_oc))
           emis_ant(i,k,j,p_e_so2)=frac_so2_ant * emiss_ab(i,j,p_e_so2)
           emis_ant(i,k,j,p_e_dms)= 0. !emiss_ab(j,p_e_dms)
           emis_ant(i,k,j,p_e_pm_25)=emiss_ab(i,j,p_e_pm_25)
@@ -458,7 +460,8 @@ contains
               firesize_agsv(i,j)=plume(i,j,7)
               firesize_aggr(i,j)=plume(i,j,8)
             case (FIRE_OPT_GBBEPx)
-              ebu_in(i,j,p_ebu_in_oc)   = frpc * (emiss_abu(i,j,p_e_pm_25) - emiss_abu(i,j,p_e_bc))
+              !ebu_in(i,j,p_ebu_in_oc)   = frpc * (emiss_abu(i,j,p_e_pm_25) - emiss_abu(i,j,p_e_bc))
+              ebu_in(i,j,p_ebu_in_oc)   = frpc * emiss_abu(i,j,p_e_oc)
               ebu_in(i,j,p_ebu_in_bc)   = frpc * emiss_abu(i,j,p_e_bc)
               ebu_in(i,j,p_ebu_in_pm25) = frpc * (emiss_abu(i,j,p_e_pm_25) - emiss_abu(i,j,p_e_bc) - emiss_abu(i,j,p_e_oc))
               ebu_in(i,j,p_ebu_in_so2)  = frpc * emiss_abu(i,j,p_e_so2)
@@ -765,6 +768,7 @@ endif
             chem(i,k,j,p_p25)=chem(i,k,j,p_p25)+emis_ant(i,k,j,p_e_pm_25)*factor
             chem(i,k,j,p_p10)=chem(i,k,j,p_p10)+emis_ant(i,k,j,p_e_pm_10)*factor
             chem(i,k,j,p_sulf)=chem(i,k,j,p_sulf)+emis_ant(i,k,j,p_e_sulf)*factor
+            !chem(i,k,j,p_sulf)=chem(i,k,j,p_sulf)+emis_ant(i,k,j,p_e_sulf)*factor/ppm2ugkg(p_sulf)
             chem(i,k,j,p_so2)=chem(i,k,j,p_so2)+emis_ant(i,k,j,p_e_so2)*factor2
           enddo
         enddo
