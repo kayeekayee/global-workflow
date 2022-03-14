@@ -15,8 +15,9 @@ setenv NCEPLIBS /scratch2/NCEPDEV/nwprod/NCEPLIBS
 ## load contrib environment
 ## load slurm utils (arbitrary.pl  layout.pl)
 ##
-module load contrib sutils
-
+#module load contrib sutils
+module use -a /contrib/sutils/modulefiles
+module load sutils
 ##
 ## load programming environment
 ## this typically includes compiler, MPI and job scheduler
