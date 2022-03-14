@@ -30,8 +30,8 @@ parm/wafs
 sorc/*log
 sorc/logs
 sorc/aeroconv.fd
-sorc/fv3gfs.fd
-sorc/gfs_post.fd
+#sorc/fv3gfs.fd        ## JKH
+#sorc/gfs_post.fd      ## JKH
 sorc/gfs_wafs.fd
 sorc/gsi.fd
 sorc/ufs_utils.fd
