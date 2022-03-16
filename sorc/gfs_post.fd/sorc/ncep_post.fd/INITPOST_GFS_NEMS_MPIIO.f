@@ -1480,7 +1480,8 @@
           ,salt(1:im,jsta_2l:jend_2u,ll,3))
 
             sscb(1:im,jsta_2l:jend_2u)=sscb(1:im,jsta_2l:jend_2u)+ &
-         (salt(1:im,jsta_2l:jend_2u,ll,2)+0.83*salt(1:im,jsta_2l:jend_2u,ll,3))* &
+           (salt(1:im,jsta_2l:jend_2u,ll,1)+ &
+           salt(1:im,jsta_2l:jend_2u,ll,2)+0.83*salt(1:im,jsta_2l:jend_2u,ll,3))* &
            dpres(1:im,jsta_2l:jend_2u,ll)/grav
      
 !         if(debugprint)print*,'sample l ',VarName,' = ',ll,salt(isa,jsa,ll,3)
@@ -3652,39 +3653,6 @@
       enddo
 
 
-#if 0
-! Retrieve aer fields if it's listed (GOCART)
-      print *, 'iostatus for aer file=', iostatusAER
-      if(iostatusAER == 0) then ! start reading aer file
-       call nemsio_open(rfile,trim(fileNameAER),'read',mpi_comm_comp &
-                       ,iret=status)
-       if ( Status /= 0 ) then
-        print*,'error opening ',fileNameAER, ' Status = ', Status
-       endif
-       call nemsio_getfilehead(rfile,iret=status,nrec=nrec)
-       print*,'nrec for aer file=',nrec
-       allocate(recname(nrec),reclevtyp(nrec),reclev(nrec))
-       call nemsio_getfilehead(rfile,iret=iret,recname=recname       &
-                              ,reclevtyp=reclevtyp,reclev=reclev)
-       if(debugprint)then
-         if (me == 0)then
-           do i=1,nrec
-             print *,'recname,reclevtyp,reclev=',trim(recname(i)),' ', &
-                      trim(reclevtyp(i)),reclev(i)
-           end do
-         end if
-       end if
-! start reading nemsio aer files using parallel read
-      fldsize=(jend-jsta+1)*im
-      allocate(tmp(fldsize*nrec))
-      print*,'allocate tmp successfully'
-      tmp=0.
-      call nemsio_denseread(rfile,1,im,jsta,jend,tmp,iret=iret)
-      if(iret/=0)then
-        print*,"fail to read aer file using mpi io read, stopping"
-        stop 
-      end if
-#endif
 ! retrieve dust emission fluxes
       do K = 1, nbin_du
        if ( K == 1) VarName='duem001'
@@ -4015,12 +3983,6 @@
 !                          ,recname,reclevtyp,reclev,VarName,VcoordName &
 !                          ,ducmass25)
 !     if(debugprint)print*,'sample ',VarName,' = ',ducmass25(isa,jsa)
-#if 0
-        if (me == 0) print *,'after aer files reading,mype=',me
-       call nemsio_close(rfile,iret=status)
-       deallocate(tmp,recname,reclevtyp,reclev)
-      end if ! end of aer file read
-#endif
 ! pos east
        call collect_loc(gdlat,dummy)
        if(me == 0)then
