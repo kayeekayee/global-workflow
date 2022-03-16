@@ -1,3 +1,30 @@
+03/15/22
+  ** effective 00Z 03/15/22 **
+  update to v91 tag for EMC_FV3GFS_GSDCHEM  
+    -- point sorc/fv3gfs.fd to /scratch2/BMC/gsd-fv3-dev/lzhang/EMC_FV3/v91/EMC_FV3GFS-GSDCHEM/
+
+11/12/21
+  ** effective 00Z 11/21/21 **
+  corrected bug in UPP in INITPOST_GFS_NEMS_MPIIO.f
+
+08/04/21
+  ** effective 00Z 07/29/21 **
+  corrected bugs in the UPP to calculate the PM25 and PM10 column
+
+05/04/21
+  ** effective 00Z 05/03/21 **
+  update FENGSHA dust tuning factors alpha and gamma in scripts/exglobal_fcst_nemsfv3gfs.sh
+     dust_alpha = 2.0 ==> 2.2 
+     dust_gamma = 1.8 ==> 1.0
+
+04/02/21
+  ** effective 00Z 03/23/21 **
+  implement v16 changes  
+    -- use atmanl, sfcanl netcdf files to create FV3 ICs
+  use GFS atmanl file to compute increment instead of GDAS atmanl file
+  change layout_x,layout_y to 6,6 for FV3 forecast
+  point sorc/fv3gfs.fd to /scratch2/BMC/gsd-fv3-dev/lzhang/EMC_FV3/fs/EMC_FV3GFS-GSDCHEM/
+   
 12/02/20
   change from 168h to 120h forecasts
      effective 00Z 11/29/20 cycle
