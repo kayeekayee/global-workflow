@@ -50,6 +50,7 @@ export DO_BUFRSND="YES"    # BUFR sounding products
 export DO_GEMPAK="YES"     # GEMPAK products
 export DO_AWIPS="YES"      # AWIPS products
 export WAFSF="YES"         # WAFS products
+export DO_VRFY="NO"        # VRFY step
 
 # NO for retrospective parallel; YES for real-time parallel
 export REALTIME="YES"
@@ -64,8 +65,8 @@ export REALTIME="YES"
 export FIXgsi="$HOMEgfs/fix/fix_gsi"
 export HOMEfv3gfs="$HOMEgfs/sorc/fv3gfs.fd"
 export HOMEpost="$HOMEgfs"
-export HOMEobsproc_prep="$BASE_GIT/obsproc/gfsv16b/obsproc_prep.iss70457.netcdfhistory"
-export HOMEobsproc_network="$BASE_GIT/obsproc/gfsv16b/obsproc_global.iss71402.supportGFSv16"
+export HOMEobsproc_prep="$NWPROD/obsproc_prep.v5.5.0"
+export HOMEobsproc_network="$NWPROD/obsproc_global.v3.4.2"
 export HOMEobsproc_global=$HOMEobsproc_network
 export BASE_VERIF="$BASE_GIT/verif/global/tags/vsdb"
 
@@ -74,7 +75,6 @@ export NCP="/bin/cp -p"
 export NMV="/bin/mv"
 export NLN="/bin/ln -sf"
 export VERBOSE="YES"
-export KEEPDATA="NO"
 export CHGRP_CMD="chgrp rstprod"
 export NEMSIOGET="$HOMEgfs/exec/nemsio_get"
 export NCDUMP="$NETCDF/bin/ncdump"
@@ -126,8 +126,8 @@ export CASE="C768"
 export CASE_ENKF="C384"
 
 # Run with CCPP physics
-export RUN_CCPP="NO"
-export CCPP_SUITE="FV3_GFS_v16beta"
+export RUN_CCPP="YES"
+export CCPP_SUITE="FV3_GFS_v16"
 
 # Surface cycle update frequency
 if [[ "$CDUMP" == "gdas" ]] ; then
@@ -173,6 +173,7 @@ export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
 export WRITE_DOPOST=".true."
+export WRITE_NSFLIP=".true."
 
 # suffix options depending on file format
 if [ $OUTPUT_FILE = "netcdf" ]; then
@@ -188,7 +189,7 @@ fi
 # IAU related parameters
 export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
-export IAU_FHROT=`echo $IAUFHRS | cut -c1`
+export IAU_FHROT=$(echo $IAUFHRS | cut -c1)
 export IAU_DELTHRS=6
 export IAU_OFFSET=6
 export DOIAU_ENKF=${DOIAU:-"YES"}   # Enable 4DIAU for EnKF ensemble

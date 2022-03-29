@@ -1,3 +1,11 @@
+23 Mar 2022
+    - update to 01Mar22 global-workflow develop branch, a0e23e2
+         post:       c939eae  (10Nov21)
+         ufs_utils:  26cd024  (31Jan22)
+    - update UFS to 24Feb22 gsl/develop branch, a2a6a22, tag global-24Feb2022
+         v5 namelist
+         unified UGWP
+         no GF shallow convection
 17 Nov 2021
     - run in realtime on JET
     - use NOAA-EMC/UFS_UTILS:ufs_utils_1_4_0 tag

@@ -9,17 +9,24 @@ set +x
 #                   Anything other than "true"  will use libraries locally.
 #------------------------------------
 
-while getopts "c" option;
-do
+_build_ufs_options=""
+
+while getopts "ac" option;do
  case $option in
+  a)
+   echo "Received -a flag, building ufs-weather-model for ATMAERO app"
+   echo "skipping builds not needed for prototype runs"
+   _build_ufs_options=-a
+   break
+   ;;
   c)
-   echo "Received -c flag, check out ufs-weather-model develop branch with CCPP physics"
-   RUN_CCPP="YES"
+   echo "Received -c flag, building ufs-weather-model for S2SW app"
+   echo "skipping builds not needed for prototype runs"
+   _build_ufs_options=-c
+   break
    ;;
  esac
 done
-
-
 
 export USE_PREINST_LIBS="true"
 
@@ -27,7 +34,7 @@ export USE_PREINST_LIBS="true"
 # END USER DEFINED STUFF
 #------------------------------------
 
-build_dir=`pwd`
+build_dir=$(pwd)
 logs_dir=$build_dir/logs
 if [ ! -d $logs_dir  ]; then
   echo "Creating logs folder"
@@ -49,8 +56,13 @@ source ./machine-setup.sh > /dev/null 2>&1
 #------------------------------------
 # INCLUDE PARTIAL BUILD 
 #------------------------------------
+. ./partial_build.sh $@
 
-. ./partial_build.sh
+if [ $target = jet ]; then
+  Build_gldas=false
+  Build_gfs_util=false
+  Build_ww3_prepost=false
+fi
 
 #------------------------------------
 # Exception Handling Init
@@ -58,28 +70,33 @@ source ./machine-setup.sh > /dev/null 2>&1
 ERRSCRIPT=${ERRSCRIPT:-'eval [[ $err = 0 ]]'}
 err=0
 
+
 #------------------------------------
-# build libraries first
+# build WW3 pre & post execs 
 #------------------------------------
-$Build_libs && {
-echo " .... Library build not currently supported .... "
-#echo " .... Building libraries .... "
-#./build_libs.sh > $logs_dir/build_libs.log 2>&1
+$Build_ww3_prepost && {
+echo " .... Building WW3 pre and post execs .... "
+./build_ww3prepost.sh > $logs_dir/build_ww3_prepost.log 2>&1
+rc=$?
+if [[ $rc -ne 0 ]] ; then
+    echo "Fatal error in building WW3 pre/post processing."
+    echo "The log file is in $logs_dir/build_ww3_prepost.log"
+fi
+((err+=$rc))
 }
 
 #------------------------------------
-# build fv3
+# build forecast model 
 #------------------------------------
-$Build_fv3gfs && {
-echo " .... Building fv3 .... "
-export RUN_CCPP=${RUN_CCPP:-"NO"}
-./build_fv3.sh > $logs_dir/build_fv3.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building fv3."
-    echo "The log file is in $logs_dir/build_fv3.log"
-fi
-((err+=$rc))
+$Build_ufs_model && {
+    echo " .... Building forecast model .... "
+    ./build_ufs.sh ${_build_ufs_options} > $logs_dir/build_ufs.log 2>&1
+    rc=$?
+    if [[ $rc -ne 0 ]] ; then
+        echo "Fatal error in building UFS model."
+        echo "The log file is in $logs_dir/build_ufs.log"
+    fi
+    ((err+=$rc))
 }
 
 #------------------------------------
@@ -155,113 +172,15 @@ if [ -d gfs_wafs.fd ]; then
 fi
 
 #------------------------------------
-# build gaussian_sfcanl
+# build workflow_utils
 #------------------------------------
-$Build_gaussian_sfcanl && {
-echo " .... Building gaussian_sfcanl .... "
-./build_gaussian_sfcanl.sh > $logs_dir/build_gaussian_sfcanl.log 2>&1
+$Build_workflow_utils && {
+echo " .... Building workflow_utils .... "
+target=$target ./build_workflow_utils.sh > $logs_dir/build_workflow_utils.log 2>&1
 rc=$?
 if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building gaussian_sfcanl."
-    echo "The log file is in $logs_dir/build_gaussian_sfcanl.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build enkf_chgres_recenter
-#------------------------------------
-$Build_enkf_chgres_recenter && {
-echo " .... Building enkf_chgres_recenter .... "
-./build_enkf_chgres_recenter.sh > $logs_dir/build_enkf_chgres_recenter.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building enkf_chgres_recenter."
-    echo "The log file is in $logs_dir/build_enkf_chgres_recenter.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build enkf_chgres_recenter_nc
-#------------------------------------
-$Build_enkf_chgres_recenter_nc && {
-echo " .... Building enkf_chgres_recenter_nc .... "
-./build_enkf_chgres_recenter_nc.sh > $logs_dir/build_enkf_chgres_recenter_nc.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building enkf_chgres_recenter_nc."
-    echo "The log file is in $logs_dir/build_enkf_chgres_recenter_nc.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build tropcy_NEMS
-#------------------------------------
-$Build_tropcy && {
-echo " .... Building tropcy_NEMS .... "
-./build_tropcy_NEMS.sh > $logs_dir/build_tropcy_NEMS.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building tropcy_NEMS."
-    echo "The log file is in $logs_dir/build_tropcy_NEMS.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build gfs_fbwndgfs
-#------------------------------------
-$Build_gfs_fbwndgfs && {
-echo " .... Building gfs_fbwndgfs .... "
-./build_gfs_fbwndgfs.sh > $logs_dir/build_gfs_fbwndgfs.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building gfs_fbwndgfs."
-    echo "The log file is in $logs_dir/build_gfs_fbwndgfs.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build gfs_bufrsnd
-#------------------------------------
-$Build_gfs_bufrsnd && {
-echo " .... Building gfs_bufrsnd .... "
-./build_gfs_bufrsnd.sh > $logs_dir/build_gfs_bufrsnd.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building gfs_bufrsnd."
-    echo "The log file is in $logs_dir/build_gfs_bufrsnd.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build fv3nc2nemsio
-#------------------------------------
-$Build_fv3nc2nemsio && {
-echo " .... Building fv3nc2nemsio .... "
-./build_fv3nc2nemsio.sh > $logs_dir/build_fv3nc2nemsio.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building fv3nc2nemsio."
-    echo "The log file is in $logs_dir/build_fv3nc2nemsio.log"
-fi
-((err+=$rc))
-}
-
-#------------------------------------
-# build regrid_nemsio
-#------------------------------------
-$Build_regrid_nemsio && {
-echo " .... Building regrid_nemsio .... "
-./build_regrid_nemsio.sh > $logs_dir/build_regrid_nemsio.log 2>&1
-rc=$?
-if [[ $rc -ne 0 ]] ; then
-    echo "Fatal error in building regrid_nemsio."
-    echo "The log file is in $logs_dir/build_regrid_nemsio.log"
+    echo "Fatal error in building workflow_utils."
+    echo "The log file is in $logs_dir/build_workflow_utils.log"
 fi
 ((err+=$rc))
 }
@@ -269,19 +188,16 @@ fi
 #------------------------------------
 # build gfs_util       
 #------------------------------------
-# Only build on WCOSS
-if [ $target = wcoss -o $target = wcoss_cray -o $target = wcoss_dell_p3 ]; then
- $Build_gfs_util && {
- echo " .... Building gfs_util .... "
- ./build_gfs_util.sh > $logs_dir/build_gfs_util.log 2>&1
- rc=$?
- if [[ $rc -ne 0 ]] ; then
-     echo "Fatal error in building gfs_util."
-     echo "The log file is in $logs_dir/build_gfs_util.log"
- fi
- ((err+=$rc))
- }
+$Build_gfs_util && {
+echo " .... Building gfs_util .... "
+./build_gfs_util.sh > $logs_dir/build_gfs_util.log 2>&1
+rc=$?
+if [[ $rc -ne 0 ]] ; then
+    echo "Fatal error in building gfs_util."
+    echo "The log file is in $logs_dir/build_gfs_util.log"
 fi
+((err+=$rc))
+}
 
 #------------------------------------
 # Exception Handling

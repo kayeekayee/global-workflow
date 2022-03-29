@@ -2,16 +2,16 @@
 #set -xue
 set -x
 
-while getopts "oc" option;
-do
+while getopts "om:" option; do
  case $option in
   o)
-   echo "Received -o flag for optional checkout of GTG, will check out GTG with UPP"
+   echo "Received -o flag for optional checkout of operational-only codes"
    checkout_gtg="YES"
+   checkout_wafs="YES"
    ;;
-  c)
-   echo "Received -c flag, check out ufs-weather-model develop branch with CCPP physics"  
-   run_ccpp="YES"
+  m)
+   echo "Received -m flag with argument, will check out ufs-weather-model hash $OPTARG instead of default"
+   ufs_model_hash=$OPTARG
    ;;
   :)
    echo "option -$OPTARG needs an argument"
@@ -24,40 +24,31 @@ do
 done
 
 topdir=$(pwd)
-echo $topdir
+logdir="${topdir}/logs"
+mkdir -p ${logdir}
 
-echo fv3gfs checkout ...
-if [[ ! -d fv3gfs.fd ]] ; then
-    rm -f ${topdir}/checkout-fv3gfs.log
-    #JKHgit clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
-    #JKHcd fv3gfs.fd
-    if [ ${run_ccpp:-"NO"} = "NO" ]; then
-        git clone https://github.com/ufs-community/ufs-weather-model fv3gfs.fd >> ${topdir}/checkout-fv3gfs.log 2>&1
-        cd fv3gfs.fd
-        git checkout GFS.v16.0.16
-    else
-##      EMC develop
-##      git checkout 9350745855aebe0790813e0ed2ba5ad680e3f75c
-
-        git clone --recursive -b gsl/develop https://github.com/NOAA-GSL/ufs-weather-model ufs-weather-model_18mar_f204bfd >> ${topdir}/checkout-fv3gfs.log
-g 2>&1
-        cd ufs-weather-model_18mar_f204bfd 
-        git checkout f204bfd922318c6dc39619d1c7f217fe49de7292 
-    fi
+echo ufs-weather-model checkout ...
+if [[ ! -d ufs_model.fd ]] ; then
+    #JKHgit clone https://github.com/ufs-community/ufs-weather-model ufs_model.fd >> ${logdir}/checkout-ufs_model.log 2>&1
+    git clone https://github.com/NOAA-GSL/ufs-weather-model ufs_model.fd >> ${logdir}/checkout-ufs_model.log 2>&1
+    cd ufs_model.fd
+    #JKH  24Feb22 branch, a2a6a22b865d471a2814712ea80bef946d30bd2d
+    git checkout ${ufs_model_hash:-global-24Feb2022}
     git submodule update --init --recursive
     cd ${topdir}
-    ln -fs ufs-weather-model_18mar_f204bfd fv3gfs.fd 
-    rsync -ax fv3gfs.fd_gsl/ fv3gfs.fd/        ## copy over changes not in FV3 repository
+    if [[ -d ufs_model.fd_gsl ]]; then
+        rsync -avx ufs_model.fd_gsl/ ufs_model.fd/        ## copy over GSL changes not in UFS repository
+    fi
 else
-    echo 'Skip.  Directory fv3gfs.fd already exists.'
-fi
+    echo 'Skip.  Directory ufs_model.fd already exists.'
+fi 
 
 #JKHecho gsi checkout ...
 #JKHif [[ ! -d gsi.fd ]] ; then
-#JKH    rm -f ${topdir}/checkout-gsi.log
-#JKH    git clone --recursive https://github.com/NOAA-EMC/GSI.git gsi.fd >> ${topdir}/checkout-gsi.log 2>&1
+#JKH    rm -f ${logdir}/checkout-gsi.log
+#JKH    git clone --recursive https://github.com/NOAA-EMC/GSI.git gsi.fd >> ${logdir}/checkout-gsi.log 2>&1
 #JKH    cd gsi.fd
-#JKH    git checkout gfsda.v16.0.0
+#JKH    git checkout a62dec6
 #JKH    git submodule update
 #JKH    cd ${topdir}
 #JKHelse
@@ -66,10 +57,10 @@ fi
 #JKH
 #JKHecho gldas checkout ...
 #JKHif [[ ! -d gldas.fd ]] ; then
-#JKH    rm -f ${topdir}/checkout-gldas.log
-#JKH    git clone https://github.com/NOAA-EMC/GLDAS.git gldas.fd >> ${topdir}/checkout-gldas.fd.log 2>&1
+#JKH    rm -f ${logdir}/checkout-gldas.log
+#JKH    git clone https://github.com/NOAA-EMC/GLDAS.git gldas.fd >> ${logdir}/checkout-gldas.fd.log 2>&1
 #JKH    cd gldas.fd
-#JKH    git checkout gldas_gfsv16_release.v1.12.0
+#JKH    git checkout gldas_gfsv16_release.v.1.28.0
 #JKH    cd ${topdir}
 #JKHelse
 #JKH    echo 'Skip.  Directory gldas.fd already exists.'
@@ -77,23 +68,25 @@ fi
 
 echo ufs_utils checkout ...
 if [[ ! -d ufs_utils.fd ]] ; then
-    rm -f ${topdir}/checkout-ufs_utils.log
-    git clone https://github.com/NOAA-EMC/UFS_UTILS.git ufs_utils.fd >> ${topdir}/checkout-ufs_utils.fd.log 2>&1
+    rm -f ${logdir}/checkout-ufs_utils.log
+    git clone --recursive https://github.com/ufs-community/UFS_UTILS.git ufs_utils.fd >> ${logdir}/checkout-ufs_utils.fd.log 2>&1
     cd ufs_utils.fd
-    git checkout ufs_utils_1_4_0
-#    git checkout ops-gfsv16.0.0
+    git checkout 26cd024
     cd ${topdir}
-    rsync -ax ufs_utils.fd_gsl/ ufs_utils.fd/        ## copy over changes not in UFS_UTILS repository
+    if [[ -d ufs_utils.fd_gsl ]]; then
+        rsync -avx ufs_utils.fd_gsl/ ufs_utils.fd/        ## copy over GSL changes not in UFS_UTILS repository
+    fi
 else
     echo 'Skip.  Directory ufs_utils.fd already exists.'
 fi
 
 echo UPP checkout ...
 if [[ ! -d gfs_post.fd ]] ; then
-    rm -f ${topdir}/checkout-gfs_post.log
-    git clone https://github.com/NOAA-EMC/UPP.git gfs_post.fd >> ${topdir}/checkout-gfs_post.log 2>&1
+    rm -f ${logdir}/checkout-gfs_post.log
+    git clone https://github.com/NOAA-EMC/UPP.git gfs_post.fd >> ${logdir}/checkout-gfs_post.log 2>&1
     cd gfs_post.fd
-    git checkout upp_gfsv16_release.v1.1.1
+    git checkout c939eae
+    git submodule update --init CMakeModules
     ################################################################################
     # checkout_gtg
     ## yes: The gtg code at NCAR private repository is available for ops. GFS only.
@@ -103,32 +96,37 @@ if [[ ! -d gfs_post.fd ]] ; then
     checkout_gtg=${checkout_gtg:-"NO"}
     if [[ ${checkout_gtg} == "YES" ]] ; then
       ./manage_externals/checkout_externals
-      cp sorc/post_gtg.fd/*f90 sorc/ncep_post.fd/.
+      cp sorc/post_gtg.fd/*F90 sorc/ncep_post.fd/.
       cp sorc/post_gtg.fd/gtg.config.gfs parm/gtg.config.gfs
     fi
     cd ${topdir}
-    rsync -ax gfs_post.fd_gsl/ gfs_post.fd/        ## copy over GSL changes not in UPP repository
+    if [[ -d gfs_post.fd_gsl ]]; then
+        rsync -avx gfs_post.fd_gsl/ gfs_post.fd/        ## copy over GSL changes not in UPP repository
+    fi
 else
     echo 'Skip.  Directory gfs_post.fd already exists.'
 fi
 
-#JKHecho EMC_gfs_wafs checkout ...
-#JKHif [[ ! -d gfs_wafs.fd ]] ; then
-#JKH    rm -f ${topdir}/checkout-gfs_wafs.log
-#JKH    git clone --recursive https://github.com/NOAA-EMC/EMC_gfs_wafs.git gfs_wafs.fd >> ${topdir}/checkout-gfs_wafs.log 2>&1
-#JKH    cd gfs_wafs.fd
-#JKH    git checkout gfs_wafs.v6.0.17
-#JKH    cd ${topdir}
-#JKHelse
-#JKH    echo 'Skip.  Directory gfs_wafs.fd already exists.'
-#JKHfi
+checkout_wafs=${checkout_wafs:-"NO"}
+if [[ ${checkout_wafs} == "YES" ]] ; then
+  echo EMC_gfs_wafs checkout ...
+  if [[ ! -d gfs_wafs.fd ]] ; then
+    rm -f ${logdir}/checkout-gfs_wafs.log
+    git clone --recursive https://github.com/NOAA-EMC/EMC_gfs_wafs.git gfs_wafs.fd >> ${logdir}/checkout-gfs_wafs.log 2>&1
+    cd gfs_wafs.fd
+    git checkout c2a29a67d9432b4d6fba99eac7797b81d05202b6
+    cd ${topdir}
+  else
+    echo 'Skip.  Directory gfs_wafs.fd already exists.'
+  fi
+fi
 
 echo EMC_verif-global checkout ...
 if [[ ! -d verif-global.fd ]] ; then
-    rm -f ${topdir}/checkout-verif-global.log
-    git clone --recursive https://github.com/NOAA-EMC/EMC_verif-global.git verif-global.fd >> ${topdir}/checkout-verif-global.log 2>&1
+    rm -f ${logdir}/checkout-verif-global.log
+    git clone --recursive https://github.com/NOAA-EMC/EMC_verif-global.git verif-global.fd >> ${logdir}/checkout-verif-global.log 2>&1
     cd verif-global.fd
-    git checkout verif_global_v1.13.1
+    git checkout verif_global_v2.8.0
     cd ${topdir}
 else
     echo 'Skip. Directory verif-global.fd already exist.'
@@ -136,8 +134,8 @@ fi
 
 #JKHecho aeroconv checkout ...
 #JKHif [[ ! -d aeroconv.fd ]] ; then
-#JKH    rm -f ${topdir}/checkout-aero.log
-#JKH    git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${topdir}/checkout-aero.log 2>&1
+#JKH    rm -f ${logdir}/checkout-aero.log
+#JKH    git clone https://github.com/NCAR/aeroconv aeroconv.fd >> ${logdir}/checkout-aero.log 2>&1
 #JKH    cd aeroconv.fd
 #JKH    git checkout 24f6ddc
 #JKH    cd ${topdir}
@@ -151,8 +149,8 @@ wfmdir=../FV3GFSwfm
 cd $wfmdir
 
 if [[ ! -d nclvx ]]; then
-    rm -f ${topdir}/checkout-nclvx.log
-    git clone -b realtime/nclvx gerritt:FV3_ESRL nclvx >> ${topdir}/checkout-nclvx.log 2>&1
+    rm -f ${logdir}/checkout-nclvx.log
+    git clone -b realtime/nclvx gerrit:FV3_ESRL nclvx >> ${logdir}/checkout-nclvx.log 2>&1
 else
     echo 'Skip.  Directory nclvx already exists.'
 fi

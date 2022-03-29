@@ -10,6 +10,7 @@ echo "BEGIN: config.getic"
 
 export RETRO="NO" # YES = Pull v16 inputs from retrospective parallels; NO = use operational inputs
 export gfs_ver="v16" # Default = v16
+export OPS_RES=${OPS_RES:-"C768"} # Operational resolution
 
 export UFS_DIR=${HOMEgfs}/sorc/ufs_utils.fd
 export GDASINIT_DIR=${UFS_DIR}/util/gdas_init
@@ -25,10 +26,14 @@ if [ ${RETRO:-"NO"} = "YES" ]; then # Retrospective parallel input
     HPSSDIR=/NCEPDEV/emc-global/5year/emc.glopara/WCOSS_D/gfsv16/v16retro1e
   elif [[ "$CDATE" -lt "2019101706" ]]; then
     HPSSDIR=/NCEPDEV/emc-global/5year/emc.glopara/WCOSS_D/gfsv16/v16retro2e
-  elif [[ "$CDATE" -lt "2020122206" ]]; then
+  elif [[ "$CDATE" -lt "2020122200" ]]; then
     HPSSDIR=/NCEPDEV/emc-global/5year/emc.glopara/WCOSS_D/gfsv16/v16rt2
+  elif [[ "$CDATE" -le "2021032506" ]]; then
+    HPSSDIR=/NCEPDEV/emc-global/5year/emc.glopara/WCOSS_D/gfsv16/v16rt2n
   else
-    HPSSDIR=/NCEPDEV/emc-global/5year/emc.gloparadev/WCOSS_D/gfsv16/v16rt2n
+    set +x
+    echo NO DATA FOR $CDATE
+    exit 3
   fi
 elif [ ${RETRO:-"NO"} = "NO" ]; then # Operational input
   # No ENKF data prior to 2012/05/21/00z
@@ -44,11 +49,17 @@ elif [ ${RETRO:-"NO"} = "NO" ]; then # Operational input
   elif [[ "$CDATE" -lt "2019061200" ]]; then
     export gfs_ver=v14
     export GETICSH=${GDASINIT_DIR}/get_${gfs_ver}.data.sh
-    export tarball=gpfs_hps_nco_ops_com_gfs_prod_gfs.${PDY}_${cyc}.pgrb2_${grid}.tar
-  elif [[ "$CDATE" -lt "2021031700" ]]; then
+  elif [[ "$CDATE" -lt "2021032100" ]]; then
     export gfs_ver=v15
     export GETICSH=${GDASINIT_DIR}/get_${gfs_ver}.data.sh
-    export tarball=com_gfs_prod_gfs.${PDY}_${cyc}.gfs_pgrb2.tar
+  elif [[ "$CDATE" -lt "2021032106" ]]; then
+    # The way the v16 switch over was done, there is no complete
+    # set of v16 or v15 data for 2021032100.  And although
+    # v16 was officially implemented 2021032212, the v16 prod
+    # tarballs were archived starting 2021032106.
+    set +x
+    echo FATAL ERROR: NO V15 OR V16 DATA FOR 2021032100
+    exit 1
   fi
 fi
 

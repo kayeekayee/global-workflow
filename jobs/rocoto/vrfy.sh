@@ -43,8 +43,10 @@ export COMPONENT=${COMPONENT:-atmos}
 export CDATEm1=$($NDATE -24 $CDATE)
 export PDYm1=$(echo $CDATEm1 | cut -c1-8)
 
+export pid=${pid:-$$}
+export jobid=${job}.${pid}
 export COMIN="$ROTDIR/$CDUMP.$PDY/$cyc/$COMPONENT"
-export DATAROOT="$RUNDIR/$CDATE/$CDUMP/vrfy"
+export DATAROOT="$RUNDIR/$CDATE/$CDUMP/vrfy.${jobid}"
 [[ -d $DATAROOT ]] && rm -rf $DATAROOT
 mkdir -p $DATAROOT
 
@@ -174,17 +176,7 @@ if [ $VRFYTRAK = "YES" ]; then
     $TRACKERSH  
 fi
 
-# GSL - rename tracker file and change AVNO to GCP1         ## JKH
-export TRACKDIR="${ROTDIR}/../../tracks"               
-typeset -u ucatcf=$ATCFNAME
-if [ -f $COMIN/avnop.t00z.cyclone.trackatcfunix ]; then
-  cat $COMIN/avnop.t00z.cyclone.trackatcfunix | sed s:AVNO:${ucatcf}:g > $TRACKDIR/tctrk.atcf.${CDATE}.${ATCFNAME}.txt
-  cp -p $TRACKDIR/tctrk.atcf.${CDATE}.${ATCFNAME}.txt $COMIN/tctrk.atcf.${CDATE}.${ATCFNAME}.txt
-  rm -f $COMIN/avnop.t00z.cyclone.trackatcfunix $COMIN/avno.t00z.cyclone.trackatcfunix
-  echo "$COMIN/avno*.t00z.cyclone.trackatcfunix deleted...."
-else
-  echo "no track file created...."
-fi
+
 ################################################################################
 echo
 echo "=============== START TO RUN CYCLONE GENESIS VERIFICATION ==============="

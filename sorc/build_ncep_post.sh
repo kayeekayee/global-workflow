@@ -2,7 +2,7 @@
 set -eux
 
 source ./machine-setup.sh > /dev/null 2>&1
-cwd=`pwd`
+cwd=$(pwd)
 
 USE_PREINST_LIBS=${USE_PREINST_LIBS:-"true"}
 if [ $USE_PREINST_LIBS = true ]; then
@@ -16,5 +16,5 @@ if [ ! -d "../exec" ]; then
   mkdir ../exec
 fi
 
-cd gfs_post.fd/sorc
-sh build_ncep_post.sh
+cd gfs_post.fd/tests
+./compile_upp.sh

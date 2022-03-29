@@ -92,7 +92,7 @@ cat << EOF > fort.41
  convert_nst=.true.
  tracers="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
  tracers_input="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
- thomp_mp_climo_file="/home/rtfim/UFS-CAMsuite/fix/fix_am/Thompson_MP_MONTHLY_CLIMO.nc"
+ thomp_mp_climo_file="${FIX_AM}/Thompson_MP_MONTHLY_CLIMO.nc"
 /
 EOF
 

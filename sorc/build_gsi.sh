@@ -2,7 +2,7 @@
 set -eux
 
 source ./machine-setup.sh > /dev/null 2>&1
-cwd=`pwd`
+cwd=$(pwd)
 
 USE_PREINST_LIBS=${USE_PREINST_LIBS:-"true"}
 if [ $USE_PREINST_LIBS = true ]; then
@@ -21,6 +21,7 @@ fi
 
 cd gsi.fd/ush/
 ./build_all_cmake.sh "PRODUCTION" "$cwd/gsi.fd"
+##./build_all_cmake.sh "PRODUCTION" "$cwd/gsi.fd" "NCO"  # use this line for pruned NCO install
 
 exit
 

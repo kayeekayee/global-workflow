@@ -36,7 +36,7 @@
   cd $DATA
   postmsg "$jlogfile" "Making TAR FILE"
 
-  alertName=`echo $RUN|tr [a-z] [A-Z]`
+  alertName=$(echo $RUN|tr [a-z] [A-Z])
 
   set +x
   echo ' '
@@ -70,6 +70,9 @@
 
   filext=$type
   if [ "$type" = "ibp" ]; then filext='spec'; fi
+  if [ "$type" = "ibpbull" ]; then filext='bull'; fi
+  if [ "$type" = "ibpcbull" ]; then filext='cbull'; fi
+
 
   rm -rf TAR_${filext}_$ID 
   mkdir  TAR_${filext}_$ID
@@ -92,7 +95,7 @@
     exit 2
   fi
 
-  cd ${STA_DIR}/${type}
+  cd ${STA_DIR}/${filext}
 
 # --------------------------------------------------------------------------- #
 # 2.  Generate tar file (spectral files are compressed)
@@ -109,7 +112,7 @@
   while [ "$count" -lt "$countMAX" ] && [ "$tardone" = 'no' ]
   do
     
-    nf=`ls | awk '/'$ID.*.$filext'/ {a++} END {print a}'`
+    nf=$(ls | awk '/'$ID.*.$filext'/ {a++} END {print a}')
     nbm2=$(( $nb - 2 ))
     if [ $nf -ge $nbm2 ]
     then 
@@ -138,7 +141,7 @@
       echo ' All files not found for tar. Sleeping 10 seconds and trying again ..'
       [[ "$LOUD" = YES ]] && set -x
       sleep 10
-      count=`expr $count + 1`
+      count=$(expr $count + 1)
     fi
 
   done
@@ -206,7 +209,7 @@
     exit 4
   fi
 
-  if [ "$SENDDBN" = 'YES' -a  $type != "ibp" ]
+  if [ "$SENDDBN" = 'YES' ]
   then
     set +x
     echo ' '
