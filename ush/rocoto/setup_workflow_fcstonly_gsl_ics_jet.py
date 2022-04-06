@@ -119,8 +119,8 @@ def get_definitions(base):
     strings.append(f'''\t<!ENTITY EXPDIR "{base['EXPDIR']}">\n''')
     strings.append(f'''\t<!ENTITY ROTDIR "{base['ROTDIR']}">\n''')
     strings.append(f'''\t<!ENTITY ICSDIR "{base['ICSDIR']}">\n''')
+    strings.append(f'''\t<!ENTITY SCR_DIR "/home/rtfim/UFS-CAMsuite/FV3GFSwfm/jet_scripts">\n''')
     strings.append(f'''\t<!ENTITY PUBDIR "/public/data/grids/gfs/anl/netcdf">\n''')
-    strings.append(f'''\t<!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">\n''')
     strings.append(f'''\t<!ENTITY RETRODIR "/lfs4/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">\n''')
     strings.append('\n')
     strings.append('\t<!-- Directories for driving the workflow -->\n')
@@ -314,15 +314,6 @@ def get_workflow(dict_configs, cdump='gdas'):
             deps1.append(rocoto.add_dependency(dep_dict))
             dependencies1 = rocoto.create_dependency(dep_condition='nor', dep=deps1)
 
-            deps2 = []
-            data = '&EMCDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.atmanl.nc'
-            dep_dict = {'type':'data', 'data':data}
-            deps2.append(rocoto.add_dependency(dep_dict))
-            data = '&EMCDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.sfcanl.nc'
-            dep_dict = {'type':'data', 'data':data}
-            deps2.append(rocoto.add_dependency(dep_dict))
-            dependencies2 = rocoto.create_dependency(dep_condition='and', dep=deps2)
-
             deps3 = []
             data = '&PUBDIR;/@y@j@H00.&CDUMP;.t@Hz.atmanl.nc'
             dep_dict = {'type':'data', 'data':data}
@@ -342,8 +333,7 @@ def get_workflow(dict_configs, cdump='gdas'):
             dependencies4 = rocoto.create_dependency(dep_condition='and', dep=deps4)
 
             deps = []
-            deps = dependencies2
-            deps.append(dependencies3)
+            deps = dependencies3
             deps.append(dependencies4)
             dependencies = rocoto.create_dependency(dep_condition='or', dep=deps)
 
@@ -353,12 +343,11 @@ def get_workflow(dict_configs, cdump='gdas'):
             dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
 
             PUBDIR = rocoto.create_envar(name='PUBDIR', value='&PUBDIR;')
-            EMCDIR = rocoto.create_envar(name='EMCDIR', value='&EMCDIR;')
             RETRODIR = rocoto.create_envar(name='RETRODIR', value='&RETRODIR;')
             ROTDIR = rocoto.create_envar(name='ROTDIR', value='&ROTDIR;')
             PSLOT = rocoto.create_envar(name='PSLOT', value='&PSLOT;')
             COMPONENT = rocoto.create_envar(name='COMPONENT', value='&COMPONENT;')
-            geticenvars = envars + [PUBDIR] + [EMCDIR] + [RETRODIR] + [ROTDIR] + [PSLOT] + [COMPONENT]
+            geticenvars = envars + [PUBDIR] + [RETRODIR] + [ROTDIR] + [PSLOT] + [COMPONENT]
             task = wfu.create_wf_task('getic', cdump=cdump, envar=geticenvars, dependency=dependencies)
             tasks.append(task)
             tasks.append('\n')

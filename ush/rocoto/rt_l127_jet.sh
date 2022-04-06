@@ -15,7 +15,7 @@ python3 ./setup_expt.py forecast-only --pslot $PSLOT  --gfs_cyc 1 \
        --idate $IDATE --edate $EDATE --resdet $RESDET \
        --comrot $COMROT --expdir $EXPDIR --icsdir $ICSDIR
 
-./setup_workflow_fcstonly_gsl_ics.py --expdir $EXPDIR/$PSLOT
+./setup_workflow_fcstonly_gsl_ics_jet.py --expdir $EXPDIR/$PSLOT
 
 # call jobs/rocoto/arch_gsl.sh for gfsarch task
 sed -i "s/arch.sh/arch_gsl.sh/" $EXPDIR/$PSLOT/$PSLOT.xml
