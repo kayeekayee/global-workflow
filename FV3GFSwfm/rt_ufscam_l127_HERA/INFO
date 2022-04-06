@@ -1,7 +1,0 @@
-06 Oct 21
----------
-change to 4 WG to see if makes any difference in jobs running out of walltime and skipping forecasts
-16x16, 4WG  =>  186 nodes
-
-16x16, 2WG  =>  170 nodes
-

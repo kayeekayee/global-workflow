@@ -1,0 +1,26 @@
+{{
+#! /bin/sh
+#SBATCH --job-name=rt_ufscam_l127_gfspost_f000-f000_00
+#SBATCH --account=gsd-fv3-dev
+#SBATCH --qos=batch
+#SBATCH --partition=vjet,xjet
+#SBATCH --nodes=10-10
+#SBATCH --tasks-per-node=12
+#SBATCH --cpus-per-task=1
+#SBATCH -t 01:00:00
+#SBATCH --mem=40960
+#SBATCH -o /lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite_jet/FV3GFSrun/rt_ufscam_l127/logs/2022032600/gfspost_f000-f000.log
+#SBATCH --export=NONE
+#SBATCH --comment=7f9a9191c0f097c3f98af84dcf1bb974
+export RUN_ENVIR='emc'
+export HOMEgfs='/mnt/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite_jet'
+export EXPDIR='/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite_jet/FV3GFSwfm/rt_ufscam_l127'
+export CDATE='2022032600'
+export CDUMP='gfs'
+export PDY='20220326'
+export cyc='00'
+export FHRGRP='_f000-f000'
+export FHRLST='f000'
+export ROTDIR='/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite_jet/FV3GFSrun/rt_ufscam_l127'
+/mnt/lfs4/BMC/gsd-fv3-dev/rtruns/UFS-CAMsuite_jet/jobs/rocoto/post.sh
+}}
