@@ -62,8 +62,8 @@
 	<!-- ROCOTO parameters that control workflow -->
 	<!ENTITY CYCLETHROTTLE "4">
 	<!ENTITY TASKTHROTTLE  "20">
-	<!ENTITY MAXTRIES      "1">
 	<!ENTITY MAXTRIES      "2">
+	<!ENTITY MAXTRIES      "1">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
         
@@ -248,8 +248,8 @@
         <var name="lst">f000_f006_f012_f018 f024_f030_f036_f042 f048_f054_f060_f066 f072_f078_f084_f090 f096_f102_f108_f114_f120</var>
 -->
         <var name="grp">001 002 003 </var>
-        <var name="dep">f018 f042 f048 </var>
-        <var name="lst">f000_f006_f012_f018 f024_f030_f036_f042 f048 </var>
+        <var name="dep">f012 f030 f048 </var>
+        <var name="lst">f000_f006_f012 f018_f024_f030 f036_f042_f048 </var>
 
 	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 		<command>&JOBS_DIR;/post.sh</command>
