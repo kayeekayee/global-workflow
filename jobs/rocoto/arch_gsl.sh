@@ -47,18 +47,18 @@ if [ $HPSSARCH = "YES" ]; then
         status=$?
         if [ $status -ne 0 ]; then
           echo "HTAR $CDATE gfs_nemsio.tar failed"
-          exit $status
+          #exit $status
         fi
       fi
 
       ## netcdf files ##
-      if [ -f *nc ]; then
+      if [ -f *f???.nc ]; then
         # archive netcdf files (gfs.t00z.atmfHHH.nc, gfs.t00z.sfcfHHH.nc, gfs.t00z.logfHHH.txt )
         htar -P -cvf $ATARDIR/$YYYY/$CDATE/gfs_nc.tar gfs*.nc gfs.*log*.txt
         status=$?
         if [ $status -ne 0 ]; then
           echo "HTAR $CDATE gfs_nc.tar failed"
-          exit $status
+          #exit $status
         fi
       fi
         
@@ -72,7 +72,7 @@ if [ $HPSSARCH = "YES" ]; then
       status=$?
       if [ $status -ne 0 ]; then
         echo "HTAR $CDATE gfs_pgrb2.tar failed"
-        exit $status
+        #exit $status
       fi
       
   fi
