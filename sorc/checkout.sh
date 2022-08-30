@@ -71,7 +71,7 @@ if [[ ! -d ufs_utils.fd ]] ; then
     rm -f ${logdir}/checkout-ufs_utils.log
     git clone --recursive https://github.com/ufs-community/UFS_UTILS.git ufs_utils.fd >> ${logdir}/checkout-ufs_utils.fd.log 2>&1
     cd ufs_utils.fd
-    git checkout 26cd024
+    git checkout ufs_utils_1_8_0
     cd ${topdir}
     if [[ -d ufs_utils.fd_gsl ]]; then
         rsync -avx ufs_utils.fd_gsl/ ufs_utils.fd/        ## copy over GSL changes not in UFS_UTILS repository

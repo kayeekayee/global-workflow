@@ -1,3 +1,7 @@
+26 Aug 2022
+    - update to ufs_utils_1_8_0
+30 Jun 2022
+    - run in realtime on HERA
 23 Mar 2022
     - update to 01Mar22 global-workflow develop branch, a0e23e2
          post:       c939eae  (10Nov21)
