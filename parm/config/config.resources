@@ -192,6 +192,7 @@ elif [ $step = "post" ]; then
 
     export wtime_post="02:00:00"
     export wtime_post_gfs="06:00:00"
+    export memory_post="40G"
     export npe_post=48 
     export nth_post=1
     export npe_node_post=12
