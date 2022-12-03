@@ -120,8 +120,7 @@ def get_definitions(base):
     strings.append(f'''\t<!ENTITY ROTDIR "{base['ROTDIR']}">\n''')
     strings.append(f'''\t<!ENTITY ICSDIR "{base['ICSDIR']}">\n''')
     strings.append(f'''\t<!ENTITY PUBDIR "/public/data/grids/gfs/anl/netcdf">\n''')
-    strings.append(f'''\t<!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">\n''')
-    strings.append(f'''\t<!ENTITY RETRODIR "/lfs4/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">\n''')
+    strings.append(f'''\t<!ENTITY RETRODIR "/lfs4/BMC/gsd-fv3-dev/GFS_RETRO_ANL">\n''')
     strings.append('\n')
     strings.append('\t<!-- Directories for driving the workflow -->\n')
     strings.append(f'''\t<!ENTITY HOMEgfs  "{base['HOMEgfs']}">\n''')
@@ -793,7 +792,9 @@ def get_workflow(dict_configs, cdump='gdas'):
         dep_dict = {'type':'metatask', 'name':f'{cdump}post'}
         deps.append(rocoto.add_dependency(dep_dict))
         dependencies = rocoto.create_dependency(dep=deps)
-        task = wfu.create_wf_task('vrfy', cdump=cdump, envar=envars, dependency=dependencies)
+        atcfname = rocoto.create_envar(name='ATCFNAME', value='&ATCFNAME;')
+        vrfyenvars = envars + [atcfname]
+        task = wfu.create_wf_task('vrfy', cdump=cdump, envar=vrfyenvars, dependency=dependencies)
         tasks.append(task)
         tasks.append('\n')
 

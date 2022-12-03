@@ -55,7 +55,7 @@ export DO_BUFRSND="NO"     # BUFR sounding products
 export DO_GEMPAK="NO"      # GEMPAK products
 export DO_AWIPS="NO"       # AWIPS products
 export WAFSF="NO"          # WAFS products
-export DO_VRFY="NO"       # VRFY step               ## JKH
+export DO_VRFY="YES"       # VRFY step       ## JKH
 
 # NO for retrospective parallel; YES for real-time parallel
 #  arch.sh uses REALTIME for MOS.  Need to set REALTIME=YES
@@ -125,6 +125,12 @@ export COMINatmos=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/atmos
 export COMOUTatmos=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/atmos
 export COMINwave=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/wave
 export COMOUTwave=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/wave
+export COMINocean=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/ocean
+export COMOUTocean=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/ocean
+export COMINice=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/ice
+export COMOUTice=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/ice
+export COMINaero=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/chem
+export COMOUTaero=${ROTDIR}/${CDUMP}.${PDY}/${cyc}/chem
 
 export jlogfile="${EXPDIR}/logs/jlogfile"
 export ERRSCRIPT=${ERRSCRIPT:-'eval [[ $err = 0 ]]'}
@@ -149,50 +155,55 @@ export DO_COUPLED="NO"
 export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
-export DO_AERO="NO"
+export DO_AERO=@DO_AERO@
+export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
+#### export CCPP_SUITE="FV3_GFS_v17_p8_gf"                           # GFS v17 prototype p8 + GF
+#### export CCPP_SUITE="FV3_GFS_v17_p8_mynn"                         # GFS v17 prototype p8 + MYNN
 #### export CCPP_SUITE="FV3_GFS_v16"                            # GFS v16
 #### export CCPP_SUITE="FV3_RAP_cires_ugwp"                     # RUC LSM, MYNN, GF, CIRES UGWP
-export CCPP_SUITE="FV3_RAP_noah_sfcdiff_unified_ugwp"      # NOAH LSM, MYNN, GF, no GF shallow, Unified UGWP
+#### export CCPP_SUITE="FV3_RAP_noah_sfcdiff_unified_ugwp"      # NOAH LSM, MYNN, GF, no GF shallow, Unified UGWP
 #### export CCPP_SUITE="FV3_RAP_noah_sfcdiff_ugwpv1"            # NOAH LSM, MYNN, GF, no GF shallow, UGWPv1
 #### export CCPP_SUITE="FV3_GFS_v16_gf"                         # GFS v16 + GF
 #### export CCPP_SUITE="FV3_GFS_v16_mynn"                       # GFS v16 + MYNN
 #### export CCPP_SUITE="FV3_GFS_v16_thompson"                   # GFS v16 + THMP
 export WAVE_CDUMP="" # When to include wave suite: gdas, gfs, or both
-export confignamevarfornems="atm" # For APP=ATM
 export cplwav2atm=".false."
+
+aero_nems_string=""
+if [[ $DO_AERO = "YES" ]]; then
+    aero_nems_string="_aero"
+else
+    aero_nems_string=""
+fi
 
 case "${APP}" in
   ATM)
     echo "APP=ATM; will use defaults"
+    export confignamevarfornems="atm${aero_nems_string}"
     ;;
   ATMW)
     export DO_COUPLED="YES"
     export DO_WAVE="YES"
     export WAVE_CDUMP="both"
-    export confignamevarfornems="leapfrog_atm_wav"
+    export confignamevarfornems="leapfrog_atm${aero_nems_string}_wav"
     ;;
   S2S)
     export DO_COUPLED="YES"
     export DO_OCN="YES"
     export DO_ICE="YES"
-    export CCPP_SUITE="FV3_GFS_v16_coupled_nsstNoahmpUGWPv1"
-    export confignamevarfornems="cpld"
+    export CCPP_SUITE="FV3_GFS_v17_coupled_p8"
+    export confignamevarfornems="cpld${aero_nems_string}"
     ;;
   S2SW)
     export DO_COUPLED="YES"
     export DO_WAVE="YES"
     export DO_OCN="YES"
     export DO_ICE="YES"
-    export CCPP_SUITE="FV3_GFS_v16_coupled_nsstNoahmpUGWPv1"
+    export CCPP_SUITE="FV3_GFS_v17_coupled_p8"
     export WAVE_CDUMP="both"
-    export confignamevarfornems="cpld_wave"
     export cplwav2atm=".true."
+    export confignamevarfornems="cpld${aero_nems_string}_wave"
     source $EXPDIR/config.defaults.s2sw
-    ;;
-  ATMAERO)
-    export DO_COUPLED="YES"
-    export DO_AERO="YES"
-    export confignamevarfornems="atm_aer"
     ;;
   *)
     echo "Unrecognized APP: ${1}"
@@ -208,7 +219,7 @@ export LEVS=128
 export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 case "$CASE" in
-    "C48") export OCNRES=100;;
+    "C48") export OCNRES=400;;
     "C96") export OCNRES=100;;
     "C192") export OCNRES=050;;
     "C384") export OCNRES=025;;
@@ -232,7 +243,7 @@ fi
 # Output frequency of the forecast model (for cycling)
 export FHMIN=0
 export FHMAX=9
-export FHOUT=3
+export FHOUT=3           # Will be changed to 1 in config.base if DO_GLDAS is set or (DOHYBVAR set to NO and l4densvar set to false)
 
 # Cycle to run EnKF  (set to BOTH for both gfs and gdas)
 export EUPD_CYC="gdas"
@@ -243,16 +254,20 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=${FHMAX_GFS_00:-120}      ## JKH
-export FHMAX_GFS_06=${FHMAX_GFS_06:-120}      ## JKH
-export FHMAX_GFS_12=${FHMAX_GFS_12:-120}      ## JKH
-export FHMAX_GFS_18=${FHMAX_GFS_18:-120}      ## JKH
+export FHMAX_GFS_00=${FHMAX_GFS_00:-168}      ## JKH
+export FHMAX_GFS_06=${FHMAX_GFS_06:-168}      ## JKH
+export FHMAX_GFS_12=${FHMAX_GFS_12:-168}      ## JKH
+export FHMAX_GFS_18=${FHMAX_GFS_18:-168}      ## JKH
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=${FHOUT_GFS:-6}              ## JKH
 export FHMAX_HF_GFS=${FHMAX_HF_GFS:-0}
 export FHOUT_HF_GFS=${FHOUT_HF_GFS:-1}
-export STEP_GFS="24"
+if (( gfs_cyc != 0 )); then
+    export STEP_GFS=$(( 24 / gfs_cyc ))
+else
+    export STEP_GFS="0"
+fi
 export ILPOST=1           # gempak output frequency up to F120
 
 # GFS restart interval in hours
@@ -265,7 +280,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".false."                ## JKH
+export WRITE_DOPOST=".false."           ## JKH
 export WRITE_NSFLIP=".true."
 
 # suffix options depending on file format
@@ -300,6 +315,11 @@ export lobsdiag_forenkf=".true."
 # run GLDAS to spin up land ICs
 export DO_GLDAS="YES"
 export gldas_cyc=00
+
+# Exception handling that when DO_GLDAS is set, the FHOUT must be 1
+if [ $DO_GLDAS = "YES" ]; then
+  export FHOUT=1
+fi
 
 # if [[ "$SDATE" -lt "2019020100" ]]; then # no rtofs in GDA
 #   export DO_WAVE="NO"

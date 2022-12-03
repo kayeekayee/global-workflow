@@ -1,4 +1,4 @@
-#!/bin/ksh  -x
+#!/bin/bash -x
 
 ## this script makes links to FV3GFS (GFSv15.1) nemsio files under /public and copies over GFS analysis file for verification
 ##   /scratch4/BMC/rtfim/rtfuns/FV3GFS/FV3ICS/YYYYMMDDHH/gfs
@@ -24,6 +24,13 @@ hh=`echo $CDATE | cut -c9-10`
 yyddd=`date +%y%j -u -d $yyyymmdd`
 fv3ic_dir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}
 
+## EMC archive on disk
+##    /scratch1/NCEPDEV/rstprod/com/gfs/prod
+##         gfs.t00z.atmanl.nemsio
+##         gfs.t00z.sfcanl.nemsio
+##
+EMCDIR=/scratch1/NCEPDEV/rstprod/com/gfs/prod
+
 ## create links in FV3ICS directory
 mkdir -p $fv3ic_dir
 cd $fv3ic_dir
@@ -45,6 +52,10 @@ elif  [[ -f $RETRODIR/${pubsfc_file} ]]; then
   echo "linking $RETRODIR...."
   ln -fs $RETRODIR/${pubsfc_file} $sfc_file
   ln -fs $RETRODIR/${pubatm_file} $atm_file 
+elif  [[ -f $EMCDIR/${pubsfc_file} ]]; then
+  echo "linking $EMCDIR...."
+  ln -fs $EMCDIR/${sfc_file} $sfc_file
+  ln -fs $EMCDIR/${atm_file} $atm_file 
 else
   echo "missing input files!"
   exit 1

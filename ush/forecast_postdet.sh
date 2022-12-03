@@ -96,7 +96,7 @@ EOF
         read_increment=".false."
         res_latlon_dynamics=""
       else
-        increment_file=$memdir/${CDUMP}.t${cyc}z.${PREFIX_INC}atminc.nc
+        increment_file=$memdir/${CDUMP}.t${cyc}z.${PREFIX_ATMINC}atminc.nc
         if [ -f $increment_file ]; then
           $NLN $increment_file $DATA/INPUT/fv3_increment.nc
           read_increment=".true."
@@ -186,7 +186,7 @@ EOF
     done
   else
     OROFIX=${OROFIX:-"${FIXfv3}/${CASE}"}
-    FIX_SFC=${FIX_SFC:-"${FIXgrd}/fix_sfc"}
+    FIX_SFC=${FIX_SFC:-"${OROFIX}/fix_sfc"}
     for n in $(seq 1 $ntiles); do
       $NLN ${OROFIX}/${CASE}_oro_data.tile${n}.nc $DATA/INPUT/oro_data.tile${n}.nc
     done
@@ -203,7 +203,7 @@ EOF
   # Scan suite file to determine whether it uses Noah-MP  ( Noah-MP #2, RUC-LSM #3, Noah #1 )
   if [ $(grep noahmpdrv ${_suite_file} | wc -l ) -gt 0 ]; then
     lsm="2"
-    lheatstrg=".true."
+    lheatstrg=".false."
     landice=".false."
     iopt_dveg=${iopt_dveg:-"4"}
     iopt_crs=${iopt_crs:-"2"}
@@ -217,6 +217,8 @@ EOF
     iopt_snf=${iopt_snf:-"4"}
     iopt_tbot=${iopt_tbot:-"2"}
     iopt_stc=${iopt_stc:-"3"}
+    IALB=${IALB:-2}
+    IEMS=${IEMS:-2}
   elif [ $(grep lsm_ruc ${_suite_file} | wc -l ) -gt 0 ]; then 
     lsm="3"
     lsoil_lsm=9
@@ -224,7 +226,7 @@ EOF
     landice=".false."
   else
     lsm="1"
-    lheatstrg=".false."
+    lheatstrg=".true."
     if [[ "$CCPP_SUITE" == "FV3_RAP_cires_ugwp" || "$CCPP_SUITE" == "FV3_RAP_noah_sfcdiff_unified_ugwp" || "$CCPP_SUITE" == "FV3_RAP_noah_sfcdiff_ugwpv1" ]] ; then   ## JKH
       landice=".false."
     else
@@ -242,40 +244,23 @@ EOF
     iopt_snf=${iopt_snf:-"4"}
     iopt_tbot=${iopt_tbot:-"2"}
     iopt_stc=${iopt_stc:-"1"}
+    IALB=${IALB:-1}
+    IEMS=${IEMS:-1}
   fi
 
-  # Scan suite file to determine whether it uses UGWP v1
-  if [ $(grep -i ugwpv1_gsldrag ${_suite_file} | wc -l ) -gt 0 ]; then
-    gwd_opt="2"
-    knob_ugwp_version="1"
-    OROFIX_ugwd=${OROFIX_ugwd:-"${FIX_DIR}/fix_ugwd"}
+  # Files for GWD
+  OROFIX_ugwd=${OROFIX_ugwd:-"${FIX_DIR}/fix_ugwd"}
+  if [[ "$CCPP_SUITE" != "FV3_RAP_cires_ugwp" && "$CCPP_SUITE" != "FV3_RAP_noah_sfcdiff_unified_ugwp" && "$CCPP_SUITE" != "FV3_RAP_noah_sfcdiff_ugwpv1" ]] ; then   ## JKH
+
     $NLN ${OROFIX_ugwd}/ugwp_limb_tau.nc $DATA/ugwp_limb_tau.nc
-    for n in $(seq 1 $ntiles); do
-      $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ls.tile${n}.nc $DATA/INPUT/oro_data_ls.tile${n}.nc
-      $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ss.tile${n}.nc $DATA/INPUT/oro_data_ss.tile${n}.nc
-    done
-  # Scan suite file to determine whether it uses Unified UGWP
-  # JKH  -- 'workaround' to get correct settings for unified_ugwp in parsing_namelist_FV3.sh for GSL
-  #         (gwd_opt will be set to "2" in namelist)
-  elif [ $(grep -i unified_ugwp ${_suite_file} | wc -l ) -gt 0 ]; then 
-    gwd_opt="3"                         
-    knob_ugwp_version="0"
-    launch_level=${launch_level:-$(echo "$LEVS/2.35" |bc)}
-    OROFIX_ugwd=${OROFIX_ugwd:-"${FIX_DIR}/fix_ugwd"}
-    for n in $(seq 1 $ntiles); do
-      $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ls.tile${n}.nc $DATA/INPUT/oro_data_ls.tile${n}.nc
-      $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ss.tile${n}.nc $DATA/INPUT/oro_data_ss.tile${n}.nc
-    done
-  else
-    gwd_opt="1"
-    knob_ugwp_version="0"
-    launch_level=${launch_level:-$(echo "$LEVS/2.35" |bc)}
   fi
+  for n in $(seq 1 $ntiles); do
+    $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ls.tile${n}.nc $DATA/INPUT/oro_data_ls.tile${n}.nc
+    $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ss.tile${n}.nc $DATA/INPUT/oro_data_ss.tile${n}.nc
+  done
 
   # GFS standard input data
 
-  IALB=${IALB:-1}
-  IEMS=${IEMS:-1}
   ISOL=${ISOL:-2}
   IAER=${IAER:-1011}
   ICO2=${ICO2:-2}
@@ -287,15 +272,17 @@ EOF
   fi
   H2OFORC=${H2OFORC:-"global_h2o_pltc.f77"}
   ####
-  # copy CCN_ACTIVATE.BIN for Thompson microphysics
+  #  Copy CCN_ACTIVATE.BIN for Thompson microphysics
+  #  Thompson microphysics used when CCPP_SUITE set to FV3_GSD_v0 or FV3_GSD_noah
+  #  imp_physics should be 8
+  ####
   if [ $imp_physics -eq 8 ]; then
-    $NCP $FV3INP/CCN_ACTIVATE.BIN  CCN_ACTIVATE.BIN
-    ####
-    $NCP $FIX_AM/freezeH2O.dat .
-    $NCP $FIX_AM/qr_acr_qg.dat .
-    $NCP $FIX_AM/qr_acr_qs.dat .
-    sleep 60
+    $NLN $FIX_AM/CCN_ACTIVATE.BIN  $DATA/CCN_ACTIVATE.BIN
+    $NLN $FIX_AM/freezeH2O.dat     $DATA/freezeH2O.dat
+    $NLN $FIX_AM/qr_acr_qg.dat     $DATA/qr_acr_qg.dat 
+    $NLN $FIX_AM/qr_acr_qs.dat     $DATA/qr_acr_qs.dat
   fi
+
   $NLN $FIX_AM/${O3FORC}                         $DATA/global_o3prdlos.f77
   $NLN $FIX_AM/${H2OFORC}                        $DATA/global_h2oprdlos.f77
   $NLN $FIX_AM/global_solarconstant_noaa_an.txt  $DATA/solarconstant_noaa_an.txt
@@ -369,31 +356,17 @@ EOF
   FNSNOC=${FNSNOC:-"$FIX_AM/global_snoclim.1.875.grb"}
   FNZORC=${FNZORC:-"igbp"}
   FNAISC=${FNAISC:-"$FIX_AM/CFSR.SEAICE.1982.2012.monthly.clim.grb"}
-  if [ $cplflx = ".false." ] ; then
-    FNALBC2=${FNALBC2:-"$FIX_AM/global_albedo4.1x1.grb"}
-    FNTG3C=${FNTG3C:-"$FIX_AM/global_tg3clim.2.6x1.5.grb"}
-    FNVEGC=${FNVEGC:-"$FIX_AM/global_vegfrac.0.144.decpercent.grb"}
-    FNMSKH=${FNMSKH:-"$FIX_AM/global_slmask.t1534.3072.1536.grb"}
-    FNVMNC=${FNVMNC:-"$FIX_AM/global_shdmin.0.144x0.144.grb"}
-    FNVMXC=${FNVMXC:-"$FIX_AM/global_shdmax.0.144x0.144.grb"}
-    FNSLPC=${FNSLPC:-"$FIX_AM/global_slope.1x1.grb"}
-    FNALBC=${FNALBC:-"$FIX_AM/global_snowfree_albedo.bosu.t${JCAP}.${LONB}.${LATB}.rg.grb"}
-    FNVETC=${FNVETC:-"$FIX_AM/global_vegtype.igbp.t${JCAP}.${LONB}.${LATB}.rg.grb"}
-    FNSOTC=${FNSOTC:-"$FIX_AM/global_soiltype.statsgo.t${JCAP}.${LONB}.${LATB}.rg.grb"}
-    FNABSC=${FNABSC:-"$FIX_AM/global_mxsnoalb.uariz.t${JCAP}.${LONB}.${LATB}.rg.grb"}
-  else
-    FNALBC2=${FNALBC2:-"${FIX_SFC}/${CASE}.facsf.tileX.nc"}
-    FNTG3C=${FNTG3C:-"${FIX_SFC}/${CASE}.substrate_temperature.tileX.nc"}
-    FNVEGC=${FNVEGC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
-    FNMSKH=${FNMSKH:-"$FIX_AM/global_slmask.t1534.3072.1536.grb"}
-    FNVMNC=${FNVMNC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
-    FNVMXC=${FNVMXC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
-    FNSLPC=${FNSLPC:-"${FIX_SFC}/${CASE}.slope_type.tileX.nc"}
-    FNALBC=${FNALBC:-"${FIX_SFC}/${CASE}.snowfree_albedo.tileX.nc"}
-    FNVETC=${FNVETC:-"${FIX_SFC}/${CASE}.vegetation_type.tileX.nc"}
-    FNSOTC=${FNSOTC:-"${FIX_SFC}/${CASE}.soil_type.tileX.nc"}
-    FNABSC=${FNABSC:-"${FIX_SFC}/${CASE}.maximum_snow_albedo.tileX.nc"}
-  fi
+  FNALBC2=${FNALBC2:-"${FIX_SFC}/${CASE}.facsf.tileX.nc"}
+  FNTG3C=${FNTG3C:-"${FIX_SFC}/${CASE}.substrate_temperature.tileX.nc"}
+  FNVEGC=${FNVEGC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
+  FNMSKH=${FNMSKH:-"$FIX_AM/global_slmask.t1534.3072.1536.grb"}
+  FNVMNC=${FNVMNC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
+  FNVMXC=${FNVMXC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
+  FNSLPC=${FNSLPC:-"${FIX_SFC}/${CASE}.slope_type.tileX.nc"}
+  FNALBC=${FNALBC:-"${FIX_SFC}/${CASE}.snowfree_albedo.tileX.nc"}
+  FNVETC=${FNVETC:-"${FIX_SFC}/${CASE}.vegetation_type.tileX.nc"}
+  FNSOTC=${FNSOTC:-"${FIX_SFC}/${CASE}.soil_type.tileX.nc"}
+  FNABSC=${FNABSC:-"${FIX_SFC}/${CASE}.maximum_snow_albedo.tileX.nc"}
   FNSMCC=${FNSMCC:-"$FIX_AM/global_soilmgldas.statsgo.t${JCAP}.${LONB}.${LATB}.grb"}
 
   # If the appropriate resolution fix file is not present, use the highest resolution available (T1534)
@@ -543,15 +516,7 @@ EOF
   LONB_STP=${LONB_STP:-$LONB_CASE}
   LATB_STP=${LATB_STP:-$LATB_CASE}
 
-  #------------------------------------------------------------------
-  # make symbolic links to write forecast files directly in memdir
   cd $DATA
-  if [ "$CCPP_SUITE" = "FV3_RAP_cires_ugwp" -o "$CCPP_SUITE" = "FV3_RAP_noah_sfcdiff_unified_ugwp" -o "$CCPP_SUITE" = "FV3_RAP_noah_sfcdiff_ugwpv1" ]; then
-    $NLN $FIX_AM/CCN_ACTIVATE.BIN  CCN_ACTIVATE.BIN
-    $NLN $FIX_AM/freezeH2O.dat  freezeH2O.dat
-    $NLN $FIX_AM/qr_acr_qg.dat  qr_acr_qg.dat
-    $NLN $FIX_AM/qr_acr_qs.dat  qr_acr_qs.dat
-  fi
 
   affix="nc"
   if [ "$OUTPUT_FILE" = "nemsio" ]; then
@@ -788,7 +753,13 @@ MOM6_postdet() {
   $NCP -pf $FIXmom/$OCNRES/* $DATA/INPUT/
 
   # Copy coupled grid_spec
-  $NCP -pf $FIX_DIR/fix_cpl/a${CASE}o${OCNRES}/grid_spec.nc $DATA/INPUT/
+  spec_file="$FIX_DIR/fix_cpl/a${CASE}o${OCNRES}/grid_spec.nc"
+  if [ -s $spec_file ]; then
+    $NCP -pf $spec_file $DATA/INPUT/
+  else
+    echo "FATAL ERROR: grid_spec file '$spec_file' does not exist"
+    exit 3
+  fi
 
   # Copy mediator restart files to RUNDIR
   if [ $warm_start = ".true." -o $RERUN = "YES" ]; then
@@ -810,14 +781,7 @@ MOM6_postdet() {
   export ENSMEM=${ENSMEM:-01}
   export IDATE=$CDATE
 
-  if [ $RUN_ENVIR = "nco" ]; then
-    export COMIN=${COMIN:-$ROTDIR/$RUN.$PDY/$cyc}
-    export COMOUT=${COMOUT:-$ROTDIR/$RUN.$PDY/$cyc}
-  else
-    export COMIN="$ROTDIR/$CDUMP.$PDY/$cyc"
-    export COMOUT="$ROTDIR/$CDUMP.$PDY/$cyc"
-  fi
-  [[ ! -d $COMOUT/ocean ]] && mkdir -p $COMOUT/ocean
+  [[ ! -d $COMOUTocean ]] && mkdir -p $COMOUTocean
 
   fhrlst=$OUTPUT_FH
 
@@ -847,21 +811,21 @@ MOM6_postdet() {
 
     source_file="ocn_${YYYY_MID}_${MM_MID}_${DD_MID}_${HH_MID}.nc"
     dest_file="ocn${VDATE}.${ENSMEM}.${IDATE}.nc"
-    ${NLN} ${COMOUT}/ocean/${dest_file} ${DATA}/${source_file}
+    ${NLN} ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
 
     source_file="wavocn_${YYYY_MID}_${MM_MID}_${DD_MID}_${HH_MID}.nc"
     dest_file=${source_file}
-    ${NLN} ${COMOUT}/ocean/${dest_file} ${DATA}/${source_file}
+    ${NLN} ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
 
     source_file="ocn_daily_${YYYY}_${MM}_${DD}.nc"
     dest_file=${source_file}
     if [ ! -a "${DATA}/${source_file}" ]; then
-      $NLN ${COMOUT}/ocean/${dest_file} ${DATA}/${source_file}
+      $NLN ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
     fi
 
     last_fhr=$fhr
   done
-  $NLN $COMOUT/ocean/MOM_input $DATA/INPUT/MOM_input
+  $NLN ${COMOUTocean}/MOM_input $DATA/INPUT/MOM_input
 
   echo "SUB ${FUNCNAME[0]}: MOM6 input data linked/copied"
 
@@ -896,7 +860,7 @@ CICE_postdet() {
 
   FRAZIL_FWSALT=${FRAZIL_FWSALT:-".true."}
   ktherm=${ktherm:-2}
-  tfrz_option=${tfrz_option:-"mushy"}
+  tfrz_option=${tfrz_option:-"'mushy'"}
   tr_pond_lvl=${tr_pond_lvl:-".true."} # Use level melt ponds tr_pond_lvl=true
 
   # restart_pond_lvl (if tr_pond_lvl=true):
@@ -942,8 +906,8 @@ CICE_postdet() {
   # Link output files
   export ENSMEM=${ENSMEM:-01}
   export IDATE=$CDATE
-  [[ ! -d $COMOUT/ice ]] && mkdir -p $COMOUT/ice
-  $NLN $COMOUT/ice/ice_in $DATA/ice_in
+  [[ ! -d $COMOUTice ]] && mkdir -p $COMOUTice
+  $NLN $COMOUTice/ice_in $DATA/ice_in
   fhrlst=$OUTPUT_FH
 
   for fhr in $fhrlst; do
@@ -958,10 +922,10 @@ CICE_postdet() {
     SS=$((10#$HH*3600))
 
     if [[ 10#$fhr -eq 0 ]]; then
-      $NLN $COMOUT/ice/iceic$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_ic.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
+      $NLN $COMOUTice/iceic$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_ic.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
     else
       (( interval = fhr - last_fhr ))
-      $NLN $COMOUT/ice/ice$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_$(printf "%0.2d" $interval)h.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
+      $NLN $COMOUTice/ice$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_$(printf "%0.2d" $interval)h.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
     fi
     last_fhr=$fhr
   done
@@ -983,17 +947,47 @@ GOCART_rc() {
   # this variable is platform-dependent and should be set via a YAML file
 
   # link directory containing GOCART input dataset, if provided
-  if [ ! -z "${CHM_INPDIR}" ]; then
-    $NLN -sf ${CHM_INPDIR} $DATA
+  if [ ! -z "${AERO_INPUTS_DIR}" ]; then
+    $NLN -sf ${AERO_INPUTS_DIR} $DATA/ExtData
     status=$?
     [[ $status -ne 0 ]] && exit $status
   fi
 
   # copying GOCART configuration files
-  if [ ! -z "${CHM_CFGDIR}" ]; then
-    $NCP     ${CHM_CFGDIR}/*.rc $DATA
+  if [ ! -z "${AERO_CONFIG_DIR}" ]; then
+    $NCP     ${AERO_CONFIG_DIR}/*.rc $DATA
     status=$?
     [[ $status -ne 0 ]] && exit $status
+    # attempt to generate ExtData configuration file if not provided
+    if [ ! -f $DATA/AERO_ExtData.rc ]; then
+      { \
+        echo "PrimaryExports%%" ; \
+        cat ${AERO_CONFIG_DIR}/ExtData.other ; \
+        cat ${AERO_CONFIG_DIR}/ExtData.${AERO_EMIS_FIRE:-none} ; \
+        echo "%%" ; \
+      } > $DATA/AERO_ExtData.rc
+      [[ $status -ne 0 ]] && exit $status
+    fi
   fi
 }
 
+GOCART_postdet() {
+  echo "SUB ${FUNCNAME[0]}: Linking output data for GOCART"
+
+  [[ ! -d $COMOUTaero ]] && mkdir -p $COMOUTaero
+
+  fhrlst=$OUTPUT_FH
+  for fhr in $fhrlst; do
+    if [ $fhr = 'anl' ]; then
+      continue
+    fi
+    VDATE=$($NDATE $fhr $CDATE)
+    YYYY=$(echo $VDATE | cut -c1-4)
+    MM=$(echo $VDATE | cut -c5-6)
+    DD=$(echo $VDATE | cut -c7-8)
+    HH=$(echo $VDATE | cut -c9-10)
+    SS=$((10#$HH*3600))
+
+    $NLN $COMOUTaero/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4 $DATA/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4
+  done
+}

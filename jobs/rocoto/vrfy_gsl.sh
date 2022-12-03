@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/bash -x
 
 ###############################################################
 ## Abstract:
@@ -176,14 +176,15 @@ if [ $VRFYTRAK = "YES" ]; then
     $TRACKERSH  
 fi
 
-# GSL - rename tracker file and change AVNO to GCP1         ## JKH
+# GSL - rename tracker file and change AVNO to $ACTFNAME         ## JKH
 export TRACKDIR="${ROTDIR}/../../tracks"               
+if [ ! -d $TRACKDIR ]; then mkdir $TRACKDIR ; fi
 typeset -u ucatcf=$ATCFNAME
-if [ -f $COMIN/avnop.t00z.cyclone.trackatcfunix ]; then
-  cat $COMIN/avnop.t00z.cyclone.trackatcfunix | sed s:AVNO:${ucatcf}:g > $TRACKDIR/tctrk.atcf.${CDATE}.${ATCFNAME}.txt
+if [ -f $COMIN/avnop.t${cyc}z.cyclone.trackatcfunix ]; then
+  cat $COMIN/avnop.t${cyc}z.cyclone.trackatcfunix | sed s:AVNO:${ucatcf}:g > $TRACKDIR/tctrk.atcf.${CDATE}.${ATCFNAME}.txt
   cp -p $TRACKDIR/tctrk.atcf.${CDATE}.${ATCFNAME}.txt $COMIN/tctrk.atcf.${CDATE}.${ATCFNAME}.txt
-  rm -f $COMIN/avnop.t00z.cyclone.trackatcfunix $COMIN/avno.t00z.cyclone.trackatcfunix
-  echo "$COMIN/avno*.t00z.cyclone.trackatcfunix deleted...."
+  rm -f $COMIN/avnop.t${cyc}z.cyclone.trackatcfunix $COMIN/avno.t${cyc}z.cyclone.trackatcfunix
+  echo "$COMIN/avno*.t${cyc}z.cyclone.trackatcfunix deleted...."
 else
   echo "no track file created...."
 fi

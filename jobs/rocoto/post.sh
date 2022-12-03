@@ -1,4 +1,4 @@
-#!/bin/ksh -x
+#!/bin/bash -x
 
 ###############################################################
 ## NCEP post driver script
@@ -36,12 +36,12 @@ for fhr in $fhrlst; do
 
     #master=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.master.grb2f${fhr}
     pgb0p25=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.pgrb2.0p25.f${fhr}
-    if [ ! -s $pgb0p25 ]; then
+#JKH    if [ ! -s $pgb0p25 ]; then
         export post_times=$fhr
         $HOMEgfs/jobs/JGLOBAL_ATMOS_NCEPPOST
         status=$?
         [[ $status -ne 0 ]] && exit $status
-    fi
+#JKH    fi
 
 done
 

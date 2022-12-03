@@ -151,7 +151,7 @@ class HostInfo:
             'stmp': '$ROTDIR/..',
             'ptmp': '$ROTDIR/..',
             'noscrub': '$HOMEDIR',
-            'account': 'gsd-fv3-dev',
+            'account': 'gsd-fv3',
             'queue': 'batch',
             'queue_service': 'service',
             'partition_batch': 'hera',
@@ -159,7 +159,7 @@ class HostInfo:
             'chgrp_cmd': 'chgrp rstprod',
             'hpssarch': 'YES',
             'localarch': 'NO',
-            'atardir': '/BMC/$HPSS_PROJECT/1year/GSL_phys_tst_2022/$PSLOT',
+            'atardir': '/BMC/$HPSS_PROJECT/2year/$PSLOT',
              }
 
         return info
@@ -185,7 +185,7 @@ class HostInfo:
             'chgrp_cmd': 'chgrp rstprod',
             'hpssarch': 'YES',
             'localarch': 'NO',
-            'atardir': '/BMC/$HPSS_PROJECT/1year/GSL_phys_tst_2022/$PSLOT',
+            'atardir': '/BMC/$HPSS_PROJECT/2year/$PSLOT',
              }
 
         return info

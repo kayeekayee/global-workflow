@@ -9,6 +9,17 @@ IDATE=2022030200
 EDATE=2022030200
 RESDET=768               ## 96 192 384 768
 
+# set machine
+if [[ -d /scratch1 ]] ; then
+  machine=hera
+elif [[ -d /lfs4 ]] ; then
+  machine=jet
+else
+  echo "machine not found!"
+fi
+
+ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_${machine} ${GITDIR}/parm/config/config.base.emc.dyn
+ln -fs ${GITDIR}/parm/config/config.base.emc.dyn_${machine} ${GITDIR}/parm/config/config.base
 
 ### gfs_cyc 1  00Z only;  gfs_cyc 2  00Z and 12Z
 

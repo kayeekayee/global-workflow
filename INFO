@@ -1,24 +1,108 @@
+18 Sep 2022
+    - change settings for suites FV3_GFS_v17_p8_gf_mynn and FV3_GFS_v17_p8_mynn
+        sedi_semi=.false. (dt_inner will then become 75)
+        decfl=8
+      effective 00Z 19 Sep 2022
 26 Aug 2022
-    - update to ufs_utils_1_8_0
-30 Jun 2022
-    - run in realtime on HERA
-23 Mar 2022
-    - update to 01Mar22 global-workflow develop branch, a0e23e2
-         post:       c939eae  (10Nov21)
-         ufs_utils:  26cd024  (31Jan22)
+    - update ufs_utils to ufs_utils_1_8_0
+19 Aug 2022
+    - update UFS to 17Aug22 gsl/develop branch, b42ca73 
+      * add FV3_GFS_v17_p8_gf_mynn suite
+      * updates to GF and sgscloud_radpre for HFIP 2022 
+      * updates for GFS-MYNN configuration for HFIP 2022
+      * regression tests for p8+gf+mynn 
+      effective 00Z 20 Aug 2022
+10 Aug 2022
+    - corrected links for post files
+         nam_micro_lookup.dat -> ../../sorc/upp.fd/parm/nam_micro_lookup.dat
+         optics_luts_DUST.dat -> ../../sorc/upp.fd/parm/optics_luts_DUST.dat
+         AEROSOL_LUTS -> ../../sorc/upp.fd/parm/AEROSOL_LUTS
+21 Jun 2022
+    - update UFS to 14Jun22 gsl/develop branch, 576b58e
+        RAP decomp b4b issues fixed (Grell Freitas)
+        MYNN surface layer bug fix
+17 Jun 2022
+    - update to 30May22 global-workflow develop branch, dbd9fa9 
+      * updated for Prototype p8C
+      * switch to UPP in UFS instead of separate clone
+           FV3/upp  07Apr22, dc8bc68
+      * renamed field_table_gsd to field_table_thompson_aero_tke and updated surface value of 
+        hydrometeor number concentrations and sub-grid TKE to 0
+      * module files converted from tcl to lua
+    - update to 30Mar22 global-workflow develop branch, cabf437
+      * updated for Prototype p8b
+              post:  upp_v10.0.11   (09Dec22 - 0dc3c0c)   
+         ufs_utils:  04ad17e        (13Jan22)
+    - switch to ens_tracker.v1.1.15.4
+    - updates for running on Jet
+    - update UFS to 23May22 gsl/develop branch, 7b0be42 
+      * add FV3_GFS_v17_p8_gf,FV3_GFS_v17_p8_mynn suites
+06 Apr 2022
+    - update UFS to 29Mar22 gsl/develop branch, c31f633, tag global-29Mar2022
+         v5 namelist
+         unified UGWP
+         no GF shallow convection
+03 Mar 2022
     - update UFS to 24Feb22 gsl/develop branch, a2a6a22, tag global-24Feb2022
          v5 namelist
          unified UGWP
          no GF shallow convection
-17 Nov 2021
-    - run in realtime on JET
-    - use NOAA-EMC/UFS_UTILS:ufs_utils_1_4_0 tag
-01 Jun 2021
-    - run in realtime on HERA
-17 Apr 2021
-    - update to 18Mar21 gsl/develop branch, f204bfd, for sorc/fv3gfs_ccpp.fd
-    - switch to using chgres_cube to generate FV3 ICs, including aerosol variables
-       ufs_utils:  GeorgeGayno-NOAA/UFS_UTILS:feature/gdas_init.v16
+    - update to 01Mar22 global-workflow develop branch, a0e23e2
+         post:       c939eae  (10Nov21)
+         ufs_utils:  26cd024  (31Jan22)
+      * sorc/fv3gfs.fd renamed to sorc/ufs_model.fd
+      * scripts/exglobal_forecast.sh broken into modular scripts under ush
+        (forecast_predet.sh, forecast_det.sh, forecast_postdet.sh, parsing_namelists_FV3.sh, 
+         parsing_model_configure_FV3.sh)
+      * adds full coupled model support except aerosols (FV3-WW3-MOM6-CICE)
+      * major pull request #500
+        https://github.com/NOAA-EMC/global-workflow/commit/dd03ed0953bfc65f5a9c85529dd2c95ac0625189  
+    - renaming of files from *gsd* to *gsl*
+        diag_table_da_gsd  =>  diag_table_da_gsl
+        diag_table_gsd     =>  diag_table_gsl
+        diag_table_gsd_ruc =>  diag_table_gsl_ruc
+        field_table_gsd    =>  field_table_thompson_aero_tke
+    - renaming of suite definition files  (SDF)
+        FV3_GSD_v0    =>  FV3_RAP_cires_ugwp
+        FV3_GSD_noah  =>  FV3_RAP_sfcdiff_unified_ugwp
+    - added FV3_RAP_sfcdiff_ugwpv1 SDF
+24 Feb 2022
+    - update UFS to 15dec21 gsl/develop branch, dbdb629
+         v5 namelist
+         unified UGWP
+         no GF shallow convection
+    - update UFS UTILS repository to ufs-community and update branch to 31 Jan 2022 (upgrade to ESMF 8.2.0)
+08 Dec 2021
+    - added diag_table_aod for IAER=1011 option
+03 Dec 2021
+    - added tag gsldev_03dec21_ugwpv1
+      * change FV3_gsd_noah_ugwd to FV3_gsd_noah_ugwpv1 
+02 Dec 2021
+    - added tag gsldev_02dec21_ugwd
+      * added new SDF FV3_gsd_noah_ugwd
+24 Nov 2021
+    - added tag gsldev_18oct21  
+      * update FV3 to 18Oct21 gsl/develop branch
+      * update field_table_gsd with default values of 0.0 for ice_nc, rain_nc, water_nc, sgs_tke variables
+      * set default IAER to 1011
+16 Sep 2021
+    - added tag gsldev_26aug21  
+      * update FV3 to 26Aug21 gsl/develop branch
+      * remove fhdiag, fhmax, fhout, fhmaxhf, fhouthf from atmos_model_nml
+    - added tag gsldev_21jul21  
+      * update FV3 to 21Jul21 gsl/develop branch
+      * updated compilation options
+      * removed ncld from gfs_physics_nml
+      * added "-n n_tasks" after srun command
+   - added tag gsldev_26may21  
+      * update FV3 to 26May21 gsl/develop branch
+      * updated compilation options
+      * copy yaml file to working directory
+15 Sep 2021
+    - added tag gsldev_18mar21
+      * update FV3 to 18mar21 gsl/develop branch
+19 Feb 2021
+    - change HPSS directory to /BMC/fim/1year/GSL_phys_tst_2021
 12 Jan 2021
     - update to 04Jan21 global-workflow develop branch, ef8b641
          post:       upp_gfsv16_release.v1.1.1
