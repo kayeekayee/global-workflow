@@ -1,3 +1,11 @@
+03 Dec 2022
+    - new branch, gsl_ufs_rt, created from gfsv17p8_hfip branch, 17Nov22, f63227f
+      run in realtime:  GFSv17p8+GF+MYNN, 120h
+         Thompson aerosol-aware
+         sedi_semi=.false.
+         decfl=8
+         dt_inner=75
+         WRITE_DOPOST=.false.
 18 Sep 2022
     - change settings for suites FV3_GFS_v17_p8_gf_mynn and FV3_GFS_v17_p8_mynn
         sedi_semi=.false. (dt_inner will then become 75)

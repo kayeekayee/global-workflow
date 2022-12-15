@@ -1,12 +1,12 @@
 USER=Judy.K.Henderson
-GITDIR=/home/rtfim/GFSv17p8_HFIP                                 ## where your git checkout is located
+GITDIR=/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gsl_ufs_rt/  ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
-ICSDIR=/lfs1/BMC/gsd-fv3-test/rtfim/FV3ICS_L127/
+ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127/
 
 PSLOT=v17_p8_gf_mynn
-IDATE=2022082000
-EDATE=2022082000
+IDATE=2022121200
+EDATE=2022121200
 RESDET=768               ## 96 192 384 768
 
 ### gfs_cyc 1  00Z only;  gfs_cyc 2  00Z and 12Z
