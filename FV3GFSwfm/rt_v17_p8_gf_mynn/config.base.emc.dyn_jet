@@ -55,7 +55,7 @@ export DO_BUFRSND="NO"     # BUFR sounding products
 export DO_GEMPAK="NO"      # GEMPAK products
 export DO_AWIPS="NO"       # AWIPS products
 export WAFSF="NO"          # WAFS products
-export DO_VRFY="YES"       # VRFY step       ## JKH
+export DO_VRFY="YES"       # VRFY step
 
 # NO for retrospective parallel; YES for real-time parallel
 #  arch.sh uses REALTIME for MOS.  Need to set REALTIME=YES
@@ -156,9 +156,9 @@ export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO=@DO_AERO@
-export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
-#### export CCPP_SUITE="FV3_GFS_v17_p8_gf"                           # GFS v17 prototype p8 + GF
-#### export CCPP_SUITE="FV3_GFS_v17_p8_mynn"                         # GFS v17 prototype p8 + MYNN
+#### export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
+export CCPP_SUITE="FV3_GFS_v17_p8_gf_mynn"                 # GFS v17 prototype p8 + GF + MYNN
+#### export CCPP_SUITE="FV3_GFS_v17_p8_mynn"                    # GFS v17 prototype p8 + MYNN
 #### export CCPP_SUITE="FV3_GFS_v16"                            # GFS v16
 #### export CCPP_SUITE="FV3_RAP_cires_ugwp"                     # RUC LSM, MYNN, GF, CIRES UGWP
 #### export CCPP_SUITE="FV3_RAP_noah_sfcdiff_unified_ugwp"      # NOAH LSM, MYNN, GF, no GF shallow, Unified UGWP
@@ -254,10 +254,10 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=${FHMAX_GFS_00:-168}      ## JKH
-export FHMAX_GFS_06=${FHMAX_GFS_06:-168}      ## JKH
-export FHMAX_GFS_12=${FHMAX_GFS_12:-168}      ## JKH
-export FHMAX_GFS_18=${FHMAX_GFS_18:-168}      ## JKH
+export FHMAX_GFS_00=${FHMAX_GFS_00:-120}      ## JKH
+export FHMAX_GFS_06=${FHMAX_GFS_06:-120}      ## JKH
+export FHMAX_GFS_12=${FHMAX_GFS_12:-120}      ## JKH
+export FHMAX_GFS_18=${FHMAX_GFS_18:-120}      ## JKH
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=${FHOUT_GFS:-6}              ## JKH
@@ -280,7 +280,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".true."
+export WRITE_DOPOST=".false."           ## JKH
 export WRITE_NSFLIP=".true."
 
 # suffix options depending on file format

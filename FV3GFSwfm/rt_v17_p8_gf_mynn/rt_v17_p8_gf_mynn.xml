@@ -10,7 +10,7 @@
 		rahul.mahajan@noaa.gov
 
 	NOTES:
-		This workflow was automatically generated at 2022-08-20 03:09:12.193341
+		This workflow was automatically generated at 2022-12-16 00:42:36.255203
 	-->
 
 	<!-- Experiment parameters such as name, cycle, resolution -->
@@ -21,87 +21,64 @@
 	<!ENTITY ATCFNAME   "gfp8">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202208200000">
-	<!ENTITY EDATE    "202211010000">
+	<!ENTITY SDATE    "202212160000">
+	<!ENTITY EDATE    "203212160000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
 
 	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "/home/rtfim/GFSv17p8_HFIP/FV3GFSwfm/rt_v17_p8_gf_mynn">
-	<!ENTITY ROTDIR "/home/rtfim/GFSv17p8_HFIP/FV3GFSrun/rt_v17_p8_gf_mynn">
-	<!ENTITY ICSDIR "/lfs1/BMC/gsd-fv3-test/rtfim/FV3ICS_L127/">
-	<!ENTITY PUBDIR "/public/data/grids/gfs/anl/netcdf">
-	<!ENTITY RETRODIR "/lfs4/BMC/gsd-fv3-dev/GFS_RETRO_ANL">
+	<!ENTITY EXPDIR "/home/rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17_p8_gf_mynn">
+	<!ENTITY ROTDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17_p8_gf_mynn">
+	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127/">
+	<!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
+	<!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
+	<!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">
 
 	<!-- Directories for driving the workflow -->
-	<!ENTITY HOMEgfs  "/home/rtfim/GFSv17p8_HFIP">
-	<!ENTITY JOBS_DIR "/home/rtfim/GFSv17p8_HFIP/jobs/rocoto">
+	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
+	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/jobs/rocoto">
 
 	<!-- Machine related entities -->
-	<!ENTITY ACCOUNT    "rtgsd-fv3-hfip">
+	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_SERVICE "service">
-	<!ENTITY PARTITION_BATCH "vjet">
+	<!ENTITY PARTITION_BATCH "hera">
 	<!ENTITY PARTITION_SERVICE "service">
 	<!ENTITY SCHEDULER  "slurm">
-        <!ENTITY RESERVATION_FCST "judy_fcst_00">
-        <!ENTITY RESERVATION_POST1 "judy_post1_00">
-        <!ENTITY RESERVATION_POST2 "judy_post2_00">
 
 	<!-- Toggle HPSS archiving -->
 	<!ENTITY ARCHIVE_TO_HPSS "YES">
 
 	<!-- ROCOTO parameters that control workflow -->
 	<!ENTITY CYCLETHROTTLE "4">
-	<!ENTITY TASKTHROTTLE  "29">
+	<!ENTITY TASKTHROTTLE  "25">
 	<!ENTITY MAXTRIES      "2">
 
 	<!-- BEGIN: Resource requirements for the workflow -->
 
-	<!ENTITY QUEUE_WAIT_GFS     "&QUEUE;">
-	<!ENTITY PARTITION_WAIT_GFS "&PARTITION_BATCH;">
-	<!ENTITY WALLTIME_WAIT_GFS  "08:00:00">
-	<!ENTITY RESOURCES_WAIT_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
-	<!ENTITY NATIVE_WAIT_GFS    "--reservation=&RESERVATION_POST1; --export=NONE">
-
-	<!ENTITY QUEUE_WAIT2_GFS     "&QUEUE;">
-	<!ENTITY PARTITION_WAIT2_GFS "&PARTITION_BATCH;">
-	<!ENTITY WALLTIME_WAIT2_GFS  "05:10:00">
-	<!ENTITY RESOURCES_WAIT2_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
-	<!ENTITY NATIVE_WAIT2_GFS    "--reservation=&RESERVATION_POST2; --export=NONE">
-
 	<!ENTITY QUEUE_INIT_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_INIT_GFS "&PARTITION_BATCH;">
 	<!ENTITY WALLTIME_INIT_GFS  "00:30:00">
-	<!ENTITY RESOURCES_INIT_GFS "<nodes>4:ppn=6:tpp=1</nodes>">
-	<!ENTITY MEMORY_INIT_GFS    "50G">
+	<!ENTITY RESOURCES_INIT_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
+<!--	<!ENTITY RESOURCES_INIT_GFS "<nodes>4:ppn=6:tpp=1</nodes>">
+	<!ENTITY MEMORY_INIT_GFS    "70G"> -->
 	<!ENTITY NATIVE_INIT_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_FCST_GFS "&PARTITION_BATCH;">
-	<!ENTITY WALLTIME_FCST_GFS  "05:45:00">
-	<!ENTITY RESOURCES_FCST_GFS "<nodes>232:ppn=4:tpp=4</nodes>">
-        <!ENTITY NATIVE_FCST_GFS    "--reservation=&RESERVATION_FCST; --export=NONE">
+	<!ENTITY WALLTIME_FCST_GFS  "06:00:00">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>103:ppn=10:tpp=4</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_POST_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_POST_GFS "&PARTITION_BATCH;">
-	<!ENTITY WALLTIME_POST_GFS  "00:40:00">
-	<!ENTITY WALLTIME_POST_GFS  "00:10:00">                            <!-- inline post -->
+	<!ENTITY WALLTIME_POST_GFS  "00:20:00">
+	<!ENTITY RESOURCES_POST_GFS "<nodes>6:ppn=8:tpp=1</nodes>">
 	<!ENTITY RESOURCES_POST_GFS "<nodes>10:ppn=12:tpp=1</nodes>">
-	<!ENTITY RESOURCES_POST_GFS "<nodes>3:ppn=12:tpp=1</nodes>">       <!-- inline post -->
-	<!ENTITY MEMORY_POST_GFS    "50G">
-	<!ENTITY NATIVE_POST_GFS    "--reservation=&RESERVATION_POST1; --export=NONE">
+	<!ENTITY MEMORY_POST_GFS    "60G">
 	<!ENTITY NATIVE_POST_GFS    "--export=NONE">
-
-        <!ENTITY QUEUE_VRFY_GFS     "&QUEUE;">
-        <!ENTITY PARTITION_VRFY_GFS "&PARTITION_BATCH;">
-        <!ENTITY WALLTIME_VRFY_GFS  "00:30:00">
-        <!ENTITY RESOURCES_VRFY_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
-        <!ENTITY NATIVE_VRFY_GFS    "--export=NONE">
-        <!ENTITY NATIVE_VRFY_GFS    "--reservation=&RESERVATION_POST2;00 --export=NONE">
 
 	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_ARCH_GFS "&PARTITION_SERVICE;">
@@ -121,39 +98,6 @@
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
-<!--
--->
-<task name="post1wait" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-        <command>/home/Judy.K.Henderson/tmp/datawait.sh</command>
-
-        <jobname><cyclestr>&PSLOT;_wait1</cyclestr></jobname>
-        <account>&ACCOUNT;</account>
-        <queue>&QUEUE_WAIT_GFS;</queue>
-	<partition>&PARTITION_WAIT_GFS;</partition>
-        &RESOURCES_WAIT_GFS;
-        <walltime>&WALLTIME_WAIT_GFS;</walltime>
-        <native>&NATIVE_WAIT_GFS;</native>
-
-        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfswait.log</cyclestr></join>
-</task>
-
-<task name="post2wait" cycledefs="gfs" maxtries="1">
-
-        <command>/home/Judy.K.Henderson/tmp/datawait.sh</command>
-
-        <jobname><cyclestr>&PSLOT;_wait2</cyclestr></jobname>
-        <account>&ACCOUNT;</account>
-        <queue>&QUEUE_WAIT2_GFS;</queue>
-	<partition>&PARTITION_WAIT2_GFS;</partition>
-        &RESOURCES_WAIT2_GFS;
-        <walltime>&WALLTIME_WAIT2_GFS;</walltime>
-        <native>&NATIVE_WAIT2_GFS;</native>
-
-        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfswait2.log</cyclestr></join>
-</task>
-<!--
-
 <task name="gfsinit" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/makeinit_link.sh</command>
@@ -164,7 +108,7 @@
 	<partition>&PARTITION_INIT_GFS;</partition>
 	&RESOURCES_INIT_GFS;
 	<walltime>&WALLTIME_INIT_GFS;</walltime>
-	<memory>&MEMORY_INIT_GFS;</memory>
+<!--	<memory>&MEMORY_INIT_GFS;</memory> -->
 	<native>&NATIVE_INIT_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsinit.log</cyclestr></join>
@@ -194,7 +138,6 @@
 	</dependency>
 
 </task>
--->
 
 <task name="gfsfcst" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -243,14 +186,9 @@
 
 <metatask name="gfspost">
 
-<!--
-        <var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120 _f126-f126 _f132-f132 _f138-f138 _f144-f144 _f150-f150 _f156-f156 _f162-f162 _f168-f168</var>
-        <var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 f150 f156 f162 f168</var>
-        <var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 f150 f156 f162 f168</var>
--->
-        <var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120 _f126-f126 _f132-f132 _f138-f138 _f144-f144 </var>
-        <var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 </var>
-        <var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 </var>
+	<var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120</var>
+	<var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120</var>
+	<var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120</var>
 
 	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -286,109 +224,6 @@
 
 </metatask>
 
-<metatask name="chkpost">
-
-  <!--  this task will resubmit any post job that created a zero-length grib2 file due to some error but post reported SUCCEEDED anyway -->
-
-        <var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120 _f126-f126 _f132-f132 _f138-f138 _f144-f144 </var>
-        <var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 </var>
-        <var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 </var>
-
-	<task name="chkpost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-		<command>&JOBS_DIR;/post.sh</command>
-
-		<jobname><cyclestr>&PSLOT;_chkpost#grp#_@H</cyclestr></jobname>
-		<account>&ACCOUNT;</account>
-		<queue>&QUEUE_POST_GFS;</queue>
-		<partition>&PARTITION_POST_GFS;</partition>
-		&RESOURCES_POST_GFS;
-		<walltime>&WALLTIME_POST_GFS;</walltime>
-		<memory>&MEMORY_POST_GFS;</memory>
-		<native>&NATIVE_POST_GFS;</native>
-
-		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfspost#grp#.log</cyclestr></join>
-
-		<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-		<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-		<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-		<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-		<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-		<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-		<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-		<envar><name>FHRGRP</name><value>#grp#</value></envar>
-		<envar><name>FHRLST</name><value>#lst#</value></envar>
-		<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
-
-		<dependency>
-			<and>
-				<metataskdep metatask="gfspost"/>
-				<nand>
-					<datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/atmos/gfs.t@Hz.log#dep#.txt</cyclestr></datadep>
-					<datadep minsize="1b"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.#dep#</cyclestr></datadep>
-				</nand>
-			</and>
-		</dependency>
-
-	</task>
-
-</metatask>
-
-<task name="gfsvrfy" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-	<command>&JOBS_DIR;/vrfy.sh</command>
-
-	<jobname><cyclestr>&PSLOT;_gfsvrfy_@H</cyclestr></jobname>
-	<account>&ACCOUNT;</account>
-	<queue>&QUEUE_VRFY_GFS;</queue>
-	<partition>&PARTITION_VRFY_GFS;</partition>
-	&RESOURCES_VRFY_GFS;
-	<walltime>&WALLTIME_VRFY_GFS;</walltime>
-	
-	<native>&NATIVE_VRFY_GFS;</native>
-
-	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsvrfy.log</cyclestr></join>
-
-	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
-	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-
-	<dependency>
-		<and>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f000</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f006</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f012</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f018</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f024</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f030</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f036</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f042</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f048</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f054</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f060</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f066</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f072</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f078</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f084</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f090</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f096</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f102</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f108</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f114</cyclestr></datadep>
-            		<datadep minsize="1b" age="120"><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/&CDUMP;.t@Hz.pgrb2.0p25.f120</cyclestr></datadep>
-            		<datadep minsize="1b">/lfs4/HFIP/hwrf-data/hwrf-input/SYNDAT-PLUS/syndat_tcvitals.2022</datadep>
-		</and>
-	</dependency>
-
-</task>
-
-<!--
--->
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
 
 	<command>&JOBS_DIR;/arch_gsl.sh</command>
@@ -417,7 +252,6 @@
 	<dependency>
 		<and>
 			<metataskdep metatask="gfspost"/>
-			<taskdep task="gfsvrfy"/>
 			<streq><left>&ARCHIVE_TO_HPSS;</left><right>YES</right></streq>
 		</and>
 	</dependency>

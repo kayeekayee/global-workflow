@@ -156,8 +156,8 @@ export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO=@DO_AERO@
-export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
-#### export CCPP_SUITE="FV3_GFS_v17_p8_gf"                           # GFS v17 prototype p8 + GF
+#### export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
+export CCPP_SUITE="FV3_GFS_v17_p8_gf_mynn"                 # GFS v17 prototype p8 + GF + MYNN
 #### export CCPP_SUITE="FV3_GFS_v17_p8_mynn"                         # GFS v17 prototype p8 + MYNN
 #### export CCPP_SUITE="FV3_GFS_v16"                            # GFS v16
 #### export CCPP_SUITE="FV3_RAP_cires_ugwp"                     # RUC LSM, MYNN, GF, CIRES UGWP
@@ -280,7 +280,7 @@ export restart_interval_gfs=0
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
 export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".true."
+export WRITE_DOPOST=".false."           ## JKH
 export WRITE_NSFLIP=".true."
 
 # suffix options depending on file format
