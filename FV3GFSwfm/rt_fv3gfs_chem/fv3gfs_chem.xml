@@ -33,7 +33,7 @@
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
         <!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
         <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
-        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/sdsu/emissions">
+        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/nesdis/GBBEPx/C384">
 	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
         <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
         <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
@@ -49,7 +49,6 @@
 	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
 	<!ENTITY QUEUE      "batch">
-	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY PARTITION_ARCH "service">
@@ -169,21 +168,21 @@
 	<dependency>
 	  <or>
 	     <and>
-		<datadep><cyclestr>&ARCEMI;/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&ARCEMI;/GBBEPx.oc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&ARCEMI;/GBBEPx.bc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&ARCEMI;/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&ARCEMI;/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&ARCEMI;/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 	     </and>
 	     <and>
-		<datadep><cyclestr>&PUBEMI;/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&PUBEMI;/GBBEPx.oc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&PUBEMI;/GBBEPx.bc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&PUBEMI;/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&PUBEMI;/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&PUBEMI;/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 	     </and>
 <!--
 -->
 	     <and>
-		<datadep><cyclestr>&DIRGB;/@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.oc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.bc.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+		<datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
 	     </and>
 	  </or>
 	</dependency>

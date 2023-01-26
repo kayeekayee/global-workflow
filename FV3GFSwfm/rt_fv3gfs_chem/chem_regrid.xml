@@ -49,7 +49,6 @@
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
 	<!ENTITY ACCOUNT    "gsd-fv3">
 	<!ENTITY QUEUE      "batch">
-	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY SCHEDULER  "slurm">

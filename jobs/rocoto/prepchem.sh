@@ -82,16 +82,16 @@ cd $tiledir
         emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
         print "emiss_date: $emiss_date1"
         mkdir -p $DIRGB/$emiss_date1
-        if [[ -f $PUBEMI/GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
+        if [[ -f $PUBEMI/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
           $NCP $PUBEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
         else
           $NCP $ARCEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
         fi
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.oc.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.so2.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.pm25.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
-        eval $NLN $DIRGB/${emiss_date1}/meanFRP.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_PM2.5.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
+        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.FRP.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
         cd ..
     fi
     #eval $NLN ${CASE}-T-${emiss_date}0000-ALD-bb.bin ebu_ald.dat

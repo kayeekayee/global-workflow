@@ -51,7 +51,6 @@
 	<!ENTITY ACCOUNT    "gsd-fv3-dev">
 	<!ENTITY ACCOUNT_TEST "gsd-fv3-test">
 	<!ENTITY QUEUE      "batch">
-	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE_DEBUG "debug">
 	<!ENTITY PARTITION_SERVICE "service">
 	<!ENTITY SCHEDULER  "slurm">
@@ -73,14 +72,12 @@
 	<!ENTITY NATIVE_GETIC_GFS    "--export=NONE">
 
 	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE;">
-	<!ENTITY QUEUE_FV3IC_GFS     "&QUEUE_URG;">
 	<!ENTITY WALLTIME_FV3IC_GFS  "00:30:00">
 	<!ENTITY RESOURCES_FV3IC_GFS "<nodes>4:ppn=6:tpp=1</nodes>">
         <!ENTITY MEMORY_FV3IC_GFS     "100G">
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
         <!ENTITY QUEUE_REGRID     "&QUEUE;">
-        <!ENTITY QUEUE_REGRID     "&QUEUE_URG;">
         <!ENTITY WALLTIME_REGRID  "00:30:00">
         <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
         <!ENTITY NATIVE_REGRID    "--export=NONE">
