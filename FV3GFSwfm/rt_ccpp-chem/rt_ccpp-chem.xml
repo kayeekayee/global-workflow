@@ -112,7 +112,7 @@
 
 	<command>&JOBS_DIR;/calcinc.sh</command>
 
-	<jobname><cyclestr>&PSLOT;_clacinc_@H</cyclestr></jobname>
+	<jobname><cyclestr>&PSLOT;_calcinc_@H</cyclestr></jobname>
 	<account>&ACCOUNT;</account>
 	<queue>&QUEUE_CALCINC;</queue>
 	&RESOURCES_CALCINC;
