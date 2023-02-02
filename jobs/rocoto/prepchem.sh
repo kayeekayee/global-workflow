@@ -99,7 +99,7 @@ for n in $(seq 1 6); do
         echo "NetCDF GBBEPx File ${BINGB}/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc  exists, just link."
       else
     
-        if [ ${SYEAR} -eq 2016 -o ${emiss_date1} -ge 20230115 ];  then           ## JKH - change date
+        if [ ${SYEAR} -eq 2016 -o ${emiss_date1} -ge 20230201 ];  then           
           BC=GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           OC=GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           SO2=GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
