@@ -1,4 +1,12 @@
 ============
+Feb 01, 2023
+============
+** effective 00Z 02/01/23 **
+switch source of GBBEPx files to /public/data/grids/nesdis/GBBEPx/C384 from
+  /public/data/grids/sdsu/emissions
+ - update naming convention of GBBEPx files
+
+============
 Feb 07, 2022
 ============
 added memory parameter to post tasks
