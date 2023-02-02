@@ -1,3 +1,9 @@
+01/23/23  
+  ** effective 00Z 02/01/23 **
+  switch source of GBBEPx files to /public/data/grids/nesdis/GBBEPx/C384 from
+    /public/data/grids/sdsu/emissions
+    -- update naming convention of GBBEPx files
+
 03/15/22
   ** effective 00Z 03/15/22 **
   update to v91 tag for EMC_FV3GFS_GSDCHEM  
