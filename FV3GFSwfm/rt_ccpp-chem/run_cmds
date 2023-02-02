@@ -26,3 +26,9 @@ rocotostat  -w arch_regrid.xml -d arch_regrid.db
 
 rocotorun  -w arch_nclgrb2.xml -d arch_nclgrb2.db
 rocotostat  -w arch_nclgrb2.xml -d arch_nclgrb2.db
+
+rocotorun -w rt_ccpp-chem.xml_gsd-fv3-test -d rt_ccpp-chem_gsd-fv3-test.db
+rocotostat -w rt_ccpp-chem.xml_gsd-fv3-test -d rt_ccpp-chem_gsd-fv3-test.db
+
+rocotorun -w rt_ccpp-chem.xml_gsd-fv3-dev -d rt_ccpp-chem_gsd-fv3-dev.db
+rocotostat -w rt_ccpp-chem.xml_gsd-fv3-dev -d rt_ccpp-chem_gsd-fv3-dev.db

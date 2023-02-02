@@ -30,24 +30,19 @@
 	<!ENTITY EXPDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSwfm/rt_ccpp_c384">
 	<!ENTITY ROTDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3GFSrun/rt_ccpp_c384">
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS">
-        <!-- use RUNDIR1 as long as FV3-CHEM is still running in realtime   -->
-        <!ENTITY RUNDIR1 "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
-        <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/nemsio">
-        <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
-        <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
-        <!-- use lzhang GBBEPx directory as long as FV3-CHEM is still running in realtime  -->
-        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_ccpp_c384">
-         
+
+	<!-- use RUNDIR1 as long as FV3-CHEM is still running in realtime   -->
+	<!ENTITY RUNDIR1 "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+	<!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_ccpp_c384">
+
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/jobs/rocoto">
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
-	<!ENTITY QUEUE_URG  "urgent">
 	<!ENTITY QUEUE      "batch">
 	<!ENTITY QUEUE_DEBUG  "debug">
-	<!ENTITY QUEUE_ARCH "service">
 	<!ENTITY PARTITION_ARCH "service">
 	<!ENTITY SCHEDULER  "slurm">
 

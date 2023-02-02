@@ -32,14 +32,9 @@
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/FV3ICS">
 
         <!-- use RUNDIR1 as long as FV3-CHEM is still running in realtime   -->
-        <!ENTITY RUNDIR1 "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_c384">
-        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_ccpp_c384">
+	<!ENTITY RUNDIR1 "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+	<!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_ccpp_c384">
 
-        <!-- use lzhang GBBEPx directory as long as FV3-CHEM is still running in realtime -->
-        <!ENTITY EMIDIR "/scratch2/BMC/public/data/grids/sdsu/emissions"> 
-        <!ENTITY EMIDIR "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
-        <!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
-         
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/jobs/rocoto">
