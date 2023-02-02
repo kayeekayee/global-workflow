@@ -73,9 +73,6 @@ fi
  
 for n in $(seq 1 6); do
     tiledir=tile${n}
-    #mkdir -p $tiledir
-    #cd $tiledir
-    EMIINPUT=/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_${CASE}
     eval $NLN $EMIINPUT/EMI/$SMONTH/emi_data.tile${n}.nc .
     eval $NLN $EMIINPUT/EMI2/$SMONTH/emi2_data.tile${n}.nc .
     eval $NLN $EMIINPUT/fengsha/$SMONTH/dust_data.tile${n}.nc .
@@ -92,30 +89,26 @@ for n in $(seq 1 6); do
       eval $NLN ${CASE}-T-${emiss_date}0000-SO2-bb.bin ebu_so2.dat
     fi
     if [ $EMITYPE -eq 2 ]; then
-      if [ ${res} -eq 384 ];  then
-         DIRGB=/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx
-      else
-         DIRGB=/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx/${CASE}
-      fi
-      NCGB=/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_${CASE}/GBBEPx
-      PUBEMI=/scratch2/BMC/public/data/grids/sdsu/emissions
-      #PUBEMI=/scratch2/NCEPDEV/stmp1/Li.Pan/tmp
-    
       emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
       print "emiss_date: $emiss_date1"
-      #mkdir -p $DIRGB/$emiss_date1
-      #$NCP $PUBEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
+      ## JKH  -  uncomment next 2 lines if not running FV3-CHEM prepchem task
+      # mkdir -p $BINGB/$emiss_date1
+      # $NCP ${PUBEMI}/*${emiss_date1}.*.bin ${BINGB}/$emiss_date1/
     
-      if [[ -f $NCGB/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc ]]; then
-        echo "NetCDF GBBEPx File $DIRGB/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc  exists, just link."
+      if [[ -f ${NCGB}/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc ]]; then
+        echo "NetCDF GBBEPx File ${BINGB}/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc  exists, just link."
       else
     
-        if [ ${SYEAR} -eq 2016 ];  then
+        if [ ${SYEAR} -eq 2016 -o ${emiss_date1} -ge 20230201 ];  then           
           BC=GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           OC=GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
-          PM25=GBBEPx.emis_PM25.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           SO2=GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           FRP=GBBEPx.FRP.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
+          if [ ${SYEAR} -eq 2016 ];  then          
+            PM25=GBBEPx.emis_PM25.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
+          else
+            PM25=GBBEPx.emis_PM2.5.003.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
+          fi
         else
           BC=GBBEPx.bc.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
           OC=GBBEPx.oc.${emiss_date1}.FV3.${CASE}Grid.tile${n}.bin
@@ -125,9 +118,6 @@ for n in $(seq 1 6); do
         fi
       
         mkdir -p $NCGB/${emiss_date1}
-        set -ue
-        module load intel netcdf szip hdf5
-        set -x
         $NLN $EXECgfs/mkncgbbepx .
  ./mkncgbbepx <<EOF
 &mkncgbbepx
@@ -137,12 +127,12 @@ for n in $(seq 1 6); do
        nlon = ${res}
        nlat = ${res}
        outfile     = "$NCGB/${emiss_date1}/FIRE_GBBEPx_data.tile${n}.nc"
-       pathoro     = "$FIXgfs/fix_fv3/${CASE}/${CASE}_oro_data.tile${n}.nc"
-       pathebc     = "$DIRGB/${emiss_date1}/$BC"
-       patheoc     = "$DIRGB/${emiss_date1}/$OC"
-       pathepm25   = "$DIRGB/${emiss_date1}/$PM25"
-       patheso2    = "$DIRGB/${emiss_date1}/$SO2"
-       patheplume  = "$DIRGB/${emiss_date1}/$FRP"
+       pathoro     = "$FIXgfs/fix_orog/${CASE}/${CASE}_oro_data.tile${n}.nc"
+       pathebc     = "$BINGB/${emiss_date1}/$BC"
+       patheoc     = "$BINGB/${emiss_date1}/$OC"
+       pathepm25   = "$BINGB/${emiss_date1}/$PM25"
+       patheso2    = "$BINGB/${emiss_date1}/$SO2"
+       patheplume  = "$BINGB/${emiss_date1}/$FRP"
 /
 EOF
         status=$?
