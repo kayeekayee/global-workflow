@@ -39,10 +39,10 @@
 	<!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
 	<!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/nesdis/GBBEPx/&CASE;"> 
 	<!ENTITY BINGB "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
-	<!ENTITY NCGB "/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_&CASE;/GBBEPx">
-	<!ENTITY EMIINPUT "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/scratch/tmp/emi_&CASE;">
-	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
-         
+	<!ENTITY EMIINPUT "/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_&CASE;">
+	<!ENTITY NCGB "&EMIINPUT;/GBBEPx">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/GBBEPx">
+
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
 	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem/jobs/rocoto">
@@ -194,7 +194,7 @@
 	<queue>&QUEUE_FCST_GFS;</queue>
 	&RESOURCES_FCST_GFS;
 	<walltime>&WALLTIME_FCST_GFS;</walltime>
-	
+
 	<native>&NATIVE_FCST_GFS;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfcst.log</cyclestr></join>
@@ -250,11 +250,11 @@
 		<envar><name>FHRGRP</name><value>#grp#</value></envar>
 		<envar><name>FHRLST</name><value>#lst#</value></envar>
 		<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
-	
+
 		<dependency>
 			<datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/gfs.t@Hz.log#dep#.txt</cyclestr></datadep>
 		</dependency>
-	
+
 	</task>
 
 </metatask>
