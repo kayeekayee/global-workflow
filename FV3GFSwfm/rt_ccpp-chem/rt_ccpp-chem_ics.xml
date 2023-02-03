@@ -40,9 +40,9 @@
 
 	<!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/nesdis/GBBEPx/&CASE;"> 
 	<!ENTITY BINGB "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
-	<!ENTITY NCGB "/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_&CASE;/GBBEPx">
-	<!ENTITY EMIINPUT "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/scratch/tmp/emi_&CASE;">
-	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
+	<!ENTITY EMIINPUT "/scratch1/BMC/gsd-fv3-dev/Haiqin.Li/Develop/emi_&CASE;">
+	<!ENTITY NCGB "&EMIINPUT;/GBBEPx">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/GBBEPx">
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/CCPP-Chem">
