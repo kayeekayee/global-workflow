@@ -13,7 +13,7 @@
   <!ENTITY FV3GFS_WFM "&FV3GFS_HOME;/FV3GFSwfm">
   <!ENTITY FV3GFS_POST_DIR "post/fim">
   <!ENTITY SCRIPTS "&FV3GFS_HOME;/FV3GFSwfm/scripts">
-  <!ENTITY RTFIM_HOME "/home/rtfim">
+  <!ENTITY RTFIM_HOME "$HOME">
   <!ENTITY SCRATCH_ROOT "/scratch1/BMC/gsd-fv3-dev">
   <!ENTITY RTRUN_ROOT "/scratch1/BMC/gsd-fv3/rtruns">
 
@@ -22,8 +22,9 @@
   <!ENTITY CLIMATE_DIR "&SCRATCH1_ROOT;/cmean/">
 
   <!ENTITY NCL_ROOT "&RTRUN_ROOT;/nclvx/FV3GFSwfm/ncl/fimall">                  <!-- new NCL routines -->
+  <!ENTITY NCL_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimall">                  <!-- old NCL routines -->
   <!ENTITY NCL_DIFF_HOME "&FV3GFS_HOME;/FV3GFSwfm/ncl/fimalldiff">
-  <!ENTITY COPYGB "/home/rtfim/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
+  <!ENTITY COPYGB "${HOME}/WPPV3.2_intel-12.0.4_opt_mpt-2.05/exec/copygb.exe">  <!-- CHECK THIS  !!! -->
   <!ENTITY CNVGRIB "/apps/cnvgrib/1.4.0/bin/cnvgrib">
   <!ENTITY WGRIB "wgrib">
   <!ENTITY WGRIB2 "wgrib2">

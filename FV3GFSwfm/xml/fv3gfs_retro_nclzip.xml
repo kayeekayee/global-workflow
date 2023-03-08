@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "/home/rtfim/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "${HOME}/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
   <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
   <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->

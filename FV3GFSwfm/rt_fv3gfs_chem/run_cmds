@@ -1,34 +1,30 @@
 REALTIME
 ========
-rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem_pre.db
-rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem_pre.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
-rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem_pre.db
-rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem_pre.db
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
+rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
 
-rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
-rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
-rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
-rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d /home/rtfim/rt_dbfiles/rt_fv3gfs_chem.db
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db
+rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db
 
-rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d /home/rtfim/retro_dbfiles/chem_regrid.db
-rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d /home/rtfim/retro_dbfiles/chem_regrid.db
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d $HOME/retro_dbfiles/chem_regrid.db
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/chem_regrid.xml -d $HOME/retro_dbfiles/chem_regrid.db
 
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/arch_ics384.xml  -d $HOME/retro_dbfiles/arch_ics384.db
+rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/arch_ics384.xml  -d $HOME/retro_dbfiles/arch_ics384.db
+
+rocotorun -w arch_ics384.xml -d $HOME/retro_dbfiles/arch_ics384.db
+rocotostat -w arch_ics384.xml -d $HOME/retro_dbfiles/arch_ics384.db
 
 rocotorun -w fv3gfs_chem.xml -d fv3gfs_chem.db
 rocotostat -w fv3gfs_chem.xml -d fv3gfs_chem.db
 
+rocotorun -w rt_fv3gfs_chem.xml_gsd-fv3-dev -d rt_fv3gfs_chem.xml_gsd-fv3-dev.db
+rocotostat -w rt_fv3gfs_chem.xml_gsd-fv3-dev -d rt_fv3gfs_chem.xml_gsd-fv3-dev.db
 
-URGENT queue
+rocotorun -w rt_fv3gfs_chem.xml_gsd-fv3-test -d rt_fv3gfs_chem_gsd-fv3-test.db
+rocotostat -w rt_fv3gfs_chem.xml_gsd-fv3-test -d rt_fv3gfs_chem_gsd-fv3-test.db
 
-#rocotorun -w urgent_pre.xml -d urgent_pre.db
-#rocotostat -w urgent_pre.xml -d urgent_pre.db
-
-### 08/05-08/09
-#rocotorun -w urgent_chem.xml -d urgent_chem.db 
-#rocotostat -w urgent_chem.xml -d urgent_chem.db
-
-#rocotorun -w urgent_calc.xml -d urgent_calc.db
-#rocotostat  -w urgent_calc.xml -d urgent_calc.db
-
-rocotorun -w urgent_post.xml -d urgent_post.db 
-rocotostat -w urgent_post.xml -d urgent_post.db 

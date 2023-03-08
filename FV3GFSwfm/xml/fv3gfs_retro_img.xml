@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "/home/rtfim/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "${HOME}/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
   <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
   <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->
@@ -21,6 +21,7 @@
 
   %hera;
   <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
+  <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
   <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
@@ -31,14 +32,12 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_nclretro.log</cyclestr>
   </log>
 
-  <cycledef>202202180000 202202180000 24:00:00</cycledef>
+  <cycledef>202210110000 202210110000 24:00:00</cycledef>
 
   <metatask name="remap_ncl" throttle="100">
 <!--
 <var name="fcst"> 0 6 12 18 24 30 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 </var>
 <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 </var>
-<var name="fcst"> 48 </var>
-<var name="T"> 048 </var>
     &fcst_120hr_metatask;
     &t120hr_metatask;
     <var name="fcst"> 42 </var>
@@ -49,9 +48,9 @@
     &remapgrib_task; 
     &ncl_task;
   </metatask>
+  &chemplot_task;              
   &nclzip_task;  
 <!--    
-  &chemplot_task;              uncomment after 03/31/21
   &nclzipretro_task;  
 -->
 </workflow>
