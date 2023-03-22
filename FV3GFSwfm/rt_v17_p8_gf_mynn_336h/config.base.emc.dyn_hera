@@ -6,22 +6,22 @@
 echo "BEGIN: config.base"
 
 # Machine environment
-export machine="HERA"
+export machine="@MACHINE@"
 
 # EMC parallel or NCO production
 export RUN_ENVIR="emc"
 
 # Account, queue, etc.
-export ACCOUNT="gsd-fv3"
-export QUEUE="batch"
-export QUEUE_SERVICE="service"
-export PARTITION_BATCH="hera"
+export ACCOUNT="@ACCOUNT@"
+export QUEUE="@QUEUE@"
+export QUEUE_SERVICE="@QUEUE_SERVICE@"
+export PARTITION_BATCH="@PARTITION_BATCH@"
 
 # Project to use in mass store:
 HPSS_PROJECT=fim                                  ## JKH
 
 # Directories relative to installation areas:
-export HOMEgfs=/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite
+export HOMEgfs=@HOMEgfs@
 export PARMgfs=$HOMEgfs/parm
 export FIXgfs=$HOMEgfs/fix
 export USHgfs=$HOMEgfs/ush
@@ -36,19 +36,19 @@ export FIXreg2grb2=$HOMEgfs/fix/fix_reg2grb2
 ########################################################################
 
 # GLOBAL static environment parameters
-export NWPROD="/scratch1/NCEPDEV/global/glopara/nwpara"
-export COMROOT="/scratch1/NCEPDEV/global/glopara/com"
-export DMPDIR="/scratch1/NCEPDEV/global/glopara/dump"
+export NWPROD="@NWPROD@"
+export COMROOT="@COMROOT@"
+export DMPDIR="@DMPDIR@"
 export RTMFIX=$CRTM_FIX
 
 # USER specific paths
-export HOMEDIR="/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/$USER"
-export STMP="$ROTDIR/.."
-export PTMP="$ROTDIR/.."
-export NOSCRUB="$HOMEDIR"
+export HOMEDIR="@HOMEDIR@"
+export STMP="@STMP@"
+export PTMP="@PTMP@"
+export NOSCRUB="@NOSCRUB@"
 
 # Base directories for various builds
-export BASE_GIT="/scratch1/NCEPDEV/global/glopara/git"
+export BASE_GIT="@BASE_GIT@"
 
 # Toggle to turn on/off GFS downstream processing.
 export DO_BUFRSND="NO"     # BUFR sounding products
@@ -64,7 +64,7 @@ export DO_VRFY="NO"       # VRFY step       ## JKH
 export REALTIME="YES"
 
 # Experiment mode (cycled or free-forecast)
-export MODE="forecast-only" # cycled/free
+export MODE="@MODE@" # cycled/free
 
 ####################################################
 # DO NOT ADD MACHINE DEPENDENT STUFF BELOW THIS LINE
@@ -87,8 +87,8 @@ export NMV="/bin/mv"
 export NLN="/bin/ln -sf"
 export VERBOSE="YES"
 export KEEPDATA="NO"
-export CHGRP_RSTPROD="YES"
-export CHGRP_CMD="chgrp rstprod"
+export CHGRP_RSTPROD="@CHGRP_RSTPROD@"
+export CHGRP_CMD="@CHGRP_CMD@"
 export NEMSIOGET="$HOMEgfs/exec/nemsio_get"
 export NCDUMP="$NETCDF/bin/ncdump"
 export NCLEN="$HOMEgfs/ush/getncdimlen"
@@ -98,14 +98,14 @@ export BASE_ENV="$HOMEgfs/env"
 export BASE_JOB="$HOMEgfs/jobs/rocoto"
 
 # EXPERIMENT specific environment parameters
-export SDATE=2022121600
+export SDATE=@SDATE@
 export FDATE=@FDATE@
-export EDATE=2022121600
-export EXP_WARM_START=".false."
+export EDATE=@EDATE@
+export EXP_WARM_START="@EXP_WARM_START@"
 export assim_freq=6
-export PSLOT="rt_v17_p8_gf_mynn"
-export EXPDIR="$HOME/UFS-CAMsuite/FV3GFSwfm/$PSLOT"
-export ROTDIR="$HOME/UFS-CAMsuite/FV3GFSrun/$PSLOT"
+export PSLOT="@PSLOT@"
+export EXPDIR="@EXPDIR@/$PSLOT"
+export ROTDIR="@ROTDIR@/$PSLOT"
 export ROTDIR_DUMP="YES"                #Note: A value of "NO" does not currently work
 export DUMP_SUFFIX=""
 if [[ "$CDATE" -ge "2019092100" && "$CDATE" -le "2019110700" ]]; then
@@ -114,8 +114,8 @@ fi
 export RUNDIR="$STMP/RUNDIRS/$PSLOT"
 export DATAROOT="$RUNDIR/$CDATE/$CDUMP"
 export ARCDIR="$NOSCRUB/archive/$PSLOT"
-export ICSDIR="/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127/"
-export ATARDIR="/BMC/$HPSS_PROJECT/2year/$PSLOT"
+export ICSDIR="@ICSDIR@"
+export ATARDIR="@ATARDIR@"
 
 # Commonly defined parameters in JJOBS
 export envir=${envir:-"prod"}
@@ -148,14 +148,14 @@ export SENDDBN=${SENDDBN:-"NO"}
 export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 
 # APP settings
-export APP=ATM
+export APP=@APP@
 
 # Defaults:
 export DO_COUPLED="NO"
 export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
-export DO_AERO=NO
+export DO_AERO=@DO_AERO@
 #### export CCPP_SUITE="FV3_GFS_v17_p8"                              # GFS v17 prototype p8
 export CCPP_SUITE="FV3_GFS_v17_p8_gf_mynn"                 # GFS v17 prototype p8 + GF + MYNN
 #### export CCPP_SUITE="FV3_GFS_v17_p8_mynn"                         # GFS v17 prototype p8 + MYNN
@@ -216,7 +216,7 @@ export OPS_RES="C768" # Do not change
 
 # Resolution specific parameters
 export LEVS=128
-export CASE="C768"
+export CASE="@CASECTL@"
 export CASE_ENKF="@CASEENS@"
 case "$CASE" in
     "C48") export OCNRES=400;;
@@ -249,7 +249,7 @@ export FHOUT=3           # Will be changed to 1 in config.base if DO_GLDAS is se
 export EUPD_CYC="gdas"
 
 # GFS cycle info
-export gfs_cyc=1 # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
+export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 cycles.
 
 # GFS output and frequency
 export FHMIN_GFS=0
@@ -379,8 +379,8 @@ export DO_METP="NO"         # Run METPLUS jobs - set METPLUS settings in config.
 export DO_VSDB="NO"         # Run VSDB package - set VSDB settings in config.vrfy       ## JKH
 
 # Archiving options
-export HPSSARCH="YES"        # save data to HPSS archive
-export LOCALARCH="NO"        # save data to local archive
+export HPSSARCH="@HPSSARCH@"        # save data to HPSS archive
+export LOCALARCH="@LOCALARCH@"        # save data to local archive
 if [[ $HPSSARCH = "YES" ]] && [[ $LOCALARCH = "YES" ]]; then
    echo "Both HPSS and local archiving selected.  Please choose one or the other."
    exit 2

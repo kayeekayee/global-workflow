@@ -17,14 +17,14 @@
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
 
-	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "/home/rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17_p8_gf_mynn">
-	<!ENTITY ROTDIR "/home/rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17_p8_gf_mynn">
-	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/rtruns/pygraf">
-
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
         <!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
+
+	<!-- Experiment related directories -->
+	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/rt_v17_p8_gf_mynn">
+	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/rt_v17_p8_gf_mynn">
+	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/rtruns/pygraf">
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
@@ -122,7 +122,7 @@
   
 <!--
     <dependency>
-          <metataskdep metatask="remapgrib"/>
+        <metataskdep metatask="remapgrib"/>
     </dependency>
 -->
   

@@ -21,24 +21,24 @@
 	<!ENTITY ATCFNAME   "gfp8">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202212160000">
-	<!ENTITY EDATE    "203212160000">
+	<!ENTITY SDATE    "202302090000">
+	<!ENTITY EDATE    "202302100000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
 	<!ENTITY RUN_ENVIR "emc">
 
-	<!-- Directories for driving the workflow -->
-	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
-	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
-
 	<!-- Experiment related directories -->
-	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/rt_v17_p8_gf_mynn">
-	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/rt_v17_p8_gf_mynn">
+	<!ENTITY EXPDIR "$HOME/UFS-CAMsuite//FV3GFSwfm/rt_v17_p8_gf_mynn_336h">
+	<!ENTITY ROTDIR "$HOME/UFS-CAMsuite//FV3GFSrun/rt_v17_p8_gf_mynn">
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127/">
 	<!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
 	<!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
 	<!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">
+
+	<!-- Directories for driving the workflow -->
+	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
+	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/jobs/rocoto">
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
@@ -68,7 +68,8 @@
 
 	<!ENTITY QUEUE_FCST_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_FCST_GFS "&PARTITION_BATCH;">
-	<!ENTITY WALLTIME_FCST_GFS  "06:00:00">
+	<!ENTITY WALLTIME_FCST_GFS  "07:59:00">
+	<!ENTITY RESOURCES_FCST_GFS "<nodes>170:ppn=10:tpp=4</nodes>">
 	<!ENTITY RESOURCES_FCST_GFS "<nodes>103:ppn=10:tpp=4</nodes>">
 	<!ENTITY NATIVE_FCST_GFS    "--export=NONE">
 
@@ -91,104 +92,24 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
-<task name="gfsinit" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-	<command>&JOBS_DIR;/makeinit_link.sh</command>
-
-	<jobname><cyclestr>&PSLOT;_gfsinit_@H</cyclestr></jobname>
-	<account>&ACCOUNT;</account>
-	<queue>&QUEUE_INIT_GFS;</queue>
-	<partition>&PARTITION_INIT_GFS;</partition>
-	&RESOURCES_INIT_GFS;
-	<walltime>&WALLTIME_INIT_GFS;</walltime>
-<!--	<memory>&MEMORY_INIT_GFS;</memory> -->
-	<native>&NATIVE_INIT_GFS;</native>
-
-	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsinit.log</cyclestr></join>
-
-	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-	<envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
-	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
-	<envar><name>COMPONENT</name><value>&COMPONENT;</value></envar>
-	<envar><name>CASE</name><value>&CASE;</value></envar>
-
-	<dependency>
-		<and>
-			<not>
-				<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/atmos/INPUT</cyclestr></datadep>
-			</not>
-			<and>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
-			</and>
-		</and>
-	</dependency>
-
-</task>
-
-<task name="gfsfcst" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-	<command>&JOBS_DIR;/fcst.sh</command>
-
-	<jobname><cyclestr>&PSLOT;_gfsfcst_@H</cyclestr></jobname>
-	<account>&ACCOUNT;</account>
-	<queue>&QUEUE_FCST_GFS;</queue>
-	<partition>&PARTITION_FCST_GFS;</partition>
-	&RESOURCES_FCST_GFS;
-	<walltime>&WALLTIME_FCST_GFS;</walltime>
-	
-	<native>&NATIVE_FCST_GFS;</native>
-
-	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfcst.log</cyclestr></join>
-
-	<envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-	<envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
-
-	<dependency>
-		<and>
-			<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/INPUT</cyclestr></datadep>
-			<or>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/gfs/&CASE;/INPUT/aero_done</cyclestr></datadep>
-				<datadep><cyclestr>&ICSDIR;/@Y@m@d@H/gfs/&CASE;/INPUT/chgres_done</cyclestr></datadep>
-				<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/INPUT/aero_done</cyclestr></datadep>
-				<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/INPUT/chgres_done</cyclestr></datadep>
-			</or>
-			<or>
-				<and>
-					<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
-					<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
-				</and>
-				<datadep><cyclestr>&ROTDIR;/&CDUMP;.@Y@m@d/@H/&COMPONENT;/RESTART/@Y@m@d.@H0000.sfcanl_data.tile6.nc</cyclestr></datadep>
-			</or>
-		</and>
-	</dependency>
-
-</task>
-
 <metatask name="gfspost">
 
-	<var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120</var>
-	<var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120</var>
-	<var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120</var>
+<!--
+        <var name="grp">_f000-f006 _f012-f018 _f024-f030 _f036-f042 _f048-f054 _f060-f066 _f072-f078 _f084-f090 _f096-f102 _f108-f114 _f120-f126 _f132-f138 _f144-f150 _f156-f162 _f168-f174 _f180-f180 _f186-f186 _f192-f192 _f198-f198 _f204-f204 _f210-f210 _f216-f216 _f222-f222 _f228-f228 _f234-f234 _f240-f240 _f246-f246 _f252-f252 _f258-f258 _f264-f264 _f270-f270 _f276-f276 _f282-f282 _f288-f288 _f294-f294 _f300-f300 _f306-f306 _f312-f312 _f318-f318 _f324-f324 _f330-f330 _f336-f336</var>
+        <var name="dep">f006 f018 f030 f042 f054 f066 f078 f090 f102 f114 f126 f138 f150 f162 f174 f180 f186 f192 f198 f204 f210 f216 f222 f228 f234 f240 f246 f252 f258 f264 f270 f276 f282 f288 f294 f300 f306 f312 f318 f324 f330 f336</var>
+        <var name="lst">f000_f006 f012_f018 f024_f030 f036_f042 f048_f054 f060_f066 f072_f078 f084_f090 f096_f102 f108_f114 f120_f126 f132_f138 f144_f150 f156_f162 f168_f174 f180 f186 f192 f198 f204 f210 f216 f222 f228 f234 f240 f246 f252 f258 f264 f270 f276 f282 f288 f294 f300 f306 f312 f318 f324 f330 f336</var>
+-->
+        <var name="grp">_f132-f138 _f156-f162 _f168-f174 _f192-f192 _f210-f210 _f228-f228 _f246-f246 </var>
+        <var name="dep">f138 f162 f174 f192 f210 f228 f246 </var>
+        <var name="lst">f132_f138 f156_f162 f168_f174 f192 f210 f228 f246 </var>
+
 
 	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -224,7 +145,7 @@
 
 </metatask>
 
-<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" final="true">
+<task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;" >
 
 	<command>&JOBS_DIR;/arch_gsl.sh</command>
 

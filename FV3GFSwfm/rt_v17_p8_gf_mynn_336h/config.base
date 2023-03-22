@@ -104,7 +104,7 @@ export EDATE=2022121600
 export EXP_WARM_START=".false."
 export assim_freq=6
 export PSLOT="rt_v17_p8_gf_mynn"
-export EXPDIR="$HOME/UFS-CAMsuite/FV3GFSwfm/$PSLOT"
+export EXPDIR="$HOME/UFS-CAMsuite/FV3GFSwfm/${PSLOT}_336h"
 export ROTDIR="$HOME/UFS-CAMsuite/FV3GFSrun/$PSLOT"
 export ROTDIR_DUMP="YES"                #Note: A value of "NO" does not currently work
 export DUMP_SUFFIX=""
@@ -254,10 +254,10 @@ export gfs_cyc=1 # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4: all 4 c
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=${FHMAX_GFS_00:-120}      ## JKH
-export FHMAX_GFS_06=${FHMAX_GFS_06:-120}      ## JKH
-export FHMAX_GFS_12=${FHMAX_GFS_12:-120}      ## JKH
-export FHMAX_GFS_18=${FHMAX_GFS_18:-120}      ## JKH
+export FHMAX_GFS_00=${FHMAX_GFS_00:-336}      ## JKH
+export FHMAX_GFS_06=${FHMAX_GFS_06:-336}      ## JKH
+export FHMAX_GFS_12=${FHMAX_GFS_12:-336}      ## JKH
+export FHMAX_GFS_18=${FHMAX_GFS_18:-336}      ## JKH
 export FHMAX_GFS=$(eval echo \${FHMAX_GFS_$cyc})
 
 export FHOUT_GFS=${FHOUT_GFS:-6}              ## JKH

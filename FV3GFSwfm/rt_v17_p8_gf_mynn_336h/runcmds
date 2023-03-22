@@ -1,0 +1,23 @@
+
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_v17_p8_gf_mynn_336h/rt_v17_p8_gf_mynn_336.xml -d ${HOME}/rt_dbfiles/rt_v17_p8_gf_mynn_336.db 
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSwfm/rt_v17_p8_gf_mynn_336h/rt_v17_p8_gf_mynn_336.xml -d ${HOME}/rt_dbfiles/rt_v17_p8_gf_mynn_336.db   -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w v17_p8_gf_mynn_336.xml -d v17_p8_gf_mynn_336.db
+rocotostat  -w v17_p8_gf_mynn_336.xml -d v17_p8_gf_mynn_336.db
+
+rocotorun -w v17_p8_gf_mynn_336_post.xml -d v17_p8_gf_mynn_336_post.db
+rocotostat  -w v17_p8_gf_mynn_336_post.xml -d v17_p8_gf_mynn_336_post.db
+
+PyGraf Images
+=============
+rocotorun  -w ${HOME}/UFS-CAMsuite/FV3GFSwfm/rt_v17_p8_gf_mynn_336h/rt_l127_pygraf_global_336.xml -d ${HOME}/rt_dbfiles/rt_l127_pygraf_global_336.db
+rocotostat  -w ${HOME}/UFS-CAMsuite/FV3GFSwfm/rt_v17_p8_gf_mynn_336h/rt_l127_pygraf_global_336.xml -d ${HOME}/rt_dbfiles/rt_l127_pygraf_global_336.db -c `date --date='4 days ago' +%Y%m%d0000`: |  m
+
+
+
+rocotorun -w pygraf_global_336.xml -d pygraf_global_336.db
+rocotostat -w pygraf_global_336.xml -d pygraf_global_336.db
+
+
+rocotorun -w pygraf_global_pcp.xml -d pygraf_global_pcp.db
+rocotostat -w pygraf_global_pcp.xml -d pygraf_global_pcp.db

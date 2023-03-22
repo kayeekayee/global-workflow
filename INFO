@@ -1,6 +1,9 @@
 23 Feb 2023
     - change settings for autoconv and aeroevap to 1 in sorc/ufs_model.fd/FV3/ccpp/physics/physics/cu_gf_deep.F90
       effective 00Z 24 Feb 2023
+08 Feb 2023
+    - temporarily extend out to 336h
+      effective 00Z 09 Feb 2023
 03 Dec 2022
     - new branch, gsl_ufs_rt, created from gfsv17p8_hfip branch, 17Nov22, f63227f
       run in realtime:  GFSv17p8+GF+MYNN, 120h
