@@ -19,7 +19,7 @@
 
 	<!-- Directories for driving the workflow -->
 	<!ENTITY HOMEgfs  "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
-        <!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
+	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
 
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/rt_v17_p8_gf_mynn_336h">
