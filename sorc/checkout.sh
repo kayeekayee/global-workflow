@@ -29,11 +29,9 @@ mkdir -p ${logdir}
 
 echo ufs-weather-model checkout ...
 if [[ ! -d ufs_model.fd ]] ; then
-    #JKHgit clone https://github.com/ufs-community/ufs-weather-model ufs_model.fd >> ${logdir}/checkout-ufs_model.log 2>&1
-    git clone https://github.com/NOAA-GSL/ufs-weather-model ufs_model.fd >> ${logdir}/checkout-ufs_model.log 2>&1
+    git clone https://github.com/ufs-community/ufs-weather-model ufs_model.fd >> ${logdir}/checkout-ufs_model.log 2>&1
     cd ufs_model.fd
-    #JKH  HFIP2022-08-17 17Aug22 tag, b42ca73
-    git checkout ${ufs_model_hash:-HFIP2022-08-17}
+    git checkout ${ufs_model_hash:-889254a}        ## 27Mar2023 
     git submodule update --init --recursive
 
     ################################################################################
