@@ -4,9 +4,9 @@ COMROT=$GITDIR/FV3GFSrun                                         ## default COMR
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127/
 
-PSLOT=ff_l127
-IDATE=2022032600
-EDATE=2022032600
+PSLOT=mynn_test
+IDATE=2022032700
+EDATE=2022032700
 RESDET=768               ## 96 192 384 768
 
 ### gfs_cyc 1  00Z only;  gfs_cyc 2  00Z and 12Z

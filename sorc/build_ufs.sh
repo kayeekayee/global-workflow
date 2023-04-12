@@ -3,7 +3,7 @@ set -eux
 
 # Default settings
 APP="S2SWA"
-CCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_ugwpv1,FV3_RAP_noah_sfcdiff_unified_ugwp,FV3_GFS_v17_p8,FV3_GFS_v17_p8_gf,FV3_GFS_v17_p8_mynn,FV3_GFS_v17_p8_gf_mynn"
+CCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_ugwpv1,FV3_RAP_noah_sfcdiff_unified_ugwp,FV3_GFS_v17_p8,FV3_GFS_v17_p8_mynn,FV3_GFS_v17_p8_gf_mynn"
 #JKHCCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_ugwpv1,FV3_GFS_v17_p8,FV3_GFS_v16_coupled_nsstNoahmpUGWPv1,FV3_GFS_v17_coupled_p8"
 
 while getopts "a:s:v" option; do

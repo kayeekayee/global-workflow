@@ -232,13 +232,16 @@ export iopt_trs="2"
 if [[ "$CCPP_SUITE" == "FV3_RAP_cires_ugwp" || "$CCPP_SUITE" == "FV3_RAP_noah_sfcdiff_unified_ugwp" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf_mynn" ]] ; then
     export imfdeepcnv=3
     export imfshalcnv=-1              ## JKH - no shallow GF
+    export progsigma=.false.
 elif [[ "$CCPP_SUITE" == "FV3_GFS_v16_gf" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf" ]] ; then 
     export imfdeepcnv=3
     export imfshalcnv=3              
+    export progsigma=.false.
 else
     export imfdeepcnv=2
     if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then 
       export imfshalcnv=-1
+      export progsigma=.false.
     else
       export imfshalcnv=2
     fi
@@ -292,16 +295,14 @@ elif [ $imp_physics -eq 8 ]; then # Thompson
         export hord_xx_nh_nonmono=6 ###  JKH - 10dec
     else
         export ncld=2
+        export sedi_semi=.true.          
+        export decfl=10                 
         if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf_mynn" ]] ; then
           export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_aero_tke"
           export ltaerosol=".true."
-          export sedi_semi=.false.          ## JKH - 14sep
-          export decfl=8                    ## JKH - 14sep
         else
           export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_noaero_tke"
           export ltaerosol=".false."
-          export sedi_semi=.true.          ## JKH - 14sep
-          export decfl=10                  ## JKH - 14sep
         fi
         export lradar=".false."
         export dt_inner=$((DELTIM/2))

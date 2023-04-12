@@ -187,12 +187,13 @@ case $case_in in
     export OUTPUT_FILETYPE_SFC="netcdf"
     ;;
   "C384" | "C768" | "C1152" | "C3072")
-    if [[ "$machine" = "JET" ]]; then
+#JKH    if [[ "$machine" = "JET" ]]; then
       export OUTPUT_FILETYPE_ATM="netcdf"                  ## JKH
-    else
-      export OUTPUT_FILETYPE_ATM="netcdf_parallel"
-    fi
-    export OUTPUT_FILETYPE_SFC="netcdf_parallel"
+#JKH    else
+#JKH      export OUTPUT_FILETYPE_ATM="netcdf_parallel"
+#JKH    fi
+#JKH    export OUTPUT_FILETYPE_SFC="netcdf_parallel"
+    export OUTPUT_FILETYPE_SFC="netcdf"
     ;;
 esac
 
