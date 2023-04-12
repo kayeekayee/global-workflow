@@ -1,11 +1,17 @@
-29 Mar 2023
+12 Apr 2023
     - update UFS to 27Mar23 ufs-community develop branch, 889254a 
       * switch to ufs-community codebase
       * latest MYNN updates
         -- adds dry deposition velocity to MYNN-EDMF
         -- include snow mixing 
         -- updates to sgscloud_readpre module
-      effective 00Z 30 Mar 2023
+      * namelist parameter changes
+        -- sedi_semi=.true.
+        -- decfl=10
+        -- dt_inner=150
+        -- bl_mynn_tke_budeget => tke_budget
+      * turn off parallel netcdf
+      effective 00Z 09 Apr 2023
 23 Feb 2023
     - change settings for autoconv and aeroevap to 1 in sorc/ufs_model.fd/FV3/ccpp/physics/physics/cu_gf_deep.F90
       effective 00Z 24 Feb 2023
