@@ -1,3 +1,8 @@
+16 May 2023
+    - update UFS with Joe's code changes 
+      * temporary patch for snow mixing which causes numerical instabilities
+      * small change to table values of Leaf Area Index to match them better with the LAI monthly climatology that is used in HRRR
+      effective 00Z 17 May 2023
 12 Apr 2023
     - update UFS to 27Mar23 ufs-community develop branch, 889254a 
       * switch to ufs-community codebase
