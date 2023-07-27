@@ -1,0 +1,7 @@
+
+
+rocotorun -w test_hera_12x12.xml -d test_hera_12x12.db
+rocotostat -w test_hera_12x12.xml -d test_hera_12x12.db
+
+
+rocotorun -w /scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSwfm/test_hera/test_hera_12x12.xml -d /scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSwfm/test_hera/test_hera_12x12.db

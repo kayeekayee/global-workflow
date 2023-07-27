@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 
 #####
 ## "forecast_def.sh"
@@ -8,19 +8,40 @@
 ## This script is a definition of functions.
 #####
 
-
 # For all non-evironment variables
 # Cycling and forecast hour specific parameters
+
+to_seconds() {
+  # Function to convert HHMMSS to seconds since 00Z
+  local hhmmss=${1:?}
+  local hh=${hhmmss:0:2}
+  local mm=${hhmmss:2:2}
+  local ss=${hhmmss:4:2}
+  local seconds=$((10#${hh}*3600+10#${mm}*60+10#${ss}))
+  local padded_seconds=$(printf "%05d" ${seconds})
+  echo ${padded_seconds}
+}
+
+middle_date(){
+  # Function to calculate mid-point date in YYYYMMDDHH between two dates also in YYYYMMDDHH
+  local date1=${1:?}
+  local date2=${2:?}
+  local date1s=$(date -d "${date1:0:8} ${date1:8:2}" +%s)
+  local date2s=$(date -d "${date2:0:8} ${date2:8:2}" +%s)
+  local dtsecsby2=$(( $((date2s - date1s)) / 2 ))
+  local mid_date=$(date -d "${date1:0:8} ${date1:8:2} + ${dtsecsby2} seconds" +%Y%m%d%H%M%S)
+  echo ${mid_date:0:10}
+}
+
 common_predet(){
   echo "SUB ${FUNCNAME[0]}: Defining variables for shared through models"
   pwd=$(pwd)
-  machine=${machine:-"WCOSS_C"}
+  machine=${machine:-"WCOSS2"}
   machine=$(echo $machine | tr '[a-z]' '[A-Z]')
   CASE=${CASE:-C768}
   CDATE=${CDATE:-2017032500}
   DATA=${DATA:-$pwd/fv3tmp$$}    # temporary running directory
   ROTDIR=${ROTDIR:-$pwd}         # rotating archive directory
-  ICSDIR=${ICSDIR:-$pwd}         # cold start initial conditions
 }
 
 DATM_predet(){
@@ -39,7 +60,6 @@ DATM_predet(){
 FV3_GFS_predet(){
   echo "SUB ${FUNCNAME[0]}: Defining variables for FV3GFS"
   CDUMP=${CDUMP:-gdas}
-  CDUMPwave="${CDUMP}wave"
   FHMIN=${FHMIN:-0}
   FHMAX=${FHMAX:-9}
   FHOUT=${FHOUT:-3}
@@ -72,16 +92,14 @@ FV3_GFS_predet(){
 
   # Directories.
   pwd=$(pwd)
-  NWPROD=${NWPROD:-${NWROOT:-$pwd}}
-  HOMEgfs=${HOMEgfs:-$NWPROD}
+  HOMEgfs=${HOMEgfs:-${PACKAGEROOT:-$pwd}}
   FIX_DIR=${FIX_DIR:-$HOMEgfs/fix}
-  FIX_AM=${FIX_AM:-$FIX_DIR/fix_am}
-  FIX_AER=${FIX_AER:-$FIX_DIR/fix_aer}
-  FIX_LUT=${FIX_LUT:-$FIX_DIR/fix_lut}
-  FIXfv3=${FIXfv3:-$FIX_DIR/fix_fv3_gmted2010}
+  FIX_AM=${FIX_AM:-$FIX_DIR/am}
+  FIX_AER=${FIX_AER:-$FIX_DIR/aer}
+  FIX_LUT=${FIX_LUT:-$FIX_DIR/lut}
+  FIXfv3=${FIXfv3:-$FIX_DIR/orog}
   DATA=${DATA:-$pwd/fv3tmp$$}    # temporary running directory
   ROTDIR=${ROTDIR:-$pwd}         # rotating archive directory
-  ICSDIR=${ICSDIR:-$pwd}         # cold start initial conditions
   DMPDIR=${DMPDIR:-$pwd}         # global dumps for seaice, snow and sst analysis
 
   # Model resolution specific parameters
@@ -110,51 +128,23 @@ FV3_GFS_predet(){
   IAU_OFFSET=${IAU_OFFSET:-0}
 
   # Model specific stuff
-  FCSTEXECDIR=${FCSTEXECDIR:-$HOMEgfs/sorc/ufs_model.fd/build}
-  FCSTEXEC=${FCSTEXEC:-ufs_model}
+  FCSTEXECDIR=${FCSTEXECDIR:-$HOMEgfs/exec}
+  FCSTEXEC=${FCSTEXEC:-ufs_model.x}
   PARM_FV3DIAG=${PARM_FV3DIAG:-$HOMEgfs/parm/parm_fv3diag}
   PARM_POST=${PARM_POST:-$HOMEgfs/parm/post}
 
   # Model config options
-  APRUN_FV3=${APRUN_FV3:-${APRUN_FCST:-${APRUN:-""}}}
-  #the following NTHREAD_FV3 line is commented out because NTHREAD_FCST is not defined
-  #and because NTHREADS_FV3 gets overwritten by what is in the env/${macine}.env
-  #file and the value of npe_node_fcst is not correctly defined when using more than
-  #one thread and sets NTHREADS_FV3=1 even when the number of threads is appropraitely >1
-  #NTHREADS_FV3=${NTHREADS_FV3:-${NTHREADS_FCST:-${nth_fv3:-1}}}
-  cores_per_node=${cores_per_node:-${npe_node_fcst:-24}}
   ntiles=${ntiles:-6}
-  if [ $MEMBER -lt 0 ]; then
-    NTASKS_TOT=${NTASKS_TOT:-$npe_fcst_gfs}
-  else
-    NTASKS_TOT=${NTASKS_TOT:-$npe_efcs}
-  fi
 
   TYPE=${TYPE:-"nh"}                  # choices:  nh, hydro
   MONO=${MONO:-"non-mono"}            # choices:  mono, non-mono
 
   QUILTING=${QUILTING:-".true."}
   OUTPUT_GRID=${OUTPUT_GRID:-"gaussian_grid"}
-  OUTPUT_FILE=${OUTPUT_FILE:-"nemsio"}
   WRITE_NEMSIOFLIP=${WRITE_NEMSIOFLIP:-".true."}
   WRITE_FSYNCFLAG=${WRITE_FSYNCFLAG:-".true."}
-  affix="nemsio"
-  [[ "$OUTPUT_FILE" = "netcdf" ]] && affix="nc"
 
   rCDUMP=${rCDUMP:-$CDUMP}
-
-  #------------------------------------------------------------------
-  # setup the runtime environment
-  if [ $machine = "WCOSS_C" ] ; then
-    HUGEPAGES=${HUGEPAGES:-hugepages4M}
-    . $MODULESHOME/init/sh 2>/dev/null
-    module load iobuf craype-$HUGEPAGES 2>/dev/null
-    export MPICH_GNI_COLL_OPT_OFF=${MPICH_GNI_COLL_OPT_OFF:-MPI_Alltoallv}
-    export MKL_CBWR=AVX2
-    export WRTIOBUF=${WRTIOBUF:-"4M"}
-    export NC_BLKSZ=${NC_BLKSZ:-"4M"}
-    export IOBUF_PARAMS="*nemsio:verbose:size=${WRTIOBUF},*:verbose:size=${NC_BLKSZ}"
-  fi
 
   #-------------------------------------------------------
   if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
@@ -223,10 +213,9 @@ FV3_GFS_predet(){
   print_freq=${print_freq:-6}
 
   #-------------------------------------------------------
-  if [ $CDUMP = "gfs" -a $rst_invt1 -gt 0 ]; then
-    RSTDIR_ATM=${RSTDIR:-$ROTDIR}/${CDUMP}.${PDY}/${cyc}/atmos/RERUN_RESTART
-    if [ ! -d $RSTDIR_ATM ]; then mkdir -p $RSTDIR_ATM ; fi
-    $NLN $RSTDIR_ATM RESTART
+  if [[ ${RUN} =~ "gfs" || ${RUN} = "gefs" ]] && (( rst_invt1 > 0 )); then
+    if [[ ! -d ${COM_ATMOS_RESTART} ]]; then mkdir -p "${COM_ATMOS_RESTART}" ; fi
+    ${NLN} "${COM_ATMOS_RESTART}" RESTART
     # The final restart written at the end doesn't include the valid date
     # Create links that keep the same name pattern for these files
     VDATE=$($NDATE +$FHMAX_GFS $CDATE)
@@ -238,39 +227,19 @@ FV3_GFS_predet(){
         files="${files} ${base}.tile${tile}.nc"
       done
     done
-    for file in $files; do
-      $NLN $RSTDIR_ATM/$file $RSTDIR_ATM/${vPDY}.${vcyc}0000.$file
+    for file in ${files}; do
+      ${NLN} "${COM_ATMOS_RESTART}/${file}" "${COM_ATMOS_RESTART}/${vPDY}.${vcyc}0000.${file}"
     done
   else
     mkdir -p $DATA/RESTART
   fi
 
-  #-------------------------------------------------------
-  # member directory
-  if [ $MEMBER -lt 0 ]; then
-    prefix=$CDUMP
-    rprefix=$rCDUMP
-    memchar=""
-  else
-    prefix=enkf$CDUMP
-    rprefix=enkf$rCDUMP
-    memchar=mem$(printf %03i $MEMBER)
-  fi
-  memdir=$ROTDIR/${prefix}.$PDY/$cyc/atmos/$memchar
-  if [ ! -d $memdir ]; then mkdir -p $memdir; fi
-
-  GDATE=$($NDATE -$assim_freq $CDATE)
-  gPDY=$(echo $GDATE | cut -c1-8)
-  gcyc=$(echo $GDATE | cut -c9-10)
-  gmemdir=$ROTDIR/${rprefix}.$gPDY/$gcyc/atmos/$memchar
-  sCDATE=$($NDATE -3 $CDATE)
-
   if [[ "$DOIAU" = "YES" ]]; then
     sCDATE=$($NDATE -3 $CDATE)
     sPDY=$(echo $sCDATE | cut -c1-8)
     scyc=$(echo $sCDATE | cut -c9-10)
-    tPDY=$gPDY
-    tcyc=$gcyc
+    tPDY=${gPDY}
+    tcyc=${gcyc}
   else
     sCDATE=$CDATE
     sPDY=$PDY
@@ -284,36 +253,18 @@ FV3_GFS_predet(){
 
 WW3_predet(){
   echo "SUB ${FUNCNAME[0]}: Defining variables for WW3"
-  if [ $CDUMP = "gdas" ]; then
-    export RSTDIR_WAVE=$ROTDIR/${CDUMP}.${PDY}/${cyc}/wave/restart
-  else
-    export RSTDIR_WAVE=${RSTDIR_WAVE:-$ROTDIR/${CDUMP}.${PDY}/${cyc}/wave/restart}
-  fi
-  if [ ! -d $RSTDIR_WAVE ]; then mkdir -p $RSTDIR_WAVE ; fi
-  $NLN $RSTDIR_WAVE restart_wave
+  if [[ ! -d "${COM_WAVE_RESTART}" ]]; then mkdir -p "${COM_WAVE_RESTART}" ; fi
+  ${NLN} "${COM_WAVE_RESTART}" "restart_wave"
 }
 
 CICE_predet(){
   echo "SUB ${FUNCNAME[0]}: CICE before run type determination"
-  if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
-  if [ ! -d $DATA ]; then mkdir -p $DATA; fi
-  if [ ! -d $DATA/RESTART ]; then mkdir -p $DATA/RESTART; fi
-  if [ ! -d $DATA/INPUT ]; then mkdir -p $DATA/INPUT; fi
-  if [ ! -d $DATA/restart ]; then mkdir -p $DATA/restart; fi
-  if [ ! -d $DATA/history ]; then mkdir -p $DATA/history; fi
-  if [ ! -d $DATA/OUTPUT ]; then mkdir -p $DATA/OUTPUT; fi
+  if [ ! -d $DATA/CICE_OUTPUT ]; then  mkdir -p $DATA/CICE_OUTPUT; fi
+  if [ ! -d $DATA/CICE_RESTART ]; then mkdir -p $DATA/CICE_RESTART; fi
 }
 
 MOM6_predet(){
   echo "SUB ${FUNCNAME[0]}: MOM6 before run type determination"
-  if [ ! -d $ROTDIR ]; then mkdir -p $ROTDIR; fi
-  if [ ! -d $DATA ]; then mkdir -p $DATA; fi
-  if [ ! -d $DATA/RESTART ]; then mkdir -p $DATA/RESTART; fi
-  if [ ! -d $DATA/INPUT ]; then mkdir -p $DATA/INPUT; fi
-  if [ ! -d $DATA/restart ]; then mkdir -p $DATA/restart; fi
-  if [ ! -d $DATA/history ]; then mkdir -p $DATA/history; fi
-  if [ ! -d $DATA/OUTPUT ]; then mkdir -p $DATA/OUTPUT; fi
   if [ ! -d $DATA/MOM6_OUTPUT ]; then mkdir -p $DATA/MOM6_OUTPUT; fi
   if [ ! -d $DATA/MOM6_RESTART ]; then mkdir -p $DATA/MOM6_RESTART; fi
-  cd $DATA || exit 8
 }

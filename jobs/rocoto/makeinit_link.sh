@@ -1,7 +1,11 @@
 #!/bin/sh 
-
+##
 ## this script makes a link to $ICSDIR/YYYYMMDDHH/gfs/<CASE>/INPUT
-##   /scratch4/BMC/rtfim/rtruns/FV3ICS/YYYYMMDDHH/gfs/C384|C768/INPUT
+##   
+##  md ${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/model_data/${COMPONENT}
+##  cd ${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/model_data/${COMPONENT}
+##  ln -s /scratch4/BMC/rtfim/rtruns/FV3ICS/YYYYMMDDHH/gfs/C768/INPUT  input
+##   
 ##
 
 echo
@@ -17,7 +21,7 @@ echo
 yyyymmdd=`echo $CDATE | cut -c1-8`
 hh=`echo $CDATE | cut -c9-10`
 init_dir=$ICSDIR/${CDATE}/${CDUMP}/${CASE}
-outdir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}
+outdir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/model_data/${COMPONENT}
 
 ## create link to FV3ICS directory
 if [[ ! -d $outdir ]]; then
@@ -30,6 +34,6 @@ if [[ ! -d $outdir ]]; then
 fi
 cd $outdir
 echo "making link to FV3ICS directory:  $init_dir/INPUT"
-ln -fs $init_dir/INPUT
+ln -fs $init_dir/INPUT input
 status=$?
 exit $status

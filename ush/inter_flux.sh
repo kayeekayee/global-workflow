@@ -1,5 +1,6 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
+
+source "$HOMEgfs/ush/preamble.sh" "$FH"
 
 #-----------------------------------------------------------------------
 #-Wen Meng, 03/2019:  First version.
@@ -7,13 +8,10 @@ set -x
 #  into lat-lon grids.
 #-----------------------------------------------------------------------
 
-
-echo "!!!!!CREATING $RUN FLUX PRODUCTS FOR FH = $FH !!!!!!"
-
-export CNVGRIB=${CNVGRIB:-${NWPROD:-/nwprod}/util/exec/cnvgrib21}
-export COPYGB2=${COPYGB2:-${NWPROD:-/nwprod}/util/exec/copygb2}
-export WGRIB2=${WGRIB2:-${NWPROD:-/nwprod}/util/exec/wgrib2}
-export GRBINDEX=${GRBINDEX:-${NWPROD:-nwprod}/util/exec/grbindex}
+export CNVGRIB=${CNVGRIB:-${grib_util_ROOT}/bin/cnvgrib}
+export COPYGB2=${COPYGB2:-${grib_util_ROOT}/bin/copygb}
+export WGRIB2=${WGRIB2:-${wgrib2_ROOT}/bin/wgrib2}
+export GRBINDEX=${GRBINDEX:-${wgrib2_ROOT}/bin/grbindex}
 export RUN=${RUN:-"gfs"}
 export cycn=$(echo $CDATE |cut -c 9-10)
 export TCYC=${TCYC:-".t${cycn}z."}
@@ -45,17 +43,13 @@ else
 fi
 
 #---------------------------------------------------------------
+  ${WGRIB2} "${COM_ATMOS_MASTER}/${FLUXFL}" ${option1} ${option21} ${option22} ${option23} \
+    ${option24} ${option25} ${option26} ${option27} ${option28} \
+    -new_grid ${grid1p0} fluxfile_${fhr3}_1p00
+  export err=$?; err_chk
 
-  $WGRIB2 $COMOUT/${FLUXFL} $option1 $option21 $option22 $option23 $option24 \
-                            $option25 $option26 $option27 $option28 \
-                            -new_grid $grid1p0  fluxfile_${fhr3}_1p00
-
-
-  $WGRIB2 -s fluxfile_${fhr3}_1p00 > $COMOUT/${PREFIX}flux.1p00.f${fhr3}.idx
-  cp fluxfile_${fhr3}_1p00  $COMOUT/${PREFIX}flux.1p00.f${fhr3}
-
-#---------------------------------------------------------------
-echo "!!!!!CREATION OF SELECT $RUN FLUX PRODUCTS COMPLETED FOR FHR = $FH !!!!!"
+  ${WGRIB2} -s "fluxfile_${fhr3}_1p00" > "${COM_ATMOS_GRIB_1p00}/${PREFIX}flux.1p00.f${fhr3}.idx"
+  cp "fluxfile_${fhr3}_1p00" "${COM_ATMOS_GRIB_1p00}/${PREFIX}flux.1p00.f${fhr3}"
 #---------------------------------------------------------------
 
 

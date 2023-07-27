@@ -1,0 +1,5 @@
+
+#################### test ####################
+MAILTO=""
+*/5 * * * * /apps/rocoto/1.3.3/bin/rocotorun -d /lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/FV3GFSwfm/test/test.db -w /lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/FV3GFSwfm/test/test.xml
+#################################################################

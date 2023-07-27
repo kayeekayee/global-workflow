@@ -1,0 +1,24 @@
+BASE_GIT: '/scratch1/NCEPDEV/global/glopara/git'
+DMPDIR: '/scratch1/NCEPDEV/global/glopara/dump'
+PACKAGEROOT: '/scratch1/NCEPDEV/global/glopara/nwpara'
+COMROOT: '/scratch1/NCEPDEV/global/glopara/com'
+COMINsyn: '${COMROOT}/gfs/prod/syndat'
+HOMEDIR: '/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/${USER}'
+STMP: '/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSrun/'
+PTMP: '/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSrun/'
+NOSCRUB: $HOMEDIR
+ACCOUNT: gsd-fv3
+SCHEDULER: slurm
+QUEUE: batch
+QUEUE_SERVICE: batch
+PARTITION_BATCH: hera
+PARTITION_SERVICE: service
+CHGRP_RSTPROD: 'YES'
+CHGRP_CMD: 'chgrp rstprod'
+HPSSARCH: 'YES'
+HPSS_PROJECT: fim
+LOCALARCH: 'NO'
+ATARDIR: '/BMC/${HPSS_PROJECT}/1year/${USER}/${machine}/scratch/${PSLOT}'
+MAKE_NSSTBUFR: 'NO'
+MAKE_ACFTBUFR: 'NO'
+SUPPORTED_RESOLUTIONS: ['C768', 'C384', 'C192', 'C96', 'C48']

@@ -1,0 +1,6 @@
+
+rocotorun -w storms-c3.xml -d storms-c3.db
+rocotostat -w storms-c3.xml -d storms-c3.db
+
+rocotorun -w v17_p8_c3.xml -d v17_p8_c3.db
+rocotostat -w v17_p8_c3.xml -d v17_p8_c3.db

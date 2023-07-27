@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#! /usr/bin/env bash
+
+source "$HOMEgfs/ush/preamble.sh"
 
 ###############################################################
 ## Abstract:
@@ -41,7 +43,7 @@ export mm=$(echo $CDATE | cut -c5-6)
 export dd=$(echo $CDATE | cut -c7-8)
 export hh=${cyc:-$(echo $CDATE | cut -c9-10)}
 
-export DATA=${DATA:-${DATAROOT}/init}
+export DATA=${DATA:-${DATAROOT}/init_$CDATE}
 export EXTRACT_DIR=${EXTRACT_DIR:-$ROTDIR}
 export WORKDIR=${WORKDIR:-$DATA}
 export OUTDIR=${OUTDIR:-$ROTDIR}
@@ -53,7 +55,7 @@ export RUNICSH=${RUNICSH:-${GDASINIT_DIR}/run_v16.chgres.sh}
 # Check if init is needed and run if so
 if [[ $gfs_ver = "v16" && $EXP_WARM_START = ".true." && $CASE = $OPS_RES ]]; then
   echo "Detected v16 $OPS_RES warm starts, will not run init. Exiting..."
-  exit 0
+  
 else
   # Run chgres_cube
   if [ ! -d $OUTDIR ]; then mkdir -p $OUTDIR ; fi
@@ -70,4 +72,6 @@ cd $DATAROOT
 
 ###############################################################
 # Exit out cleanly
+
+
 exit 0

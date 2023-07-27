@@ -1,0 +1,6 @@
+2023-05-30 15:45:08 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-30 15:45:08 +0000 :: fe2 :: Submission status of gfsfcst is pending at druby://fe2:40351
+2023-05-30 20:45:54 +0000 :: fe3 :: Submission status of previously pending gfsfcst is success, jobid=28616104
+2023-05-30 20:45:54 +0000 :: fe3 :: Task gfsfcst, jobid=28616104, in state FAILED (FAILED), ran for 258.0 seconds, exit status=11, try=1 (of 2)
+2023-05-30 20:45:54 +0000 :: fe3 :: Submitting gfsfcst
+2023-05-30 20:45:54 +0000 :: fe3 :: Submission status of gfsfcst is pending at druby://fe3:44424

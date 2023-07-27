@@ -1,5 +1,4 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
 
 #-----------------------------------------------------------------------
 #-Hui-Ya Chuang, January 2014:  First version.
@@ -31,15 +30,14 @@ set -x
 #  1. Modify sea icea cover via land-sea mask.
 #-----------------------------------------------------------------------
 
-
-echo "!!!!!CREATING $RUN DOWNSTREAM PRODUCTS FOR FH = $FH !!!!!!"
+source "$HOMEgfs/ush/preamble.sh" "$FH"
 
 export downset=${downset:-1}
 export DATA=${DATA:-/ptmpd2/$LOGNAME/test}
-export CNVGRIB=${CNVGRIB:-${NWPROD:-/nwprod}/util/exec/cnvgrib21}
-export COPYGB2=${COPYGB2:-${NWPROD:-/nwprod}/util/exec/copygb2}
-export WGRIB2=${WGRIB2:-${NWPROD:-/nwprod}/util/exec/wgrib2}
-export GRBINDEX=${GRBINDEX:-${NWPROD:-nwprod}/util/exec/grbindex}
+export CNVGRIB=${CNVGRIB:-${grib_util_ROOT}/bin/cnvgrib}
+export COPYGB2=${COPYGB2:-${grib_util_ROOT}/bin/copygb}
+export WGRIB2=${WGRIB2:-${wgrib2_ROOT}/bin/wgrib2}
+export GRBINDEX=${GRBINDEX:-${wgrib2_ROOT}/bin/grbindex}
 export RUN=${RUN:-"gfs"}
 export cycn=$(echo $CDATE |cut -c 9-10)
 export TCYC=${TCYC:-".t${cycn}z."}
@@ -79,10 +77,8 @@ elif [ $FH -eq 0 ] ; then
 else
   export paramlist=${paramlist:-$PARMpost/global_1x1_paramlist_g2}
   export paramlistb=${paramlistb:-$PARMpost/global_master-catchup_parmlist_g2}
-  export fhr3=$(expr $FH + 0 )
-  if [ $fhr3 -lt 100 ]; then export fhr3="0$fhr3"; fi
-  if [ $fhr3 -lt 10 ];  then export fhr3="0$fhr3"; fi
-  if [ $fhr3%${FHOUT_PGB} -eq 0 ]; then
+  export fhr3=$(printf "%03d" ${FH})
+  if (( FH%FHOUT_PGB == 0 )); then
     export PGBS=YES
   fi
 fi
@@ -90,15 +86,11 @@ fi
 
 $WGRIB2 $PGBOUT2 | grep -F -f $paramlist | $WGRIB2 -i -grib  tmpfile1_$fhr3 $PGBOUT2
 export err=$?; err_chk
-#if [ $machine = WCOSS -o $machine = WCOSS_C -a $downset = 2 ]; then
 if [ $downset = 2 ]; then
   $WGRIB2 $PGBOUT2 | grep -F -f $paramlistb | $WGRIB2 -i -grib  tmpfile2_$fhr3 $PGBOUT2
   export err=$?; err_chk
 fi
 
-#-----------------------------------------------------
-#-----------------------------------------------------
-#if [ $machine = WCOSS -o $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 ]; then
 #-----------------------------------------------------
 #-----------------------------------------------------
 export nset=1
@@ -134,16 +126,27 @@ while [ $nset -le $totalset ]; do
     # if final record of each piece is ugrd, add vgrd
     # copygb will only interpolate u and v together
     #$WGRIB2 -d $end $tmpfile |grep -i ugrd
-    $WGRIB2 -d $end $tmpfile |egrep -i "ugrd|ustm|uflx|u-gwd"
+    # grep returns 1 if no match is found, so temporarily turn off exit on non-zero rc
+    set +e
+    $WGRIB2 -d $end $tmpfile | egrep -i "ugrd|ustm|uflx|u-gwd"
     export rc=$?
+    set_strict
     if [[ $rc -eq 0 ]] ; then
       export end=$(expr ${end} + 1)
+    elif [[ $rc -gt 1 ]]; then
+      echo "FATAL: WGRIB2 failed with error code ${rc}"
+      exit $rc
     fi
     # if final record is land, add next record icec 
-    $WGRIB2 -d $end $tmpfile |egrep -i "land"
+    set +e
+    $WGRIB2 -d $end $tmpfile | egrep -i "land"
     export rc=$?
+    set_strict
     if [[ $rc -eq 0 ]] ; then
       export end=$(expr ${end} + 1)
+    elif [[ $rc -gt 1 ]]; then
+      echo "FATAL: WGRIB2 failed with error code ${rc}"
+      exit $rc
     fi
     if [ $iproc -eq $nproc ]; then
       export end=$ncount
@@ -170,16 +173,17 @@ while [ $nset -le $totalset ]; do
   export MP_PGMMODEL=mpmd
   export MP_CMDFILE=$DATA/poescript
   launcher=${APRUN_DWN:-"aprun -j 1 -n 24 -N 24 -d 1 cfp"}
-  if [ $machine = WCOSS_C -o $machine = WCOSS_DELL_P3 -o $machine = WCOSS2 ] ; then
+  if [ $machine = WCOSS2 ] ; then
     $launcher $MP_CMDFILE
   elif [ $machine = HERA -o $machine = ORION -o $machine = JET -o $machine = S4 ] ; then
     if [ -s $DATA/poescript_srun ]; then rm -f $DATA/poescript_srun; fi
     touch $DATA/poescript_srun
     nm=0
     cat $DATA/poescript | while read line; do
-      echo "$nm $line" >> $DATA/poescript_srun 
+      echo "$nm $line" >> $DATA/poescript_srun
       nm=$((nm+1))
     done
+    nm=$(wc -l < $DATA/poescript_srun)
     ${launcher:-"srun --export=ALL"} -n $nm --multi-prog $DATA/poescript_srun
   else
     $launcher
@@ -218,8 +222,8 @@ while [ $nset -le $totalset ]; do
   # $WGRIB2 land.grb -set_grib_type same -new_grid_interpolation bilinear -new_grid_winds earth -new_grid $grid0p25 newland.grb
   # $WGRIB2 newland.grb -set_byte 4 11 218 -grib newnewland.grb
   # cat ./newnewland.grb >> pgb2file_${fhr3}_0p25
-  # $CNVGRIB -g21 newnewland.grb newnewland.grb1 
-  # cat ./newnewland.grb1 >> pgbfile_${fhr3}_0p25 
+  # $CNVGRIB -g21 newnewland.grb newnewland.grb1
+  # cat ./newnewland.grb1 >> pgbfile_${fhr3}_0p25
   ##0p5 degree
   # rm -f newland.grb newnewland.grb newnewland.grb1
   # $WGRIB2 land.grb -set_grib_type same -new_grid_interpolation bilinear -new_grid_winds earth -new_grid $grid0p5 newland.grb
@@ -236,59 +240,55 @@ while [ $nset -le $totalset ]; do
 
   if [ $nset = 1 ]; then
     if [ $fhr3 = anl ]; then
-      cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.anl
-      $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.anl.idx
+      cp "pgb2file_${fhr3}_0p25" "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2.0p25.anl"
+      ${WGRIB2} -s "pgb2file_${fhr3}_0p25" > "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2.0p25.anl.idx"
       if [ "$PGBS" = "YES" ]; then
-        cp pgb2file_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2.0p50.anl
-        cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.anl
-        $WGRIB2 -s pgb2file_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2.0p50.anl.idx
-        $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.anl.idx
-        if [ "$PGB1F" = 'YES' ]; then 
-          cp pgbfile_${fhr3}_1p0    $COMOUT/${PREFIX}pgrb.1p00.anl
-          $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.anl $COMOUT/${PREFIX}pgrb.1p00.anl.idx
+        cp "pgb2file_${fhr3}_0p5" "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2.0p50.anl"
+        cp "pgb2file_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2.1p00.anl"
+        ${WGRIB2} -s "pgb2file_${fhr3}_0p5" > "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2.0p50.anl.idx"
+        ${WGRIB2} -s "pgb2file_${fhr3}_1p0" > "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2.1p00.anl.idx"
+        if [ "$PGB1F" = 'YES' ]; then
+          cp "pgbfile_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.anl"
+          ${GRBINDEX} "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.anl" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.anl.idx"
         fi
       fi
     else
-      cp pgb2file_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}
-      $WGRIB2 -s pgb2file_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2.0p25.f${fhr3}.idx
+      cp "pgb2file_${fhr3}_0p25" "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2.0p25.f${fhr3}"
+      ${WGRIB2} -s "pgb2file_${fhr3}_0p25" > "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2.0p25.f${fhr3}.idx"
       if [ "$PGBS" = "YES" ]; then
-        cp pgb2file_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}
-        cp pgb2file_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}
-        $WGRIB2 -s pgb2file_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2.0p50.f${fhr3}.idx
-        $WGRIB2 -s pgb2file_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2.1p00.f${fhr3}.idx
+        cp "pgb2file_${fhr3}_0p5" "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2.0p50.f${fhr3}"
+        cp "pgb2file_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2.1p00.f${fhr3}"
+        ${WGRIB2} -s "pgb2file_${fhr3}_0p5"  > "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2.0p50.f${fhr3}.idx"
+        ${WGRIB2} -s "pgb2file_${fhr3}_1p0"  > "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2.1p00.f${fhr3}.idx"
         if [ "$PGB1F" = 'YES' ]; then
-          cp pgbfile_${fhr3}_1p0    $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}
-          $GRBINDEX $COMOUT/${PREFIX}pgrb.1p00.f${fhr3} $COMOUT/${PREFIX}pgrb.1p00.f${fhr3}.idx
+          cp "pgbfile_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.f${fhr3}"
+          ${GRBINDEX} "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.f${fhr3}" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb.1p00.f${fhr3}.idx"
         fi
       fi
     fi
   elif [ $nset = 2 ]; then
     if [ $fhr3 = anl ]; then
-      cp pgb2bfile_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2b.0p25.anl
-      $WGRIB2 -s pgb2bfile_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2b.0p25.anl.idx
+      cp "pgb2bfile_${fhr3}_0p25" "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2b.0p25.anl"
+      ${WGRIB2} -s "pgb2bfile_${fhr3}_0p25" > "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2b.0p25.anl.idx"
       if [ "$PGBS" = "YES" ]; then
-        cp pgb2bfile_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2b.0p50.anl
-        cp pgb2bfile_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2b.1p00.anl
-        $WGRIB2 -s pgb2bfile_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2b.0p50.anl.idx
-        $WGRIB2 -s pgb2bfile_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2b.1p00.anl.idx
+        cp "pgb2bfile_${fhr3}_0p5" "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2b.0p50.anl"
+        cp "pgb2bfile_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2b.1p00.anl"
+        ${WGRIB2} -s "pgb2bfile_${fhr3}_0p5" > "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2b.0p50.anl.idx"
+        ${WGRIB2} -s "pgb2bfile_${fhr3}_1p0" > "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2b.1p00.anl.idx"
       fi
     else
-      cp pgb2bfile_${fhr3}_0p25  $COMOUT/${PREFIX}pgrb2b.0p25.f${fhr3}
-      $WGRIB2 -s pgb2bfile_${fhr3}_0p25 > $COMOUT/${PREFIX}pgrb2b.0p25.f${fhr3}.idx
+      cp "pgb2bfile_${fhr3}_0p25"  "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2b.0p25.f${fhr3}"
+      ${WGRIB2} -s "pgb2bfile_${fhr3}_0p25" > "${COM_ATMOS_GRIB_0p25}/${PREFIX}pgrb2b.0p25.f${fhr3}.idx"
       if [ "$PGBS" = "YES" ]; then
-        cp pgb2bfile_${fhr3}_0p5   $COMOUT/${PREFIX}pgrb2b.0p50.f${fhr3}
-        cp pgb2bfile_${fhr3}_1p0   $COMOUT/${PREFIX}pgrb2b.1p00.f${fhr3}
-        $WGRIB2 -s pgb2bfile_${fhr3}_0p5  > $COMOUT/${PREFIX}pgrb2b.0p50.f${fhr3}.idx
-        $WGRIB2 -s pgb2bfile_${fhr3}_1p0  > $COMOUT/${PREFIX}pgrb2b.1p00.f${fhr3}.idx
+        cp "pgb2bfile_${fhr3}_0p5" "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2b.0p50.f${fhr3}"
+        cp "pgb2bfile_${fhr3}_1p0" "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2b.1p00.f${fhr3}"
+        ${WGRIB2} -s "pgb2bfile_${fhr3}_0p5" > "${COM_ATMOS_GRIB_0p50}/${PREFIX}pgrb2b.0p50.f${fhr3}.idx"
+        ${WGRIB2} -s "pgb2bfile_${fhr3}_1p0" > "${COM_ATMOS_GRIB_1p00}/${PREFIX}pgrb2b.1p00.f${fhr3}.idx"
       fi
     fi
   fi
 
   export nset=$(expr $nset + 1 )
 done
-
-echo "!!!!!!CREATION OF SELECT $RUN DOWNSTREAM PRODUCTS COMPLETED FOR FHR = $FH !!!!!!!"
-#---------------------------------------------------------------
-
 
 exit 0

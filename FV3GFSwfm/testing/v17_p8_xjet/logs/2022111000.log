@@ -1,0 +1,51 @@
+2023-05-28 01:31:38 +0000 :: fe3 :: Submitting gfsfcst
+2023-05-28 01:31:38 +0000 :: fe3 :: Submission status of gfsfcst is pending at druby://fe3:36854
+2023-05-28 01:33:22 +0000 :: fe3 :: Submission status of previously pending gfsfcst is failure!  sbatch: error: Batch job submission failed: Invalid qos specification
+2023-05-28 01:33:22 +0000 :: fe3 :: Submitting gfsfcst
+2023-05-28 01:33:23 +0000 :: fe3 :: Submission of gfsfcst succeeded, jobid=28483216
+2023-05-28 01:34:46 +0000 :: fe3 :: Task gfsfcst, jobid=28483216, in state QUEUED (PENDING)
+2023-05-28 06:05:19 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-28 06:05:22 +0000 :: fe2 :: Submission of gfsfcst succeeded, jobid=28492564
+2023-05-28 06:38:42 +0000 :: fe3 :: Task gfsfcst, jobid=28492564, in state FAILED (FAILED), ran for 219.0 seconds, exit status=11, try=1 (of 2)
+2023-05-28 06:38:42 +0000 :: fe3 :: Submitting gfsfcst
+2023-05-28 06:38:42 +0000 :: fe3 :: Submission status of gfsfcst is pending at druby://fe3:33495
+2023-05-29 16:48:27 +0000 :: fe2 :: Task gfsfcst, jobid=28566454, in state FAILED (CANCELLED), ran for 20.0 seconds, exit status=15, try=1 (of 2)
+2023-05-29 16:48:27 +0000 :: fe2 :: Task gfspost_f000-f000, jobid=28566455, in state FAILED (CANCELLED), ran for 20.0 seconds, exit status=15, try=1 (of 2)
+2023-05-29 16:48:27 +0000 :: fe2 :: Task gfspost_f006-f006, jobid=28566457, in state FAILED (CANCELLED), ran for 20.0 seconds, exit status=15, try=1 (of 2)
+2023-05-29 16:48:27 +0000 :: fe2 :: Task gfspost_f012-f012, jobid=28566459, in state FAILED (CANCELLED), ran for 20.0 seconds, exit status=15, try=1 (of 2)
+2023-05-29 16:48:27 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-29 16:48:27 +0000 :: fe2 :: Submission status of gfsfcst is pending at druby://fe2:32912
+2023-05-29 16:48:50 +0000 :: fe2 :: Submission status of previously pending gfsfcst is success, jobid=28566687
+2023-05-29 16:48:50 +0000 :: fe2 :: Task gfsfcst, jobid=28566687, in state RUNNING (RUNNING)
+2023-05-29 16:49:10 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-29 16:49:10 +0000 :: fe2 :: Submission status of gfsfcst is pending at druby://fe2:38302
+2023-05-29 17:17:08 +0000 :: fe2 :: Submission status of previously pending gfsfcst is success, jobid=28566693
+2023-05-29 17:17:08 +0000 :: fe2 :: Task gfsfcst, jobid=28566693, in state FAILED (FAILED), ran for 178.0 seconds, exit status=11, try=1 (of 2)
+2023-05-29 17:17:08 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-29 17:17:08 +0000 :: fe2 :: Submission status of gfsfcst is pending at druby://fe2:39108
+2023-05-29 18:15:18 +0000 :: fe3 :: Submission status of previously pending gfsfcst is success, jobid=28567880
+2023-05-29 18:15:26 +0000 :: fe3 :: Task gfsfcst, jobid=28567880, in state DEAD (TIMEOUT), ran for 2416.0 seconds, exit status=255, try=2 (of 2)
+2023-05-29 18:15:26 +0000 :: fe3 :: Submitting gfspost_f000-f000
+2023-05-29 18:15:26 +0000 :: fe3 :: Submitting gfspost_f006-f006
+2023-05-29 18:15:26 +0000 :: fe3 :: Submitting gfspost_f012-f012
+2023-05-29 18:15:26 +0000 :: fe3 :: Submission of gfspost_f000-f000 succeeded, jobid=28570041
+2023-05-29 18:15:26 +0000 :: fe3 :: Submission of gfspost_f006-f006 succeeded, jobid=28570042
+2023-05-29 18:15:26 +0000 :: fe3 :: Submission of gfspost_f012-f012 succeeded, jobid=28570043
+2023-05-29 18:15:49 +0000 :: fe3 :: Task gfspost_f000-f000, jobid=28570041, in state RUNNING (RUNNING)
+2023-05-29 18:15:49 +0000 :: fe3 :: Task gfspost_f006-f006, jobid=28570042, in state RUNNING (RUNNING)
+2023-05-29 18:15:49 +0000 :: fe3 :: Task gfspost_f012-f012, jobid=28570043, in state RUNNING (RUNNING)
+2023-05-29 18:15:49 +0000 :: fe3 :: Forcibly submitting gfsfcst
+2023-05-29 18:15:49 +0000 :: fe3 :: Submission status of gfsfcst is pending at druby://fe3:46659
+2023-05-29 20:14:07 +0000 :: fe3 :: Submission status of previously pending gfsfcst is success, jobid=28570044
+2023-05-29 20:14:08 +0000 :: fe3 :: Task gfsfcst, jobid=28570044, in state SUCCEEDED (COMPLETED), ran for 4494.0 seconds, exit status=0, try=4 (of 2)
+2023-05-29 20:14:08 +0000 :: fe3 :: Task gfspost_f000-f000, jobid=28570041, in state SUCCEEDED (COMPLETED), ran for 136.0 seconds, exit status=0, try=1 (of 2)
+2023-05-29 20:14:08 +0000 :: fe3 :: Task gfspost_f006-f006, jobid=28570042, in state SUCCEEDED (COMPLETED), ran for 154.0 seconds, exit status=0, try=1 (of 2)
+2023-05-29 20:14:08 +0000 :: fe3 :: Task gfspost_f012-f012, jobid=28570043, in state SUCCEEDED (COMPLETED), ran for 157.0 seconds, exit status=0, try=1 (of 2)
+2023-05-29 20:14:08 +0000 :: fe3 :: Submitting gfspost_f018-f018
+2023-05-29 20:14:09 +0000 :: fe3 :: Submitting gfspost_f024-f024
+2023-05-29 20:14:09 +0000 :: fe3 :: Submission of gfspost_f018-f018 succeeded, jobid=28574064
+2023-05-29 20:14:09 +0000 :: fe3 :: Submission of gfspost_f024-f024 succeeded, jobid=28574065
+2023-05-29 20:22:08 +0000 :: fe3 :: Task gfspost_f018-f018, jobid=28574064, in state SUCCEEDED (COMPLETED), ran for 144.0 seconds, exit status=0, try=1 (of 2)
+2023-05-29 20:22:09 +0000 :: fe3 :: Task gfspost_f024-f024, jobid=28574065, in state FAILED (FAILED), ran for 97.0 seconds, exit status=256, try=1 (of 2)
+2023-05-29 20:22:09 +0000 :: fe3 :: Submitting gfspost_f024-f024
+2023-05-29 20:22:09 +0000 :: fe3 :: Submission status of gfspost_f024-f024 is pending at druby://fe3:40089

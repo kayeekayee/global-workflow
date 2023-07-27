@@ -1,4 +1,5 @@
-#!/bin/bash
+#! /usr/bin/env bash
+
 ###############################################################################
 #                                                                             #
 # This script tars the sectral or bulletin files into a single file and       #
@@ -23,18 +24,13 @@
 #
 # --------------------------------------------------------------------------- #
 # 0.  Preparations
+
+source "$HOMEgfs/ush/preamble.sh"
+
 # 0.a Basic modes of operation
 
-  # set execution trace prompt.  ${0##*/} adds the script's basename
-  PS4=" \${SECONDS} ${0##*/} L\${LINENO} + "
-  set -x
-
-  # Use LOUD variable to turn on/off trace.  Defaults to YES (on).
-  export LOUD=${LOUD:-YES}; [[ $LOUD = yes ]] && export LOUD=YES
-  [[ "$LOUD" != YES ]] && set -x
-
   cd $DATA
-  postmsg "$jlogfile" "Making TAR FILE"
+  echo "Making TAR FILE"
 
   alertName=$(echo $RUN|tr [a-z] [A-Z])
 
@@ -46,7 +42,7 @@
   echo "   ID              : $1"
   echo "   Type            : $2"
   echo "   Number of files : $3"
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 
 # 0.b Check if type set
@@ -59,8 +55,7 @@
     echo '*** VARIABLES IN ww3_tar.sh NOT SET ***'
     echo '********************************************'
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "TYPE IN ww3_tar.sh NOT SET"
+    set_trace
     exit 1
   else
     ID=$1
@@ -81,17 +76,15 @@
 # 0.c Define directories and the search path.
 #     The tested variables should be exported by the postprocessor script.
 
-  if [ -z "$cycle" ] || [ -z "$COMOUT" ] || [ -z "$WAV_MOD_TAG" ] ||  \
-     [ -z "$SENDCOM" ] || [ -z "$SENDDBN" ] || [ -z "${STA_DIR}" ]
-  then
+  if [[ -z "${cycle}" ]] || [[ -z "${COM_WAVE_STATION}" ]] || [[ -z "${WAV_MOD_TAG}" ]] ||  \
+     [[ -z "${SENDCOM}" ]] || [[ -z "${SENDDBN}" ]] || [[ -z "${STA_DIR}" ]]; then
     set +x
     echo ' '
     echo '*****************************************************'
     echo '*** EXPORTED VARIABLES IN ww3_tar.sh NOT SET ***'
     echo '*****************************************************'
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "EXPORTED VARIABLES IN ww3_tar.sh NOT SET"
+    set_trace
     exit 2
   fi
 
@@ -103,7 +96,7 @@
   set +x
   echo ' '
   echo '   Making tar file ...'
-  set -x
+  set_trace
 
   count=0
   countMAX=5
@@ -127,8 +120,7 @@
         echo '*** FATAL ERROR : TAR CREATION FAILED *** '
         echo '***************************************** '
         echo ' '
-        [[ "$LOUD" = YES ]] && set -x
-        postmsg "$jlogfile" "FATAL ERROR : TAR CREATION FAILED"
+        set_trace
         exit 3
       fi
       
@@ -139,7 +131,7 @@
     else
       set +x
       echo ' All files not found for tar. Sleeping 10 seconds and trying again ..'
-      [[ "$LOUD" = YES ]] && set -x
+      set_trace
       sleep 10
       count=$(expr $count + 1)
     fi
@@ -154,8 +146,7 @@
     echo '*** FATAL ERROR : TAR CREATION FAILED *** '
     echo '***************************************** '
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "FATAL ERROR : TAR CREATION FAILED"
+    set_trace
     exit 3
   fi
 
@@ -175,8 +166,7 @@
         echo '*** FATAL ERROR : SPECTRAL TAR COMPRESSION FAILED *** '
         echo '***************************************************** '
         echo ' '
-        [[ "$LOUD" = YES ]] && set -x
-        postmsg "$jlogfile" "FATAL ERROR : SPECTRAL TAR COMPRESSION FAILED"
+        set_trace
         exit 4
       fi
     fi
@@ -189,10 +179,10 @@
 
   set +x
   echo ' '
-  echo "   Moving tar file ${file_name} to $COMOUT ..."
-  [[ "$LOUD" = YES ]] && set -x
+  echo "   Moving tar file ${file_name} to ${COM_WAVE_STATION} ..."
+  set_trace
 
-  cp ${file_name} $COMOUT/station/.
+  cp "${file_name}" "${COM_WAVE_STATION}/."
 
   exit=$?
 
@@ -204,8 +194,7 @@
     echo '*** FATAL ERROR : TAR COPY FAILED *** '
     echo '************************************* '
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "FATAL ERROR : TAR COPY FAILED"
+    set_trace
     exit 4
   fi
 
@@ -213,23 +202,22 @@
   then
     set +x
     echo ' '
-    echo "   Alerting TAR file as $COMOUT/station/${file_name}"
+    echo "   Alerting TAR file as ${COM_WAVE_STATION}/${file_name}"
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    $DBNROOT/bin/dbn_alert MODEL ${alertName}_WAVE_TAR $job $COMOUT/station/${file_name}
+    set_trace
+    "${DBNROOT}/bin/dbn_alert MODEL" "${alertName}_WAVE_TAR" "${job}" \
+      "${COM_WAVE_STATION}/${file_name}"
   fi
 
 # --------------------------------------------------------------------------- #
 # 4.  Final clean up
 
-  cd $DATA
+cd $DATA
 
-  set +x; [[ "$LOUD" = YES ]] && set -v
+if [[ ${KEEPDATA:-NO} == "NO" ]]; then
+  set -v
   rm -rf  ${STA_DIR}/${type}
   set +v
-
-  echo ' '
-  echo 'End of ww3_tar.sh at'
-  date
+fi
 
 # End of ww3_tar.sh ----------------------------------------------------- #

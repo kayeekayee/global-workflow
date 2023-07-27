@@ -1,0 +1,37 @@
+31may
+ - seem to be running out of memory
+   * try increasing # of write tasks per group
+   * changed from 10 to 12  ==>  increase #nodes by 8
+      get MPI abort command; wrote Walter/Kate/David
+
+29may23
+ - update to UFS hash, 1ac938c, 12may23 + Joe's update
+
+ - 
+
+19may23
+ - update to top of develop (19May23)
+ - test UFS hash in checkout.sh  (14Apr23 - 2247060)
+
+  sh checkout.sh
+  sh build_all.sh
+  sh link_workflow.sh etc jet
+
+
+  get error when running setup_expt.py
+     Traceback (most recent call last):
+     File "/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/workflow/./setup_expt.py", line 13, in <module>
+       from hosts import Host
+     File "/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/workflow/hosts.py", line 6, in <module>
+       from pygw.yaml_file import YAMLFile
+     File "/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/workflow/pygw/yaml_file.py", line 9, in <module>
+       from .jinja import Jinja
+     File "/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw/workflow/pygw/jinja.py", line 4, in <module>
+       import jinja2
+   ModuleNotFoundError: No module named 'jinja2'
+
+    wrong Python environment ??
+     * sent email to Kate, Walter, David
+
+  sample xml file from David's directory
+    /lfs1/NESDIS/nesdis-rdo2/David.Huber/para/exp/384/384.xml

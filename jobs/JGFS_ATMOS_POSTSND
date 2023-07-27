@@ -1,63 +1,13 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
 
-export RUN_ENVIR=${RUN_ENVIR:-"nco"}
-export PS4='$SECONDS + '
-date
-
-#############################
-# Source relevant config files
-#############################
-configs="base postsnd"
-export EXPDIR=${EXPDIR:-$HOMEgfs/parm/config}
-config_path=${EXPDIR:-$NWROOT/gfs.${gfs_ver}/parm/config}
-for config in $configs; do
-    . $config_path/config.$config
-    status=$?
-    [[ $status -ne 0 ]] && exit $status
-done
-
-
-##########################################
-# Source machine runtime environment
-##########################################
-. $HOMEgfs/env/${machine}.env postsnd
-status=$?
-[[ $status -ne 0 ]] && exit $status
-
-
-##############################################
-# Obtain unique process id (pid) and make temp directory
-##############################################
-export pid=${pid:-$$}
-export outid=${outid:-"LL$job"}
-export DATA=${DATA:-${DATAROOT}/${jobid:?}}
-mkdir -p $DATA
-cd $DATA
-
-
-##############################################
-# Run setpdy and initialize PDY variables
-##############################################
-export cycle="t${cyc}z"
-setpdy.sh
-. ./PDY
-
-##############################################
-# Determine Job Output Name on System
-##############################################
-export pgmout="OUTPUT.${pid}"
-export pgmerr=errfile
+source "${HOMEgfs}/ush/preamble.sh"
+source "${HOMEgfs}/ush/jjob_header.sh" -e "postsnd" -c "base postsnd"
 
 
 ##############################################
 # Set variables used in the exglobal script
 ##############################################
-export CDATE=${CDATE:-${PDY}${cyc}}
-export CDUMP=${CDUMP:-${RUN:-"gfs"}}
-if [ $RUN_ENVIR = "nco" ]; then
-    export ROTDIR=${COMROOT:?}/$NET/$envir
-fi
+export CDUMP=${RUN/enkf}
 
 
 ########################################
@@ -73,32 +23,31 @@ export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 # Set up the source directories
 ###################################
 
-export HOMEbufrsnd=${HOMEbufrsnd:-$HOMEgfs}
-export EXECbufrsnd=${EXECbufrsnd:-$HOMEbufrsnd/exec}
-export FIXbufrsnd=${FIXbufrsnd:-$HOMEbufrsnd/fix/product}
-export PARMbufrsnd=${PARMbufrsnd:-$HOMEbufrsnd/parm/product}
-export USHbufrsnd=${USHbufrsnd:-$HOMEbufrsnd/ush}
-export SCRbufrsnd=${SCRbufrsnd:-$HOMEbufrsnd/scripts}
+export HOMEbufrsnd=${HOMEbufrsnd:-${HOMEgfs}}
+export EXECbufrsnd=${EXECbufrsnd:-${HOMEbufrsnd}/exec}
+export FIXbufrsnd=${FIXbufrsnd:-${HOMEbufrsnd}/fix/product}
+export PARMbufrsnd=${PARMbufrsnd:-${HOMEbufrsnd}/parm/product}
+export USHbufrsnd=${USHbufrsnd:-${HOMEbufrsnd}/ush}
+export SCRbufrsnd=${SCRbufrsnd:-${HOMEbufrsnd}/scripts}
 
 ##############################
 # Define COM Directories
 ##############################
-export COMIN=${COMIN:-$ROTDIR/${CDUMP}.${PDY}/${cyc}/atmos}
-export COMOUT=${COMOUT:-$ROTDIR/${CDUMP}.${PDY}/${cyc}/atmos}
-export pcom=${pcom:-${COMOUT}/wmo}
-export COMAWP=${COMAWP:-${COMOUT}/gempak}
 export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
-[[ ! -d $COMOUT ]] && mkdir -p $COMOUT
-[[ ! -d $pcom ]] && mkdir -p $pcom
-[[ ! -d $COMAWP ]] && mkdir -p $COMAWP
 
-env
+YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_HISTORY COM_ATMOS_BUFR \
+  COM_ATMOS_WMO COM_ATMOS_GEMPAK
+
+[[ ! -d ${COM_ATMOS_BUFR} ]] && mkdir -p "${COM_ATMOS_BUFR}"
+[[ ! -d ${COM_ATMOS_GEMPAK} ]] && mkdir -p "${COM_ATMOS_GEMPAK}"
+[[ ! -d ${COM_ATMOS_WMO} ]] && mkdir -p "${COM_ATMOS_WMO}"
+
 
 ########################################################
 # Execute the script.
-$SCRbufrsnd/exgfs_atmos_postsnd.sh
+${SCRbufrsnd}/exgfs_atmos_postsnd.sh
 status=$?
-[[ $status -ne 0 ]] && exit $status
+[[ ${status} -ne 0 ]] && exit ${status}
 
 
 ##############################################
@@ -108,19 +57,16 @@ status=$?
 ##############################################
 # Final processing
 ##############################################
-if [ -e "$pgmout" ] ; then
-  cat $pgmout
+if [ -e "${pgmout}" ] ; then
+  cat ${pgmout}
 fi
-
-msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
 
 ##########################################
 # Remove the Temporary working directory
 ##########################################
-cd $DATAROOT
-[[ $KEEPDATA = "NO" ]] && rm -rf $DATA
+cd ${DATAROOT}
+[[ ${KEEPDATA} = "NO" ]] && rm -rf ${DATA}
 
-date
+
 exit 0
 

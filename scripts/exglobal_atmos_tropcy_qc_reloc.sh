@@ -1,24 +1,21 @@
+#! /usr/bin/env bash
+
 ############################################################################
-echo "---------------------------------------------------------------------"
-echo "exglobal_atmos_tropcy_qc_reloc.sh - Tropical Cyclone QC/Relocation Prcocessing"
-echo "---------------------------------------------------------------------"
-echo "History: Jun 13 2006 - Original script."
-echo "          March 2013 - No changes needed for WCOSS transition"
-echo "                       MP_LABELIO default added"
-echo "            Oct 2013 - Use main USH vars as part of minor pkg cleanup"
+# echo "---------------------------------------------------------------------"
+# echo "exglobal_atmos_tropcy_qc_reloc.sh - Tropical Cyclone QC/Relocation Prcocessing"
+# echo "---------------------------------------------------------------------"
+# echo "History: Jun 13 2006 - Original script."
+# echo "          March 2013 - No changes needed for WCOSS transition"
+# echo "                       MP_LABELIO default added"
+# echo "            Oct 2013 - Use main USH vars as part of minor pkg cleanup"
 ############################################################################
 
-set -x
+source "$HOMEgfs/ush/preamble.sh"
 
 # Make sure we are in the $DATA directory
 cd $DATA
 
-msg="HAS BEGUN on $(hostname)"
-postmsg "$jlogfile" "$msg"
-
 cat break > $pgmout
-
-export COMSP=$COMOUT/${RUN}.${cycle}.
 
 tmhr=$(echo $tmmark|cut -c3-4)
 cdate10=$( ${NDATE:?} -$tmhr $PDY$cyc)
@@ -26,27 +23,20 @@ cdate10=$( ${NDATE:?} -$tmhr $PDY$cyc)
 NET_uc=$(echo $RUN | tr [a-z] [A-Z])
 tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
-msg="$NET_uc ANALYSIS TIME IS $PDY$cyc"
-postmsg "$jlogfile" "$msg"
-
 iflag=0
 if [ $RUN = ndas ]; then
    if [ $DO_RELOCATE = NO ]; then
-      msg="CENTER PROCESSING TIME FOR NDAS TROPICAL CYCLONE QC IS $cdate10"
-      postmsg "$jlogfile" "$msg"
-      msg="Output tcvitals files will be copied forward in time to proper \
+      echo "CENTER PROCESSING TIME FOR NDAS TROPICAL CYCLONE QC IS $cdate10"
+      echo "Output tcvitals files will be copied forward in time to proper \
 output file directory path locations"
-      postmsg "$jlogfile" "$msg"
       iflag=1
    else
-      msg="CENTER PROCESSING TIME FOR $tmmark_uc NDAS TROPICAL CYCLONE \
+      echo "CENTER PROCESSING TIME FOR $tmmark_uc NDAS TROPICAL CYCLONE \
 RELOCATION IS $cdate10"
-      postmsg "$jlogfile" "$msg"
    fi
 else
-   msg="CENTER PROCESSING TIME FOR $tmmark_uc $NET_uc TROPICAL CYCLONE QC/\
+   echo "CENTER PROCESSING TIME FOR $tmmark_uc $NET_uc TROPICAL CYCLONE QC/\
 RELOCATION IS $cdate10"
-   postmsg "$jlogfile" "$msg"
 fi
 
 
@@ -63,17 +53,14 @@ if [ "$PROCESS_TROPCY" = 'YES' ]; then
    ${USHSYND:-$HOMEgfs/ush}/syndat_qctropcy.sh $cdate10
    errsc=$?
    if [ "$errsc" -ne '0' ]; then
-    msg="syndat_qctropcy.sh failed. exit"
-    postmsg "$jlogfile" "$msg"
+    echo "syndat_qctropcy.sh failed. exit"
     exit $errsc
    fi
    
 
-   cd $COMOUT
+   cd "${COM_OBS}" || exit 1
    pwd
-   set +x
    ls -ltr *syndata*
-   set -x
    cd $ARCHSYND
    pwd;ls -ltr
    cat syndat_dateck
@@ -90,10 +77,10 @@ else
 #         don't want to wipe out these files)
 #         
 
-   [ ! -s ${COMSP}syndata.tcvitals.$tmmark ]  &&  \
-    cp /dev/null ${COMSP}syndata.tcvitals.$tmmark
-   [ ! -s ${COMSP}jtwc-fnoc.tcvitals.$tmmark ]  &&  \
-    cp /dev/null ${COMSP}jtwc-fnoc.tcvitals.$tmmark
+   [ ! -s "${COM_OBS}/${RUN}.t${cyc}z.syndata.tcvitals.${tmmark}" ]  &&  \
+    cp "/dev/null" "${COM_OBS}/${RUN}.t${cyc}z.syndata.tcvitals.${tmmark}"
+   [ ! -s "${COM_OBS}/${RUN}.t${cyc}z.jtwc-fnoc.tcvitals.${tmmark}" ]  &&  \
+    cp "/dev/null" "${COM_OBS}/${RUN}.t${cyc}z.jtwc-fnoc.tcvitals.${tmmark}"
 
 #  endif loop $PROCESS_TROPCY
 fi
@@ -121,25 +108,25 @@ if [ "$DO_RELOCATE" = 'YES' ]; then
    [ $RUN = gfs -o $RUN = gdas -o $NET = cfs ]  &&  qual_last=""
 
    if [ $BKGFREQ -eq 1 ]; then
-      [ -s sgm3prep ]  &&  cp sgm3prep ${COMSP}sgm3prep${qual_last}
-      [ -s sgm2prep ]  &&  cp sgm2prep ${COMSP}sgm2prep${qual_last}
-      [ -s sgm1prep ]  &&  cp sgm1prep ${COMSP}sgm1prep${qual_last}
-      [ -s sgesprep ]  &&  cp sgesprep ${COMSP}sgesprep${qual_last}
-      [ -s sgp1prep ]  &&  cp sgp1prep ${COMSP}sgp1prep${qual_last}
-      [ -s sgp2prep ]  &&  cp sgp2prep ${COMSP}sgp2prep${qual_last}
-      [ -s sgp3prep ]  &&  cp sgp3prep ${COMSP}sgp3prep${qual_last}
+      if [[ -s sgm3prep ]]; then cp "sgm3prep" "${COM_OBS}/${RUN}.t${cyc}z.sgm3prep${qual_last}"; fi
+      if [[ -s sgm2prep ]]; then cp "sgm2prep" "${COM_OBS}/${RUN}.t${cyc}z.sgm2prep${qual_last}"; fi
+      if [[ -s sgm1prep ]]; then cp "sgm1prep" "${COM_OBS}/${RUN}.t${cyc}z.sgm1prep${qual_last}"; fi
+      if [[ -s sgesprep ]]; then cp "sgesprep" "${COM_OBS}/${RUN}.t${cyc}z.sgesprep${qual_last}"; fi
+      if [[ -s sgp1prep ]]; then cp "sgp1prep" "${COM_OBS}/${RUN}.t${cyc}z.sgp1prep${qual_last}"; fi
+      if [[ -s sgp2prep ]]; then cp "sgp2prep" "${COM_OBS}/${RUN}.t${cyc}z.sgp2prep${qual_last}"; fi
+      if [[ -s sgp3prep ]]; then cp "sgp3prep" "${COM_OBS}/${RUN}.t${cyc}z.sgp3prep${qual_last}"; fi
    elif [ $BKGFREQ -eq 3 ]; then
-      [ -s sgm3prep ]  &&  cp sgm3prep ${COMSP}sgm3prep${qual_last}
-      [ -s sgesprep ]  &&  cp sgesprep ${COMSP}sgesprep${qual_last}
-      [ -s sgp3prep ]  &&  cp sgp3prep ${COMSP}sgp3prep${qual_last}
+      if [[ -s sgm3prep ]]; then cp "sgm3prep" "${COM_OBS}/${RUN}.t${cyc}z.sgm3prep${qual_last}"; fi
+      if [[ -s sgesprep ]]; then cp "sgesprep" "${COM_OBS}/${RUN}.t${cyc}z.sgesprep${qual_last}"; fi
+      if [[ -s sgp3prep ]]; then cp "sgp3prep" "${COM_OBS}/${RUN}.t${cyc}z.sgp3prep${qual_last}"; fi
    fi
 
-# The existence of ${COMSP}tropcy_relocation_status.$tmmark file will tell the
+# The existence of ${COM_OBS}/${RUN}.t${cyc}z.tropcy_relocation_status.$tmmark file will tell the
 #  subsequent PREP processing that RELOCATION processing occurred, if this file
 #  does not already exist at this point, echo "RECORDS PROCESSED" into it to
 #  further tell PREP processing that records were processed by relocation and
 #  the global sigma guess was modified by tropical cyclone relocation
-#  Note: If ${COMSP}tropcy_relocation_status.$tmmark already exists at this
+#  Note: If ${COM_OBS}/${RUN}.t${cyc}z.tropcy_relocation_status.$tmmark already exists at this
 #        point it means that it contains the string "NO RECORDS to process"
 #        and was created by the child script tropcy_relocate.sh because records
 #        were not processed by relocation and the global sigma guess was NOT
@@ -147,8 +134,9 @@ if [ "$DO_RELOCATE" = 'YES' ]; then
 #        were found in the relocation step)
 # ----------------------------------------------------------------------------
 
-   [ ! -s ${COMSP}tropcy_relocation_status.$tmmark ]  &&  \
-    echo "RECORDS PROCESSED" > ${COMSP}tropcy_relocation_status.$tmmark
+   if [[ ! -s "${COM_OBS}/${RUN}.t${cyc}z.tropcy_relocation_status.${tmmark}" ]]; then
+      echo "RECORDS PROCESSED" > "${COM_OBS}/${RUN}.t${cyc}z.tropcy_relocation_status.${tmmark}"
+   fi
 
 #  endif loop $DO_RELOCATE
 fi
@@ -156,27 +144,8 @@ fi
 
 ########################################################
 
-# GOOD RUN
-set +x
-echo " "
-echo " ****** PROCESSING COMPLETED NORMALLY"
-echo " ****** PROCESSING COMPLETED NORMALLY"
-echo " ****** PROCESSING COMPLETED NORMALLY"
-echo " ****** PROCESSING COMPLETED NORMALLY"
-echo " "
-set -x
-
-
 # save standard output
-cat break $pgmout break > allout
-cat allout
-# rm allout
+cat break $pgmout break
 
-sleep 10
-
-if [ $iflag -eq 0 ]; then
-   msg='ENDED NORMALLY.'
-   postmsg "$jlogfile" "$msg"
-fi
 
 ################## END OF SCRIPT #######################

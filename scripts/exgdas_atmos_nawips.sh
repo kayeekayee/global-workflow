@@ -1,29 +1,26 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 ###################################################################
-echo "----------------------------------------------------"
-echo "exnawips - convert NCEP GRIB files into GEMPAK Grids"
-echo "----------------------------------------------------"
-echo "History: Mar 2000 - First implementation of this new script."
-echo "S Lilly: May 2008 - add logic to make sure that all of the "
-echo "                    data produced from the restricted ECMWF"
-echo "                    data on the CCS is properly protected."
+# echo "----------------------------------------------------"
+# echo "exnawips - convert NCEP GRIB files into GEMPAK Grids"
+# echo "----------------------------------------------------"
+# echo "History: Mar 2000 - First implementation of this new script."
+# echo "S Lilly: May 2008 - add logic to make sure that all of the "
+# echo "                    data produced from the restricted ECMWF"
+# echo "                    data on the CCS is properly protected."
 #####################################################################
 
-set -xa
+source "$HOMEgfs/ush/preamble.sh" "${2}"
 
 cd $DATA
-RUN=$1
+RUN2=$1
 fend=$2
 DBN_ALERT_TYPE=$3
+destination=$4
 
-export 'PS4=$RUN:$SECONDS + '
-
-DATA_RUN=$DATA/$RUN
+DATA_RUN=$DATA/$RUN2
 mkdir -p $DATA_RUN
 cd $DATA_RUN
-
-msg="Begin job for $job"
-postmsg "$jlogfile" "$msg"
 
 cp $FIXgempak/g2varswmo2.tbl g2varswmo2.tbl
 export err=$?
@@ -74,32 +71,25 @@ pdsext=no
 maxtries=180
 fhcnt=$fstart
 while [ $fhcnt -le $fend ] ; do
-  typeset -Z3 fhr
-
-  fhr=$fhcnt
+  fhr=$(printf "%03d" $fhcnt)
   fhcnt3=$(expr $fhr % 3)
 
-  fhr3=$fhcnt
-  typeset -Z3 fhr3
+  fhr3=$(printf "%03d" $fhcnt)
 
-  GEMGRD=${RUN}_${PDY}${cyc}f${fhr3}
+  GEMGRD=${RUN2}_${PDY}${cyc}f${fhr3}
 
-  if [ $RUN = "gdas_0p25" ]; then 
-    export GRIBIN=$COMIN/${model}.${cycle}.pgrb2.0p25.f${fhr}
-    if [ ! -f $GRIBIN ] ; then
-       echo "WARNING: $GRIBIN FILE is missing"
-       msg=" $GRIBIN file is missing "
-       postmsg "$jlogfile" "$msg"
+  if [[ ${RUN2} = "gdas_0p25" ]]; then
+    export GRIBIN=${COM_ATMOS_GRIB_0p25}/${model}.${cycle}.pgrb2.0p25.f${fhr}
+    if [[ ! -f ${GRIBIN} ]] ; then
+       echo "WARNING: ${GRIBIN} FILE is missing"
     fi
-    GRIBIN_chk=$COMIN/${model}.${cycle}.pgrb2.0p25.f${fhr}.idx
+    GRIBIN_chk=${COM_ATMOS_GRIB_0p25}${model}.${cycle}.pgrb2.0p25.f${fhr}.idx
   else
-    export GRIBIN=$COMIN/${model}.${cycle}.pgrb2.1p00.f${fhr}
-    if [ ! -f $GRIBIN ] ; then
-       echo "WARNING: $GRIBIN FILE is missing"
-       msg=" $GRIBIN file is missing "
-       postmsg "$jlogfile" "$msg"
+    export GRIBIN=${COM_ATMOS_GRIB_1p00}/${model}.${cycle}.pgrb2.1p00.f${fhr}
+    if [[ ! -f ${GRIBIN} ]] ; then
+       echo "WARNING: ${GRIBIN} FILE is missing"
     fi
-    GRIBIN_chk=$COMIN/${model}.${cycle}.pgrb2.1p00.f${fhr}.idx
+    GRIBIN_chk=${COM_ATMOS_GRIB_1p00}/${model}.${cycle}.pgrb2.1p00.f${fhr}.idx
   fi
 
   icnt=1
@@ -109,15 +99,13 @@ while [ $fhcnt -le $fend ] ; do
       sleep 5
       break
     else
-      msg="The process is waiting ... ${GRIBIN_chk} file to proceed."
-      postmsg "${jlogfile}" "$msg"
+      echo "The process is waiting ... ${GRIBIN_chk} file to proceed."
       sleep 20
       let "icnt=icnt+1"
     fi
     if [ $icnt -ge $maxtries ]
     then
-      msg="ABORTING: after 1 hour of waiting for ${GRIBIN_chk} file at F$fhr to end."
-      postmsg "${jlogfile}" "$msg"
+      echo "ABORTING: after 1 hour of waiting for ${GRIBIN_chk} file at F$fhr to end."
       export err=7 ; err_chk
       exit $err
     fi
@@ -148,17 +136,17 @@ EOF
   export err=$?;err_chk
 
   if [ $SENDCOM = "YES" ] ; then
-     cp $GEMGRD $COMOUT/.$GEMGRD
+     cp "${GEMGRD}" "${destination}/.${GEMGRD}"
      export err=$?
-     if [[ $err -ne 0 ]] ; then
-        echo " File $GEMGRD does not exist."
-        exit $err
+     if [[ ${err} -ne 0 ]] ; then
+        echo " File ${GEMGRD} does not exist."
+        exit "${err}"
      fi
 
-     mv $COMOUT/.$GEMGRD $COMOUT/$GEMGRD
-     if [ $SENDDBN = "YES" ] ; then
-         $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job \
-           $COMOUT/$GEMGRD
+     mv "${destination}/.${GEMGRD}" "${destination}/${GEMGRD}"
+     if [[ ${SENDDBN} = "YES" ]] ; then
+         "${DBNROOT}/bin/dbn_alert" MODEL "${DBN_ALERT_TYPE}" "${job}" \
+           "${destination}/${GEMGRD}"
      else
        echo "##### DBN_ALERT_TYPE is: ${DBN_ALERT_TYPE} #####"
      fi
@@ -173,16 +161,6 @@ done
 
 $GEMEXE/gpend
 #####################################################################
-# GOOD RUN
-set +x
-echo "**************JOB $RUN NAWIPS COMPLETED NORMALLY ON THE IBM"
-echo "**************JOB $RUN NAWIPS COMPLETED NORMALLY ON THE IBM"
-echo "**************JOB $RUN NAWIPS COMPLETED NORMALLY ON THE IBM"
-set -x
-#####################################################################
 
-msg='Job completed normally.'
-echo $msg
-postmsg "$jlogfile" "$msg"
 
 ############################### END OF SCRIPT #######################

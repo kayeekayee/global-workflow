@@ -1,5 +1,4 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
 
 # this script generates 0.25/0.5/1/2.5 deg pgb files for each small Grib file
 # Hui-Ya Chuang 01/2014: First Version
@@ -12,14 +11,16 @@ set -x
 # Wen Meng 10/2019: Use bilinear interpolation for LAND, It can trancate land-sea mask as 0 or 1.
 # Wen Meng 11/2019: Teak sea ice cover via land-sea mask.
 
+source "$HOMEgfs/ush/preamble.sh"
+
 export tmpfile=$1
 export fhr3=$2
 export iproc=$3
 export nset=$4
 
-export CNVGRIB=${CNVGRIB:-$${NWPROD:-/nwprod}/util/exec/cnvgrib21}
-export COPYGB2=${COPYGB2:-$${NWPROD:-/nwprod}/util/exec/copygb2}
-export WGRIB2=${WGRIB2:-${NWPROD:-/nwprod}/util/exec/wgrib2}
+export CNVGRIB=${CNVGRIB:-${grib_util_ROOT}/bin/cnvgrib}
+export COPYGB2=${COPYGB2:-${grib_util_ROOT}/bin/copygb}
+export WGRIB2=${WGRIB2:-${wgrib2_ROOT}/bin/wgrib2}
 export TRIMRH=${TRIMRH:-$USHgfs/trim_rh.sh}
 export MODICEC=${MODICEC:-$USHgfs/mod_icec.sh}
 
@@ -32,9 +33,9 @@ export opt25=":(APCP|ACPCP|PRATE|CPRAT):"
 export opt26=' -set_grib_max_bits 25 -fi -if '
 export opt27=":(APCP|ACPCP|PRATE|CPRAT|DZDT):"
 export opt28=' -new_grid_interpolation budget -fi '
-if [ $machine = "S4" ]; then
+#JKHif [ $machine = "S4" ]; then
   export optncpu=' -ncpu 1 '
-fi
+#JKHfi
 export grid0p25="latlon 0:1440:0.25 90:721:-0.25"
 export grid0p5="latlon 0:720:0.5 90:361:-0.5"
 export grid1p0="latlon 0:360:1.0 90:181:-1.0"
@@ -42,6 +43,7 @@ export grid2p5="latlon 0:144:2.5 90:73:-2.5"
 
 export PGB1F=${PGB1F:-"NO"}
 export PGBS=${PGBS:-"NO"}
+optncpu=${optncpu:-}
 
 if [ $nset = 1 ]; then
   if [ "$PGBS" = "YES" ]; then
@@ -105,5 +107,3 @@ fi
 # $CNVGRIB -g21 pgb2file_${fhr3}_${iproc}_1p0 pgbfile_${fhr3}_${iproc}_1p0          
 # $CNVGRIB -g21 pgb2file_${fhr3}_${iproc}_2p5 pgbfile_${fhr3}_${iproc}_2p5 
 #----------------------------------------------------------------------------------------------
-
-exit 0

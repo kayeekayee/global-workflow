@@ -1,4 +1,5 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 ################################################################
 # Script Name:		exgfs_atmos_postsnd.sh.sms
 # Script Description:	Generate GFS BUFR sounding files
@@ -18,12 +19,11 @@
 #   8) 2019-10-18       Guang Ping Lou Transition to reading in NetCDF model data
 #   9) 2019-12-18       Guang Ping Lou generalizing to reading in NetCDF or nemsio
 ################################################################
-set -xa
+
+source "$HOMEgfs/ush/preamble.sh"
 
 cd $DATA
-########################################
-msg="HAS BEGUN"
-#postmsg "$jlogfile" "$msg"
+
 ########################################
 
 ###################################################
@@ -35,39 +35,18 @@ export ENDHOUR=${ENDHOUR:-180}
 export INCREMENT=12
 export MAKEBUFR=NO
 export F00FLAG=YES
-export fformat=${OUTPUT_FILE:-netcdf}
-if [ $fformat == "netcdf" ]
- then
+export fformat=netcdf
 export atmfm="nc"
 export logfm="txt"
-else 
-export atmfm="nemsio"
-export logfm="nemsio"
-fi
+export NINT1=${FHOUT_HF_GFS:-1}
+export NEND1=${FHMAX_HF_GFS:-120}
+export NINT3=${FHOUT_GFS:-3}
 
-    export NINT1=${FHOUT_HF_GFS:-1}
-    export NEND1=${FHMAX_HF_GFS:-120}
-    export NINT3=${FHOUT_GFS:-3}
-
-rm -f -r ${COMOUT}/bufr.${cycle}
-mkdir -p ${COMOUT}/bufr.${cycle}
-
-    if [ -f $HOMEgfs/ush/getncdimlen ]
-	then
-	GETDIM=$HOMEgfs/ush/getncdimlen
-	else
-	GETDIM=$EXECbufrsnd/getncdimlen
-	fi
-if [ $fformat == "netcdf" ]
- then
-export LEVS=$($GETDIM $COMIN/${RUN}.${cycle}.atmf000.${atmfm} pfull)
-else
-# Extract number of vertical levels from $STARTHOUR atmospheric file
-export NEMSIOGET=${NEMSIOGET:-$EXECbufrsnd/nemsio_get}
-fhr3=$(printf %03i $STARTHOUR)
-ATMFCS=$COMIN/${RUN}.${cycle}.atmf${fhr3}.nemsio
-export LEVS=$($NEMSIOGET $ATMFCS dimz | awk '{print $2}')
-fi
+rm -f -r "${COM_ATMOS_BUFR}"
+mkdir -p "${COM_ATMOS_BUFR}"
+GETDIM="${HOMEgfs}/ush/getncdimlen"
+LEVS=$(${GETDIM} "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atmf000.${atmfm}" pfull)
+declare -x LEVS
 
 ### Loop for the hour and wait for the sigma and surface flux file:
 export FSTART=$STARTHOUR
@@ -91,10 +70,8 @@ export FINT=$NINT1
    fi
 
    ic=0
-   while [ $ic -lt 1000 ]
-   do
-      if [ ! -f $COMIN/${RUN}.${cycle}.logf$FEND.${logfm} ]
-      then
+   while [ $ic -lt 1000 ]; do
+      if [[ ! -f "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.logf${FEND}.${logfm}" ]]; then
           sleep 10
           ic=$(expr $ic + 1)
       else
@@ -120,66 +97,39 @@ done
 ##############################################################
 # Tar and gzip the individual bufr files and send them to /com
 ##############################################################
-cd ${COMOUT}/bufr.${cycle}
-tar -cf - . | /usr/bin/gzip > ../${RUN}.${cycle}.bufrsnd.tar.gz
-cd $DATA
+cd "${COM_ATMOS_BUFR}" || exit 2
+tar -cf - . | /usr/bin/gzip > "${RUN}.${cycle}.bufrsnd.tar.gz"
+cd "${DATA}" || exit 2
 
 ########################################
 # Send the single tar file to OSO
 ########################################
-if test "$SENDDBN" = 'YES'
-then
-    $DBNROOT/bin/dbn_alert MODEL GFS_BUFRSND_TAR $job \
-  $COMOUT/${RUN}.${cycle}.bufrsnd.tar.gz
+if [[ "${SENDDBN}" == 'YES' ]]; then
+    "${DBNROOT}/bin/dbn_alert" MODEL GFS_BUFRSND_TAR "${job}" \
+        "${COM_ATMOS_BUFR}/${RUN}.${cycle}.bufrsnd.tar.gz"
 fi
 
 ########################################
 # Create Regional Collectives of BUFR data and 
 # add appropriate WMO Headers.
 ########################################
-collect=' 1 2 3 4 5 6 7 8 9'
-if [ $machine == "HERA" -o  $machine == "JET" ]; then
-for m in ${collect}
-do
-sh $USHbufrsnd/gfs_sndp.sh $m
-done
-
-################################################
-# Convert the bufr soundings into GEMPAK files
-################################################
-sh $USHbufrsnd/gfs_bfr2gpk.sh
-
-else
 rm -rf poe_col
-for m in ${collect}
-do
-echo "sh $USHbufrsnd/gfs_sndp.sh $m " >> poe_col
+for (( m = 1; m <10 ; m++ )); do
+    echo "sh ${USHbufrsnd}/gfs_sndp.sh ${m} " >> poe_col
 done
 
-mv poe_col cmdfile
+if [[ ${CFP_MP:-"NO"} == "YES" ]]; then
+    nl -n ln -v 0 poe_col > cmdfile
+else
+    mv poe_col cmdfile
+fi
 
 cat cmdfile
 chmod +x cmdfile
 
 ${APRUN_POSTSNDCFP} cmdfile
 
-sh $USHbufrsnd/gfs_bfr2gpk.sh
-fi
-################################################
-# Convert the bufr soundings into GEMPAK files
-################################################
-##$USHbufrsnd/gfs_bfr2gpk.sh
+sh "${USHbufrsnd}/gfs_bfr2gpk.sh"
 
-#####################################################################
-# GOOD RUN
-set +x
-echo "**************JOB GFS_meteogrm COMPLETED NORMALLY ON THE IBM"
-echo "**************JOB GFS_meteogrm COMPLETED NORMALLY ON THE IBM"
-echo "**************JOB GFS_meteogrm COMPLETED NORMALLY ON THE IBM"
-set -x
-#####################################################################
-
-msg='HAS COMPLETED NORMALLY.'
-#postmsg "$jlogfile" "$msg"
 
 ############## END OF SCRIPT #######################

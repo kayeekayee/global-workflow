@@ -1,4 +1,5 @@
-#! /bin/sh
+#! /usr/bin/env bash
+
 #####
 ## "parsing_namelist_FV3.sh"
 ## This script writes namelist for FV3 model
@@ -34,7 +35,7 @@ EOF
 cat $DIAG_TABLE >> diag_table
 fi
 
-if [ ! -z "${AERO_DIAG_TABLE}" ]; then
+if [ ! -z "${AERO_DIAG_TABLE:-}" ]; then
   cat ${AERO_DIAG_TABLE} >> diag_table
 fi
 
@@ -44,7 +45,7 @@ cat $DIAG_TABLE_APPEND >> diag_table
 $NCP $DATA_TABLE  data_table
 
 # build field_table
-if [ ! -z "${AERO_FIELD_TABLE}" ]; then
+if [ ! -z "${AERO_FIELD_TABLE:-}" ]; then
   nrec=$( cat ${FIELD_TABLE} | wc -l )
   prec=${nrec}
   if (( dnats > 0 )); then
@@ -69,20 +70,20 @@ cat > input.nml <<EOF
   chksum_debug = $chksum_debug
   dycore_only = $dycore_only
   ccpp_suite = $CCPP_SUITE
-  $atmos_model_nml
+  ${atmos_model_nml:-}
 /
 
 &diag_manager_nml
   prepend_date = .false.
   max_output_fields = 300
-  $diag_manager_nml
+  ${diag_manager_nml:-}
 /
 
 &fms_io_nml
   checksum_required = .false.
   max_files_r = 100
   max_files_w = 100
-  $fms_io_nml
+  ${fms_io_nml:-}
 /
 
 &mpp_io_nml
@@ -94,7 +95,7 @@ cat > input.nml <<EOF
   clock_grain = 'ROUTINE'
   domains_stack_size = ${domains_stack_size:-3000000}
   print_memory_usage = ${print_memory_usage:-".false."}
-  $fms_nml
+  ${fms_nml:-}
 /
 
 &fv_core_nml
@@ -168,6 +169,7 @@ cat >> input.nml << EOF
   dry_mass=${dry_mass:-98320.0}
   consv_te = $consv_te
   do_sat_adj = ${do_sat_adj:-".false."}
+  fast_tau_w_sec = ${fast_tau_w_sec:-"0.2"}
   consv_am = .false.
   fill = .true.
   dwind_2d = .false.
@@ -178,7 +180,7 @@ cat >> input.nml << EOF
   agrid_vel_rst = ${agrid_vel_rst:-".true."}
   read_increment = $read_increment
   res_latlon_dynamics = $res_latlon_dynamics
-  $fv_core_nml
+  ${fv_core_nml-}
 /
 
 &external_ic_nml
@@ -187,7 +189,7 @@ cat >> input.nml << EOF
   gfs_dwinds = $gfs_dwinds
   checker_tr = .false.
   nt_checker = 0
-  $external_ic_nml
+  ${external_ic_nml-}
 /
 
 &gfs_physics_nml
@@ -223,16 +225,16 @@ EOF
   do_mynnsfclay = ${do_mynnsfclay:-".false."}
   icloud_bl    = ${icloud_bl:-"1"}
   tke_budget    = ${tke_budget:-"0"}
-  bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:-".true."}
-  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:-"2"}
-  bl_mynn_mixlength = ${bl_mynn_mixlength:-"1"}
-  bl_mynn_edmf = ${bl_mynn_edmf:-"1"}
-  bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:-"1"}
-  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:-"0"}
-  bl_mynn_cloudmix = ${bl_mynn_cloudmix:-"1"}
-  bl_mynn_mixqt = ${bl_mynn_mixqt:-"0"} 
-  bl_mynn_output = ${bl_mynn_output:-"0"} 
-  bl_mynn_closure = ${bl_mynn_closure:-"2.6"}
+  bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:=".true."}
+  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:="2"}
+  bl_mynn_mixlength = ${bl_mynn_mixlength:="1"}
+  bl_mynn_edmf = ${bl_mynn_edmf:="1"}
+  bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:="1"}
+  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:="0"}
+  bl_mynn_cloudmix = ${bl_mynn_cloudmix:="1"}
+  bl_mynn_mixqt = ${bl_mynn_mixqt:="0"} 
+  bl_mynn_output = ${bl_mynn_output:="0"} 
+  bl_mynn_closure = ${bl_mynn_closure:="2.6"}
   do_ugwp      = ${do_ugwp:-".false."}
   do_tofd      = ${do_tofd:-".true."}
   gwd_opt      = ${gwd_opt:-"2"}
@@ -303,15 +305,16 @@ EOF
   icloud_bl    = ${icloud_bl:-"1"}
   tke_budget = ${tke_budget:-"0"}
   bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:-".true."}
-  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:-"2"}
-  bl_mynn_mixlength = ${bl_mynn_mixlength:-"1"}
+  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:="2"}
+  bl_mynn_mixlength = ${bl_mynn_mixlength:="1"}
   bl_mynn_edmf = ${bl_mynn_edmf:-"1"}
   bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:-"1"}
-  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:-"0"}
-  bl_mynn_cloudmix = ${bl_mynn_cloudmix:-"1"}
-  bl_mynn_mixqt = ${bl_mynn_mixqt:-"0"}
-  bl_mynn_output = ${bl_mynn_output:-"0"}
-  bl_mynn_closure = ${bl_mynn_closure:-"2.6"}
+  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:="0"}
+  bl_mynn_cloudmix = ${bl_mynn_cloudmix:="1"}
+  bl_mynn_mixqt = ${bl_mynn_mixqt:="0"}
+  bl_mynn_output = ${bl_mynn_output:="0"}
+  bl_mynn_closure = ${bl_mynn_closure:="2.6"}
+  lcnorm       = ${lcnorm:-".true."}
   do_ugwp      = ${do_ugwp:-".false."}
   do_tofd      = ${do_tofd:-".false."}
   gwd_opt      = ${gwd_opt:-"2"}
@@ -398,6 +401,7 @@ cat >> input.nml <<EOF
   cnvcld       = ${cnvcld:-".true."}
   imfshalcnv   = ${imfshalcnv:-"2"}
   imfdeepcnv   = ${imfdeepcnv:-"2"}
+  progsigma    = ${progsigma:-".true."} 
   ras          = ${ras:-".false."}
   cdmbgwd      = ${cdmbgwd:-"3.5,0.25"}
   prslrd0      = ${prslrd0:-"0."}
@@ -441,7 +445,7 @@ cat >> input.nml <<EOF
   doGP_lwscat        = ${doGP_lwscat:-".false."}
 EOF
 
-if [ $cpl = .true. ]; then
+if [ $cplchm = .true. ]; then
   cat >> input.nml << EOF
   fscav_aero = ${fscav_aero:-'*:0.0'}
 EOF
@@ -454,9 +458,9 @@ cat >> input.nml <<EOF
   frac_grid    = ${FRAC_GRID:-".true."}
   cplchm       = ${cplchm:-".false."}
   cplflx       = ${cplflx:-".false."}
-  cplice       = ${cplice-".false."} 
+  cplice       = ${cplice:-".false."} 
   cplwav       = ${cplwav:-".false."}
-  cplwav2atm   = ${cplwav2atm-".false."}
+  cplwav2atm   = ${cplwav2atm:-".false."}
 EOF
 
 # Add namelist for IAU
@@ -466,6 +470,7 @@ if [ $DOIAU = "YES" ]; then
   iau_delthrs  = ${IAU_DELTHRS}
   iau_inc_files= ${IAU_INC_FILES}
   iau_drymassfixer = .false.
+  iau_filter_increments = ${IAU_FILTER_INCREMENTS:-".false."}
 EOF
 fi
 
@@ -494,7 +499,7 @@ EOF
 fi
 
   cat >> input.nml << EOF
-  $gfs_physics_nml
+
 /
 EOF
 
@@ -597,12 +602,12 @@ cat >> input.nml <<EOF
   mp_time = 150.
   reiflag = ${reiflag:-"2"}
 
-  $gfdl_cloud_microphysics_nml
+  ${gfdl_cloud_microphysics_nml:-}
 /
 
 &interpolator_nml
   interp_method = 'conserve_great_circle'
-  $interpolator_nml
+  ${interpolator_nml:-}
 /
 
 &namsfc
@@ -621,12 +626,12 @@ cat >> input.nml <<EOF
   FNSMCC   = '${FNSMCC}'
   FNMSKH   = '${FNMSKH}'
   FNTSFA   = '${FNTSFA}'
-  FNACNA   = '${FNACNA}'
-  FNSNOA   = '${FNSNOA}'
-  FNVMNC   = '${FNVMNC}'
-  FNVMXC   = '${FNVMXC}'
-  FNSLPC   = '${FNSLPC}'
-  FNABSC   = '${FNABSC}'
+  FNACNA   = '${FNACNA:-}'
+  FNSNOA   = '${FNSNOA:-}'
+  FNVMNC   = '${FNVMNC:-}'
+  FNVMXC   = '${FNVMXC:-}'
+  FNSLPC   = '${FNSLPC:-}'
+  FNABSC   = '${FNABSC:-}'
   LDEBUG = ${LDEBUG:-".false."}
   FSMCL(2) = ${FSMCL2:-99999}
   FSMCL(3) = ${FSMCL3:-99999}
@@ -646,12 +651,12 @@ cat >> input.nml <<EOF
   FvmxL = ${FvmxL:-99999}
   FSLPL = ${FSLPL:-99999}
   FABSL = ${FABSL:-99999}
-  $namsfc_nml
+  ${namsfc_nml:-}
 /
 
 &fv_grid_nml
   grid_file = 'INPUT/grid_spec.nc'
-  $fv_grid_nml
+  ${fv_grid_nml:-}
 /
 EOF
 
@@ -698,7 +703,7 @@ EOF
   fi
 
   cat >> input.nml << EOF
-  $nam_stochy_nml
+  ${nam_stochy_nml:-}
 /
 EOF
 
@@ -711,13 +716,13 @@ EOF
   ISEED_LNDP = ${ISEED_LNDP:-$ISEED}
   lndp_var_list = ${lndp_var_list}
   lndp_prt_list = ${lndp_prt_list}
-  $nam_sfcperts_nml
+  ${nam_sfcperts_nml:-}
 /
 EOF
   else
     cat >> input.nml << EOF
 &nam_sfcperts
-  $nam_sfcperts_nml
+  ${nam_sfcperts_nml:-}
 /
 EOF
   fi

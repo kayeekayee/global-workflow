@@ -1,0 +1,25 @@
+BASE_GIT: '/lfs4/HFIP/hfv3gfs/glopara/git'
+DMPDIR: '/lfs4/HFIP/hfv3gfs/glopara/dump'
+PACKAGEROOT: '/lfs4/HFIP/hfv3gfs/glopara/nwpara'
+COMROOT: '/lfs4/HFIP/hfv3gfs/glopara/com'
+COMINsyn: '/lfs4/HFIP/hwrf-data/hwrf-input/SYNDAT-PLUS'
+HOMEDIR: '/lfs1/BMC/gsd-fv3-test/NCEPDEV/global/$USER'
+STMP: '/home/Judy.K.Henderson/scratch1-test/gw_19may23/FV3GFSrun'
+PTMP: '/home/Judy.K.Henderson/scratch1-test/gw_19may23/FV3GFSrun'
+NOSCRUB: $HOMEDIR
+ACCOUNT: gsd-fv3-dev
+SCHEDULER: slurm
+QUEUE: batch
+QUEUE_SERVICE: batch
+PARTITION_BATCH: xjet
+PARTITION_POST_BATCH: sjet
+PARTITION_SERVICE: service
+CHGRP_RSTPROD: 'YES'
+CHGRP_CMD: 'chgrp rstprod'
+HPSSARCH: 'YES'
+HPSS_PROJECT: fim
+LOCALARCH: 'NO'
+ATARDIR: '/BMC/${HPSS_PROJECT}/1year/${USER}/${machine}/scratch/${PSLOT}'
+MAKE_NSSTBUFR: 'NO'
+MAKE_ACFTBUFR: 'NO'
+SUPPORTED_RESOLUTIONS: ['C768', 'C384', 'C192', 'C96', 'C48']

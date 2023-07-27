@@ -1,0 +1,4 @@
+
+rocotorun -w test-thompson.xml -d test-thompson.db
+rocotostat  -w test-thompson.xml -d test-thompson.db
+

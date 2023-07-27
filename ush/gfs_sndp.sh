@@ -1,4 +1,5 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 ################################################################
 # Script Name:          gfs_sndp.sh
 # Script Description:   Format GFS BUFR sounding files for AWIPS
@@ -6,7 +7,7 @@
 #   1) 2004-09-10       Steve Gilbert       First Implementation
 ################################################################
 
-set -x
+source "$HOMEgfs/ush/preamble.sh"
 
   #  Create "collectives" consisting of groupings of the soundings
   #  into files designated by geographical region.   Each input
@@ -16,7 +17,6 @@ export m=$1
 mkdir $DATA/$m
 cd $DATA/$m
   cp $FIXbufrsnd/gfs_collective${m}.list $DATA/$m/. 
-set +x
   CCCC=KWBC
     file_list=gfs_collective${m}.list
 
@@ -32,14 +32,12 @@ set +x
 
     for stn in $(cat $file_list)
     do
-       cp ${COMOUT}/bufr.${cycle}/bufr.$stn.$PDY$cyc $DATA/${m}/bufrin
-       export pgm=tocsbufr
+       cp "${COM_ATMOS_BUFR}/bufr.${stn}.${PDY}${cyc}" "${DATA}/${m}/bufrin"
+       export pgm=tocsbufr.x
        #. prep_step
        export FORT11=$DATA/${m}/bufrin
        export FORT51=./bufrout
-       # JY - Turn off the startmsg to reduce the update on jlogfile in this loop
-       # startmsg
-      $EXECbufrsnd/tocsbufr << EOF
+       ${EXECbufrsnd}/${pgm} << EOF
  &INPUT
   BULHED="$WMOHEAD",KWBX="$CCCC",
   NCEP2STD=.TRUE.,
@@ -47,12 +45,11 @@ set +x
   MAXFILESIZE=600000
  /
 EOF
-       # JY export err=$?; err_chk
-       export err=$?; #err_chk
-       if [ $err -ne 0 ]
-       then
-          echo "ERROR in $pgm"
+       export err=$?;
+       if (( err != 0 )); then
+          echo "FATAL ERROR in ${pgm}"
           err_chk
+          exit 3
        fi
 
        cat $DATA/${m}/bufrout >> $DATA/${m}/gfs_collective$m.fil
@@ -60,19 +57,12 @@ EOF
        rm $DATA/${m}/bufrout
     done
 
-set -x
-#    if test $SENDCOM = 'NO'
-    if test $SENDCOM = 'YES'
-    then 
-      if [ $SENDDBN = 'YES' ] ; then
-         cp $DATA/${m}/gfs_collective$m.fil $pcom/gfs_collective$m.postsnd_$cyc
-         $DBNROOT/bin/dbn_alert NTC_LOW BUFR $job $pcom/gfs_collective$m.postsnd_$cyc
+    if [[ ${SENDCOM} == 'YES' ]]; then 
+      if [[ ${SENDDBN} == 'YES' ]] ; then
+         cp "${DATA}/${m}/gfs_collective${m}.fil" "${COM_ATMOS_WMO}/gfs_collective${m}.postsnd_${cyc}"
+         "${DBNROOT}/bin/dbn_alert" NTC_LOW BUFR "${job}" \
+          "${COM_ATMOS_WMO}/gfs_collective${m}.postsnd_${cyc}"
       fi
-      cp $DATA/${m}/gfs_collective$m.fil ${COMOUT}/bufr.${cycle}/.
+      cp "${DATA}/${m}/gfs_collective${m}.fil" "${COM_ATMOS_BUFR}/."
     fi
 
-##    let "m=m+1"
-
-##  done
-
-#exit

@@ -1,0 +1,36 @@
+2023-05-30 15:21:02 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-30 15:21:02 +0000 :: fe2 :: Submission status of gfsfcst is pending at druby://fe2:40418
+2023-05-30 15:23:12 +0000 :: fe2 :: Submission status of previously pending gfsfcst is success, jobid=28614915
+2023-05-30 15:23:12 +0000 :: fe2 :: Task gfsfcst, jobid=28614915, in state RUNNING (RUNNING)
+2023-05-30 15:23:50 +0000 :: fe2 :: Task gfsfcst, jobid=28614915, in state RUNNING (RUNNING)
+2023-05-30 15:24:18 +0000 :: fe2 :: Task gfsfcst, jobid=28614915, in state RUNNING (RUNNING)
+2023-05-30 15:31:13 +0000 :: fe2 :: Submitting gfsfcst
+2023-05-30 15:31:13 +0000 :: fe2 :: Submitting gfspost_f000-f000
+2023-05-30 15:31:13 +0000 :: fe2 :: Submission of gfsfcst succeeded, jobid=28615213
+2023-05-30 15:31:13 +0000 :: fe2 :: Submission of gfspost_f000-f000 succeeded, jobid=28615214
+2023-05-31 14:31:51 +0000 :: fe6 :: Task gfsfcst, jobid=28614915, in state SUCCEEDED (COMPLETED), ran for 2335.0 seconds, exit status=0, try=1 (of 2)
+2023-05-31 14:31:51 +0000 :: fe6 :: Submitting gfspost_f000-f000
+2023-05-31 14:31:51 +0000 :: fe6 :: Submitting gfspost_f006-f006
+2023-05-31 14:31:56 +0000 :: fe6 :: Submitting gfspost_f012-f012
+2023-05-31 14:31:56 +0000 :: fe6 :: Submitting gfspost_f018-f018
+2023-05-31 14:31:57 +0000 :: fe6 :: Submitting gfspost_f024-f024
+2023-05-31 14:31:57 +0000 :: fe6 :: Submission of gfspost_f000-f000 succeeded, jobid=28666939
+2023-05-31 14:31:57 +0000 :: fe6 :: Submission of gfspost_f006-f006 succeeded, jobid=28666940
+2023-05-31 14:31:58 +0000 :: fe6 :: Submission of gfspost_f012-f012 succeeded, jobid=28666941
+2023-05-31 14:31:59 +0000 :: fe6 :: Submission of gfspost_f018-f018 succeeded, jobid=28666942
+2023-05-31 14:31:59 +0000 :: fe6 :: Submission of gfspost_f024-f024 succeeded, jobid=28666943
+2023-05-31 14:33:03 +0000 :: fe6 :: Task gfspost_f000-f000, jobid=28666939, in state RUNNING (RUNNING)
+2023-05-31 14:33:05 +0000 :: fe6 :: Task gfspost_f006-f006, jobid=28666940, in state RUNNING (RUNNING)
+2023-05-31 14:33:05 +0000 :: fe6 :: Task gfspost_f012-f012, jobid=28666941, in state RUNNING (RUNNING)
+2023-05-31 14:33:05 +0000 :: fe6 :: Task gfspost_f018-f018, jobid=28666942, in state RUNNING (RUNNING)
+2023-05-31 14:33:05 +0000 :: fe6 :: Task gfspost_f024-f024, jobid=28666943, in state RUNNING (RUNNING)
+2023-05-31 14:33:54 +0000 :: fe6 :: Task gfspost_f000-f000, jobid=28666939, in state RUNNING (RUNNING)
+2023-05-31 14:33:54 +0000 :: fe6 :: Task gfspost_f006-f006, jobid=28666940, in state RUNNING (RUNNING)
+2023-05-31 14:33:54 +0000 :: fe6 :: Task gfspost_f012-f012, jobid=28666941, in state RUNNING (RUNNING)
+2023-05-31 14:34:00 +0000 :: fe6 :: Task gfspost_f018-f018, jobid=28666942, in state RUNNING (RUNNING)
+2023-05-31 14:34:01 +0000 :: fe6 :: Task gfspost_f024-f024, jobid=28666943, in state RUNNING (RUNNING)
+2023-05-31 14:35:10 +0000 :: fe6 :: Task gfspost_f000-f000, jobid=28666939, in state RUNNING (RUNNING)
+2023-05-31 14:35:10 +0000 :: fe6 :: Task gfspost_f006-f006, jobid=28666940, in state RUNNING (RUNNING)
+2023-05-31 14:35:10 +0000 :: fe6 :: Task gfspost_f012-f012, jobid=28666941, in state RUNNING (RUNNING)
+2023-05-31 14:35:10 +0000 :: fe6 :: Task gfspost_f018-f018, jobid=28666942, in state RUNNING (RUNNING)
+2023-05-31 14:35:10 +0000 :: fe6 :: Task gfspost_f024-f024, jobid=28666943, in state RUNNING (RUNNING)

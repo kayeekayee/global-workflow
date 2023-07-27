@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#! /usr/bin/env bash
+
+source "${HOMEgfs}/ush/preamble.sh"
 
 ###############################################################
 ## NCEP post driver script
@@ -7,44 +9,25 @@
 ###############################################################
 
 # Source FV3GFS workflow modules
-. $HOMEgfs/ush/load_fv3gfs_modules.sh
+. ${HOMEgfs}/ush/load_fv3gfs_modules.sh
 status=$?
-[[ $status -ne 0 ]] && exit $status
+[[ ${status} -ne 0 ]] && exit ${status}
 
-export COMPONENT=${COMPONENT:-atmos}
+export job="post"
+export jobid="${job}.$$"
 
-if [ $FHRGRP = 'anl' ]; then
+if [ ${FHRGRP} = 'anl' ]; then
     fhrlst="anl"
-    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.atm
 else
-    fhrlst=$(echo $FHRLST | sed -e 's/_/ /g; s/f/ /g; s/,/ /g')
-    restart_file=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.logf
+    fhrlst=$(echo ${FHRLST} | sed -e 's/_/ /g; s/f/ /g; s/,/ /g')
 fi
 
-
 #---------------------------------------------------------------
-for fhr in $fhrlst; do
-
-    if [ ! -f $restart_file${fhr}.nemsio -a ! -f $restart_file${fhr}.nc  -a ! -f $restart_file${fhr}.txt ]; then
-        echo "Nothing to process for FHR = $fhr, cycle, wait for 5 minutes"
-        sleep 300
-    fi
-    if [ ! -f $restart_file${fhr}.nemsio -a ! -f $restart_file${fhr}.nc  -a ! -f $restart_file${fhr}.txt ]; then
-        echo "Nothing to process for FHR = $fhr, cycle, skip"
-        continue
-    fi
-
-    #master=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.master.grb2f${fhr}
-    pgb0p25=$ROTDIR/${CDUMP}.${PDY}/${cyc}/$COMPONENT/${CDUMP}.t${cyc}z.pgrb2.0p25.f${fhr}
-#JKH    if [ ! -s $pgb0p25 ]; then
-        export post_times=$fhr
-        $HOMEgfs/jobs/JGLOBAL_ATMOS_NCEPPOST
-        status=$?
-        [[ $status -ne 0 ]] && exit $status
-#JKH    fi
-
+for fhr in ${fhrlst}; do
+    export post_times=${fhr}
+    ${HOMEgfs}/jobs/JGLOBAL_ATMOS_POST
+    status=$?
+    [[ ${status} -ne 0 ]] && exit ${status}
 done
 
-###############################################################
-# Exit out cleanly
 exit 0

@@ -1,21 +1,20 @@
-#!/bin/bash -x
+#! /usr/bin/env bash
+
+source "${HOMEgfs}/ush/preamble.sh"
 
 ###############################################################
-echo
-echo "=============== START TO SOURCE FV3GFS WORKFLOW MODULES ==============="
-. $HOMEgfs/ush/load_fv3gfs_modules.sh
+# Source FV3GFS workflow modules
+. ${HOMEgfs}/ush/load_fv3gfs_modules.sh
 status=$?
-[[ $status -ne 0 ]] && exit $status
+[[ ${status} -ne 0 ]] && exit ${status}
+
+export job="wavepostsbs"
+export jobid="${job}.$$"
 
 ###############################################################
-echo
-echo "=============== START TO RUN WAVE POST_SBS ==============="
 # Execute the JJOB
-$HOMEgfs/jobs/JGLOBAL_WAVE_POST_SBS
+${HOMEgfs}/jobs/JGLOBAL_WAVE_POST_SBS
 status=$?
-[[ $status -ne 0 ]] && exit $status
+[[ ${status} -ne 0 ]] && exit ${status}
 
-###############################################################
-# Force Exit out cleanly
-if [ ${KEEPDATA:-"NO"} = "NO" ] ; then rm -rf $DATAROOT ; fi
 exit 0

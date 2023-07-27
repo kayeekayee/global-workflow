@@ -1,75 +1,16 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
 
+source "${HOMEgfs}/ush/preamble.sh"
+source "${HOMEgfs}/ush/jjob_header.sh" -e "vrfy" -c "base vrfy"
+
+
+# TODO (#1220) Determine if this is still needed
 export RUN_ENVIR=${RUN_ENVIR:-"nco"}
-export PS4='$SECONDS + '
-date
-
-
-#############################
-# Source relevant config files
-#############################
-configs="base vrfy"
-config_path=${EXPDIR:-$NWROOT/gfs.${gfs_ver}/parm/config}
-for config in $configs; do
-    . $config_path/config.$config
-    status=$?
-    [[ $status -ne 0 ]] && exit $status
-done
-
-
-##########################################
-# Source machine runtime environment
-##########################################
-. $HOMEgfs/env/${machine}.env vrfy
-status=$?
-[[ $status -ne 0 ]] && exit $status
-
-
-##############################################
-# Obtain unique process id (pid) and make temp directory
-##############################################
-if [ $RUN_ENVIR = "nco" ]; then
-    export DATA=${DATA:-${DATAROOT}/${jobid:?}}
-else
-    export job="gfs_cyclone_genesis"
-    export DATA="$DATAROOT/${job}$$"
-    [[ -d $DATA ]] && rm -rf $DATA
-fi
-mkdir -p $DATA
-cd $DATA
-
-
-##############################################
-# Run setpdy and initialize PDY variables
-##############################################
-export cycle="t${cyc}z"
-setpdy.sh
-. ./PDY
-
-
-####################################
-# Specify NET and RUN Name and model
-####################################
-export NET=${NET:-gfs}
-export RUN=${RUN:-gfs}
-export COMPONENT=${COMPONENT:-atmos}
-
-##############################################
-# Determine Job Output Name on System
-##############################################
-export pgmout="OUTPUT.${pid}"
-export pgmerr=errfile
 
 ##############################################
 # Set variables used in the exglobal script
 ##############################################
-export CDATE=${CDATE:-${PDY}${cyc}}
-export CDUMP=${CDUMP:-${RUN:-"gfs"}}
-if [ $RUN_ENVIR = "nco" ]; then
-    export ROTDIR=${COMROOT:?}/$NET/$envir
-fi
-export cmodel=$CDUMP
+export cmodel=${RUN}
 
 ####################################
 # SENDCOM  - Copy Files From TMPDIR to $COMOUT
@@ -82,38 +23,37 @@ export SENDECF=${SENDECF:-NO}
 ####################################
 # Specify Execution Areas
 ####################################
-export HOMEens_tracker=${HOMEens_tracker:-${NWROOT:?}/ens_tracker.${ens_tracker_ver}}
-export EXECens_tracker=${EXECens_tracker:-$HOMEens_tracker/exec}
-export FIXens_tracker=${FIXens_tracker:-$HOMEens_tracker/fix}
-export USHens_tracker=${USHens_tracker:-$HOMEens_tracker/ush}
-export SCRIPTens_tracker=${SCRIPTens_tracker:-$HOMEens_tracker/scripts}
+export HOMEens_tracker=${HOMEens_tracker:-${PACKAGEROOT}/ens_tracker.${ens_tracker_ver}}
+export EXECens_tracker=${EXECens_tracker:-${HOMEens_tracker}/exec}
+export FIXens_tracker=${FIXens_tracker:-${HOMEens_tracker}/fix}
+export USHens_tracker=${USHens_tracker:-${HOMEens_tracker}/ush}
+export SCRIPTens_tracker=${SCRIPTens_tracker:-${HOMEens_tracker}/scripts}
 
 ##############################################
 # Define COM directories
 ##############################################
-export COMIN=${ROTDIR}/${RUN}.${PDY}/${cyc}/$COMPONENT
-export gfsdir=${COMIN}
-export COMINgfs=${COMIN}
-export COMOUT=${ROTDIR}/${RUN}.${PDY}/${cyc}/$COMPONENT
+YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_GENESIS
+YMD=${PDY} HH=${cyc} GRID="0p25" generate_com -rx COM_ATMOS_GRIB_0p25:COM_ATMOS_GRIB_TMPL
 
-export JYYYY=$(echo ${PDY} | cut -c1-4)
-export COMINgenvit=${COMINgenvit:-${COMOUT}/genesis_vital_${JYYYY}}
-export COMOUTgenvit=${COMOUTgenvit:-${COMOUT}/genesis_vital_${JYYYY}}
-#export COMINgenvit=${COMINgenvit:-${DATA}/genesis_vital_${JYYYY}}
-#export COMOUTgenvit=${COMOUTgenvit:-${DATA}/genesis_vital_${JYYYY}}
+# The following variables are used by the tracker scripts which are outside
+#   of global-workflow and therefore can't be standardized at this time
+export COMIN=${COM_ATMOS_GRIB_0p25}
+export gfsdir=${COM_ATMOS_GRIB_0p25}
+export COMINgfs=${COM_ATMOS_GRIB_0p25}
 
-export COMINsyn=${COMINsyn:-$(compath.py gfs/prod/syndat)}
+export COMINgenvit=${COM_ATMOS_GENESIS}
+export COMOUTgenvit=${COM_ATMOS_GENESIS}
+export COMOUT=${COM_ATMOS_GENESIS}
 
-mkdir -m 775 -p $COMOUTgenvit
+export COMINsyn=${COMINsyn:-$(compath.py "${envir}/com/gfs/${gfs_ver}")/syndat}
+
+mkdir -m 775 -p "${COMOUTgenvit}"
+
+export JYYYY=${PDY:0:4}
 
 ##############################################
 # Run relevant script
 ##############################################
-env
-msg="HAS BEGUN on $(hostname)"
-postmsg "$jlogfile" "$msg"
-$LOGSCRIPT
-
 
 ${SCRIPTens_tracker}/exgfs_tc_genesis.sh
 export err=$?; err_chk
@@ -121,19 +61,15 @@ export err=$?; err_chk
 ##############################################
 # Final processing
 ##############################################
-if [ -e "$pgmout" ] ; then
-  cat $pgmout
+if [ -e "${pgmout}" ] ; then
+  cat ${pgmout}
 fi
-
-
-msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
 
 ##########################################
 # Remove the Temporary working directory
 ##########################################
-cd $DATAROOT
-[[ $KEEPDATA = "NO" ]] && rm -rf $DATA
+cd ${DATAROOT}
+[[ ${KEEPDATA} = "NO" ]] && rm -rf ${DATA}
 
-date
+
 exit 0

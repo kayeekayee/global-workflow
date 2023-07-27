@@ -1,0 +1,6 @@
+
+rocotorun -w v17_p8_mynn.xml -d v17_p8_mynn.db
+rocotostat -w v17_p8_mynn.xml -d v17_p8_mynn.db
+
+rocotorun -w v17_p8_post_sjet.xml -d post.db
+rocotostat -w v17_p8_post_sjet.xml -d post.db

@@ -1,0 +1,7 @@
+
+rocotorun -w storms-mynn.xml -d storms-mynn.db
+rocotostat  -w storms-mynn.xml -d storms-mynn.db
+
+rocotorun -w test-mynn.xml -d test-mynn.db
+rocotostat  -w test-mynn.xml -d test-mynn.db
+

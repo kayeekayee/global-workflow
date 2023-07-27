@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 
 #####
 ## This script defines functions for data I/O and namelist.
@@ -10,11 +10,6 @@
 ## need to call these functions in the parent script
 ## for execution.
 #####
-
-FV3_GEFS_postdet(){
-  echo SUB ${FUNCNAME[0]}: Linking input data for FV3 $RUN
-  # soft link commands insert here
-}
 
 DATM_postdet(){
   ######################################################################
@@ -45,26 +40,25 @@ FV3_GFS_postdet(){
     if [ $RERUN = "NO" ]; then
       #.............................
 
-      # Link all (except sfc_data) restart files from $gmemdir
-      for file in $(ls $gmemdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
+      # Link all restart files from previous cycle
+      for file in "${COM_ATMOS_RESTART_PREV}/${sPDY}.${scyc}0000."*.nc; do
         file2=$(echo $(basename $file))
         file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
         fsuf=$(echo $file2 | cut -d. -f1)
-        if [ $fsuf != "sfc_data" ]; then
-          $NLN $file $DATA/INPUT/$file2
-        fi
+        $NLN $file $DATA/INPUT/$file2
       done
 
-      # Link sfcanl_data restart files from $memdir
-      for file in $(ls $memdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
-        file2=$(echo $(basename $file))
-        file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
-        fsufanl=$(echo $file2 | cut -d. -f1)
-        if [ $fsufanl = "sfcanl_data" ]; then
+      # Replace sfc_data with sfcanl_data restart files from current cycle (if found)
+      if [ "${MODE}" = "cycled" ] && [ "${CCPP_SUITE}" = "FV3_GFS_v16" ]; then  # TODO: remove if statement when global_cycle can handle NOAHMP
+        for file in "${COM_ATMOS_RESTART}/${sPDY}.${scyc}0000."*.nc; do
+          file2=$(echo $(basename $file))
+          file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
+          fsufanl=$(echo $file2 | cut -d. -f1)
           file2=$(echo $file2 | sed -e "s/sfcanl_data/sfc_data/g")
+          rm -f $DATA/INPUT/$file2
           $NLN $file $DATA/INPUT/$file2
-        fi
-      done
+        done
+      fi
 
       # Need a coupler.res when doing IAU
       if [ $DOIAU = "YES" ]; then
@@ -81,9 +75,9 @@ EOF
         for i in $(echo $IAUFHRS | sed "s/,/ /g" | rev); do
           incfhr=$(printf %03i $i)
           if [ $incfhr = "006" ]; then
-            increment_file=$memdir/${CDUMP}.t${cyc}z.${PREFIX_ATMINC}atminc.nc
+            increment_file="${COM_ATMOS_ANALYSIS}/${RUN}.t${cyc}z.${PREFIX_ATMINC}atminc.nc"
           else
-            increment_file=$memdir/${CDUMP}.t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc
+            increment_file="${COM_ATMOS_ANALYSIS}/${RUN}.t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc"
           fi
           if [ ! -f $increment_file ]; then
             echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $increment_file"
@@ -91,12 +85,12 @@ EOF
             exit 1
           fi
           $NLN $increment_file $DATA/INPUT/fv_increment$i.nc
-          IAU_INC_FILES="'fv_increment$i.nc',$IAU_INC_FILES"
+          IAU_INC_FILES="'fv_increment$i.nc',${IAU_INC_FILES:-}"
         done
         read_increment=".false."
         res_latlon_dynamics=""
       else
-        increment_file=$memdir/${CDUMP}.t${cyc}z.${PREFIX_ATMINC}atminc.nc
+        increment_file="${COM_ATMOS_ANALYSIS}/${RUN}.t${cyc}z.${PREFIX_ATMINC}atminc.nc"
         if [ -f $increment_file ]; then
           $NLN $increment_file $DATA/INPUT/fv3_increment.nc
           read_increment=".true."
@@ -109,7 +103,7 @@ EOF
       export warm_start=".true."
       PDYT=$(echo $CDATE_RST | cut -c1-8)
       cyct=$(echo $CDATE_RST | cut -c9-10)
-      for file in $(ls $RSTDIR_ATM/${PDYT}.${cyct}0000.*); do
+      for file in "${COM_ATMOS_RESTART}/${PDYT}.${cyct}0000."*; do
         file2=$(echo $(basename $file))
         file2=$(echo $file2 | cut -d. -f3-)
         $NLN $file $DATA/INPUT/$file2
@@ -134,7 +128,7 @@ EOF
     #.............................
 
   else ## cold start
-    for file in $(ls $memdir/INPUT/*.nc); do
+    for file in "${COM_ATMOS_INPUT}/"*.nc; do
       file2=$(echo $(basename $file))
       fsuf=$(echo $file2 | cut -c1-3)
       if [ $fsuf = "gfs" -o $fsuf = "sfc" ]; then
@@ -144,16 +138,10 @@ EOF
 
   fi
 
-  if [ $machine = 'sandbox' ]; then
-    echo SUB ${FUNCNAME[0]}: Checking initial condition, overriden in sandbox mode!
-  else
-    nfiles=$(ls -1 $DATA/INPUT/* | wc -l)
-    if [ $nfiles -le 0 ]; then
-      echo SUB ${FUNCNAME[0]}: Initial conditions must exist in $DATA/INPUT, ABORT!
-      msg="SUB ${FUNCNAME[0]}: Initial conditions must exist in $DATA/INPUT, ABORT!"
-      postmsg "$jlogfile" "$msg"
-      exit 1
-    fi
+  nfiles=$(ls -1 $DATA/INPUT/* | wc -l)
+  if [ $nfiles -le 0 ]; then
+    echo SUB ${FUNCNAME[0]}: Initial conditions must exist in $DATA/INPUT, ABORT!
+    exit 1
   fi
 
   # If doing IAU, change forecast hours
@@ -166,10 +154,6 @@ EOF
 
   #--------------------------------------------------------------------------
   # Grid and orography data
-  for n in $(seq 1 $ntiles); do
-    $NLN $FIXfv3/$CASE/${CASE}_grid.tile${n}.nc     $DATA/INPUT/${CASE}_grid.tile${n}.nc
-    $NLN $FIXfv3/$CASE/${CASE}_oro_data.tile${n}.nc $DATA/INPUT/oro_data.tile${n}.nc
-  done
 
   if [ $cplflx = ".false." ] ; then
     $NLN $FIXfv3/$CASE/${CASE}_mosaic.nc $DATA/INPUT/grid_spec.nc
@@ -177,20 +161,12 @@ EOF
     $NLN $FIXfv3/$CASE/${CASE}_mosaic.nc $DATA/INPUT/${CASE}_mosaic.nc
   fi
 
-  # Fractional grid related
-  if [ $FRAC_GRID = ".true." ]; then
-    OROFIX=${OROFIX:-"${FIX_DIR}/fix_fv3_fracoro/${CASE}.mx${OCNRES}_frac"}
-    FIX_SFC=${FIX_SFC:-"${OROFIX}/fix_sfc"}
-    for n in $(seq 1 $ntiles); do
-      $NLN ${OROFIX}/oro_${CASE}.mx${OCNRES}.tile${n}.nc $DATA/INPUT/oro_data.tile${n}.nc
-    done
-  else
-    OROFIX=${OROFIX:-"${FIXfv3}/${CASE}"}
-    FIX_SFC=${FIX_SFC:-"${OROFIX}/fix_sfc"}
-    for n in $(seq 1 $ntiles); do
-      $NLN ${OROFIX}/${CASE}_oro_data.tile${n}.nc $DATA/INPUT/oro_data.tile${n}.nc
-    done
-  fi
+  OROFIX=${OROFIX:-"${FIX_DIR}/orog/${CASE}.mx${OCNRES}_frac"}
+  FIX_SFC=${FIX_SFC:-"${OROFIX}/fix_sfc"}
+  for n in $(seq 1 $ntiles); do
+    $NLN ${OROFIX}/oro_${CASE}.mx${OCNRES}.tile${n}.nc $DATA/INPUT/oro_data.tile${n}.nc
+    $NLN ${OROFIX}/${CASE}_grid.tile${n}.nc     $DATA/INPUT/${CASE}_grid.tile${n}.nc
+  done
 
   export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v16"}
   _suite_file=$HOMEgfs/sorc/ufs_model.fd/FV3/ccpp/suites/suite_${CCPP_SUITE}.xml
@@ -200,7 +176,7 @@ EOF
     exit 2
   fi
 
-  # Scan suite file to determine whether it uses Noah-MP  ( Noah-MP #2, RUC-LSM #3, Noah #1 )
+  # Scan suite file to determine whether it uses Noah-MP
   if [ $(grep noahmpdrv ${_suite_file} | wc -l ) -gt 0 ]; then
     lsm="2"
     lheatstrg=".false."
@@ -219,19 +195,10 @@ EOF
     iopt_stc=${iopt_stc:-"3"}
     IALB=${IALB:-2}
     IEMS=${IEMS:-2}
-  elif [ $(grep lsm_ruc ${_suite_file} | wc -l ) -gt 0 ]; then 
-    lsm="3"
-    lsoil_lsm=9
-    lheatstrg=".false."
-    landice=".false."
   else
     lsm="1"
     lheatstrg=".true."
-    if [[ "$CCPP_SUITE" == "FV3_RAP_cires_ugwp" || "$CCPP_SUITE" == "FV3_RAP_noah_sfcdiff_unified_ugwp" || "$CCPP_SUITE" == "FV3_RAP_noah_sfcdiff_ugwpv1" ]] ; then   ## JKH
-      landice=".false."
-    else
-      landice=".true."
-    fi
+    landice=".true."
     iopt_dveg=${iopt_dveg:-"1"}
     iopt_crs=${iopt_crs:-"1"}
     iopt_btr=${iopt_btr:-"1"}
@@ -249,11 +216,8 @@ EOF
   fi
 
   # Files for GWD
-  OROFIX_ugwd=${OROFIX_ugwd:-"${FIX_DIR}/fix_ugwd"}
-  if [[ "$CCPP_SUITE" != "FV3_RAP_cires_ugwp" && "$CCPP_SUITE" != "FV3_RAP_noah_sfcdiff_unified_ugwp" && "$CCPP_SUITE" != "FV3_RAP_noah_sfcdiff_ugwpv1" ]] ; then   ## JKH
-
-    $NLN ${OROFIX_ugwd}/ugwp_limb_tau.nc $DATA/ugwp_limb_tau.nc
-  fi
+  OROFIX_ugwd=${OROFIX_ugwd:-"${FIX_DIR}/ugwd"}
+  $NLN ${OROFIX_ugwd}/ugwp_limb_tau.nc $DATA/ugwp_limb_tau.nc
   for n in $(seq 1 $ntiles); do
     $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ls.tile${n}.nc $DATA/INPUT/oro_data_ls.tile${n}.nc
     $NLN ${OROFIX_ugwd}/$CASE/${CASE}_oro_data_ss.tile${n}.nc $DATA/INPUT/oro_data_ss.tile${n}.nc
@@ -279,8 +243,8 @@ EOF
   if [ $imp_physics -eq 8 ]; then
     $NLN $FIX_AM/CCN_ACTIVATE.BIN  $DATA/CCN_ACTIVATE.BIN
     $NLN $FIX_AM/freezeH2O.dat     $DATA/freezeH2O.dat
-    $NLN $FIX_AM/qr_acr_qgV2.dat     $DATA/qr_acr_qgV2.dat 
-    $NLN $FIX_AM/qr_acr_qsV2.dat     $DATA/qr_acr_qsV2.dat
+    $NLN $FIX_AM/qr_acr_qgV2.dat   $DATA/qr_acr_qgV2.dat
+    $NLN $FIX_AM/qr_acr_qsV2.dat   $DATA/qr_acr_qsV2.dat
   fi
 
   $NLN $FIX_AM/${O3FORC}                         $DATA/global_o3prdlos.f77
@@ -290,12 +254,12 @@ EOF
 
   ## merra2 aerosol climo
   if [ $IAER -eq "1011" ]; then
-    FIX_AER="${FIX_DIR}/fix_aer"
+    FIX_AER="${FIX_DIR}/aer"
     for month in $(seq 1 12); do
       MM=$(printf %02d $month)
       $NLN "${FIX_AER}/merra2.aerclim.2003-2014.m${MM}.nc" "aeroclim.m${MM}.nc"
     done
-    FIX_LUT="${FIX_DIR}/fix_lut"
+    FIX_LUT="${FIX_DIR}/lut"
     $NLN $FIX_LUT/optics_BC.v1_3.dat $DATA/optics_BC.dat
     $NLN $FIX_LUT/optics_OC.v1_3.dat $DATA/optics_OC.dat
     $NLN $FIX_LUT/optics_DU.v15_3.dat $DATA/optics_DU.dat
@@ -321,9 +285,9 @@ EOF
   # inline post fix files
   if [ $WRITE_DOPOST = ".true." ]; then
     $NLN $PARM_POST/post_tag_gfs${LEVS}             $DATA/itag
-    $NLN $PARM_POST/postxconfig-NT-GFS-TWO.txt      $DATA/postxconfig-NT.txt
-    $NLN $PARM_POST/postxconfig-NT-GFS-F00-TWO.txt  $DATA/postxconfig-NT_FH00.txt
-    $NLN $PARM_POST/params_grib2_tbl_new            $DATA/params_grib2_tbl_new
+    $NLN ${FLTFILEGFS:-$PARM_POST/postxconfig-NT-GFS-TWO.txt}           $DATA/postxconfig-NT.txt
+    $NLN ${FLTFILEGFSF00:-$PARM_POST/postxconfig-NT-GFS-F00-TWO.txt}    $DATA/postxconfig-NT_FH00.txt
+    $NLN ${POSTGRB2TBL:-$PARM_POST/params_grib2_tbl_new}                $DATA/params_grib2_tbl_new
   fi
 
   #------------------------------------------------------------------
@@ -355,7 +319,7 @@ EOF
   FNTSFC=${FNTSFC:-"$FIX_AM/RTGSST.1982.2012.monthly.clim.grb"}
   FNSNOC=${FNSNOC:-"$FIX_AM/global_snoclim.1.875.grb"}
   FNZORC=${FNZORC:-"igbp"}
-  FNAISC=${FNAISC:-"$FIX_AM/CFSR.SEAICE.1982.2012.monthly.clim.grb"}
+  FNAISC=${FNAISC:-"$FIX_AM/IMS-NIC.blended.ice.monthly.clim.grb"}
   FNALBC2=${FNALBC2:-"${FIX_SFC}/${CASE}.facsf.tileX.nc"}
   FNTG3C=${FNTG3C:-"${FIX_SFC}/${CASE}.substrate_temperature.tileX.nc"}
   FNVEGC=${FNVEGC:-"${FIX_SFC}/${CASE}.vegetation_greenness.tileX.nc"}
@@ -515,29 +479,24 @@ EOF
   JCAP_STP=${JCAP_STP:-$JCAP_CASE}
   LONB_STP=${LONB_STP:-$LONB_CASE}
   LATB_STP=${LATB_STP:-$LATB_CASE}
-
   cd $DATA
-
-  affix="nc"
-  if [ "$OUTPUT_FILE" = "nemsio" ]; then
-    affix="nemsio"
-  fi
-
+  if [[ ! -d ${COM_ATMOS_HISTORY} ]]; then mkdir -p ${COM_ATMOS_HISTORY}; fi
+  if [[ ! -d ${COM_ATMOS_MASTER} ]]; then mkdir -p ${COM_ATMOS_MASTER}; fi
   if [ $QUILTING = ".true." -a $OUTPUT_GRID = "gaussian_grid" ]; then
     fhr=$FHMIN
     for fhr in $OUTPUT_FH; do
       FH3=$(printf %03i $fhr)
       FH2=$(printf %02i $fhr)
-      atmi=atmf${FH3}.$affix
-      sfci=sfcf${FH3}.$affix
-      logi=logf${FH3}
+      atmi=atmf${FH3}.nc
+      sfci=sfcf${FH3}.nc
+      logi=log.atm.f${FH3}
       pgbi=GFSPRS.GrbF${FH2}
       flxi=GFSFLX.GrbF${FH2}
-      atmo=$memdir/${CDUMP}.t${cyc}z.atmf${FH3}.$affix
-      sfco=$memdir/${CDUMP}.t${cyc}z.sfcf${FH3}.$affix
-      logo=$memdir/${CDUMP}.t${cyc}z.logf${FH3}.txt
-      pgbo=$memdir/${CDUMP}.t${cyc}z.master.grb2f${FH3}
-      flxo=$memdir/${CDUMP}.t${cyc}z.sfluxgrbf${FH3}.grib2
+      atmo=${COM_ATMOS_HISTORY}/${RUN}.t${cyc}z.atmf${FH3}.nc
+      sfco=${COM_ATMOS_HISTORY}/${RUN}.t${cyc}z.sfcf${FH3}.nc
+      logo=${COM_ATMOS_HISTORY}/${RUN}.t${cyc}z.atm.logf${FH3}.txt
+      pgbo=${COM_ATMOS_MASTER}/${RUN}.t${cyc}z.master.grb2f${FH3}
+      flxo=${COM_ATMOS_MASTER}/${RUN}.t${cyc}z.sfluxgrbf${FH3}.grib2
       eval $NLN $atmo $atmi
       eval $NLN $sfco $sfci
       eval $NLN $logo $logi
@@ -548,11 +507,11 @@ EOF
     done
   else
     for n in $(seq 1 $ntiles); do
-      eval $NLN nggps2d.tile${n}.nc       $memdir/nggps2d.tile${n}.nc
-      eval $NLN nggps3d.tile${n}.nc       $memdir/nggps3d.tile${n}.nc
-      eval $NLN grid_spec.tile${n}.nc     $memdir/grid_spec.tile${n}.nc
-      eval $NLN atmos_static.tile${n}.nc  $memdir/atmos_static.tile${n}.nc
-      eval $NLN atmos_4xdaily.tile${n}.nc $memdir/atmos_4xdaily.tile${n}.nc
+      eval $NLN nggps2d.tile${n}.nc       ${COM_ATMOS_HISTORY}/nggps2d.tile${n}.nc
+      eval $NLN nggps3d.tile${n}.nc       ${COM_ATMOS_HISTORY}/nggps3d.tile${n}.nc
+      eval $NLN grid_spec.tile${n}.nc     ${COM_ATMOS_HISTORY}/grid_spec.tile${n}.nc
+      eval $NLN atmos_static.tile${n}.nc  ${COM_ATMOS_HISTORY}/atmos_static.tile${n}.nc
+      eval $NLN atmos_4xdaily.tile${n}.nc ${COM_ATMOS_HISTORY}/atmos_4xdaily.tile${n}.nc
     done
   fi
 }
@@ -560,10 +519,6 @@ EOF
 FV3_GFS_nml(){
   # namelist output for a certain component
   echo SUB ${FUNCNAME[0]}: Creating name lists and model configure file for FV3
-  if [ $machine = 'sandbox' ]; then
-    cd $SCRIPTDIR
-    echo "MAIN: !!!Sandbox mode, writing to current directory!!!"
-  fi
   # Call child scripts in current script directory
   source $SCRIPTDIR/parsing_namelists_FV3.sh
   FV3_namelists
@@ -587,16 +542,16 @@ data_out_GFS() {
 
   if [ $SEND = "YES" ]; then
     # Copy model restart files
-    if [ $CDUMP = "gdas" -a $rst_invt1 -gt 0 ]; then
+    if [[ ${RUN} =~ "gdas" ]] && (( rst_invt1 > 0 )); then
       cd $DATA/RESTART
-      mkdir -p $memdir/RESTART
+      mkdir -p "${COM_ATMOS_RESTART}"
       for rst_int in $restart_interval ; do
         if [ $rst_int -ge 0 ]; then
           RDATE=$($NDATE +$rst_int $CDATE)
           rPDY=$(echo $RDATE | cut -c1-8)
           rcyc=$(echo $RDATE | cut -c9-10)
-          for file in $(ls ${rPDY}.${rcyc}0000.*) ; do
-            $NCP $file $memdir/RESTART/$file
+          for file in "${rPDY}.${rcyc}0000."* ; do
+            ${NCP} "${file}" "${COM_ATMOS_RESTART}/${file}"
           done
         fi
       done
@@ -609,65 +564,85 @@ data_out_GFS() {
         RDATE=$($NDATE +$rst_iau $CDATE)
         rPDY=$(echo $RDATE | cut -c1-8)
         rcyc=$(echo $RDATE | cut -c9-10)
-        for file in $(ls ${rPDY}.${rcyc}0000.*) ; do
-          $NCP $file $memdir/RESTART/$file
+        for file in "${rPDY}.${rcyc}0000."* ; do
+          ${NCP} "${file}" "${COM_ATMOS_RESTART}/${file}"
         done
       fi
-    elif [ $CDUMP = "gfs" ]; then
-      $NCP $DATA/input.nml $ROTDIR/${CDUMP}.${PDY}/${cyc}/atmos/
-      $NCP $DATA/model_configure $ROTDIR/${CDUMP}.${PDY}/${cyc}/atmos/    # GSL
+    elif [[ ${RUN} =~ "gfs" ]]; then
+      ${NCP} "${DATA}/input.nml" "${COM_ATMOS_HISTORY}/input.nml"
     fi
   fi
 
   echo "SUB ${FUNCNAME[0]}: Output data for FV3 copied"
 }
 
+
 WW3_postdet() {
   echo "SUB ${FUNCNAME[0]}: Linking input data for WW3"
   COMPONENTwave=${COMPONENTwave:-${RUN}wave}
 
   #Link mod_def files for wave grids
-  array=($WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD $wavesbsGRD $wavepostGRD $waveinterpGRD)
-  echo "Wave Grids: $WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD $wavesbsGRD $wavepostGRD $waveinterpGRD"
-  grdALL=$(printf "%s\n" "${array[@]}" | sort -u | tr '\n' ' ')
+  if [ $waveMULTIGRID = ".true." ]; then
+    array=($WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD)
+    echo "Wave Grids: $WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD"
+    grdALL=$(printf "%s\n" "${array[@]}" | sort -u | tr '\n' ' ')
 
-  for wavGRD in ${grdALL}; do
-    $NCP $ROTDIR/${CDUMP}.${PDY}/${cyc}/wave/rundata/${COMPONENTwave}.mod_def.$wavGRD $DATA/mod_def.$wavGRD
-  done
+    for wavGRD in ${grdALL}; do
+      ${NCP} "${COM_WAVE_PREP}/${COMPONENTwave}.mod_def.${wavGRD}" "${DATA}/mod_def.${wavGRD}"
+    done
+  else 
+    #if shel, only 1 waveGRD which is linked to mod_def.ww3 
+    ${NCP} "${COM_WAVE_PREP}/${COMPONENTwave}.mod_def.${waveGRD}" "${DATA}/mod_def.ww3"
+  fi
 
-  export WAVHCYC=${WAVHCYC:-6}
-  export WRDATE=$($NDATE -${WAVHCYC} $CDATE)
-  export WRPDY=$(echo $WRDATE | cut -c1-8)
-  export WRcyc=$(echo $WRDATE | cut -c9-10)
-  export WRDIR=${ROTDIR}/${CDUMPRSTwave}.${WRPDY}/${WRcyc}/wave/restart
-  export RSTDIR_WAVE=$ROTDIR/${CDUMP}.${PDY}/${cyc}/wave/restart
-  export datwave=$COMOUTwave/rundata
-  export wavprfx=${CDUMPwave}${WAV_MEMBER}
+
+  #if wave mesh is not the same as the ocn/ice mesh, linkk it in the file
+  comparemesh=${MESH_OCN_ICE:-"mesh.mx${ICERES}.nc"}
+  if [ "$MESH_WAV" = "$comparemesh" ]; then
+    echo "Wave is on same mesh as ocean/ice"
+  else
+    $NLN -sf $FIXwave/$MESH_WAV $DATA/
+  fi
+
+  export wavprfx=${RUNwave}${WAV_MEMBER:-}
 
   #Copy initial condition files:
   for wavGRD in $waveGRD ; do
     if [ $warm_start = ".true." -o $RERUN = "YES" ]; then
       if [ $RERUN = "NO" ]; then
-        waverstfile=${WRDIR}/${sPDY}.${scyc}0000.restart.${wavGRD}
+        waverstfile=${COM_WAVE_RESTART_PREV}/${sPDY}.${scyc}0000.restart.${wavGRD}
       else 
-        waverstfile=${RSTDIR_WAVE}/${PDYT}.${cyct}0000.restart.${wavGRD}      
+        waverstfile=${COM_WAVE_RESTART}/${PDYT}.${cyct}0000.restart.${wavGRD}
       fi
     else 
-      waverstfile=${RSTDIR_WAVE}/${sPDY}.${scyc}0000.restart.${wavGRD}
+      waverstfile=${COM_WAVE_RESTART}/${sPDY}.${scyc}0000.restart.${wavGRD}
     fi
     if [ ! -f ${waverstfile} ]; then
-      echo "WARNING: NON-FATAL ERROR wave IC is missing, will start from rest"
+      if [ $RERUN = "NO" ]; then
+        echo "WARNING: NON-FATAL ERROR wave IC is missing, will start from rest"
+      else
+        echo "ERROR: Wave IC is missing in RERUN, exiting."
+        exit 1
+      fi
     else
-      $NLN ${waverstfile} $DATA/restart.${wavGRD}
+      if [ $waveMULTIGRID = ".true." ]; then
+        $NLN ${waverstfile} $DATA/restart.${wavGRD}
+      else
+        $NLN ${waverstfile} $DATA/restart.ww3
+      fi
     fi
-  done  
+  done
 
-  for wavGRD in $waveGRD ; do
-    eval $NLN $datwave/${wavprfx}.log.${wavGRD}.${PDY}${cyc} log.${wavGRD}
-  done 
+  if [ $waveMULTIGRID = ".true." ]; then
+    for wavGRD in $waveGRD ; do
+      ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.log.${wavGRD}.${PDY}${cyc}" "log.${wavGRD}"
+    done
+  else 
+    ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.log.${waveGRD}.${PDY}${cyc}" "log.ww3"
+  fi
 
   if [ "$WW3ICEINP" = "YES" ]; then
-    wavicefile=$COMINwave/rundata/${CDUMPwave}.${WAVEICE_FID}.${cycle}.ice
+    wavicefile="${COM_WAVE_PREP}/${RUNwave}.${WAVEICE_FID}.${cycle}.ice"
     if [ ! -f $wavicefile ]; then
       echo "ERROR: WW3ICEINP = ${WW3ICEINP}, but missing ice file"
       echo "Abort!"
@@ -677,7 +652,7 @@ WW3_postdet() {
   fi
 
   if [ "$WW3CURINP" = "YES" ]; then
-    wavcurfile=$COMINwave/rundata/${CDUMPwave}.${WAVECUR_FID}.${cycle}.cur
+    wavcurfile="${COM_WAVE_PREP}/${RUNwave}.${WAVECUR_FID}.${cycle}.cur"
     if [ ! -f $wavcurfile ]; then
       echo "ERROR: WW3CURINP = ${WW3CURINP}, but missing current file"
       echo "Abort!"
@@ -686,9 +661,13 @@ WW3_postdet() {
     $NLN $wavcurfile $DATA/current.${WAVECUR_FID}
   fi
 
+  if [[ ! -d ${COM_WAVE_HISTORY} ]]; then mkdir -p "${COM_WAVE_HISTORY}"; fi
+
   # Link output files
   cd $DATA
-  eval $NLN $datwave/${wavprfx}.log.mww3.${PDY}${cyc} log.mww3
+  if [ $waveMULTIGRID = ".true." ]; then
+    ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.log.mww3.${PDY}${cyc}" "log.mww3"
+  fi
 
   # Loop for gridded output (uses FHINC)
   fhr=$FHMIN_WAV
@@ -696,9 +675,13 @@ WW3_postdet() {
     YMDH=$($NDATE $fhr $CDATE)
     YMD=$(echo $YMDH | cut -c1-8)
     HMS="$(echo $YMDH | cut -c9-10)0000"
-    for wavGRD in ${waveGRD} ; do
-      eval $NLN $datwave/${wavprfx}.out_grd.${wavGRD}.${YMD}.${HMS} $DATA/${YMD}.${HMS}.out_grd.${wavGRD}
-    done
+    if [ $waveMULTIGRID = ".true." ]; then
+      for wavGRD in ${waveGRD} ; do
+        ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.out_grd.${wavGRD}.${YMD}.${HMS}" "${DATA}/${YMD}.${HMS}.out_grd.${wavGRD}"
+      done
+    else 
+      ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.out_grd.${waveGRD}.${YMD}.${HMS}" "${DATA}/${YMD}.${HMS}.out_grd.ww3"
+    fi
     FHINC=$FHOUT_WAV
     if [ $FHMAX_HF_WAV -gt 0 -a $FHOUT_HF_WAV -gt 0 -a $fhr -lt $FHMAX_HF_WAV ]; then
       FHINC=$FHOUT_HF_WAV
@@ -712,7 +695,12 @@ WW3_postdet() {
     YMDH=$($NDATE $fhr $CDATE)
     YMD=$(echo $YMDH | cut -c1-8)
     HMS="$(echo $YMDH | cut -c9-10)0000"
-    eval $NLN $datwave/${wavprfx}.out_pnt.${waveuoutpGRD}.${YMD}.${HMS} $DATA/${YMD}.${HMS}.out_pnt.${waveuoutpGRD}
+    if [ $waveMULTIGRID = ".true." ]; then
+      ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.out_pnt.${waveuoutpGRD}.${YMD}.${HMS}" "${DATA}/${YMD}.${HMS}.out_pnt.${waveuoutpGRD}"
+    else 
+      ${NLN} "${COM_WAVE_HISTORY}/${wavprfx}.out_pnt.${waveuoutpGRD}.${YMD}.${HMS}" "${DATA}/${YMD}.${HMS}.out_pnt.ww3"
+    fi
+
     FHINC=$FHINCP_WAV
     fhr=$((fhr+FHINC))
   done
@@ -720,13 +708,19 @@ WW3_postdet() {
 
 WW3_nml() {
   echo "SUB ${FUNCNAME[0]}: Copying input files for WW3"
-  WAV_MOD_TAG=${CDUMP}wave${waveMEMB}
+  WAV_MOD_TAG=${RUN}wave${waveMEMB}
   if [ "${USE_WAV_RMP:-YES}" = "YES" ]; then
-    for file in $(ls $COMINwave/rundata/rmp_src_to_dst_conserv_*) ; do
-      $NLN $file $DATA/
-    done
-  fi 
-  $NLN $COMINwave/rundata/ww3_multi.${CDUMPwave}${WAV_MEMBER}.${cycle}.inp $DATA/ww3_multi.inp
+    if (( $( ls -1 $FIXwave/rmp_src_to_dst_conserv_* 2> /dev/null | wc -l) > 0 )); then
+      for file in $(ls $FIXwave/rmp_src_to_dst_conserv_*) ; do
+        $NLN $file $DATA/
+      done
+    else
+      echo 'FATAL ERROR : No rmp precomputed nc files found for wave model'
+      exit 4
+    fi
+  fi
+  source $SCRIPTDIR/parsing_namelists_WW3.sh
+  WW3_namelists
 }
 
 WW3_out() {
@@ -737,23 +731,39 @@ WW3_out() {
 CPL_out() {
   echo "SUB ${FUNCNAME[0]}: Copying output data for general cpl fields"
   if [ $esmf_profile = ".true." ]; then
-    $NCP $DATA/ESMF_Profile.summary $ROTDIR/$CDUMP.$PDY/$cyc/
+    ${NCP} "${DATA}/ESMF_Profile.summary" "${COM_ATMOS_HISTORY}/ESMF_Profile.summary"
   fi
 }
 
 MOM6_postdet() {
   echo "SUB ${FUNCNAME[0]}: MOM6 after run type determination"
 
-  OCNRES=${OCNRES:-"025"}
-
   # Copy MOM6 ICs
-  $NCP -pf $ICSDIR/$CDATE/ocn/MOM*nc $DATA/INPUT/
+  ${NLN} "${COM_OCEAN_RESTART_PREV}/${PDY}.${cyc}0000.MOM.res.nc" "${DATA}/INPUT/MOM.res.nc"
+  case $OCNRES in
+    "025")
+      for nn in $(seq 1 4); do
+        if [[ -f "${COM_OCEAN_RESTART_PREV}/${PDY}.${cyc}0000.MOM.res_${nn}.nc" ]]; then
+          ${NLN} "${COM_OCEAN_RESTART_PREV}/${PDY}.${cyc}0000.MOM.res_${nn}.nc" "${DATA}/INPUT/MOM.res_${nn}.nc"
+        fi
+      done
+    ;;
+  esac
+
+  # Link increment
+  if [[ "${DO_JEDIOCNVAR:-NO}" = "YES" ]]; then
+      if [[ ! -f "${COM_OCEAN_ANALYSIS}/${RUN}.t${cyc}z.ocninc.nc" ]]; then
+          echo "FATAL ERROR: Ocean increment not found, ABORT!"
+          exit 111
+      fi
+      ${NLN} "${COM_OCEAN_ANALYSIS}/${RUN}.t${cyc}z.ocninc.nc" "${DATA}/INPUT/mom6_increment.nc"
+  fi
 
   # Copy MOM6 fixed files
   $NCP -pf $FIXmom/$OCNRES/* $DATA/INPUT/
 
   # Copy coupled grid_spec
-  spec_file="$FIX_DIR/fix_cpl/a${CASE}o${OCNRES}/grid_spec.nc"
+  spec_file="$FIX_DIR/cpl/a${CASE}o${OCNRES}/grid_spec.nc"
   if [ -s $spec_file ]; then
     $NCP -pf $spec_file $DATA/INPUT/
   else
@@ -761,12 +771,29 @@ MOM6_postdet() {
     exit 3
   fi
 
-  # Copy mediator restart files to RUNDIR
-  if [ $warm_start = ".true." -o $RERUN = "YES" ]; then
-    $NCP $ROTDIR/$CDUMP.$PDY/$cyc/med/ufs.cpld*.nc $DATA/
-    $NCP $ROTDIR/$CDUMP.$PDY/$cyc/med/rpointer.cpl $DATA/
+  # Copy mediator restart files to RUNDIR  # TODO: mediator should have its own CMEPS_postdet() function
+  if [[ $warm_start = ".true." ]]; then
+    local mediator_file="${COM_MED_RESTART}/${PDY}.${cyc}0000.ufs.cpld.cpl.r.nc"
+    if [[ -f "${mediator_file}" ]]; then
+      ${NCP} "${mediator_file}" "${DATA}/ufs.cpld.cpl.r.nc"
+      rm -f "${DATA}/rpointer.cpl"
+      touch "${DATA}/rpointer.cpl"
+      echo "ufs.cpld.cpl.r.nc" >> "${DATA}/rpointer.cpl"
+    else
+      # We have a choice to make here.
+      # Either we can FATAL ERROR out, or we can let the coupling fields initialize from zero
+      # cmeps_run_type is determined based on the availability of the mediator restart file
+      echo "WARNING: ${mediator_file} does not exist for warm_start = .true., initializing!"
+      #echo "FATAL ERROR: ${mediator_file} must exist for warm_start = .true. and does not, ABORT!"
+      #exit 4
+    fi
+  else
+    # This is a cold start, so initialize the coupling fields from zero
+    export cmeps_run_type="startup"
   fi
 
+  # If using stochatic parameterizations, create a seed that does not exceed the
+  # largest signed integer
   if [ $DO_OCN_SPPT = "YES" -o $DO_OCN_PERT_EPBL = "YES" ]; then
     if [ ${SET_STP_SEED:-"YES"} = "YES" ]; then
       ISEED_OCNSPPT=$(( (CDATE*1000 + MEMBER*10 + 6) % 2147483647 ))
@@ -776,56 +803,117 @@ MOM6_postdet() {
     fi
   fi
 
+  # Create COMOUTocean
+  [[ ! -d ${COM_OCEAN_HISTORY} ]] && mkdir -p "${COM_OCEAN_HISTORY}"
+
   # Link output files
+  if [[ "${RUN}" =~ "gfs" ]]; then
+    # Link output files for RUN = gfs
 
-  export ENSMEM=${ENSMEM:-01}
-  export IDATE=$CDATE
+    # TODO: get requirements on what files need to be written out and what these dates here are and what they mean
+    export ENSMEM=${ENSMEM:-01}
+    export IDATE=$CDATE
 
-  [[ ! -d $COMOUTocean ]] && mkdir -p $COMOUTocean
+    fhrlst=${OUTPUT_FH}
+    if [[ ! -d ${COM_OCEAN_HISTORY} ]]; then mkdir -p ${COM_OCEAN_HISTORY}; fi
 
-  fhrlst=$OUTPUT_FH
+    for fhr in $fhrlst; do
+      if [ $fhr = 'anl' ]; then  # Looking at OUTPUT_FH, this is never true, TODO: remove this block
+        continue
+      fi
+      if [ -z ${last_fhr:-} ]; then
+        last_fhr=$fhr
+        continue
+      fi
+      (( interval = fhr - last_fhr ))
+      (( midpoint = last_fhr + interval/2 ))
+      VDATE=$($NDATE $fhr $IDATE)
+      YYYY=$(echo $VDATE | cut -c1-4)
+      MM=$(echo $VDATE | cut -c5-6)
+      DD=$(echo $VDATE | cut -c7-8)
+      HH=$(echo $VDATE | cut -c9-10)
+      SS=$((10#$HH*3600))
 
-  for fhr in $fhrlst; do
-    if [ $fhr = 'anl' ]; then
-      continue
-    fi
-    if [ -z $last_fhr ]; then
+      VDATE_MID=$($NDATE $midpoint $IDATE)
+      YYYY_MID=$(echo $VDATE_MID | cut -c1-4)
+      MM_MID=$(echo $VDATE_MID | cut -c5-6)
+      DD_MID=$(echo $VDATE_MID | cut -c7-8)
+      HH_MID=$(echo $VDATE_MID | cut -c9-10)
+      SS_MID=$((10#$HH_MID*3600))
+
+      source_file="ocn_${YYYY_MID}_${MM_MID}_${DD_MID}_${HH_MID}.nc"
+      dest_file="ocn${VDATE}.${ENSMEM}.${IDATE}.nc"
+      ${NLN} ${COM_OCEAN_HISTORY}/${dest_file} ${DATA}/${source_file}
+
+      source_file="ocn_daily_${YYYY}_${MM}_${DD}.nc"
+      dest_file=${source_file}
+      if [ ! -a "${DATA}/${source_file}" ]; then
+        $NLN ${COM_OCEAN_HISTORY}/${dest_file} ${DATA}/${source_file}
+      fi
+
       last_fhr=$fhr
-      continue
-    fi
-    (( interval = fhr - last_fhr ))
-    (( midpoint = last_fhr + interval/2 ))
-    VDATE=$($NDATE $fhr $IDATE)
-    YYYY=$(echo $VDATE | cut -c1-4)
-    MM=$(echo $VDATE | cut -c5-6)
-    DD=$(echo $VDATE | cut -c7-8)
-    HH=$(echo $VDATE | cut -c9-10)
-    SS=$((10#$HH*3600))
+    done
 
-    VDATE_MID=$($NDATE $midpoint $IDATE)
-    YYYY_MID=$(echo $VDATE_MID | cut -c1-4)
-    MM_MID=$(echo $VDATE_MID | cut -c5-6)
-    DD_MID=$(echo $VDATE_MID | cut -c7-8)
-    HH_MID=$(echo $VDATE_MID | cut -c9-10)
-    SS_MID=$((10#$HH_MID*3600))
+  elif [[ "${RUN}" =~ "gdas" ]]; then
+    # Link output files for RUN = gdas
 
-    source_file="ocn_${YYYY_MID}_${MM_MID}_${DD_MID}_${HH_MID}.nc"
-    dest_file="ocn${VDATE}.${ENSMEM}.${IDATE}.nc"
-    ${NLN} ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
+    # Save MOM6 backgrounds
+    for fhr in ${OUTPUT_FH}; do
+      local idatestr=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${fhr} hours" +%Y_%m_%d_%H)
+      local fhr3=$(printf %03i "${fhr}")
+      $NLN "${COM_OCEAN_HISTORY}/${RUN}.t${cyc}z.ocnf${fhr3}.nc" "${DATA}/ocn_da_${idatestr}.nc"
+    done
+  fi
 
-    source_file="wavocn_${YYYY_MID}_${MM_MID}_${DD_MID}_${HH_MID}.nc"
-    dest_file=${source_file}
-    ${NLN} ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
+  mkdir -p "${COM_OCEAN_RESTART}"
 
-    source_file="ocn_daily_${YYYY}_${MM}_${DD}.nc"
-    dest_file=${source_file}
-    if [ ! -a "${DATA}/${source_file}" ]; then
-      $NLN ${COMOUTocean}/${dest_file} ${DATA}/${source_file}
-    fi
+  # end point restart does not have a timestamp, calculate
+  local rdate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${FHMAX} hours" +%Y%m%d%H)
 
-    last_fhr=$fhr
+  # Link ocean restarts from DATA to COM
+  # Coarser than 1/2 degree has a single MOM restart
+  $NLN "${COM_OCEAN_RESTART}/${rdate:0:8}.${rdate:8:2}0000.MOM.res.nc" "${DATA}/MOM6_RESTART/"
+  # 1/4 degree resolution has 4 additional restarts
+  case ${OCNRES} in
+    "025")
+      for nn in $(seq 1 4); do
+        $NLN "${COM_OCEAN_RESTART}/${rdate:0:8}.${rdate:8:2}0000.MOM.res_${nn}.nc" "${DATA}/MOM6_RESTART/"
+      done
+      ;;
+    *)
+    ;;
+  esac
+
+  # Loop over restart_interval frequency and link restarts from DATA to COM
+  local res_int=$(echo $restart_interval | cut -d' ' -f1)  # If this is a list, get the frequency.  # This is bound to break w/ IAU
+  local idate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${res_int} hours" +%Y%m%d%H)
+  while [[ $idate -lt $rdate ]]; do
+    local idatestr=$(date +%Y-%m-%d-%H -d "${idate:0:8} ${idate:8:2}")
+    $NLN "${COM_OCEAN_RESTART}/${idate:0:8}.${idate:8:2}0000.MOM.res.nc" "${DATA}/MOM6_RESTART/"
+    case ${OCNRES} in
+      "025")
+        for nn in $(seq 1 4); do
+          $NLN "${COM_OCEAN_RESTART}/${idate:0:8}.${idate:8:2}0000.MOM.res_${nn}.nc" "${DATA}/MOM6_RESTART/"
+        done
+        ;;
+    esac
+    local idate=$(date -d "${idate:0:8} ${idate:8:2} + ${res_int} hours" +%Y%m%d%H)
   done
-  $NLN ${COMOUTocean}/MOM_input $DATA/INPUT/MOM_input
+
+  # TODO: mediator should have its own CMEPS_postdet() function
+  # Link mediator restarts from DATA to COM
+  # DANGER DANGER DANGER - Linking mediator restarts to COM causes the model to fail with a message like this below:
+  # Abort with message NetCDF: File exists && NC_NOCLOBBER in file pio-2.5.7/src/clib/pioc_support.c at line 2173
+  # Instead of linking, copy the mediator files after the model finishes
+  #local COMOUTmed="${ROTDIR}/${RUN}.${PDY}/${cyc}/med"
+  #mkdir -p "${COMOUTmed}/RESTART"
+  #local idate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${res_int} hours" +%Y%m%d%H)
+  #while [[ $idate -le $rdate ]]; do
+  #  local seconds=$(to_seconds ${idate:8:2}0000)  # use function to_seconds from forecast_predet.sh to convert HHMMSS to seconds
+  #  local idatestr="${idate:0:4}-${idate:4:2}-${idate:6:2}-${seconds}"
+  #  $NLN "${COMOUTmed}/RESTART/${idate:0:8}.${idate:8:2}0000.ufs.cpld.cpl.r.nc" "${DATA}/RESTART/ufs.cpld.cpl.r.${idatestr}.nc"
+  #  local idate=$(date -d "${idate:0:8} ${idate:8:2} + ${res_int} hours" +%Y%m%d%H)
+  #done
 
   echo "SUB ${FUNCNAME[0]}: MOM6 input data linked/copied"
 
@@ -839,24 +927,57 @@ MOM6_nml() {
 
 MOM6_out() {
   echo "SUB ${FUNCNAME[0]}: Copying output data for MOM6"
+
+  # Copy MOM_input from DATA to COM_OCEAN_INPUT after the forecast is run (and successfull)
+  if [[ ! -d ${COM_OCEAN_INPUT} ]]; then mkdir -p "${COM_OCEAN_INPUT}"; fi
+  ${NCP} "${DATA}/INPUT/MOM_input" "${COM_OCEAN_INPUT}/"
+
+  # TODO: mediator should have its own CMEPS_out() function
+  # Copy mediator restarts from DATA to COM
+  # Linking mediator restarts to COM causes the model to fail with a message.
+  # See MOM6_postdet() function for error message
+  mkdir -p "${COM_MED_RESTART}"
+  local res_int=$(echo $restart_interval | cut -d' ' -f1)  # If this is a list, get the frequency.  # This is bound to break w/ IAU
+  local idate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${res_int} hours" +%Y%m%d%H)
+  local rdate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${FHMAX} hours" +%Y%m%d%H)
+  while [[ $idate -le $rdate ]]; do
+    local seconds=$(to_seconds ${idate:8:2}0000)  # use function to_seconds from forecast_predet.sh to convert HHMMSS to seconds
+    local idatestr="${idate:0:4}-${idate:4:2}-${idate:6:2}-${seconds}"
+    local mediator_file="${DATA}/RESTART/ufs.cpld.cpl.r.${idatestr}.nc"
+    if [[ -f ${mediator_file} ]]; then
+      $NCP "${DATA}/RESTART/ufs.cpld.cpl.r.${idatestr}.nc" "${COM_MED_RESTART}/${idate:0:8}.${idate:8:2}0000.ufs.cpld.cpl.r.nc"
+    else
+      echo "Mediator restart ${mediator_file} not found."
+    fi
+    local idate=$(date -d "${idate:0:8} ${idate:8:2} + ${res_int} hours" +%Y%m%d%H)
+  done
 }
 
 CICE_postdet() {
   echo "SUB ${FUNCNAME[0]}: CICE after run type determination"
 
+  # TODO: move configuration settings to config.ice
+
+  # TODO: These need to be calculated in the parsing_namelists_CICE.sh script CICE_namelists() function and set as local
   year=$(echo $CDATE|cut -c 1-4)
   month=$(echo $CDATE|cut -c 5-6)
   day=$(echo $CDATE|cut -c 7-8)
-  sec=$(echo $CDATE|cut -c 9-10)  
+  sec=$(echo $CDATE|cut -c 9-10)
   stepsperhr=$((3600/$ICETIM))
   nhours=$($NHOUR $CDATE ${year}010100)
   steps=$((nhours*stepsperhr))
   npt=$((FHMAX*$stepsperhr))      # Need this in order for dump_last to work
 
+  # TODO:  These settings should be elevated to config.ice
   histfreq_n=${histfreq_n:-6}
-  dumpfreq_n=${dumpfreq_n:-3024000}  # restart write interval in seconds, default 35 days
-  dumpfreq=${dumpfreq:-"s"} #  "s" or "d" or "m" for restarts at intervals of "seconds", "days" or "months"
-  cice_hist_avg=${cice_hist_avg:-".true."}
+  dumpfreq_n=${dumpfreq_n:-1000}  # Set this to a really large value, as cice, mom6 and cmeps restart interval is controlled by nems.configure
+  dumpfreq=${dumpfreq:-"y"} #  "h","d","m" or "y" for restarts at intervals of "hours", "days", "months" or "years"
+
+  if [[ "${RUN}" =~ "gdas" ]]; then
+    cice_hist_avg=".false."   # DA needs instantaneous
+  elif [[ "${RUN}" =~ "gfs" ]]; then
+    cice_hist_avg=".true."    # P8 wants averaged over histfreq_n
+  fi
 
   FRAZIL_FWSALT=${FRAZIL_FWSALT:-".true."}
   ktherm=${ktherm:-2}
@@ -866,68 +987,100 @@ CICE_postdet() {
   # restart_pond_lvl (if tr_pond_lvl=true):
   #   -- if true, initialize the level ponds from restart (if runtype=continue)
   #   -- if false, re-initialize level ponds to zero (if runtype=initial or continue)
-
-  #TODO: Determine the proper way to determine if it's a 'hot start' or not
-  #note this is not mediator cold start or not
-  #if [ hotstart ]; then
-  #  #continuing run "hot start"
-  #  RUNTYPE='continue'
-  #  USE_RESTART_TIME='.true.'
-  #fi
-  RUNTYPE='initial'
-  USE_RESTART_TIME='.false.'
   restart_pond_lvl=${restart_pond_lvl:-".false."}
 
-  ICERES=${ICERES:-"025"}
-  if [ $ICERES = '025' ]; then
-    ICERESdec="0.25"
-  fi
-  if [ $ICERES = '050' ]; then
-    ICERESdec="0.50"
-  fi
-  if [ $ICERES = '100' ]; then
-    ICERESdec="1.00"
-  fi
+  ICERES=${ICERES:-"025"}  # TODO: similar to MOM_out, lift this higher
 
   ice_grid_file=${ice_grid_file:-"grid_cice_NEMS_mx${ICERES}.nc"}
   ice_kmt_file=${ice_kmt_file:-"kmtu_cice_NEMS_mx${ICERES}.nc"}
   export MESH_OCN_ICE=${MESH_OCN_ICE:-"mesh.mx${ICERES}.nc"}
 
-  iceic="cice_model.res_$CDATE.nc"
-
-  # Copy CICE IC
-  $NCP -p $ICSDIR/$CDATE/ice/cice_model_${ICERESdec}.res_$CDATE.nc $DATA/$iceic
+  # Copy/link CICE IC to DATA
+  if [[ "${warm_start}" = ".true." ]]; then
+    cice_ana="${COM_ICE_RESTART}/${PDY}.${cyc}0000.cice_model_anl.res.nc"
+    if [[ -e ${cice_ana} ]]; then
+      ${NLN} "${cice_ana}" "${DATA}/cice_model.res.nc"
+    else
+      ${NLN} "${COM_ICE_RESTART_PREV}/${PDY}.${cyc}0000.cice_model.res.nc" "${DATA}/cice_model.res.nc"
+    fi
+  else # cold start are typically SIS2 restarts obtained from somewhere else e.g. CPC
+    $NLN "${COM_ICE_RESTART}/${PDY}.${cyc}0000.cice_model.res.nc" "${DATA}/cice_model.res.nc"
+  fi
+  # TODO: add a check for the restarts to exist, if not, exit eloquently
+  rm -f "${DATA}/ice.restart_file"
+  touch "${DATA}/ice.restart_file"
+  echo "${DATA}/cice_model.res.nc" >> "${DATA}/ice.restart_file"
 
   echo "Link CICE fixed files"
   $NLN -sf $FIXcice/$ICERES/${ice_grid_file} $DATA/
   $NLN -sf $FIXcice/$ICERES/${ice_kmt_file} $DATA/
   $NLN -sf $FIXcice/$ICERES/$MESH_OCN_ICE $DATA/
 
-  # Link output files
-  export ENSMEM=${ENSMEM:-01}
-  export IDATE=$CDATE
-  [[ ! -d $COMOUTice ]] && mkdir -p $COMOUTice
-  $NLN $COMOUTice/ice_in $DATA/ice_in
-  fhrlst=$OUTPUT_FH
+  # Link CICE output files
+  if [[ ! -d "${COM_ICE_HISTORY}" ]]; then mkdir -p "${COM_ICE_HISTORY}"; fi  
+  mkdir -p ${COM_ICE_RESTART}
 
-  for fhr in $fhrlst; do
-    if [ $fhr = 'anl' ]; then
-      continue
-    fi
-    VDATE=$($NDATE $fhr $IDATE)
-    YYYY=$(echo $VDATE | cut -c1-4)
-    MM=$(echo $VDATE | cut -c5-6)
-    DD=$(echo $VDATE | cut -c7-8)
-    HH=$(echo $VDATE | cut -c9-10)
-    SS=$((10#$HH*3600))
+  if [[ "${RUN}" =~ "gfs" ]]; then
+    # Link output files for RUN = gfs
 
-    if [[ 10#$fhr -eq 0 ]]; then
-      $NLN $COMOUTice/iceic$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_ic.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
-    else
-      (( interval = fhr - last_fhr ))
-      $NLN $COMOUTice/ice$VDATE.$ENSMEM.$IDATE.nc $DATA/history/iceh_$(printf "%0.2d" $interval)h.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc
-    fi
-    last_fhr=$fhr
+    # TODO: make these forecast output files consistent w/ GFS output
+    # TODO: Work w/ NB to determine appropriate naming convention for these files
+
+    export ENSMEM=${ENSMEM:-01}
+    export IDATE=$CDATE
+
+    fhrlst=$OUTPUT_FH
+
+    # TODO: consult w/ NB on how to improve on this.  Gather requirements and more information on what these files are and how they are used to properly catalog them
+    for fhr in $fhrlst; do
+      if [ $fhr = 'anl' ]; then  # Looking at OUTPUT_FH, this is never true. TODO: remove this block
+        continue
+      fi
+      VDATE=$($NDATE $fhr $IDATE)
+      YYYY=$(echo $VDATE | cut -c1-4)
+      MM=$(echo $VDATE | cut -c5-6)
+      DD=$(echo $VDATE | cut -c7-8)
+      HH=$(echo $VDATE | cut -c9-10)
+      SS=$((10#$HH*3600))
+
+      if [[ 10#$fhr -eq 0 ]]; then
+        ${NLN} "${COM_ICE_HISTORY}/iceic${VDATE}.${ENSMEM}.${IDATE}.nc" "${DATA}/CICE_OUTPUT/iceh_ic.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc"
+      else
+        (( interval = fhr - last_fhr ))  # Umm.. isn't this histfreq_n?
+        ${NLN} "${COM_ICE_HISTORY}/ice${VDATE}.${ENSMEM}.${IDATE}.nc" "${DATA}/CICE_OUTPUT/iceh_$(printf "%0.2d" $interval)h.${YYYY}-${MM}-${DD}-$(printf "%5.5d" ${SS}).nc"
+      fi
+      last_fhr=$fhr
+    done
+
+  elif [[ "${RUN}" =~ "gdas" ]]; then
+
+    # Link CICE generated initial condition file from DATA/CICE_OUTPUT to COMOUTice
+    # This can be thought of as the f000 output from the CICE model
+    local seconds=$(to_seconds ${CDATE:8:2}0000)  # convert HHMMSS to seconds
+    $NLN "${COM_ICE_HISTORY}/${RUN}.t${cyc}z.iceic.nc" "${DATA}/CICE_OUTPUT/iceh_ic.${CDATE:0:4}-${CDATE:4:2}-${CDATE:6:2}-${seconds}.nc"
+
+    # Link instantaneous CICE forecast output files from DATA/CICE_OUTPUT to COMOUTice
+    local fhr="${FHOUT}"
+    while [[ "${fhr}" -le "${FHMAX}" ]]; do
+      local idate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${fhr} hours" +%Y%m%d%H)
+      local seconds=$(to_seconds ${idate:8:2}0000)  # convert HHMMSS to seconds
+      local fhr3=$(printf %03i ${fhr})
+      $NLN "${COM_ICE_HISTORY}/${RUN}.t${cyc}z.icef${fhr3}.nc" "${DATA}/CICE_OUTPUT/iceh_inst.${idate:0:4}-${idate:4:2}-${idate:6:2}-${seconds}.nc"
+      local fhr=$((fhr + FHOUT))
+    done
+
+  fi
+
+  # Link CICE restarts from CICE_RESTART to COMOUTice/RESTART
+  # Loop over restart_interval and link restarts from DATA to COM
+  local res_int=$(echo ${restart_interval} | cut -d' ' -f1)  # If this is a list, get the frequency.  # This is bound to break w/ IAU
+  local rdate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${FHMAX} hours" +%Y%m%d%H)
+  local idate=$(date -d "${CDATE:0:8} ${CDATE:8:2} + ${res_int} hours" +%Y%m%d%H)
+  while [[ ${idate} -le ${rdate} ]]; do
+    local seconds=$(to_seconds ${idate:8:2}0000)  # convert HHMMSS to seconds
+    local idatestr="${idate:0:4}-${idate:4:2}-${idate:6:2}-${seconds}"
+    $NLN "${COM_ICE_RESTART}/${idate:0:8}.${idate:8:2}0000.cice_model.res.nc" "${DATA}/CICE_RESTART/cice_model.res.${idatestr}.nc"
+    local idate=$(date -d "${idate:0:8} ${idate:8:2} + ${res_int} hours" +%Y%m%d%H)
   done
 }
 
@@ -939,6 +1092,10 @@ CICE_nml() {
 
 CICE_out() {
   echo "SUB ${FUNCNAME[0]}: Copying output data for CICE"
+
+  # Copy ice_in namelist from DATA to COMOUTice after the forecast is run (and successfull)
+  if [[ ! -d "${COM_ICE_INPUT}" ]]; then mkdir -p "${COM_ICE_INPUT}"; fi
+  ${NCP} "${DATA}/ice_in" "${COM_ICE_INPUT}/ice_in"
 }
 
 GOCART_rc() {
@@ -966,7 +1123,8 @@ GOCART_rc() {
         cat ${AERO_CONFIG_DIR}/ExtData.${AERO_EMIS_FIRE:-none} ; \
         echo "%%" ; \
       } > $DATA/AERO_ExtData.rc
-      [[ $status -ne 0 ]] && exit $status
+      status=$?
+      if (( status != 0 )); then exit $status; fi
     fi
   fi
 }
@@ -974,7 +1132,7 @@ GOCART_rc() {
 GOCART_postdet() {
   echo "SUB ${FUNCNAME[0]}: Linking output data for GOCART"
 
-  [[ ! -d $COMOUTaero ]] && mkdir -p $COMOUTaero
+  if [[ ! -d "${COM_CHEM_HISTORY}" ]]; then mkdir -p "${COM_CHEM_HISTORY}"; fi
 
   fhrlst=$OUTPUT_FH
   for fhr in $fhrlst; do
@@ -988,6 +1146,13 @@ GOCART_postdet() {
     HH=$(echo $VDATE | cut -c9-10)
     SS=$((10#$HH*3600))
 
-    $NLN $COMOUTaero/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4 $DATA/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4
+    #
+    # Temporarily delete existing files due to noclobber in GOCART
+    #
+    if [[ -e "${COM_CHEM_HISTORY}/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4" ]]; then
+      rm "${COM_CHEM_HISTORY}/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4"
+    fi
+
+    ${NLN} "${COM_CHEM_HISTORY}/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4" "${DATA}/gocart.inst_aod.${YYYY}${MM}${DD}_${HH}00z.nc4"
   done
 }

@@ -1,4 +1,5 @@
-#!/bin/sh
+#! /usr/bin/env bash
+
 ###############################################################################
 #                                                                             #
 # This script preprocesses ice fields for the ocean wave models.              #
@@ -25,13 +26,13 @@
 #
 # --------------------------------------------------------------------------- #
 # 0.  Preparations
+
+source "$HOMEgfs/ush/preamble.sh"
+
 # 0.a Basic modes of operation
 
   cd $DATA
-  seton='-xa'
-  setoff='+xa'
-  set $seton
-
+  
   rm -rf ice
   mkdir ice
   cd ice
@@ -40,33 +41,33 @@
 # 0.b Define directories and the search path.
 #     The tested variables should be exported by the postprocessor script.
 
-  set $setoff
+  set +x
   echo ' '
   echo '+--------------------------------+'
   echo '!         Make ice fields        |'
   echo '+--------------------------------+'
   echo "   Model TAG       : $WAV_MOD_TAG"
-  echo "   Model ID        : ${CDUMP}wave"
+  echo "   Model ID        : ${RUN}wave"
   echo "   Ice grid ID     : $WAVEICE_FID"
   echo "   Ice file        : $WAVICEFILE"
   echo ' '
-  set $seton
-  postmsg "$jlogfile" "Making ice fields."
+  set_trace
+  echo "Making ice fields."
 
-  if [ -z "$YMDH" ] || [ -z "$cycle" ] || \
-     [ -z "$COMOUT" ] || [ -z "$FIXwave" ] || [ -z "$EXECwave" ] || \
-     [ -z "$WAV_MOD_TAG" ] || [ -z "$WAVEICE_FID" ] || [ -z "$SENDCOM" ] || \
-     [ -z "$COMIN_WAV_ICE" ]
-  then
-    set $setoff
+  if [[ -z "${YMDH}" ]] || [[ -z "${cycle}" ]] || \
+     [[ -z "${COM_WAVE_PREP}" ]] || [[ -z "${FIXwave}" ]] || [[ -z "${EXECwave}" ]] || \
+     [[ -z "${WAV_MOD_TAG}" ]] || [[ -z "${WAVEICE_FID}" ]] || [[ -z "${SENDCOM}" ]] || \
+     [[ -z "${COM_OBS}" ]]; then
+  
+    set +x
     echo ' '
     echo '**************************************************'
     echo '*** EXPORTED VARIABLES IN preprocessor NOT SET ***'
     echo '**************************************************'
     echo ' '
     exit 1
-    set $seton
-    postmsg "$jlogfile" "NON-FATAL ERROR - EXPORTED VARIABLES IN preprocessor NOT SET"
+    set_trace
+    echo "NON-FATAL ERROR - EXPORTED VARIABLES IN preprocessor NOT SET"
   fi
 
 # 0.c Links to working directory
@@ -77,7 +78,7 @@
 # 1.  Get the necessary files
 # 1.a Copy the ice data file
 
-  file=${COMIN_WAV_ICE}/${WAVICEFILE}
+  file=${COM_OBS}/${WAVICEFILE}
 
   if [ -f $file ]
   then
@@ -86,18 +87,18 @@
 
   if [ -f ice.grib ]
   then
-    set $setoff
+    set +x
     echo "   ice.grib copied ($file)."
-    set $seton
+    set_trace
   else
-    set $setoff
+    set +x
     echo ' '
     echo '************************************** '
     echo "*** FATAL ERROR: NO ICE FILE $file ***  "
     echo '************************************** '
     echo ' '
-    set $seton
-    postmsg "$jlogfile" "FATAL ERROR - NO ICE FILE (GFS GRIB)"
+    set_trace
+    echo "FATAL ERROR - NO ICE FILE (GFS GRIB)"
     exit 2
   fi
 
@@ -105,9 +106,9 @@
 # 2.  Process the GRIB packed ice file
 # 2.a Unpack data
 
-  set $setoff
+  set +x
   echo '   Extracting data from ice.grib ...'
-  set $seton
+  set_trace
 
   $WGRIB2 ice.grib -netcdf icean_5m.nc 2>&1 > wgrib.out
 
@@ -117,14 +118,14 @@
   if [ "$err" != '0' ]
   then
     cat wgrib.out
-    set $setoff
+    set +x
     echo ' '
     echo '**************************************** '
     echo '*** ERROR IN UNPACKING GRIB ICE FILE *** '
     echo '**************************************** '
     echo ' '
-    set $seton
-    postmsg "$jlogfile" "ERROR IN UNPACKING GRIB ICE FILE."
+    set_trace
+    echo "ERROR IN UNPACKING GRIB ICE FILE."
     exit 3
   fi
 
@@ -135,10 +136,10 @@
 
 # 2.d Run through preprocessor wave_prep
 
-  set $setoff
+  set +x
   echo '   Run through preprocessor ...'
   echo ' '
-  set $seton
+  set_trace
 
   cp -f ${DATA}/ww3_prnc.ice.$WAVEICE_FID.inp.tmpl ww3_prnc.inp
 
@@ -150,14 +151,14 @@
   if [ "$err" != '0' ]
   then
     cat prnc_${WAVEICE_FID}_${cycle}.out 
-    set $setoff
+    set +x
     echo ' '
     echo '******************************************** '
     echo '*** WARNING: NON-FATAL ERROR IN ww3_prnc *** '
     echo '******************************************** '
     echo ' '
-    set $seton
-    postmsg "$jlogfile" "WARNING: NON-FATAL ERROR IN ww3_prnc."
+    set_trace
+    echo "WARNING: NON-FATAL ERROR IN ww3_prnc."
     exit 4
   fi
 
@@ -174,28 +175,20 @@
     icefile=${WAV_MOD_TAG}.${WAVEICE_FID}.$cycle.ice
   elif [ "${WW3ATMIENS}" = "F" ]
   then 
-    icefile=${CDUMP}wave.${WAVEICE_FID}.$cycle.ice
+    icefile=${RUN}wave.${WAVEICE_FID}.$cycle.ice
   fi
  
-  set $setoff
-  echo "   Saving ice.ww3 as $COMOUT/rundata/${icefile}"
-  set $seton
-  cp ice.ww3 $COMOUT/rundata/${icefile}
+  set +x
+  echo "   Saving ice.ww3 as ${COM_WAVE_PREP}/${icefile}"
+  set_trace
+  cp ice.ww3 "${COM_WAVE_PREP}/${icefile}"
   rm -f ice.ww3
 
 # --------------------------------------------------------------------------- #
 # 4.  Clean up the directory
 
-  set $setoff
-  echo "   Removing work directory after success."
-  set $seton
+cd ..
 
-  cd ..
-  rm -rf ice
-
-  set $setoff
-  echo ' '
-  echo 'End of waveice.sh at'
-  date
+rm -rf ice
 
 # End of waveice.sh --------------------------------------------------------- #

@@ -1,0 +1,6 @@
+
+rocotorun -w v17_p8.xml -d v17_p8.db
+rocotostat -w v17_p8.xml -d v17_p8.db
+
+rocotorun  -w v17_p8_24h.xml -d v17_p8_24h.db
+rocotostat -w v17_p8_24h.xml -d v17_p8_24h.db

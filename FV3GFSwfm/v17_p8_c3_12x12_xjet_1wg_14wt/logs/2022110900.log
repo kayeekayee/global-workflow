@@ -1,0 +1,123 @@
+2023-06-17 09:04:34 +0000 :: fe4 :: Submitting gfsgetic
+2023-06-17 09:04:34 +0000 :: fe4 :: Submission status of gfsgetic is pending at druby://fe4:33050
+2023-06-17 09:06:33 +0000 :: fe4 :: Submission status of previously pending gfsgetic is failure!  sbatch: error: Batch job submission failed: Invalid qos specification
+2023-06-17 09:06:33 +0000 :: fe4 :: Submitting gfsgetic
+2023-06-17 09:06:33 +0000 :: fe4 :: Submission status of gfsgetic is pending at druby://fe4:44603
+2023-06-17 09:08:10 +0000 :: fe4 :: Submission status of previously pending gfsgetic is failure!  sbatch: error: Batch job submission failed: Invalid qos specification
+2023-06-17 09:08:11 +0000 :: fe4 :: Submitting gfsgetic
+2023-06-17 09:08:11 +0000 :: fe4 :: Submission status of gfsgetic is pending at druby://fe4:41872
+2023-06-17 09:08:20 +0000 :: fe4 :: Submission status of previously pending gfsgetic is success, jobid=29549646
+2023-06-17 09:08:20 +0000 :: fe4 :: Task gfsgetic, jobid=29549646, in state SUCCEEDED (COMPLETED), ran for 2.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 09:08:20 +0000 :: fe4 :: Submitting gfsfcst
+2023-06-17 09:08:20 +0000 :: fe4 :: Submission status of gfsfcst is pending at druby://fe4:40026
+2023-06-17 09:09:03 +0000 :: fe4 :: Submission status of previously pending gfsfcst is success, jobid=29549647
+2023-06-17 09:09:04 +0000 :: fe4 :: Task gfsfcst, jobid=29549647, in state QUEUED (PENDING)
+2023-06-17 15:15:42 +0000 :: fe6 :: Task gfsfcst, jobid=29549647, in state SUCCEEDED (COMPLETED), ran for 14254.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f000-f000
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f006-f006
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f012-f012
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f018-f018
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f024-f024
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f030-f030
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f036-f036
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f042-f042
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f048-f048
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f054-f054
+2023-06-17 15:15:42 +0000 :: fe6 :: Submitting gfspost_f060-f060
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f066-f066
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f072-f072
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f078-f078
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f084-f084
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f090-f090
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f096-f096
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f102-f102
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f108-f108
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f114-f114
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f120-f120
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f126-f126
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f132-f132
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f138-f138
+2023-06-17 15:15:43 +0000 :: fe6 :: Submitting gfspost_f144-f144
+2023-06-17 15:15:43 +0000 :: fe6 :: Cannot submit gfspost_f150-f150, because maximum global task throttle of 25 will be violated.
+2023-06-17 15:15:43 +0000 :: fe6 :: Cannot submit gfspost_f156-f156, because maximum global task throttle of 25 will be violated.
+2023-06-17 15:15:43 +0000 :: fe6 :: Cannot submit gfspost_f162-f162, because maximum global task throttle of 25 will be violated.
+2023-06-17 15:15:43 +0000 :: fe6 :: Cannot submit gfspost_f168-f168, because maximum global task throttle of 25 will be violated.
+2023-06-17 15:15:43 +0000 :: fe6 :: Submission of gfspost_f000-f000 succeeded, jobid=29564320
+2023-06-17 15:15:43 +0000 :: fe6 :: Submission of gfspost_f006-f006 succeeded, jobid=29564321
+2023-06-17 15:15:43 +0000 :: fe6 :: Submission of gfspost_f012-f012 succeeded, jobid=29564322
+2023-06-17 15:15:43 +0000 :: fe6 :: Submission of gfspost_f018-f018 succeeded, jobid=29564323
+2023-06-17 15:15:43 +0000 :: fe6 :: Submission of gfspost_f024-f024 succeeded, jobid=29564324
+2023-06-17 15:15:44 +0000 :: fe6 :: Submission of gfspost_f030-f030 succeeded, jobid=29564326
+2023-06-17 15:15:45 +0000 :: fe6 :: Submission of gfspost_f036-f036 succeeded, jobid=29564327
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f042-f042 succeeded, jobid=29564329
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f048-f048 succeeded, jobid=29564330
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f054-f054 succeeded, jobid=29564331
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f060-f060 succeeded, jobid=29564332
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f066-f066 succeeded, jobid=29564333
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f072-f072 succeeded, jobid=29564334
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f078-f078 succeeded, jobid=29564335
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f084-f084 succeeded, jobid=29564336
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f090-f090 succeeded, jobid=29564337
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f096-f096 succeeded, jobid=29564338
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f102-f102 succeeded, jobid=29564339
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f108-f108 succeeded, jobid=29564340
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f114-f114 succeeded, jobid=29564341
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f120-f120 succeeded, jobid=29564342
+2023-06-17 15:15:46 +0000 :: fe6 :: Submission of gfspost_f126-f126 succeeded, jobid=29564343
+2023-06-17 15:15:47 +0000 :: fe6 :: Submission of gfspost_f132-f132 succeeded, jobid=29564344
+2023-06-17 15:15:47 +0000 :: fe6 :: Submission of gfspost_f138-f138 succeeded, jobid=29564345
+2023-06-17 15:15:47 +0000 :: fe6 :: Submission of gfspost_f144-f144 succeeded, jobid=29564346
+2023-06-17 15:21:39 +0000 :: fe6 :: Task gfspost_f000-f000, jobid=29564320, in state SUCCEEDED (COMPLETED), ran for 141.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:39 +0000 :: fe6 :: Task gfspost_f006-f006, jobid=29564321, in state SUCCEEDED (COMPLETED), ran for 158.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f012-f012, jobid=29564322, in state SUCCEEDED (COMPLETED), ran for 151.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f018-f018, jobid=29564323, in state SUCCEEDED (COMPLETED), ran for 155.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f024-f024, jobid=29564324, in state SUCCEEDED (COMPLETED), ran for 153.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f030-f030, jobid=29564326, in state SUCCEEDED (COMPLETED), ran for 153.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f036-f036, jobid=29564327, in state SUCCEEDED (COMPLETED), ran for 153.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f042-f042, jobid=29564329, in state FAILED (FAILED), ran for 104.0 seconds, exit status=256, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f048-f048, jobid=29564330, in state SUCCEEDED (COMPLETED), ran for 156.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f054-f054, jobid=29564331, in state FAILED (FAILED), ran for 103.0 seconds, exit status=256, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f060-f060, jobid=29564332, in state SUCCEEDED (COMPLETED), ran for 147.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f066-f066, jobid=29564333, in state SUCCEEDED (COMPLETED), ran for 161.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f072-f072, jobid=29564334, in state SUCCEEDED (COMPLETED), ran for 152.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f078-f078, jobid=29564335, in state SUCCEEDED (COMPLETED), ran for 149.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f084-f084, jobid=29564336, in state SUCCEEDED (COMPLETED), ran for 154.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:40 +0000 :: fe6 :: Task gfspost_f090-f090, jobid=29564337, in state SUCCEEDED (COMPLETED), ran for 155.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:41 +0000 :: fe6 :: Task gfspost_f096-f096, jobid=29564338, in state SUCCEEDED (COMPLETED), ran for 152.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:41 +0000 :: fe6 :: Task gfspost_f102-f102, jobid=29564339, in state SUCCEEDED (COMPLETED), ran for 151.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:41 +0000 :: fe6 :: Task gfspost_f108-f108, jobid=29564340, in state SUCCEEDED (COMPLETED), ran for 158.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:41 +0000 :: fe6 :: Task gfspost_f114-f114, jobid=29564341, in state SUCCEEDED (COMPLETED), ran for 156.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Task gfspost_f120-f120, jobid=29564342, in state SUCCEEDED (COMPLETED), ran for 154.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Task gfspost_f126-f126, jobid=29564343, in state SUCCEEDED (COMPLETED), ran for 154.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Task gfspost_f132-f132, jobid=29564344, in state SUCCEEDED (COMPLETED), ran for 151.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Task gfspost_f138-f138, jobid=29564345, in state SUCCEEDED (COMPLETED), ran for 158.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Task gfspost_f144-f144, jobid=29564346, in state SUCCEEDED (COMPLETED), ran for 148.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:21:42 +0000 :: fe6 :: Submitting gfspost_f042-f042
+2023-06-17 15:21:42 +0000 :: fe6 :: Submitting gfspost_f054-f054
+2023-06-17 15:21:42 +0000 :: fe6 :: Submitting gfspost_f150-f150
+2023-06-17 15:21:43 +0000 :: fe6 :: Submitting gfspost_f156-f156
+2023-06-17 15:21:44 +0000 :: fe6 :: Submitting gfspost_f162-f162
+2023-06-17 15:21:44 +0000 :: fe6 :: Submitting gfspost_f168-f168
+2023-06-17 15:21:44 +0000 :: fe6 :: Submission of gfspost_f042-f042 succeeded, jobid=29564569
+2023-06-17 15:21:44 +0000 :: fe6 :: Submission of gfspost_f054-f054 succeeded, jobid=29564570
+2023-06-17 15:21:44 +0000 :: fe6 :: Submission of gfspost_f150-f150 succeeded, jobid=29564571
+2023-06-17 15:21:44 +0000 :: fe6 :: Submission of gfspost_f156-f156 succeeded, jobid=29564572
+2023-06-17 15:21:44 +0000 :: fe6 :: Submission of gfspost_f162-f162 succeeded, jobid=29564573
+2023-06-17 15:21:45 +0000 :: fe6 :: Submission of gfspost_f168-f168 succeeded, jobid=29564574
+2023-06-17 15:43:14 +0000 :: fe6 :: Submitting gfsgetic
+2023-06-17 15:43:14 +0000 :: fe6 :: Submission of gfsgetic succeeded, jobid=29565594
+2023-06-17 15:43:40 +0000 :: fe6 :: Task gfsgetic, jobid=29565594, in state SUCCEEDED (COMPLETED), ran for 3.0 seconds, exit status=0, try=1 (of 2)
+2023-06-17 15:43:40 +0000 :: fe6 :: Submitting gfsfcst
+2023-06-17 15:43:40 +0000 :: fe6 :: Submission status of gfsfcst is pending at druby://fe6:45825
+2023-06-18 15:14:44 +0000 :: fe5 :: Submission status of previously pending gfsfcst is success, jobid=29565602
+2023-06-18 15:14:46 +0000 :: fe5 :: Task gfsfcst, jobid=29565602, in state UNKNOWN (CANCELLED by 1254)
+2023-06-18 15:15:25 +0000 :: fe5 :: Task gfsfcst, jobid=29565602, in state UNKNOWN (CANCELLED by 1254)
+2023-06-18 15:15:50 +0000 :: fe5 :: Task gfsfcst, jobid=29565602, in state LOST (CANCELLED by 1254), giving up because job state could not be determined 3 consecutive times, try=1 (of 2)
+2023-06-18 15:15:55 +0000 :: fe5 :: Submitting gfsfcst
+2023-06-18 15:15:55 +0000 :: fe5 :: Submission status of gfsfcst is pending at druby://fe5:38905
+2023-06-22 17:04:26 +0000 :: fe8 :: Submission status of gfsfcst for cycle 202211090000 could not be retrieved because the server process at druby://fe5:38905 died
+2023-06-22 17:04:27 +0000 :: fe8 :: Submission of gfsfcst for cycle 202211090000 probably, but not necessarily, failed.  It will be resubmitted
+2023-06-22 17:04:28 +0000 :: fe8 :: Submitting gfsfcst
+2023-06-22 17:04:28 +0000 :: fe8 :: Submission status of gfsfcst is pending at druby://fe8:36359
+2023-06-22 17:04:56 +0000 :: fe8 :: Submission status of previously pending gfsfcst is success, jobid=29874800
+2023-06-22 17:04:57 +0000 :: fe8 :: Task gfsfcst, jobid=29874800, in state QUEUED (PENDING)
