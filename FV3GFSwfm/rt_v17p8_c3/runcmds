@@ -1,0 +1,42 @@
+
+rocotorun -w icsonly.xml -d ~/rt_dbfiles/icsonly.db
+rocotostat -w icsonly.xml -d ~/rt_dbfiles/icsonly.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w icsonly_nores.xml -d ~/rt_dbfiles/icsonly_nores.db
+rocotostat -w icsonly_nores.xml -d ~/rt_dbfiles/icsonly_nores.db
+
+rocotorun -w rt_v17p8_c3.xml -d ~/rt_dbfiles/rt_v17p8_c3.db
+rocotostat -w rt_v17p8_c3.xml -d ~/rt_dbfiles/rt_v17p8_c3.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/rt_v17p8_c3.xml -d ~/rt_dbfiles/rt_v17p8_c3.db
+rocotostat -w /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/rt_v17p8_c3.xml -d ~/rt_dbfiles/rt_v17p8_c3.db
+
+rocotorun -w v17p8_c3.xml -d v17p8_c3.db
+rocotostat -w v17p8_c3.xml -d v17p8_c3.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/v17p8_c3.xml -d /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/v17p8_c3.db 
+rocotostat -w /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/v17p8_c3.xml -d /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/v17p8_c3.db
+
+rocotorun -w pygraf_global_c3.xml -d pygraf_global_c3.db
+rocotostat -w pygraf_global_c3.xml -d pygraf_global_c3.db
+
+rocotorun -w rt_pygraf_global_c3.xml -d ~/rt_dbfiles/rt_pygraf_global_c3.db
+rocotostat -w rt_pygraf_global_c3.xml -d ~/rt_dbfiles/rt_pygraf_global_c3.db -c `date --date='4 days ago' +%Y%m%d0000`: |  m
+
+rocotorun -w res_pygraf_c3_xjet.xml -d res_pygraf_c3_xjet.db
+rocotostat -w res_pygraf_c3_xjet.xml -d res_pygraf_c3_xjet.db
+
+rocotorun -w res_pygraf_c3_vjet.xml -d res_pygraf_c3_vjet.db
+rocotostat -w res_pygraf_c3_vjet.xml -d res_pygraf_c3_vjet.db
+
+rocotorun -w res_pygraf_c3_sjet.xml -d res_pygraf_c3_sjet.db
+rocotostat -w res_pygraf_c3_sjet.xml -d res_pygraf_c3_sjet.db
+
+rocotorun -w trak.xml -d trak.db
+rocotostat -w trak.xml -d trak.db
+
+rocotorun -w arch.xml -d arch.db
+rocotostat -w arch.xml -d arch.db
+
+rocotorun -w res_post.xml -d res_post.db
+rocotorun -w res_post.xml -d res_post.db

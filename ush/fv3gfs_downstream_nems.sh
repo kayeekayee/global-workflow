@@ -73,14 +73,15 @@ elif [ $FH -eq 0 ] ; then
   export paramlist=${paramlist:-$PARMpost/global_1x1_paramlist_g2.f000}
   export paramlistb=${paramlistb:-$PARMpost/global_master-catchup_parmlist_g2}
   export fhr3=000
-  export PGBS=YES
+#JKH  export PGBS=YES
 else
   export paramlist=${paramlist:-$PARMpost/global_1x1_paramlist_g2}
   export paramlistb=${paramlistb:-$PARMpost/global_master-catchup_parmlist_g2}
   export fhr3=$(printf "%03d" ${FH})
-  if (( FH%FHOUT_PGB == 0 )); then
-    export PGBS=YES
-  fi
+#JKH  shut off creation of 0p5 and 1p0 grib2 files
+#JKH  if (( FH%FHOUT_PGB == 0 )); then
+#JKH    export PGBS=YES
+#JKH  fi
 fi
 
 

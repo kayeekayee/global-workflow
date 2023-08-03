@@ -1,3 +1,17 @@
+03 Aug 2023
+    - updated gsl_ufs_rt branch to HFIP2023 codebase 
+      (14Jul23 dev_19may23_0fae23fa branch, daf395d)
+      * UFS:  Joe's fork, 10Jul2023 ufs-community branch + Joe changes + Anders changes
+        -- namelist changes
+           rf_cutoff = 10
+           tau = 0
+           fast_tau_w_sec = 0.2
+           n_split = 4
+           c3      :  ltaerosol=.false. progsigma=.false.
+           mynn    :  ltaerosol=.true.  progsigma=.true.
+           thompson:  ltaerosol=.true.  progsigma=.true.
+      * global-workflow:  19May2023 develop branch
+      effective 00Z 24 Jul 2023
 16 May 2023
     - update UFS with Joe's code changes 
       * temporary patch for snow mixing which causes numerical instabilities

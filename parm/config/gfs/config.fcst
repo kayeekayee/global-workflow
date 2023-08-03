@@ -79,6 +79,7 @@ export FCSTEXEC="ufs_model.x"
 # Model configuration
 export TYPE="nh"
 export MONO="non-mono"
+export range_warn=".false."                  ## JKH 
 
 # Use stratosphere h2o physics
 export h2o_phys=".true."

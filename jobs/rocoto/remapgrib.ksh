@@ -75,7 +75,7 @@ export grid_specs_244="latlon 261.750:275:0.25 0.250:203:0.25"
 #########################
 
 # make post directory if doesn't exist
-postDir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/post
+postDir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/products/${COMPONENT}/grib2/0p25/post
 echo "postDir:  $postDir"
 if [ ! -d ${postDir} ]
 then
