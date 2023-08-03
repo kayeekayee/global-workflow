@@ -148,7 +148,7 @@ fi
 
 # PBL/turbulence schemes
 export hybedmf=".false."
-if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then
+if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
    export satmedmf=".false."
    export isatmedmf=0
    export shal_cnv=".false."
@@ -187,16 +187,19 @@ export iopt_trs="2"
 
 # Convection Options: 2-SASAS, 3-GF
 export progsigma=".true."
-if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then 
+if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
+    export imfdeepcnv=5
+    export imfshalcnv=-1                 ## JKH - no shallow GF
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then 
+    export progsigma=.false.
     export imfdeepcnv=5
     export imfshalcnv=5              
-    export progsigma=.false.
 elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf" ]] ; then 
     export imfdeepcnv=3
     export imfshalcnv=3              
 else
     export imfdeepcnv=2
-    if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then 
+    if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then
       export imfshalcnv=-1
     else
       export imfshalcnv=2
@@ -240,7 +243,7 @@ elif [[ "$imp_physics" -eq 8 ]]; then # Thompson
     export dddmp=0.1
     export d4_bg=0.12
     export ncld=2
-    if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_thompson" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then
+    if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_thompson" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
       export ltaerosol=".true."
       export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_aero_tke${tbp}"
     else
