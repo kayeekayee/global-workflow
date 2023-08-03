@@ -5,8 +5,7 @@ cwd=$(pwd)
 
 # Default settings
 APP="S2SWA"
-CCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_no_nsst,FV3_GFS_v16_ugwpv1,FV3_GFS_v17_p8,FV3_GFS_v16_coupled_nsstNoahmpUGWPv1,FV3_GFS_v17_coupled_p8,FV3_GFS_v17_p8_mynn,FV3_GFS_v17_p8_thompson,FV3_GFS_v17_p8_c3"
-#JKHCCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_no_nsst,FV3_GFS_v16_ugwpv1,FV3_GFS_v17_p8,FV3_GFS_v16_coupled_nsstNoahmpUGWPv1,FV3_GFS_v17_coupled_p8,FV3_GFS_v17_p8_mynn,FV3_GFS_v17_p8_thompson"
+CCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_no_nsst,FV3_GFS_v16_ugwpv1,FV3_GFS_v17_p8,FV3_GFS_v16_coupled_nsstNoahmpUGWPv1,FV3_GFS_v17_coupled_p8,FV3_GFS_v17_p8_mynn,FV3_GFS_v17_p8_thompson,FV3_GFS_v17_p8_c3,FV3_GFS_v17_p8_c3_mynn"
 #JKHCCPP_SUITES="FV3_GFS_v16,FV3_GFS_v16_no_nsst,FV3_GFS_v16_ugwpv1,FV3_GFS_v17_p8,FV3_GFS_v16_coupled_nsstNoahmpUGWPv1,FV3_GFS_v17_coupled_p8"
 
 export RT_COMPILER="intel"
