@@ -13,7 +13,6 @@ echo "CDUMP = $CDUMP"
 echo "COMPONENT = $COMPONENT"
 echo "ICSDIR = $ICSDIR"
 echo "PUBDIR = $PUBDIR"
-echo "GFSDIR = $GFSDIR"
 echo "RETRODIR = $RETRODIR"
 echo "ROTDIR = $ROTDIR"
 echo "PSLOT = $PSLOT"
@@ -23,7 +22,7 @@ echo
 yyyymmdd=`echo $CDATE | cut -c1-8`
 hh=`echo $CDATE | cut -c9-10`
 yyddd=`date +%y%j -u -d $yyyymmdd`
-fv3ic_dir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/model_data/${COMPONENT}
+fv3ic_dir=${ROTDIR}/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}
 
 ## create links in FV3ICS directory
 mkdir -p $fv3ic_dir
@@ -48,6 +47,12 @@ elif [[ -f $PUBDIR/${pubatm_file} ]]; then
   echo "linking $PUBDIR...."
   ln -fs $PUBDIR/${pubsfc_file} $sfc_file
   ln -fs $PUBDIR/${pubatm_file} $atm_file
+elif  [[ -f $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file} ]]; then
+  echo "linking $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}..."
+  echo "sfc_file:  $sfc_file"
+  echo "atm_file:  $atm_file"
+  ln -s $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${sfc_file}
+  ln -s $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file}
 elif  [[ -f $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file} ]]; then
   echo "linking $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}..."
   echo "sfc_file:  $sfc_file"

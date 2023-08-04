@@ -4,8 +4,8 @@ PACKAGEROOT: '/scratch1/NCEPDEV/global/glopara/nwpara'
 COMROOT: '/scratch1/NCEPDEV/global/glopara/com'
 COMINsyn: '${COMROOT}/gfs/prod/syndat'
 HOMEDIR: '/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/${USER}'
-STMP: '/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSrun/'
-PTMP: '/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa/FV3GFSrun/'
+STMP: '/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSrun/'
+PTMP: '/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSrun/'
 NOSCRUB: $HOMEDIR
 ACCOUNT: gsd-fv3
 SCHEDULER: slurm
@@ -18,7 +18,7 @@ CHGRP_CMD: 'chgrp rstprod'
 HPSSARCH: 'YES'
 HPSS_PROJECT: fim
 LOCALARCH: 'NO'
-ATARDIR: '/BMC/${HPSS_PROJECT}/1year/${USER}/${machine}/scratch/${PSLOT}'
+ATARDIR: '/BMC/${HPSS_PROJECT}/2year/${PSLOT}'
 MAKE_NSSTBUFR: 'NO'
 MAKE_ACFTBUFR: 'NO'
 SUPPORTED_RESOLUTIONS: ['C768', 'C384', 'C192', 'C96', 'C48']
