@@ -1,0 +1,12 @@
+
+rocotorun -w rt_icsonly.xml -d ~/rt_dbfiles/rt_icsonly.db
+rocotostat -w rt_icsonly.xml -d ~/rt_dbfiles/rt_icsonly.db  -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w icsonly.xml -d icsonly.db
+rocotostat -w icsonly.xml -d icsonly.db
+
+rocotorun -w rt_v17p8_c3_mynn.xml -d ~/rt_dbfiles/rt_v17p8_c3_mynn.db
+rocotostat -w rt_v17p8_c3_mynn.xml -d ~/rt_dbfiles/rt_v17p8_c3_mynn.db  -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w v17p8_c3_mynn.xml -d v17p8_c3_mynn.db
+rocotostat -w v17p8_c3_mynn.xml -d v17p8_c3_mynn.db

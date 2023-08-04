@@ -1,6 +1,0 @@
-
-rocotorun -w v17_p8.xml -d v17_p8.db
-rocotostat -w v17_p8.xml -d v17_p8.db
-
-rocotorun -w v17_p8_post.xml -d v17_p8.db
-rocotorun -w v17_p8_post.xml -d v17_p8.db

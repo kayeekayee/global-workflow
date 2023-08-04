@@ -1,7 +1,0 @@
-
-rocotorun -w storms-thmp.xml -d storms-thmp.db
-rocotostat  -w storms-thmp.xml -d storms-thmp.db
-
-rocotorun -w test-thompson.xml -d test-thompson.db
-rocotostat  -w test-thompson.xml -d test-thompson.db
-

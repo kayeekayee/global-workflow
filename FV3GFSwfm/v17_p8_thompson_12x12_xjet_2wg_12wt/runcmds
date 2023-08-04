@@ -1,3 +1,0 @@
-
-rocotorun -w v17_p8_thompson.xml -d v17_p8_thompson.db
-rocotostat -w v17_p8_thompson.xml -d v17_p8_thompson.db

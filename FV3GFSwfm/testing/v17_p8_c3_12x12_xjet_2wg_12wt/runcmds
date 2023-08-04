@@ -1,3 +1,0 @@
-
-rocotorun -w v17_p8_c3.xml -d v17_p8_c3.db
-rocotostat -w v17_p8_c3.xml -d v17_p8_c3.db

@@ -1,5 +1,0 @@
-
-#################### v17_p8 ####################
-MAILTO=""
-*/5 * * * * /apps/rocoto/1.3.3/bin/rocotorun -d /scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gw_01may23/FV3GFSwfm/v17_p8/v17_p8.db -w /scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gw_01may23/FV3GFSwfm/v17_p8/v17_p8.xml
-#################################################################

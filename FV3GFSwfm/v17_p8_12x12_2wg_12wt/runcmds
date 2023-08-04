@@ -1,7 +1,0 @@
-
-rocotorun -w test-p8.xml -d test-p8.db
-rocotostat  -w test-p8.xml -d test-p8.db
-
-rocotorun -w storms-p8.xml -d storms-p8.db
-rocotostat  -w storms-p8.xml -d storms-p8.db
-
