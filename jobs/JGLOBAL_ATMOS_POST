@@ -53,7 +53,8 @@ if [[ ${WAFSF} == "YES" ]]; then
   if [[ ! -d ${COM_ATMOS_WAFS} ]]; then mkdir -m 775 -p "${COM_ATMOS_WAFS}"; fi
 fi
 
-for grid in '0p25' '0p50' '1p00'; do
+#JKH for grid in '0p25' '0p50' '1p00'; do
+for grid in '0p25' ; do
   prod_dir="COM_ATMOS_GRIB_${grid}"
   GRID=${grid} YMD=${PDY} HH=${cyc} generate_com -rx "${prod_dir}:COM_ATMOS_GRIB_TMPL"
   if [[ ! -d "${prod_dir}" ]]; then mkdir -m 775 -p "${!prod_dir}"; fi
