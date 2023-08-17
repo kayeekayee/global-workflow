@@ -150,9 +150,10 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
         if [[ "${PDY}${cyc}" -eq "${SDATE}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
     fi
 
-    mod=$((nday % ARCH_FCSTICFREQ))
-    if [[ "${mod}" -eq 0 ]] || [[ "${PDY}${cyc}" -eq "${firstday}" ]]; then SAVEFCSTIC="YES" ; fi
-
+    if [[ "${machine}" = "JET" ]]; then         ## save ICS only on Jet experiments
+      mod=$((nday % ARCH_FCSTICFREQ))
+      if [[ "${mod}" -eq 0 ]] || [[ "${PDY}${cyc}" -eq "${firstday}" ]]; then SAVEFCSTIC="YES" ; fi
+    fi
 
     ARCH_LIST="${DATA}/archlist"
     [[ -d ${ARCH_LIST} ]] && rm -rf "${ARCH_LIST}"
@@ -184,8 +185,8 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
     fi
 
     # Turn on extended globbing options
-    shopt -s extglob
     yyyy="${PDY:0:4}"
+    shopt -s extglob
     for targrp in ${targrp_list}; do
         set +e
         ${TARCMD} -P -cvf "${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar" $(cat "${ARCH_LIST}/${targrp}.txt")
