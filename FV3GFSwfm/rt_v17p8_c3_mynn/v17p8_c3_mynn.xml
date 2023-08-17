@@ -10,12 +10,13 @@
 	-->
 	<!ENTITY PSLOT "rt_v17p8_c3_mynn">
 	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
-	<!ENTITY EXPDIR "/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_c3_mynn">
-	<!ENTITY ROTDIR "/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_c3_mynn">
-	<!ENTITY JOBS_DIR "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/jobs/rocoto">
+	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
+	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
+	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
         <!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127">
         <!ENTITY CASE     "C768">
         <!ENTITY COMPONENT "atmos">
+        <!ENTITY ATCFNAME "c3my">
 	<!ENTITY NATIVE_STR "--export=NONE">
 	<!ENTITY MAXTRIES "2">
 ]>
@@ -25,7 +26,7 @@
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
-	<cycledef group="gfs">202307240000 202308030000 24:00:00</cycledef>
+	<cycledef group="gfs">202307130000 202308030000 24:00:00</cycledef>
 
 <task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -80,7 +81,7 @@
 	<queue>batch</queue>
 	<partition>hera</partition>
 	<walltime>02:40:00</walltime>
-	<nodes>95:ppn=40:tpp=1</nodes>
+	<nodes>98:ppn=40:tpp=1</nodes>
 	<native>&NATIVE_STR;</native>
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsfcst.log</cyclestr></join>
@@ -171,6 +172,7 @@
 	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
 	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+	<envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
@@ -187,5 +189,7 @@
 	</dependency>
 
 </task>
+<!--
+-->
 
 </workflow>

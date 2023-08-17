@@ -8,5 +8,14 @@ rocotostat -w icsonly.xml -d icsonly.db
 rocotorun -w rt_v17p8_c3_mynn.xml -d ~/rt_dbfiles/rt_v17p8_c3_mynn.db
 rocotostat -w rt_v17p8_c3_mynn.xml -d ~/rt_dbfiles/rt_v17p8_c3_mynn.db  -c `date --date='4 days ago' +%Y%m%d0000`: | m
 
-rocotorun -w v17p8_c3_mynn.xml -d v17p8_c3_mynn.db
-rocotostat -w v17p8_c3_mynn.xml -d v17p8_c3_mynn.db
+rocotorun -w v17p8_c3_mynn.xml -d ~/retro_dbfiles/v17p8_c3_mynn.db
+rocotostat -w v17p8_c3_mynn.xml -d ~/retro_dbfiles/v17p8_c3_mynn.db
+
+rocotorun -w rt_pygraf_global_c3_mynn.xml -d ~/rt_dbfiles/rt_pygraf_global_c3_mynn.db
+rocotostat -w rt_pygraf_global_c3_mynn.xml -d ~/rt_dbfiles/rt_pygraf_global_c3_mynn.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+rocotorun -w pygraf_c3_mynn.xml -d ~/retro_dbfiles/pygraf_c3_mynn.db
+rocotostat -w pygraf_c3_mynn.xml -d ~/retro_dbfiles/pygraf_c3_mynn.db
+
+rocotorun -w arch.xml -d ~/retro_dbfiles/arch.db
+rocotostat -w arch.xml -d ~/retro_dbfiles/arch.db
