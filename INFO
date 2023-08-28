@@ -1,3 +1,10 @@
+28 Aug 2023
+    - updated UFS codebase to 28Aug23
+      * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
+              Haiqin's c3 and Joe's mynn updates
+18 Aug 2023
+    - updated UFS codebase to 18Aug23
+      * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + bug fixes and code updates
 03 Aug 2023
     - updated gsl_ufs_rt branch to HFIP2023 codebase 
       (14Jul23 dev_19may23_0fae23fa branch, daf395d)
