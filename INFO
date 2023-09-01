@@ -1,3 +1,9 @@
+01 Sep 2023
+  - modify constant for c3
+      * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
+              28Aug23 Haiqin's c3 and Joe's mynn updates + 01Sep23 Haiqin change
+        -- added to sorc/ufs_model.fd_gsl/FV3/ccpp/physics/physics
+    effective 00Z 02 Sep 2023
 28 Aug 2023
     - updated UFS codebase to 28Aug23
       * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
