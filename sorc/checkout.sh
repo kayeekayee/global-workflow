@@ -163,7 +163,7 @@ checkout "ufs_utils.fd"    "https://github.com/ufs-community/UFS_UTILS.git"     
 ## checkout "ufs_model.fd"    "https://github.com/ufs-community/ufs-weather-model" "${ufs_model_hash:-bf60924}" ; errs=$((errs + $?))
 ## 26jun23 ufs
 ## checkout "ufs_model.fd"    "https://github.com/ufs-community/ufs-weather-model" "${ufs_model_hash:-ed7fc88}" ; errs=$((errs + $?))
-## Joe's fork, 11jul23 ufs + 12jul23 Joe/Anders changes + 18aug23 Joe fixes + 28aug23 Haiqin/Joe changes
+## Joe's fork, 11jul23 ufs + 12jul23 Joe/Anders changes + 18aug23 Joe fixes + 28aug23 Haiqin/Joe changes + 11sep23 Haiqin changes
 checkout "ufs_model.fd"    "https://github.com/joeolson42/ufs-weather-model" "${ufs_model_hash:-HFIP2023}" ; errs=$((errs + $?))
 
 checkout "verif-global.fd" "https://github.com/NOAA-EMC/EMC_verif-global.git"   "c267780"                    ; errs=$((errs + $?))
