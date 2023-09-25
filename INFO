@@ -1,10 +1,15 @@
+25 Sep 2023
+  - updated UFS codebase to Joe's 22Sep23 fork, 2cafec8 (HFIP2023 tag)
+    * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
+              28Aug23 Haiqin's c3 and Joe's mynn updates + 01Sep23 Haiqin change + 08Sep23 Haiqin changes + 22Sep23 Joe changes
+    effective 00Z 26 Sep 2023
 13 Sep 2023
   - switch back to Joe's fork (11Sep2023 HFIP2023 tag, fcb156f) and remove Haiqin's files from sorc/ufs_model.fd_gsl
       * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
               28Aug23 Haiqin's c3 and Joe's mynn updates + 01Sep23 Haiqin change + 08Sep23 Haiqin changes
         -- remove from sorc/ufs_model.fd_gsl/FV3/ccpp/physics/physics
              cu_c3_deep.F90, cu_c3_sh.F90
-    effective 00Z 14 Sep 2023
+    effective 00Z 14 Sep 2023  (same as 08Sep2023 codebase)
 08 Sep 2023
   - update c3 routines to improve temperature bias and radiation
       * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
