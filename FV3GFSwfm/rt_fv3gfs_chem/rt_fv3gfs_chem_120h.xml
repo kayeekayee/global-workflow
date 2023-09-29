@@ -38,7 +38,7 @@
         <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
         <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NEMSIO/">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
-        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/rtfim/RUNDIRS/rt_fv3gfs_chem">
+        <!ENTITY RUNDIR "/scratch1/BMC/gsd-fv3/NCEPDEV/stmp3/role.rtfim/RUNDIRS/rt_fv3gfs_chem">
         <!ENTITY OUTDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSrun/rt_fv3gfs_chem/">
          
 	<!-- Directories for driving the workflow -->

@@ -13,26 +13,26 @@
       <envar><name>NCL_ROOT</name><value>&NCL_ROOT;/..</value></envar>
       <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
       <envar><name>MODEL</name><value>FV3-Chem</value></envar>
-      <envar><name>FIXfv3</name><value>&FIXfv3;</value></envar>
+      <envar><name>FIXchem</name><value>&FIXchem;</value></envar>
       <envar><name>CASE</name><value>&CASE;</value></envar>
 
       <dependency>
          <or>
               <and>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
-                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+                 <datadep age="300">&DIRGB;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
               </and>
               <and>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
-                 <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+                 <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
               </and>
          </or>
       </dependency>

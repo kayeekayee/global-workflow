@@ -1,6 +1,6 @@
 #!/bin/ksh -l
 
-# this file archives realtime directory files to the mass store, /BMC/fim/1year/rtFV3-Chem/
+# this file archives realtime directory files to the mass store, /BMC/fim/2year/rtFV3-Chem/
 
 # check for correct number of parameters
 if [ $# -lt 2 ]; then
@@ -27,7 +27,7 @@ echo "Archiving ${yyyymmdd}${hh} to mss"
 cd $srcDir/gfs.${yyyymmdd}/${hh}
 
 ## nemsio files
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_nemsio.tar *nemsio*"
+cmd="htar -cPvf /BMC/fim/2year/${mssDir}/${yyyymmdd}${hh}_nemsio.tar *nemsio*"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then
@@ -36,7 +36,7 @@ if [ $status -ne 0 ] ; then
 fi
 
 ## RESTART directory
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_restart.tar RESTART/\*0000\.\*"
+cmd="htar -cPvf /BMC/fim/2year/${mssDir}/${yyyymmdd}${hh}_restart.tar RESTART/\*0000\.\*"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then
@@ -45,7 +45,7 @@ if [ $status -ne 0 ] ; then
 fi
 
 ## GRIB2 files
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_pgrb2.tar *pgrb2*"
+cmd="htar -cPvf /BMC/fim/2year/${mssDir}/${yyyymmdd}${hh}_pgrb2.tar *pgrb2*"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then
@@ -54,7 +54,7 @@ if [ $status -ne 0 ] ; then
 fi
 
 ## NCL files
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_ncl.tar ncl/*/files.zip"
+cmd="htar -cPvf /BMC/fim/2year/${mssDir}/${yyyymmdd}${hh}_ncl.tar ncl/*/files.zip"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then
@@ -64,7 +64,7 @@ fi
 
 ## regrid directory
 cd $runDir/${yyyymmddhh}/gfs
-cmd="htar -cPvf /BMC/fim/1year/${mssDir}/${yyyymmdd}${hh}_regrid.tar regrid"
+cmd="htar -cPvf /BMC/fim/2year/${mssDir}/${yyyymmdd}${hh}_regrid.tar regrid"
 $cmd
 status=$?
 if [ $status -ne 0 ] ; then

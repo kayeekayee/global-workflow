@@ -3,11 +3,11 @@
 # variables sent via xml
 
 echo "entering ncl_FV3chem_smoke.ksh...."
-echo "FIXfv3=$FIXfv3"
+echo "FIXchem=$FIXchem"
 echo "CASE=$CASE"
 
 # initialize
-module load intel
+module load intel/18.0.5.274
 module load ncl
 module load imagemagick
 
@@ -17,10 +17,10 @@ module load imagemagick
 # export FCST_TIME=00  # for testing
 export DATAHOME="${DATAROOT}/"  # for testing
 export TZ="GMT"
-export NCL_HOME="/home/rtrr/HRRR_smoke/bin/NCL/ncl"
+export NCL_HOME="/home/role.rtrr/HRRR_smoke/bin/NCL/ncl"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
 export MAGICK_THREAD_LIMIT=1
-export FIXfv3=${FIXfv3}
+export FIXchem=${FIXchem}
 export CASE=${CASE}
 
 # Set up paths to shell commands

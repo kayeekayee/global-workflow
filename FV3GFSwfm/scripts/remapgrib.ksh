@@ -4,8 +4,8 @@
 #    236 201 244 130 224 242
 
 # initialize
-module load intel
-module load wgrib2
+module load intel/18.0.5.274
+module load wgrib2/2.0.8
 ECHO=echo
 MKDIR=mkdir
 #GRID_NAMES=201D130D244D236D224D242

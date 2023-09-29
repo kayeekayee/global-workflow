@@ -1,10 +1,20 @@
 REALTIME
 ========
+May 21, 2023
+  ** add prepchem to pre2.xml; remove regrid
+  ** start 05/08/23
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre2.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre2.db
+rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre2.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre2.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
+rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre2.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre2.db
+rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre2.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre2.db
+
+### don't run for now....  (regrid task depends on previous day's gfsfcst output)
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
 rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
 rocotocheck -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem_pre.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem_pre.db
 
+### don't run for now....  (fcst can't be recompiled)
 rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db
 rocotostat -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db -c `date --date='4 days ago' +%Y%m%d0000`: | m
 rocotoboot -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/rt_fv3gfs_chem.xml -d $HOME/rt_dbfiles/rt_fv3gfs_chem.db
@@ -18,6 +28,9 @@ rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/ar
 
 rocotorun -w arch_ics384.xml -d $HOME/retro_dbfiles/arch_ics384.db
 rocotostat -w arch_ics384.xml -d $HOME/retro_dbfiles/arch_ics384.db
+
+rocotorun -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/fv3gfs_ics.xml  -d $HOME/retro_dbfiles/fv3gfs_ics.db
+rocotostat  -w /scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3GFSwfm/rt_fv3gfs_chem/fv3gfs_ics.xml  -d $HOME/retro_dbfiles/fv3gfs_ics.db
 
 rocotorun -w fv3gfs_chem.xml -d fv3gfs_chem.db
 rocotostat -w fv3gfs_chem.xml -d fv3gfs_chem.db

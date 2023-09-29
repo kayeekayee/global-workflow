@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "${HOME}/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
 
   <!-- External parameter entites -->
@@ -11,7 +11,7 @@
   %hera;
   <!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
   <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions/">
-  <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3/">
+  <!ENTITY FIXchem "&FV3GFS_HOME;/fix/fix_chem/grid-spec">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
 ]>
 
@@ -20,13 +20,13 @@
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_chemplot.log</cyclestr>
   </log>
 
-  <cycledef>202103020000 202104010000 24:00:00</cycledef>
+  <cycledef>202303070000 202303210000 24:00:00</cycledef>
 
   <task name="chemplot_000" maxtries="2">
       <command>&SCRIPTS;/ncl_FV3chem_smoke.ksh</command>
       <account>&PROJECT;</account>
       <cores>1</cores>
-      <walltime>00:35:00</walltime>
+      <walltime>00:15:00</walltime>
       <jobname>FV3chem_smoke_ncl</jobname>
       <join><cyclestr>&FV3GFS_LOG;/ncl/ncl_FV3chem_smoke_@Y@m@d@H00.log</cyclestr></join>
 
@@ -37,18 +37,28 @@
       <envar><name>NCL_ROOT</name><value>&NCL_ROOT;/..</value></envar>
       <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
       <envar><name>MODEL</name><value>FV3-Chem</value></envar>
-      <envar><name>FIXfv3</name><value>&FIXfv3;</value></envar>
+      <envar><name>FIXchem</name><value>&FIXchem;</value></envar>
       <envar><name>CASE</name><value>&CASE;</value></envar>
 
       <dependency>
-         <and>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-         </and>
+         <or>
+            <and>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+            </and>
+            <and>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+            </and>
+         </or>
       </dependency>
 
     </task>

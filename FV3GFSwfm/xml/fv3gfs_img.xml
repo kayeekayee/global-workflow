@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "${HOME}/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
   <!ENTITY ATCFNAME "FV3GFS_CHEM">          <!-- tracker name -->
   <!ENTITY MODL "FV3GFS_Chem">              <!-- plot name -->
@@ -19,15 +19,14 @@
   <!ENTITY % DEFS   SYSTEM "all_defs.xml">   %DEFS;
 
   %hera;
-  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions">
-  <!ENTITY PUBEMI "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
+  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/nesdis/GBBEPx/C384">
   <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
-  <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3">
+  <!ENTITY FIXchem "&FV3GFS_HOME;/fix/fix_chem/grid-spec">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
   %metatasks;
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="12" cyclelifespan="72:00:00">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="15" cyclelifespan="72:00:00">
   <log>
     <cyclestr>&FV3GFS_LOG;/workflow/workflow_@Y@m@d@H_ncl.log</cyclestr>
   </log>

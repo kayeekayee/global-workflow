@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE workflow [
 
-  <!ENTITY FV3GFS_HOME "${HOME}/FV3-Chem">
+  <!ENTITY FV3GFS_HOME "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem">
   <!ENTITY PSLOT  "rt_fv3gfs_chem">
 
   <!-- External parameter entites -->
@@ -9,8 +9,9 @@
   <!ENTITY % TASKS  SYSTEM "all_tasks.xml">  %TASKS;
 
   %hera;
-  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions/">
-  <!ENTITY FIXfv3 "/scratch1/NCEPDEV/global/glopara/fix/fix_fv3/">
+<!--  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/sdsu/emissions/">   -->
+  <!ENTITY PUBEMI "&PUB_DIR;/data/grids/nesdis/GBBEPx/C384">
+  <!ENTITY FIXchem "&FV3GFS_HOME;/fix/fix_chem/grid-spec">
   <!ENTITY OUTPUT_ROOT "&FV3GFS_RUN;/&PSLOT;">
 ]>
 
@@ -35,18 +36,36 @@
       <envar><name>DATAROOT</name><value>&PUBEMI;</value></envar>
       <envar><name>OUTPUT_ROOT</name><value>&OUTPUT_ROOT;</value></envar>
       <envar><name>MODEL</name><value>FV3-Chem</value></envar>
-      <envar><name>FIXfv3</name><value>&FIXfv3;</value></envar>
+      <envar><name>FIXchem</name><value>&FIXchem;</value></envar>
       <envar><name>CASE</name><value>&CASE;</value></envar>
 
       <dependency>
-         <and>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
-            <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
-         </and>
+         <or>
+            <and>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+              <datadep age="300">&PUBEMI;/<cyclestr>GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+            </and>
+            <and>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+            </and>
+            <and>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile1.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile2.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile3.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile5.bin</cyclestr></datadep>
+               <datadep age="300">&PUBEMI;/<cyclestr>@Y@m@d/meanFRP.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+            </and>
+         </or>
       </dependency>
 
     </task>

@@ -82,16 +82,39 @@ cd $tiledir
         emiss_date1="$SYEAR$SMONTH$SDAY" # default value for branch testing      
         print "emiss_date: $emiss_date1"
         mkdir -p $DIRGB/$emiss_date1
-        if [[ -f $PUBEMI/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
-          $NCP $PUBEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
-        else
-          $NCP $ARCEMI/*${emiss_date1}.*.bin $DIRGB/$emiss_date1/
+        if [[ -f $PUBEMI/GBBEPxemis-BC-${CASE}GT${n}_v4r0_${emiss_date1}.bin ]]; then
+          print "v4 $PUBEMI"
+          $NCP $PUBEMI/*${emiss_date1}.bin $DIRGB/$emiss_date1/
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-BC-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_bc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-OC-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_oc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-SO2-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_so2.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-PM25-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_pm_25.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxFRP-MeanFRP-${CASE}GT${n}_v4r0_${emiss_date1}.bin  plumefrp.dat
+        elif [[ -f $ARCEMI/GBBEPxemis-BC-${CASE}GT${n}_v4r0_${emiss_date1}.bin ]]; then
+          print "v4 $ARCEMI"
+          $NCP $ARCEMI/*${emiss_date1}.bin $DIRGB/$emiss_date1/
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-BC-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_bc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-OC-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_oc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-SO2-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_so2.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxemis-PM25-${CASE}GT${n}_v4r0_${emiss_date1}.bin  ebu_pm_25.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPxFRP-MeanFRP-${CASE}GT${n}_v4r0_${emiss_date1}.bin  plumefrp.dat
+        elif [[ -f $PUBEMI/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
+          print "v3 $PUBEMI"
+          $NCP $PUBEMI/*${emiss_date1}*.bin $DIRGB/$emiss_date1/
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_PM2.5.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.FRP.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
+        elif [[ -f $ARCEMI/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.${tiledir}.bin ]]; then
+          print "v3 $ARCEMI"
+          $NCP $ARCEMI/*${emiss_date1}*.bin $DIRGB/$emiss_date1/
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_PM2.5.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
+          eval $NLN $DIRGB/${emiss_date1}/GBBEPx.FRP.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
         fi
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_BC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_bc.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_OC.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_oc.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_SO2.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_so2.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.emis_PM2.5.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  ebu_pm_25.dat
-        eval $NLN $DIRGB/${emiss_date1}/GBBEPx.FRP.003.${emiss_date1}.FV3.${CASE}Grid.$tiledir.bin  plumefrp.dat
         cd ..
     fi
     #eval $NLN ${CASE}-T-${emiss_date}0000-ALD-bb.bin ebu_ald.dat

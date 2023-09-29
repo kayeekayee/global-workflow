@@ -11,6 +11,7 @@ echo "CDATE = $CDATE"
 echo "CDUMP = $CDUMP"
 echo "COMPONENT = $COMPONENT"
 echo "ICSDIR = $ICSDIR"
+echo "EMCDIR = $EMCDIR"
 echo "PUBDIR = $PUBDIR"
 echo "GFSDIR = $GFSDIR"
 echo "RETRODIR = $RETRODIR"
@@ -59,6 +60,14 @@ elif  [[ -f $RETRODIR/${pubsfc_file} ]]; then
   ln -fs $RETRODIR/${pubsfc_file} $sfc_file
   ln -fs $RETRODIR/${pubatm_file} $atm_file 
   ln -fs $RETRODIR/${pubatm_file} $gdas_atm_file 
+elif  [[ -f $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${sfc_file} ]]; then
+  echo "linking $EMCDIR...."
+  echo "sfc_file:  $sfc_file"
+  echo "atm_file:  $atm_file"
+  echo "link $atm_file to $gdas_atm_file"
+  ln -s $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${sfc_file}
+  ln -s $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file}
+  ln -s $EMCDIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file} $gdas_atm_file
 elif  [[ -f $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${sfc_file} ]]; then
   echo "linking $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}..."
   echo "sfc_file:  $sfc_file"
@@ -69,4 +78,5 @@ elif  [[ -f $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${sfc_file} ]]; th
   ln -s $RETRODIR/${CDUMP}.${yyyymmdd}/${hh}/${COMPONENT}/${atm_file} $gdas_atm_file
 else
   echo "missing input files!"
+  exit 5
 fi

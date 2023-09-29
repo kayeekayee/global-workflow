@@ -20,8 +20,8 @@
 	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202103230000">
-	<!ENTITY EDATE    "202909200000">
+	<!ENTITY SDATE    "202305060000">
+	<!ENTITY EDATE    "202305080000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -33,6 +33,8 @@
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
         <!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
         <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
+        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/sdsu/emissions">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/sdsu_emissions">
         <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
         <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
@@ -75,11 +77,6 @@
         <!ENTITY MEMORY_FV3IC_GFS     "100G">
 	<!ENTITY NATIVE_FV3IC_GFS    "--export=NONE">
 
-        <!ENTITY QUEUE_REGRID     "&QUEUE;">
-        <!ENTITY WALLTIME_REGRID  "00:30:00">
-        <!ENTITY RESOURCES_REGRID "<nodes>1:ppn=2</nodes>">
-        <!ENTITY NATIVE_REGRID    "--export=NONE">
-
 	<!ENTITY QUEUE_ARCH_GFS     "&QUEUE;">
 	<!ENTITY PARTITION_ARCH_GFS "&PARTITION_SERVICE;">
 	<!ENTITY WALLTIME_ARCH_GFS  "06:00:00">
@@ -91,7 +88,7 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="&CYCLETHROTTLE;" taskthrottle="&TASKTHROTTLE;">
 
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H_pre.log</cyclestr></log>
 
@@ -192,39 +189,6 @@
 		</and>
 	</dependency>
 
-</task>
-
-<task name="regrid" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-        <command>&JOBS_DIR;/regrid.sh</command>
-
-        <jobname><cyclestr>&PSLOT;_regrid_@H</cyclestr></jobname>
-        <account>&ACCOUNT;</account>
-        <queue>&QUEUE_REGRID;</queue>
-        &RESOURCES_REGRID;
-        <walltime>&WALLTIME_REGRID;</walltime>
-        <native>&NATIVE_REGRID;</native>
-        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
-
-        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-        <envar><name>OUTDIR</name><value>&OUTDIR;</value></envar>
-        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-        <envar><name>SYEAR</name><value><cyclestr>@Y</cyclestr></value></envar>
-        <envar><name>SMONTH</name><value><cyclestr>@m</cyclestr></value></envar>
-        <envar><name>SDAY</name><value><cyclestr>@d</cyclestr></value></envar>
-        <envar><name>SHOUR</name><value><cyclestr>@H</cyclestr></value></envar>
-        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-
-        <dependency>
-           <and>
-               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nc</cyclestr></datadep>
-               <datadep><cyclestr offset="-24:00:00">&OUTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf000.nemsio</cyclestr></datadep>
-           </and>  
-        </dependency>
 </task>
 
 <task name="mssFV3ICS" cycledefs="gfs" maxtries="&MAXTRIES;">

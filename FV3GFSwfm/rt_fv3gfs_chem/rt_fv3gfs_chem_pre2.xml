@@ -20,7 +20,7 @@
 	<!ENTITY COMPONENT "atmos">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202103230000">
+	<!ENTITY SDATE    "202305090000">
 	<!ENTITY EDATE    "202909200000">
 	<!ENTITY INTERVAL "24:00:00">
 
@@ -33,6 +33,8 @@
 	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3-Chem/FV3ICS">
         <!ENTITY EMCDIR "/scratch1/NCEPDEV/rstprod/com/gfs/prod">
         <!ENTITY PUBDIR "/scratch2/BMC/public/data/grids/gfs/anl/netcdf">
+        <!ENTITY PUBEMI "/scratch2/BMC/public/data/grids/nesdis/GBBEPx/C384">
+	<!ENTITY ARCEMI "/scratch2/BMC/gsd-fv3-dev/Judy.K.Henderson/GBBEPx">
         <!ENTITY DIRGB  "/scratch1/BMC/gsd-fv3-dev/lzhang/GBBEPx">
         <!ENTITY RETRODIR "/scratch1/BMC/gsd-fv3-dev/GFS_RETRO_NETCDF">
         <!ENTITY GFSDIR "/ESRL/BMC/fdr/Permanent">
@@ -86,6 +88,12 @@
 	<!ENTITY RESOURCES_ARCH_GFS "<nodes>1:ppn=1:tpp=1</nodes>">
 	<!ENTITY MEMORY_ARCH_GFS    "2048M">
 	<!ENTITY NATIVE_ARCH_GFS    "--export=NONE">
+
+        <!ENTITY QUEUE_PREP_CHEM_SRC     "&QUEUE;">
+        <!ENTITY WALLTIME_PREP_CHEM_SRC  "00:15:00">
+        <!ENTITY RESOURCES_PREP_CHEM_SRC "<nodes>1:ppn=2</nodes>">
+        <!ENTITY MEMORY_PREP_CHEM_SRC    "">
+        <!ENTITY NATIVE_PREP_CHEM_SRC    "--export=NONE">
 
 	<!-- END: Resource requirements for the workflow -->
 
@@ -194,39 +202,6 @@
 
 </task>
 
-<task name="regrid" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-        <command>&JOBS_DIR;/regrid.sh</command>
-
-        <jobname><cyclestr>&PSLOT;_regrid_@H</cyclestr></jobname>
-        <account>&ACCOUNT;</account>
-        <queue>&QUEUE_REGRID;</queue>
-        &RESOURCES_REGRID;
-        <walltime>&WALLTIME_REGRID;</walltime>
-        <native>&NATIVE_REGRID;</native>
-        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/regrid.log</cyclestr></join>
-
-        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
-        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-        <envar><name>OUTDIR</name><value>&OUTDIR;</value></envar>
-        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
-        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-        <envar><name>SYEAR</name><value><cyclestr>@Y</cyclestr></value></envar>
-        <envar><name>SMONTH</name><value><cyclestr>@m</cyclestr></value></envar>
-        <envar><name>SDAY</name><value><cyclestr>@d</cyclestr></value></envar>
-        <envar><name>SHOUR</name><value><cyclestr>@H</cyclestr></value></envar>
-        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-
-        <dependency>
-           <and>
-               <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/&CDUMP;/gdas.t@Hz.atmanl.nc</cyclestr></datadep>
-               <datadep><cyclestr offset="-24:00:00">&OUTDIR;/&CDUMP;.@Y@m@d/@H/&CDUMP;.t@Hz.atmf000.nemsio</cyclestr></datadep>
-           </and>  
-        </dependency>
-</task>
-
 <task name="mssFV3ICS" cycledefs="gfs" maxtries="&MAXTRIES;">
 	<command>&SCR_DIR;/archive_ics384.ksh</command>
 	<account>&ACCOUNT;</account>
@@ -251,4 +226,63 @@
 	</dependency>
 </task>
 
+<task name="prepchem" cycledefs="gfs" maxtries="&MAXTRIES;">
+
+        <command>&JOBS_DIR;/prepchem.sh</command>
+
+        <jobname><cyclestr>&PSLOT;_prepchem_@H</cyclestr></jobname>
+        <account>&ACCOUNT;</account>
+        <queue>&QUEUE_PREP_CHEM_SRC;</queue>
+        &RESOURCES_PREP_CHEM_SRC;
+        <walltime>&WALLTIME_PREP_CHEM_SRC;</walltime>
+        <native>&NATIVE_PREP_CHEM_SRC;</native>
+        <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/prepchem.log</cyclestr></join>
+
+        <envar><name>RUN_ENVIR</name><value>&RUN_ENVIR;</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>CDUMP</name><value>&CDUMP;</value></envar>
+        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+        <envar><name>SYEAR</name><value><cyclestr>@Y</cyclestr></value></envar>
+        <envar><name>SMONTH</name><value><cyclestr>@m</cyclestr></value></envar>
+        <envar><name>SDAY</name><value><cyclestr>@d</cyclestr></value></envar>
+        <envar><name>SHOUR</name><value><cyclestr>@H</cyclestr></value></envar>
+        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+        <envar><name>ARCEMI</name><value>&ARCEMI;</value></envar>
+        <envar><name>PUBEMI</name><value>&PUBEMI;</value></envar>
+        <envar><name>DIRGB</name><value>&DIRGB;</value></envar>
+        <dependency>
+          <or>
+             <!--  version 3 -->
+             <and>
+                <datadep><cyclestr>&ARCEMI;/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&ARCEMI;/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&ARCEMI;/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+             </and>
+             <and>
+                <datadep><cyclestr>&PUBEMI;/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&PUBEMI;/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&PUBEMI;/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&PUBEMI;/GBBEPx.emis_SO2.003.@Y@m@d.FV3.C384Grid.tile4.bin</cyclestr></datadep>
+             </and>
+             <and>
+                <datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.FRP.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.emis_OC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+                <datadep><cyclestr>&DIRGB;/@Y@m@d/GBBEPx.emis_BC.003.@Y@m@d.FV3.C384Grid.tile6.bin</cyclestr></datadep>
+             </and>
+             <!--  version 4 -->
+             <and>
+                <datadep><cyclestr>&ARCEMI;/GBBEPxFRP-MeanFRP-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+                <datadep><cyclestr>&ARCEMI;/GBBEPxemis-OC-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+                <datadep><cyclestr>&ARCEMI;/GBBEPxemis-BC-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+             </and>
+             <and>
+                <datadep><cyclestr>&PUBEMI;/GBBEPxFRP-MeanFRP-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+                <datadep><cyclestr>&PUBEMI;/GBBEPxemis-OC-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+                <datadep><cyclestr>&PUBEMI;/GBBEPxemis-BC-&CASE;GT6_v4r0_@Y@m@d.bin</cyclestr></datadep>
+             </and>
+          </or>
+        </dependency>
+</task>
 </workflow>

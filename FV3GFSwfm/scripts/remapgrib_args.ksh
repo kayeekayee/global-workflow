@@ -11,7 +11,7 @@ if [ $# -lt 5 ]; then
 fi
 
 # initialize
-module load wgrib2
+module load wgrib2/2.0.8
 ECHO=/bin/echo
 MKDIR=/bin/mkdir
 
