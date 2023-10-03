@@ -1,3 +1,9 @@
+03 Oct 2023
+  - updated UFS codebase to Joe's 03Oct23 fork, a98b92e (HFIP2023 tag)
+    * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
+              28Aug23 Haiqin's c3 and Joe's mynn updates + 01Sep23 Haiqin change + 08Sep23 Haiqin changes + 22Sep23 Joe changes
+              + 03Oct23 Joe changes
+    effective 00Z 04 Oct 2023
 25 Sep 2023
   - updated UFS codebase to Joe's 22Sep23 fork, 2cafec8 (HFIP2023 tag)
     * UFS:  Joe's fork, 10Jul2023 ufs-community branch + 12Jul23 Joe/Anders changes + 18Aug23 bug fixes and code updates +
