@@ -1,0 +1,43 @@
+#! /usr/bin/env bash
+
+#############################################################
+# Set up environment for GDAS Ozone Monitor job
+#############################################################
+source "${HOMEgfs}/ush/preamble.sh"
+source "${HOMEgfs}/ush/jjob_header.sh" -e "verfozn" -c "base verfozn"
+
+#############################################
+#  determine PDY and cyc for previous cycle
+#############################################
+# shellcheck disable=SC2153
+GDATE=$(date --utc +%Y%m%d%H -d "${PDY} ${cyc} - ${assim_freq} hours")
+export gPDY=${GDATE:0:8}
+export gcyc=${GDATE:8:2}
+
+#---------------------------------------------
+# OZN_TANKDIR - WHERE OUTPUT DATA WILL RESIDE
+#
+YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_ANALYSIS
+YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_OZNMON
+
+export oznstat="${COM_ATMOS_ANALYSIS}/gdas.t${cyc}z.oznstat"
+export TANKverf_ozn=${TANKverf_ozn:-${COM_ATMOS_OZNMON}}
+
+if [[ ! -d ${TANKverf_ozn} ]]; then mkdir -p -m 775 ${TANKverf_ozn} ; fi
+
+#-------------------------------------------------------
+# Execute the script.
+#
+"${SCRgfs}/exgdas_atmos_verfozn.sh"
+err=$?
+if (( err != 0 )); then
+    exit "${err}"
+fi
+
+
+################################
+# Remove the Working Directory
+################################
+[[ "${KEEPDATA}" = "NO" ]] && rm -rf "${DATA}"
+
+exit 0

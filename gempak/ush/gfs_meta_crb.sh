@@ -24,11 +24,11 @@ MDL=GFS
 metatype="crb"
 metaname="${mdl}_${metatype}_${cyc}.meta"
 device="nc | ${metaname}"
-PDY2=`echo ${PDY} | cut -c3-`
+PDY2=$(echo ${PDY} | cut -c3-)
 #
 # DEFINE YESTERDAY
-PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c -8`
-PDY2m1=`echo ${PDYm1} | cut -c 3-`
+PDYm1=$($NDATE -24 ${PDY}${cyc} | cut -c -8)
+PDY2m1=$(echo ${PDYm1} | cut -c 3-)
 #
 #if [ ${cyc} -eq 00 ] ; then
 #    fend=F126
@@ -260,17 +260,14 @@ export err=$?;err_chk
 
 
 if [ ${cyc} -eq 00 ] ; then
-    # BV export MODEL=/com/nawips/prod
-    # JY export HPCECMWF=${MODEL}/ecmwf.${PDY}
-    # JY export HPCUKMET=${MODEL}/ukmet.${PDYm1}
     export HPCECMWF=${COMINecmwf}.${PDY}/gempak
-    export HPCUKMET=${COMINukmet}.${PDYm1}
+    export HPCUKMET=${COMINukmet}.${PDYm1}/gempak
     grid1="F-${MDL} | ${PDY2}/${cyc}00"
     grid2="${COMINecmwf}.${PDYm1}/gempak/ecmwf_glob_${PDYm1}12"
     grid3="F-UKMETHPC | ${PDY2m1}/1200"
     for gfsfhr in 12 36 60 84 108
     do
-        ecmwffhr="F`expr ${gfsfhr} + 12`"
+        ecmwffhr="F$(expr ${gfsfhr} + 12)"
         gfsfhr="F${gfsfhr}"
 
 export pgm=gdplot2_nc;. prep_step; startmsg
@@ -335,7 +332,7 @@ export err=$?;err_chk
     done
     for gfsfhr in 00 12 24 36 48 60 84 108 132
     do
-        ukmetfhr="F`expr ${gfsfhr} + 12`"
+        ukmetfhr="F$(expr ${gfsfhr} + 12)"
         gfsfhr=F${gfsfhr}
 
 export pgm=gdplot2_nc;. prep_step; startmsg

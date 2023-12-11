@@ -1,12 +1,13 @@
-#!/bin/ksh
-set -x
+#! /usr/bin/env bash
 
-export COMPONENT=${COMPONENT:-atmos}
+source "$HOMEgfs/ush/preamble.sh"
+
+COMPONENT=${COMPONENT:-atmos}
 
 CDATE=${1:-""}
 CDUMP=${2:-""}
-SOURCE_DIR=${3:-$DMPDIR/${CDUMP}${DUMP_SUFFIX}.${PDY}/${cyc}}
-TARGET_DIR=${4:-$ROTDIR/${CDUMP}.${PDY}/$cyc/$COMPONENT}
+SOURCE_DIR=${3:-$DMPDIR/${CDUMP}${DUMP_SUFFIX}.${PDY}/${cyc}/${COMPONENT}}
+TARGET_DIR=${4:-$ROTDIR/${CDUMP}.${PDY}/${cyc}/${COMPONENT}}
 
 DUMP_SUFFIX=${DUMP_SUFFIX:-""}
 
@@ -22,14 +23,14 @@ if [ ! -s $TARGET_DIR ]; then mkdir -p $TARGET_DIR ;fi
 
 
 # Set file prefix
-cyc=`echo $CDATE |cut -c 9-10`
+cyc=$(echo $CDATE |cut -c 9-10)
 prefix="$CDUMP.t${cyc}z."
 
 
 # Link dump files from SOURCE_DIR to TARGET_DIR
 cd $SOURCE_DIR
 if [ -s ${prefix}updated.status.tm00.bufr_d ]; then
-    for file in `ls ${prefix}*`; do
+    for file in $(ls ${prefix}*); do
 	ln -fs $SOURCE_DIR/$file $TARGET_DIR/$file
     done
 else
@@ -38,6 +39,3 @@ else
 fi
 
 exit 0
-
-
-

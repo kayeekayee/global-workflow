@@ -1,8 +1,9 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 # This script is executed by the script tropcy_relocate.sh
 # --------------------------------------------------------
 
-set -aeux
+source "$HOMEgfs/ush/preamble.sh"
 
 export machine=${machine:-ZEUS}
 export machine=$(echo $machine|tr '[a-z]' '[A-Z]')
@@ -210,12 +211,12 @@ export maxtime=22    # Max number of forecast time levels
 if [ ! -d ${vdir} ];   then mkdir -p ${vdir};   fi
 if [ ! -d ${TMPDIR} ]; then mkdir -p ${TMPDIR}; fi
 
-CENT=`echo ${symdh} | cut -c1-2`
-scc=`echo ${symdh} | cut -c1-2`
-syy=`echo ${symdh} | cut -c3-4`
-smm=`echo ${symdh} | cut -c5-6`
-sdd=`echo ${symdh} | cut -c7-8`
-shh=`echo ${symdh} | cut -c9-10`
+CENT=$(echo ${symdh} | cut -c1-2)
+scc=$(echo ${symdh} | cut -c1-2)
+syy=$(echo ${symdh} | cut -c3-4)
+smm=$(echo ${symdh} | cut -c5-6)
+sdd=$(echo ${symdh} | cut -c7-8)
+shh=$(echo ${symdh} | cut -c9-10)
 dishh=${shh}
 symd=${syy}${smm}${sdd}
 
@@ -234,15 +235,15 @@ esac
 # model ID number to it.
 #---------------------------------------------------#
 
-cmodel=`echo ${cmodel} | tr "[A-Z]" "[a-z]"`
+cmodel=$(echo ${cmodel} | tr "[A-Z]" "[a-z]")
 
 case ${cmodel} in 
 
-  gdas) set +x; echo " "; echo " ++ operational GDAS chosen"; set -x;
+  gdas) set +x; echo " "; echo " ++ operational GDAS chosen"; set_trace;
        fcstlen=9                                       ;
        fcsthrs=""
        for fhr in $( seq 0 $BKGFREQ 9); do
-          fhrchar=`printf %02d $fhr`
+          fhrchar=$(printf %02d $fhr)
           fcsthrs="$fcsthrs $fhrchar"
        done
        atcfnum=72                                       ;
@@ -271,48 +272,48 @@ case ${cmodel} in
        # jpdtn=0 for deterministic data.
        g2_jpdtn=0
        model=8;;
-  gfs) set +x; echo " "; echo " ++ operational GFS chosen"; set -x;
+  gfs) set +x; echo " "; echo " ++ operational GFS chosen"; set_trace;
 		fcsthrsgfs=' 00 06 12 18 24 30 36 42 48 54 60 66 72 78';
 		gfsdir=$COMIN;
 		gfsgfile=gfs.t${dishh}z.pgrbf;
         model=1;;
-  mrf) set +x; echo " "; echo " ++ operational MRF chosen"; set -x;
+  mrf) set +x; echo " "; echo " ++ operational MRF chosen"; set_trace;
 		fcsthrsmrf=' 00 12 24 36 48 60 72';
 		mrfdir=$COMIN;
 		mrfgfile=drfmr.t${dishh}z.pgrbf;
         model=2;;
-  ukmet) set +x; echo " "; echo " ++ operational UKMET chosen"; set -x;
+  ukmet) set +x; echo " "; echo " ++ operational UKMET chosen"; set_trace;
 		fcsthrsukmet=' 00 12 24 36 48 60 72';
 		ukmetdir=$COMIN;
 		ukmetgfile=ukmet.t${dishh}z.ukmet;
         model=3;;
-  ecmwf) set +x; echo " "; echo " ++ operational ECMWF chosen"; set -x;
+  ecmwf) set +x; echo " "; echo " ++ operational ECMWF chosen"; set_trace;
 		fcsthrsecmwf=' 00 24 48 72';
 		ecmwfdir=$COMIN;
 		ecmwfgfile=ecmgrb25.t12z;
         model=4;;
-  ngm) set +x; echo " "; echo " ++ operational NGM chosen"; set -x;
+  ngm) set +x; echo " "; echo " ++ operational NGM chosen"; set_trace;
 		fcsthrsngm=' 00 06 12 18 24 30 36 42 48';
 		ngmdir=$COMIN;
 		ngmgfile=ngm.t${dishh}z.pgrb.f;
         model=5;;
-  nam) set +x; echo " "; echo " ++ operational Early NAM chosen"; set -x;
+  nam) set +x; echo " "; echo " ++ operational Early NAM chosen"; set_trace;
 		fcsthrsnam=' 00 06 12 18 24 30 36 42 48';
 		namdir=$COMIN;
 		namgfile=nam.t${dishh}z.awip32;
         model=6;;
-  ngps) set +x; echo " "; echo " ++ operational NAVGEM chosen"; set -x;
+  ngps) set +x; echo " "; echo " ++ operational NAVGEM chosen"; set_trace;
 		fcsthrsngps=' 00 12 24 36 48 60 72';
 		#ngpsdir=/com/hourly/prod/hourly.${CENT}${symd};
 		ngpsdir=$OMIN;
 		ngpsgfile=fnoc.t${dishh}z;
         model=7;;
   other) set +x; echo " "; echo " Model selected by user is ${cmodel}, which is a ";
-         echo "user-defined model, NOT operational...."; echo " "; set -x;
+         echo "user-defined model, NOT operational...."; echo " "; set_trace;
          model=9;;
   *) set +x; echo " "; echo " !!! Model selected is not recognized.";
      echo " Model= ---> ${cmodel} <--- ..... Please submit the script again....";
-     echo " ";  set -x; exit 8;;
+     echo " ";  set_trace; exit 8;;
 
 esac
 
@@ -359,11 +360,11 @@ if [ ${cmodel} = 'other' ]; then
 # pos3= character position immediately after "00"
 # pos4= character position of last character in name
 
-  otherdir=`dirname ${inpfile}`
-  fname=`basename ${inpfile}`
+  otherdir=$(dirname ${inpfile})
+  fname=$(basename ${inpfile})
   
-  pos2=`echo ${fname} | awk '{ match($0,/XX/); print RSTART }'`
-  pos4=`echo ${fname} | awk '{ match($0,/$/); print RSTART }'`
+  pos2=$(echo ${fname} | awk '{ match($0,/XX/); print RSTART }')
+  pos4=$(echo ${fname} | awk '{ match($0,/$/); print RSTART }')
   let pos4=pos4-1
   let pos1=pos2-1
   let pos3=pos2+2
@@ -376,13 +377,13 @@ if [ ${cmodel} = 'other' ]; then
     echo " replace the forecast hour characters 00 with XX.  Please check the"
     echo " name in the kickoff script and qsub it again.  Exiting....."
     echo " "
-    set -x
+    set_trace
     exit 8
   fi
   
-  fnamebeg=`echo ${fname} | cut -c1-${pos1}`
+  fnamebeg=$(echo ${fname} | cut -c1-${pos1})
   if [ ${pos4} -ge ${pos3} ]; then
-    fnameend=`echo ${fname} | cut -c${pos3}-${pos4}`
+    fnameend=$(echo ${fname} | cut -c${pos3}-${pos4})
   else
     fnameend=""
   fi
@@ -399,7 +400,7 @@ if [ ${cmodel} = 'other' ]; then
       echo " "
       echo " !!! Exiting loop, only processing 14 forecast files ...."
       echo " "
-      set -x
+      set_trace
       break
     fi 
   
@@ -414,7 +415,7 @@ if [ ${cmodel} = 'other' ]; then
       echo " "
       echo " +++ Found file ${fnamebeg}${fhour}${fnameend}"
       echo " "
-      set -x
+      set_trace
       let fhrct=fhrct+1
     else
       fflag='n'
@@ -427,14 +428,14 @@ if [ ${cmodel} = 'other' ]; then
   if [ ! -s ${otherdir}/${fnamebeg}00${fnameend} ]; then
     set +x
     echo " "
-    echo " !!! ERROR in `basename $0`"
+    echo " !!! ERROR in $(basename $0)"
     echo " !!! Input analysis file cannot be found."
     echo " !!! The tracker is looking for this file in:  "
     echo " !!! ---->  ${otherdir}/${fnamebeg}00${fnameend}"
     echo " !!! Please check the directory to make sure the file"
     echo " !!! is there and then submit this job again."
     echo " "
-    set -x
+    set_trace
     exit 8
   fi
   
@@ -443,7 +444,7 @@ if [ ${cmodel} = 'other' ]; then
   echo " Max forecast hour is $maxhour" 
   echo " List of forecast hours: $fcsthrsother"
   echo " "
-  set -x
+  set_trace
 
 # --------------------------------------------------
 # In order for the fortran program to know how many 
@@ -490,18 +491,18 @@ mv ${vdir}/tempvit.nonameless ${vdir}/vitals.${symd}${dishh}
 # tracking program.
 #--------------------------------------------------------------#
 
-ymdh6ago=` ${NDATE:?} -6 ${CENT}${symd}${dishh}`
-syy6=`echo ${ymdh6ago} | cut -c3-4`
-smm6=`echo ${ymdh6ago} | cut -c5-6`
-sdd6=`echo ${ymdh6ago} | cut -c7-8`
-shh6=`echo ${ymdh6ago} | cut -c9-10`
+ymdh6ago=$( ${NDATE:?} -6 ${CENT}${symd}${dishh})
+syy6=$(echo ${ymdh6ago} | cut -c3-4)
+smm6=$(echo ${ymdh6ago} | cut -c5-6)
+sdd6=$(echo ${ymdh6ago} | cut -c7-8)
+shh6=$(echo ${ymdh6ago} | cut -c9-10)
 symd6=${syy6}${smm6}${sdd6}
 
-ymdh6ahead=` ${NDATE:?} 6 ${CENT}${symd}${dishh}`
-syyp6=`echo ${ymdh6ahead} | cut -c3-4`
-smmp6=`echo ${ymdh6ahead} | cut -c5-6`
-sddp6=`echo ${ymdh6ahead} | cut -c7-8`
-shhp6=`echo ${ymdh6ahead} | cut -c9-10`
+ymdh6ahead=$( ${NDATE:?} 6 ${CENT}${symd}${dishh})
+syyp6=$(echo ${ymdh6ahead} | cut -c3-4)
+smmp6=$(echo ${ymdh6ahead} | cut -c5-6)
+sddp6=$(echo ${ymdh6ahead} | cut -c7-8)
+shhp6=$(echo ${ymdh6ahead} | cut -c9-10)
 symdp6=${syyp6}${smmp6}${sddp6}
 
 vit_incr=6
@@ -516,7 +517,7 @@ cat<<EOF >$TMPDIR/suv_input
 &hourinfo  vit_hr_incr=${vit_incr}/
 EOF
 
-numvitrecs=`cat ${vdir}/vitals.${symd}${dishh} | wc -l`
+numvitrecs=$(cat ${vdir}/vitals.${symd}${dishh} | wc -l)
 if [ ${numvitrecs} -eq 0 ]; then
   set +x
   echo " "
@@ -525,7 +526,7 @@ if [ ${numvitrecs} -eq 0 ]; then
   echo "!!! It could just be that there are no storms for the current"
   echo "!!! time.  Please check the dates and submit this job again...."
   echo " "
-  set -x
+  set_trace
   exit 8
 fi
 
@@ -569,23 +570,21 @@ mv ${TMPDIR}/vitals.${symd}${dishh}.y4 ${vdir}/vitals.${symd}${dishh}
 
 #cp $auxtcvit ${vdir}/vitals.${symd}${dishh}
 
-pgm=`basename  $SUPVX`
+pgm=$(basename  $SUPVX)
 if [ -s $DATA/prep_step ]; then
    set +e
    . $DATA/prep_step
-   set -e
+    set_strict
 else
    [ -f errfile ] && rm errfile
    export XLFUNITS=0
-   unset `env | grep XLFUNIT | awk -F= '{print $1}'`
+   unset $(env | grep XLFUNIT | awk -F= '{print $1}')
 
-   set +u
-   if [ -z "$XLFRTEOPTS" ]; then
+   if [ -z "${XLFRTEOPTS:-}" ]; then
      export XLFRTEOPTS="unit_vars=yes"
    else
      export XLFRTEOPTS="${XLFRTEOPTS}:unit_vars=yes"
    fi
-   set -u
 
 fi
 
@@ -614,14 +613,14 @@ set +x
 echo
 echo 'The foreground exit status for SUPVIT is ' $err
 echo
-set -x
+set_trace
 
 if [ $err -eq 0 ]; then
   set +x
   echo " "
   echo " Normal end for program supvitql (which updates TC vitals file)."
   echo " "
-  set -x
+  set_trace
 else
   set +x
   echo " "
@@ -631,7 +630,7 @@ else
   echo "!!! model= ${cmodel}, forecast initial time = ${symd}${dishh}"
   echo "!!! Exiting...."
   echo " "
-  set -x
+  set_trace
 fi
 if [ -s $DATA/err_chk ]; then
    $DATA/err_chk
@@ -652,7 +651,7 @@ fi
 # then exit.
 #------------------------------------------------------------------#
 
-numvitrecs=`cat ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} | wc -l`
+numvitrecs=$(cat ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} | wc -l)
 if [ ${numvitrecs} -eq 0 ]; then
   set +x
   echo " "
@@ -661,7 +660,7 @@ if [ ${numvitrecs} -eq 0 ]; then
   echo "!!! File ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} is empty."
   echo "!!! Please check the dates and submit this job again...."
   echo " "
-  set -x
+  set_trace
   exit 8
 fi
 
@@ -677,7 +676,7 @@ echo " Below is a list of the storms to be processed: " | tee -a storm_list
 echo " " | tee -a storm_list
 cat ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} | tee -a storm_list
 echo " " | tee -a storm_list
-set -x
+set_trace
 
 set +u
 [ -n "../$pgmout" ]  &&  cat storm_list >> ../$pgmout
@@ -693,7 +692,7 @@ do
 done
 
 dtg_current="${symd} ${dishh}00"
-smax=` grep "${dtg_current}" ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} | wc -l`
+smax=$( grep "${dtg_current}" ${vdir}/vitals.upd.${cmodel}.${symd}${dishh} | wc -l)
 
 sct=1
 while [ ${sct} -le ${smax} ]
@@ -730,7 +729,7 @@ echo "   NOW CUTTING APART INPUT GRIB FILES TO "
 echo "   CREATE 1 BIG GRIB INPUT FILE "
 echo " -----------------------------------------"
 echo " "
-set -x
+set_trace
 
 #grid='255 0 151 71 70000 190000 128 0000 340000 1000 1000 64'
 #grid='255 0 360 181 90000 0000 128 -90000 -1000 1000 1000 64'
@@ -757,7 +756,7 @@ if [ ${model} -eq 5 ]; then
     echo " !!! in the analysis data."
     echo " *******************************************************************"
     echo " "
-    set -x
+    set_trace
   fi
 
   if [ -s ${vdir}/ngmlatlon.pgrb.${symd}${dishh} ]; then
@@ -773,7 +772,7 @@ if [ ${model} -eq 5 ]; then
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo " !!! NGM File missing: ${ngmdir}/${ngmgfile}${fhour}"
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      set -x
+      set_trace
       continue
     fi
     if [ -s $TMPDIR/tmpixfile ]; then rm $TMPDIR/tmpixfile; fi
@@ -784,7 +783,7 @@ if [ ${model} -eq 5 ]; then
     echo " "
     echo " Extracting NGM GRIB data for forecast hour = $fhour"
     echo " "
-    set -x
+    set_trace
 
     g1=${ngmdir}/${ngmgfile}${fhour}       
    
@@ -808,7 +807,7 @@ if [ ${model} -eq 5 ]; then
       echo "!!! sure you've allocated enough memory for this job (error 134 using $COPYGB is "
       echo "!!! typically due to using more memory than you've allocated).  Exiting....."
       echo " "
-      set -x
+      set_trace
       exit 8
     fi
 
@@ -847,7 +846,7 @@ if [ ${model} -eq 6 ]; then
     echo " !!! in the analysis data."
     echo " *******************************************************************"
     echo " "
-    set -x
+    set_trace
   fi
 
   if [ -s ${vdir}/namlatlon.pgrb.${symd}${dishh} ]; then
@@ -863,7 +862,7 @@ if [ ${model} -eq 6 ]; then
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo " !!! Early NAM File missing: ${namdir}/${namgfile}${fhour}.tm00"
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      set -x
+      set_trace
       continue
     fi
     if [ -s $TMPDIR/tmpixfile ]; then rm $TMPDIR/tmpixfile; fi
@@ -874,7 +873,7 @@ if [ ${model} -eq 6 ]; then
     echo " "
     echo " Extracting Early NAM GRIB data for forecast hour = $fhour"
     echo " "
-    set -x
+    set_trace
   
     g1=${namdir}/${namgfile}${fhour}.tm00
      
@@ -899,7 +898,7 @@ if [ ${model} -eq 6 ]; then
       echo "!!! sure you've allocated enough memory for this job (error 134 using $COPYGB is "
       echo "!!! typically due to using more memory than you've allocated).  Exiting....."
       echo " "
-      set -x
+      set_trace
       exit 8
     fi
 
@@ -947,7 +946,7 @@ if [ ${model} -eq 4 ]; then
     echo " "
     echo " !!! Due to missing ECMWF file, execution is ending...."
     echo " "
-    set -x
+    set_trace
     exit 8
   fi
 
@@ -990,7 +989,7 @@ if [ ${model} -eq 1 ]; then
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo " !!! GFS File missing: ${gfsdir}/${gfsgfile}${fhour}"
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      set -x
+      set_trace
       continue
     fi
 
@@ -1046,7 +1045,7 @@ if [ ${model} -eq 8 ]; then
 
     for fhr in $( seq -6 $BKGFREQ 3 ); do
       if [ $fhr -lt 0 ]; then
-        fpref=pgm`expr $fhr \* -1`
+        fpref=pgm$(expr $fhr \* -1)
       elif [ $fhr -eq 0 ]; then
         fpref=pges
       elif [ $fhr -gt 0 ]; then
@@ -1061,7 +1060,7 @@ if [ ${model} -eq 8 ]; then
         echo " !!! gdas File missing: $gfile"
         echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         echo " "
-        set -x
+        set_trace
         continue
       fi
 
@@ -1092,8 +1091,8 @@ if [ ${model} -eq 8 ]; then
 
     for fhr in $( seq -6 $BKGFREQ 3 ); do
       if [ $fhr -lt 0 ]; then
-        fhour=0`expr $fhr \* -1`
-        fpref=pgm`expr $fhr \* -1`
+        fhour=0$(expr $fhr \* -1)
+        fpref=pgm$(expr $fhr \* -1)
       elif [ $fhr -eq 0 ]; then
         fhour=00
         fpref=pges
@@ -1110,7 +1109,7 @@ if [ ${model} -eq 8 ]; then
         echo " !!! gdas File missing: $gfile"
         echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         echo " "
-        set -x
+        set_trace
         continue
       fi
 
@@ -1165,7 +1164,7 @@ if [ ${model} -eq 2 ]; then
       echo " !!! MRF File missing: ${mrfdir}/${mrfgfile}${fhour}"
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo " "
-      set -x
+      set_trace
       continue
     fi
 
@@ -1220,7 +1219,7 @@ if [ ${model} -eq 3 ]; then
       echo " !!! UKMET File missing: ${ukmetdir}/${ukmetgfile}${fhour}"
       echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       echo " "
-      set -x
+      set_trace
       continue
     fi
 
@@ -1261,7 +1260,7 @@ if [ ${model} -eq 7 ]; then
     echo " "
     echo " !!! Due to missing NAVGEM file, execution is ending...."
     echo " "
-    set -x
+    set_trace
     exit 8
   fi
 
@@ -1317,8 +1316,8 @@ if [ ${model} -eq 9 ]; then
     rm ${vdir}/otherlatlon.pgrb.${symdh}
   fi
 
-  gridtyp=`${WGRIB:?} -GDS10 ${otherdir}/${fnamebeg}00${fnameend} | \
-           awk -FGDS10= '{print $2}' | awk '{print $6}' | sed -n 1p`
+  gridtyp=$(${WGRIB:?} -GDS10 ${otherdir}/${fnamebeg}00${fnameend} | \
+           awk -FGDS10= '{print $2}' | awk '{print $6}' | sed -n 1p)
 
   if [ ${gridtyp} -eq 0 ]; then
 
@@ -1336,7 +1335,7 @@ if [ ${model} -eq 9 ]; then
         echo "!!! Forecast File missing: ${otherdir}/${fnamebeg}00${fnameend}"
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         echo " "
-        set -x
+        set_trace
         continue
       fi
   
@@ -1410,7 +1409,7 @@ if [ ${model} -eq 9 ]; then
         echo "!!! sure you've allocated enough memory for this job (error 134 using $COPYGB is "
         echo "!!! typically due to using more memory than you've allocated).  Exiting....."
         echo " "
-        set -x
+        set_trace
         exit 8
       fi
 
@@ -1441,9 +1440,9 @@ while [ $ist -le 15 ]
 do
   if [ ${stormflag[${ist}]} -ne 1 ]
   then
-    set +x; echo "Storm number $ist NOT selected for processing"; set -x
+    set +x; echo "Storm number $ist NOT selected for processing"; set_trace
   else
-    set +x; echo "Storm number $ist IS selected for processing...."; set -x
+    set +x; echo "Storm number $ist IS selected for processing...."; set_trace
   fi
   let ist=ist+1
 done
@@ -1454,12 +1453,12 @@ done
 ifh=1
 while [ $ifh -le ${maxtime} ]
 do
-  fh[${ifh}]=` echo ${fcsthrs} | awk '{print $n}' n=$ifh`
+  fh[${ifh}]=$( echo ${fcsthrs} | awk '{print $n}' n=$ifh)
   let ifh=ifh+1
 done
 
 namelist=${vdir}/gettrk.input.${cmodel}.${symdh}
-ATCFNAME=` echo "${atcfname}" | tr '[a-z]' '[A-Z]'`
+ATCFNAME=$( echo "${atcfname}" | tr '[a-z]' '[A-Z]')
   
 export atcfymdh=${scc}${syy}${smm}${sdd}${shh}
 contour_interval=100.0
@@ -1503,13 +1502,13 @@ echo "          wait_max_wait=1800,"                             >>${namelist}
 echo "          wait_sleeptime=5,"                               >>${namelist}
 echo "          per_fcst_command=''/"                            >>${namelist}
   
-pgm=`basename  $GETTX`
+pgm=$(basename  $GETTX)
 if [ -s $DATA/prep_step ]; then
    . $DATA/prep_step
 else
    [ -f errfile ] && rm errfile
    export XLFUNITS=0
-   unset `env | grep XLFUNIT | awk -F= '{print $1}'`
+   unset $(env | grep XLFUNIT | awk -F= '{print $1}')
 
    set +u
    if [ -z "$XLFRTEOPTS" ]; then
@@ -1562,7 +1561,7 @@ set +x
 echo
 echo 'The foreground exit status for GETTRK is ' $err
 echo
-set -x
+set_trace
 
 if [ -s $DATA/err_chk ]; then
    $DATA/err_chk
@@ -1580,6 +1579,7 @@ if [ -s fort.*  ]; then
 fi
 
 cp ${vdir}/trak.${cmodel}.all.${symdh}   ${DATA}/model_track.all
+
 
 exit 0
 

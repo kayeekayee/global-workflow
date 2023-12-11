@@ -1,13 +1,14 @@
-#! /bin/ksh
+#! /usr/bin/env bash
+
 #
 # Script name:         exgfs_pmgr.sh.sms
 #
 #  This script monitors the progress of the gfs_fcst job
 #
-set -x
+
+source "$HOMEgfs/ush/preamble.sh"
 
 hour=00
-typeset -Z2 hour
 TEND=384
 TCP=385
 
@@ -17,13 +18,11 @@ fi
 
 while [ $hour -lt $TCP ]; 
 do
+  hour=$(printf "%02d" $hour)
   echo $hour >>pgrb2_hours
-  if [ $hour -lt 240 ]
+  if [ 10#$hour -lt 240 ]
   then
-     if [ $hour -eq 99 ]; then
-       typeset -Z3 hour
-     fi
-     if [ $hour -lt 120 ]
+     if [ 10#$hour -lt 120 ]
      then
        let "hour=hour+1"
      else
@@ -33,7 +32,7 @@ do
      let "hour=hour+12"
   fi
 done
-pgrb2_jobs=`cat pgrb2_hours`
+pgrb2_jobs=$(cat pgrb2_hours)
 
 #
 # Wait for all fcst hours to finish 
@@ -51,11 +50,11 @@ do
 #      fi    
       ecflow_client --event release_pgrb2_${fhr}
       # Remove current fhr from list
-      pgrb2_jobs=`echo ${pgrb2_jobs} | sed "s/${fhr}//"`
+      pgrb2_jobs=$(echo ${pgrb2_jobs} | sed "s/${fhr}//")
     fi
   done
   
-  result_check=`echo ${pgrb2_jobs} | wc -w`
+  result_check=$(echo ${pgrb2_jobs} | wc -w)
   if [ $result_check -eq 0 ]
   then
      break
@@ -71,6 +70,5 @@ do
 
 done
 
-echo Exiting $0
 
 exit

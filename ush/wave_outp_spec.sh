@@ -1,5 +1,5 @@
-#!/bin/bash
-#                                                                       
+#! /usr/bin/env bash
+
 ################################################################################
 #
 # UNIX Script Documentation Block
@@ -17,28 +17,22 @@
 #
 # Attributes:
 #   Language: Bourne-again (BASH) shell
-#   Machine: WCOSS-DELL-P3
 #
 ################################################################################
 # --------------------------------------------------------------------------- #
 # 0.  Preparations
+
+source "$HOMEgfs/ush/preamble.sh"
+
 # 0.a Basic modes of operation
-
-  # set execution trace prompt.  ${0##*/} adds the script's basename
-  PS4=" \${SECONDS} ${0##*/} L\${LINENO} + "
-  set -x
-
-  # Use LOUD variable to turn on/off trace.  Defaults to YES (on).
-  export LOUD=${LOUD:-YES}; [[ $LOUD = yes ]] && export LOUD=YES
-  [[ "$LOUD" != YES ]] && set +x
-   
   bloc=$1
   ymdh=$2
   specdir=$3
+  workdir=$4
 
-  YMDHE=`$NDATE $FHMAX_WAV $CDATE`
+  YMDHE=$($NDATE $FHMAX_WAV_PNT $CDATE)
 
-  cd $SPECDATA
+  cd $workdir
 
   rm -rf ${specdir}_${bloc}
   mkdir ${specdir}_${bloc}
@@ -51,8 +45,7 @@
     echo '*** FATAL ERROR : ERROR IN ww3_outp_spec (COULD NOT CREATE TEMP DIRECTORY) *** '
     echo '****************************************************************************** '
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "FATAL ERROR : ERROR IN ww3_outp_spec (Could not create temp directory)"
+    set_trace
     exit 1
   fi
 
@@ -64,7 +57,7 @@
   echo '!       Make spectral file       |'
   echo '+--------------------------------+'
   echo "   Model ID        : $WAV_MOD_TAG"
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 # 0.b Check if buoy location set
 
@@ -76,23 +69,22 @@
     echo '*** LOCATION ID IN ww3_outp_spec.sh NOT SET ***'
     echo '***********************************************'
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "LOCATION ID IN ww3_outp_spec.sh NOT SET"
+    set_trace
     exit 1
   else
     buoy=$bloc
     grep $buoy ${DATA}/buoy_log.ww3 > tmp_list.loc
     while read line
     do
-      buoy_name=`echo $line | awk '{print $2}'`
+      buoy_name=$(echo $line | awk '{print $2}')
       if [ $buoy = $buoy_name ]
       then
-        point=`echo $line | awk '{ print $1 }'`
+        point=$(echo $line | awk '{ print $1 }')
         set +x
         echo "              Location ID/#   : $buoy (${point})"
         echo "   Spectral output start time : $ymdh "
         echo ' '
-        [[ "$LOUD" = YES ]] && set -x
+        set_trace
         break
       fi
     done < tmp_list.loc
@@ -103,8 +95,7 @@
       echo '*** LOCATION ID IN ww3_outp_spec.sh NOT RECOGNIZED ***'
       echo '******************************************************'
       echo ' '
-      [[ "$LOUD" = YES ]] && set -x
-      postmsg "$jlogfile" "LOCATION ID IN ww3_outp_spec.sh NOT RECOGNIZED"
+      set_trace
       exit 2
     fi
   fi
@@ -122,20 +113,19 @@
     echo '*** EXPORTED VARIABLES IN ww3_outp_spec.sh NOT SET ***'
     echo '******************************************************'
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "EXPORTED VARIABLES IN ww3_outp_spec.sh NOT SET"
+    set_trace
     exit 3
   fi
 
 # 0.d Starting time for output
 
-  tstart="`echo $ymdh | cut -c1-8` `echo $ymdh | cut -c9-10`0000"
-  YMD="`echo $ymdh | cut -c1-8`"
-  HMS="`echo $ymdh | cut -c9-10`0000"
+  tstart="$(echo $ymdh | cut -c1-8) $(echo $ymdh | cut -c9-10)0000"
+  YMD="$(echo $ymdh | cut -c1-8)"
+  HMS="$(echo $ymdh | cut -c9-10)0000"
   set +x
   echo "   Output starts at $tstart."
   echo ' '
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 # 0.e sync important files
 
@@ -145,7 +135,7 @@
 
 # 0.f Links to mother directory
 
-  ln -s ${DATA}/mod_def.${waveuoutpGRD} ./mod_def.ww3
+  ln -s ${DATA}/output_${ymdh}0000/mod_def.${waveuoutpGRD} ./mod_def.ww3
   ln -s ${DATA}/output_${ymdh}0000/out_pnt.${waveuoutpGRD} ./out_pnt.ww3
 
 # --------------------------------------------------------------------------- #
@@ -154,12 +144,12 @@
 
   set +x
   echo "   Generate input file for ww3_outp."
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
   if [ "$specdir" = "bull" ]
   then
-    tstart="`echo $ymdh | cut -c1-8` `echo $ymdh | cut -c9-10`0000"
-    truntime="`echo $CDATE | cut -c1-8` `echo $YMDH | cut -c9-10`0000"
+    tstart="$(echo $ymdh | cut -c1-8) $(echo $ymdh | cut -c9-10)0000"
+    truntime="$(echo $CDATE | cut -c1-8) $(echo $CDATE | cut -c9-10)0000"
     sed -e "s/TIME/$tstart/g" \
       -e "s/DT/$dtspec/g" \
       -e "s/POINT/$point/g" \
@@ -174,17 +164,19 @@
       -e "s/ITYPE/1/g" \
       -e "s/FORMAT/F/g" \
                                ${DATA}/ww3_outp_spec.inp.tmpl > ww3_outp.inp
-    outfile=ww3.`echo $tstart | cut -c3-8``echo $tstart | cut -c10-11`.spc
+    outfile=ww3.$(echo $tstart | cut -c3-8)$(echo $tstart | cut -c10-11).spc
   fi
 
 # 2.b Run the postprocessor
 
   set +x
   echo "   Executing $EXECwave/ww3_outp"
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
+  export pgm=ww3_outp;. prep_step
   $EXECwave/ww3_outp 1> outp_${specdir}_${buoy}.out 2>&1
-  err=$?
+  export err=$?;err_chk
+
 
   if [ "$err" != '0' ]
   then
@@ -194,8 +186,7 @@
     echo '*** FATAL ERROR : ERROR IN ww3_outp *** '
     echo '******************************************** '
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "FATAL ERROR : ERROR IN ww3_outp"
+    set_trace
     exit 4
   fi
 
@@ -209,27 +200,27 @@
    then
      if [ "$specdir" = "bull" ]
      then
-       cat $outfile | sed -e '9,$d' >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.bull
-       cat $coutfile | sed -e '8,$d' >> ${STA_DIR}/c${specdir}/$WAV_MOD_TAG.$buoy.cbull
+       cat $outfile | sed -e '9,$d' >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.bull
+       cat $coutfile | sed -e '8,$d' >> ${STA_DIR}/c${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.cbull
      else
-       cat $outfile >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.spec
+       cat $outfile >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.spec
      fi
    elif [ "${ymdh}" = "${YMDHE}" ]
    then
      if [ "$specdir" = "bull" ]
      then
-       cat $outfile | sed -e '1,7d' >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.bull
-       cat $coutfile | sed -e '1,6d' >> ${STA_DIR}/c${specdir}/$WAV_MOD_TAG.$buoy.cbull
+       cat $outfile | sed -e '1,7d' >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.bull
+       cat $coutfile | sed -e '1,6d' >> ${STA_DIR}/c${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.cbull
      else
-       cat $outfile | sed -n "/^${YMD} ${HMS}$/,\$p" >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.spec
+       cat $outfile | sed -n "/^${YMD} ${HMS}$/,\$p" >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.spec
      fi
    else
      if [ "$specdir" = "bull" ]
      then
-       cat $outfile | sed -e '1,7d' | sed -e '2,$d' >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.bull
-       cat $coutfile | sed -e '1,6d' | sed -e '2,$d' >> ${STA_DIR}/c${specdir}/$WAV_MOD_TAG.$buoy.cbull
+       cat $outfile | sed -e '1,7d' | sed -e '2,$d' >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.bull
+       cat $coutfile | sed -e '1,6d' | sed -e '2,$d' >> ${STA_DIR}/c${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.cbull
      else
-       cat $outfile | sed -n "/^${YMD} ${HMS}$/,\$p" >> ${STA_DIR}/${specdir}/$WAV_MOD_TAG.$buoy.spec
+       cat $outfile | sed -n "/^${YMD} ${HMS}$/,\$p" >> ${STA_DIR}/${specdir}fhr/$WAV_MOD_TAG.${ymdh}.$buoy.spec
      fi
    fi
   else
@@ -239,22 +230,13 @@
     echo '*** FATAL ERROR : OUTPUT DATA FILE FOR BOUY $bouy NOT FOUND *** '
     echo '***************************************************************** '
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-    postmsg "$jlogfile" "FATAL ERROR : OUTPUT DATA FILE FOR BOUY $bouy NOT FOUND"
+    set_trace
     exit 5
   fi
 
 # 3.b Clean up the rest
 
-  rm -f ww3_outp.inp
-  rm -f mod_def.ww3 out_pnt.ww3
-
-  cd ..
-  rm -rf ${specdir}_${bloc}
-
-  set +x
-  echo ' '
-  echo 'End of ww3_outp_spec.sh at'
-  date
+cd ..
+rm -rf ${specdir}_${bloc}
 
 # End of ww3_outp_spec.sh ---------------------------------------------------- #

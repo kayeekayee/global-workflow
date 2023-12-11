@@ -1,5 +1,5 @@
-#!/bin/bash
-#
+#! /usr/bin/env bash
+
 ################################################################################
 #
 # UNIX Script Documentation Block
@@ -20,25 +20,19 @@
 #
 # Attributes:
 #   Language: Bourne-again (BASH) shell
-#   Machine: WCOSS-DELL-P3
 #
 ###############################################################################
 #
 # --------------------------------------------------------------------------- #
 # 0.  Preparations
+
+source "${HOMEgfs}/ush/preamble.sh"
+
 # 0.a Basic modes of operation
 
-  set -x
-  # Use LOUD variable to turn on/off trace.  Defaults to YES (on).
-  export LOUD=${LOUD:-YES}; [[ $LOUD = yes ]] && export LOUD=YES
-  [[ "$LOUD" != YES ]] && set +x
+  err=0
 
   cd $DATA
-
-  msg="HAS BEGUN on `hostname`"
-  postmsg "$jlogfile" "$msg"
-  msg="Starting MWW3 INIT CONFIG SCRIPT for ${CDUMP}wave"
-  postmsg "$jlogfile" "$msg"
 
   set +x
   echo ' '
@@ -46,15 +40,15 @@
   echo '                      *** MWW3 INIT CONFIG  SCRIPT ***'
   echo '                      ********************************'
   echo '                          Initial configuration script'
-  echo "                       Model identifier : ${CDUMP}wave"
+  echo "                       Model identifier : ${RUN}wave"
   echo ' '
-  echo "Starting at : `date`"
+  echo "Starting at : $(date)"
   echo ' '
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 # Script will run only if pre-defined NTASKS
 #     The actual work is distributed over these tasks.
-  if [ -z ${NTASKS} ] 
+  if [ -z ${NTASKS} ]
   then
     echo "FATAL ERROR: requires NTASKS to be set "
     err=1; export err;${errchk}
@@ -64,7 +58,7 @@
   echo ' '
   echo " Script set to run with $NTASKS tasks "
   echo ' '
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 
 # --------------------------------------------------------------------------- #
@@ -74,7 +68,7 @@
   echo 'Preparing input files :'
   echo '-----------------------'
   echo ' '
-  [[ "$LOUD" = YES ]] && set -x
+  set_trace
 
 # 1.a Model definition files
 
@@ -85,23 +79,21 @@
   chmod 744 cmdfile
 
 # Eliminate duplicate grids
-  array=($WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD $wavesbsGRD $wavepostGRD $waveinterpGRD)
-  grdALL=`printf "%s\n" "${array[@]}" | sort -u | tr '\n' ' '`
+  array=($WAVECUR_FID $WAVEICE_FID $WAVEWND_FID $waveuoutpGRD $waveGRD $waveesmfGRD $wavepostGRD $waveinterpGRD)
+  grdALL=$(printf "%s\n" "${array[@]}" | sort -u | tr '\n' ' ')
 
-  for grdID in ${grdALL}
-  do
-    if [ -f "$COMIN/rundata/${CDUMP}wave.mod_def.${grdID}" ]
-    then
+  for grdID in ${grdALL}; do
+    if [[ -f "${COM_WAVE_PREP}/${RUN}wave.mod_def.${grdID}" ]]; then
       set +x
-      echo " Mod def file for $grdID found in ${COMIN}/rundata. copying ...."
-      [[ "$LOUD" = YES ]] && set -x
-      cp $COMIN/rundata/${CDUMP}wave.mod_def.${grdID} mod_def.$grdID
+      echo " Mod def file for ${grdID} found in ${COM_WAVE_PREP}. copying ...."
+      set_trace
+      cp "${COM_WAVE_PREP}/${RUN}wave.mod_def.${grdID}" "mod_def.${grdID}"
 
     else
       set +x
-      echo " Mod def file for $grdID not found in ${COMIN}/rundata. Setting up to generate ..."
+      echo " Mod def file for ${grdID} not found in ${COM_WAVE_PREP}. Setting up to generate ..."
       echo ' '
-      [[ "$LOUD" = YES ]] && set -x
+      set_trace
       if [ -f $FIXwave/ww3_grid.inp.$grdID ]
       then
         cp $FIXwave/ww3_grid.inp.$grdID ww3_grid.inp.$grdID
@@ -113,10 +105,8 @@
         echo ' '
         echo "   ww3_grid.inp.$grdID copied ($FIXwave/ww3_grid.inp.$grdID)."
         echo ' '
-        [[ "$LOUD" = YES ]] && set -x
+        set_trace
       else
-        msg="ABNORMAL EXIT: NO INP FILE FOR MODEL DEFINITION FILE"
-        postmsg "$jlogfile" "$msg"
         set +x
         echo ' '
         echo '*********************************************************** '
@@ -124,24 +114,23 @@
         echo '*********************************************************** '
         echo "                                grdID = $grdID"
         echo ' '
-        echo $msg
-        [[ "$LOUD" = YES ]] && set -x
+        set_trace
         err=2;export err;${errchk}
       fi
 
-      [[ ! -d $COMOUT/rundata ]] && mkdir -m 775 -p $COMOUT/rundata
+      [[ ! -d "${COM_WAVE_PREP}" ]] && mkdir -m 775 -p "${COM_WAVE_PREP}"
       if [ ${CFP_MP:-"NO"} = "YES" ]; then
         echo "$nmoddef $USHwave/wave_grid_moddef.sh $grdID > $grdID.out 2>&1" >> cmdfile
       else
         echo "$USHwave/wave_grid_moddef.sh $grdID > $grdID.out 2>&1" >> cmdfile
       fi
 
-      nmoddef=`expr $nmoddef + 1`
+      nmoddef=$(expr $nmoddef + 1)
 
     fi
   done
 
-# 1.a.1 Execute parallel or serialpoe 
+# 1.a.1 Execute parallel or serialpoe
 
   if [ "$nmoddef" -gt '0' ]
   then
@@ -150,21 +139,20 @@
     echo ' '
     echo " Generating $nmoddef mod def files"
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
+    set_trace
 
 # Set number of processes for mpmd
-    wavenproc=`wc -l cmdfile | awk '{print $1}'`
-    wavenproc=`echo $((${wavenproc}<${NTASKS}?${wavenproc}:${NTASKS}))`
+    wavenproc=$(wc -l cmdfile | awk '{print $1}')
+    wavenproc=$(echo $((${wavenproc}<${NTASKS}?${wavenproc}:${NTASKS})))
 
 # 1.a.3 Execute the serial or parallel cmdfile
 
     set +x
     echo ' '
-    echo "   Executing the mod_def command file at : `date`"
+    echo "   Executing the mod_def command file at : $(date)"
     echo '   ------------------------------------'
     echo ' '
-    [[ "$LOUD" = YES ]] && set -x
-  
+    set_trace
     if [ "$NTASKS" -gt '1' ]
     then
       if [ ${CFP_MP:-"NO"} = "YES" ]; then
@@ -177,35 +165,31 @@
       ./cmdfile
       exit=$?
     fi
-  
+
     if [ "$exit" != '0' ]
     then
       set +x
       echo ' '
-      echo '********************************************'
-      echo '*** POE FAILURE DURING RAW DATA COPYING ***'
-      echo '********************************************'
+      echo '********************************************************'
+      echo '*** FATAL ERROR: POE FAILURE DURING RAW DATA COPYING ***'
+      echo '********************************************************'
       echo '     See Details Below '
       echo ' '
-      [[ "$LOUD" = YES ]] && set -x
+      set_trace
     fi
-  
-  fi 
+
+  fi
 
 # 1.a.3 File check
 
-  for grdID in ${grdALL}
-  do
-    if [ -f ${COMOUT}/rundata/${CDUMP}wave.mod_def.$grdID ]
-    then
+  for grdID in ${grdALL}; do
+    if [[ -f "${COM_WAVE_PREP}/${RUN}wave.mod_def.${grdID}" ]]; then
       set +x
       echo ' '
       echo " mod_def.$grdID succesfully created/copied "
       echo ' '
-      [[ "$LOUD" = YES ]] && set -x
-    else 
-      msg="ABNORMAL EXIT: NO MODEL DEFINITION FILE"
-      postmsg "$jlogfile" "$msg"
+      set_trace
+    else
       set +x
       echo ' '
       echo '********************************************** '
@@ -213,24 +197,25 @@
       echo '********************************************** '
       echo "                                grdID = $grdID"
       echo ' '
-      echo $msg
       sed "s/^/$grdID.out : /g"  $grdID.out
-      [[ "$LOUD" = YES ]] && set -x
+      set_trace
       err=3;export err;${errchk}
     fi
   done
 
+# Copy to other members if needed
+if (( NMEM_ENS > 0 )); then
+  for mem in $(seq -f "%03g" 1 "${NMEM_ENS}"); do
+    MEMDIR="mem${mem}" YMD=${PDY} HH=${cyc} generate_com COM_WAVE_PREP_MEM:COM_WAVE_PREP_TMPL
+    mkdir -p "${COM_WAVE_PREP_MEM}"
+    for grdID in ${grdALL}; do
+      ${NLN} "${COM_WAVE_PREP}/${RUN}wave.mod_def.${grdID}" "${COM_WAVE_PREP_MEM}/"
+    done
+  done
+fi
+
 # --------------------------------------------------------------------------- #
-# 2.  Ending 
+# 2.  Ending
 
-  set +x
-  echo ' '
-  echo "Ending at : `date`"
-  echo ' '
-  echo '                     *** End of MWW3 Init Config ***'
-  echo ' '
-  [[ "$LOUD" = YES ]] && set -x
-
-  exit $err
 
 # End of MWW3 init config script ------------------------------------------- #

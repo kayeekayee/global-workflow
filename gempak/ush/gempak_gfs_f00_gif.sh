@@ -39,7 +39,7 @@
   export FORT55="title.output"
 #  $WEBTITLE < dates
   ${UTILgfs}/exec/webtitle < dates
-  export TITLE=`cat title.output`
+  export TITLE=$(cat title.output)
   echo "\n\n TITLE = $TITLE \n"
 
 # Define labels and file names for analysis charts
@@ -95,7 +95,7 @@
 
 # Set grid date and input file name
 
-  gdattim=`echo ${PDY} | cut -c3-8`/${cyc}00F000
+  gdattim=$(echo ${PDY} | cut -c3-8)/${cyc}00F000
   gdfile=gem_grids${fhr}.gem
 
 #  Execute the GEMPAK program
@@ -593,7 +593,7 @@ if [ $SENDCOM = YES ]; then
   export input=${COMOUT}/${hgttmp500dev}
   export HEADER=YES
   export OUTPATH=$DATA/gfs_500_hgt_tmp_nh_anl_${cyc}.tif
-  ${UTILgfs}/ush/make_tif.sh
+  ${USHgfs}/make_tif.sh
 fi 
 
    msg=" GEMPAK_GIF ${fhr} hour completed normally"

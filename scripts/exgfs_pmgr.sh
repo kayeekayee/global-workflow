@@ -1,13 +1,14 @@
-#! /bin/ksh
+#! /usr/bin/env bash
+
 #
 # Script name:         exgfs_pmgr.sh.sms
 #
 #  This script monitors the progress of the gfs_fcst job
 #
-set -x
+
+source "$HOMEgfs/ush/preamble.sh"
 
 hour=00
-typeset -Z2 hour
 TEND=384
 TCP=385
 
@@ -17,15 +18,12 @@ fi
 
 while [ $hour -lt $TCP ]; 
 do
+  hour=$(printf "%02d" $hour)
   echo $hour >>posthours
-  if [ $hour -lt 240 ]
+  if [ 10#$hour -lt 240 ]
   then
-     if [ $hour -eq 99 ]
-     then
-       typeset -Z3 hour
-     fi
      # JY if [ $hour -lt 12 ]
-     if [ $hour -lt 120 ]
+     if [ 10#$hour -lt 120 ]
      then
        let "hour=hour+1"
      else
@@ -35,7 +33,7 @@ do
      let "hour=hour+12"
   fi
 done
-postjobs=`cat posthours`
+postjobs=$(cat posthours)
 
 #
 # Wait for all fcst hours to finish 
@@ -45,7 +43,7 @@ while [ $icnt -lt 1000 ]
 do
   for fhr in $postjobs
   do 
-    fhr3=`printf "%03d" $fhr`   
+    fhr3=$(printf "%03d" $fhr)   
     if [ -s ${COMIN}/gfs.${cycle}.logf${fhr}.txt -o  -s ${COMIN}/gfs.${cycle}.logf${fhr3}.txt ]
     then
       if [ $fhr -eq 0 ]
@@ -54,11 +52,11 @@ do
       fi    
       ecflow_client --event release_post${fhr}
       # Remove current fhr from list
-      postjobs=`echo $postjobs | sed "s/${fhr}//"`
+      postjobs=$(echo $postjobs | sed "s/${fhr}//")
     fi
   done
   
-  result_check=`echo $postjobs | wc -w`
+  result_check=$(echo $postjobs | wc -w)
   if [ $result_check -eq 0 ]
   then
      break
@@ -74,6 +72,5 @@ do
 
 done
 
-echo Exiting $0
 
 exit

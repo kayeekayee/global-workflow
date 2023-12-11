@@ -1,4 +1,5 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 #
 #  UTILITY SCRIPT NAME :  gfsbufr.sh
 #               AUTHOR :  Hua-Lu Pan
@@ -16,10 +17,9 @@
 # 2018-05-22 Guang Ping Lou: Making it work for both GFS and FV3GFS 
 # 2018-05-30  Guang Ping Lou: Make sure all files are available.
 # 2019-10-10  Guang Ping Lou: Read in NetCDF files
-echo "History: February 2003 - First implementation of this utility script"
+# echo "History: February 2003 - First implementation of this utility script"
 #
-
-set -ax
+source "$HOMEgfs/ush/preamble.sh"
 
 if test "$F00FLAG" = "YES"
 then
@@ -31,14 +31,14 @@ fi
 hh=$FSTART
 while  test $hh -le $FEND
 do  
-   hh=` expr $hh + $FINT `
+   hh=$( expr $hh + $FINT )
    if test $hh -lt 10
    then
       hh=0$hh
    fi
 done
 
-export pgm=gfs_bufr
+export pgm="gfs_bufr.x"
 #. prep_step
 
 if test "$MAKEBUFR" = "YES"
@@ -48,10 +48,8 @@ else
    bufrflag=".false."
 fi
 
-fformat="nc"
-
- SFCF="sfc"
- CLASS="class1fv3"
+SFCF="sfc"
+CLASS="class1fv3"
 cat << EOF > gfsparm
  &NAMMET
   levs=$LEVS,makebufr=$bufrflag,
@@ -65,7 +63,7 @@ EOF
 hh=$FSTART
    if test $hh -lt 100
    then
-      hh1=`echo "${hh#"${hh%??}"}"`
+      hh1=$(echo "${hh#"${hh%??}"}")
       hh=$hh1
    fi
 while  test $hh -le $FEND
@@ -82,10 +80,10 @@ do
    ic=0
    while [ $ic -lt 1000 ]
    do
-      if [ ! -f $COMIN/${RUN}.${cycle}.logf${hh2}.${fformat} ]
+      if [ ! -f $COMIN/${RUN}.${cycle}.logf${hh2}.txt ]
       then
           sleep 10
-          ic=`expr $ic + 1`
+          ic=$(expr $ic + 1)
       else
           break
       fi
@@ -96,10 +94,10 @@ do
       fi
    done
 #------------------------------------------------------------------
-   ln -sf $COMIN/${RUN}.${cycle}.atmf${hh2}.${fformat} sigf${hh} 
-   ln -sf $COMIN/${RUN}.${cycle}.${SFCF}f${hh2}.${fformat} flxf${hh}
+   ln -sf $COMIN/${RUN}.${cycle}.atmf${hh2}.nc sigf${hh} 
+   ln -sf $COMIN/${RUN}.${cycle}.${SFCF}f${hh2}.nc flxf${hh}
 
-   hh=` expr $hh + $FINT `
+   hh=$( expr $hh + $FINT )
    if test $hh -lt 10
    then
       hh=0$hh
@@ -111,5 +109,7 @@ ln -sf $PARMbufrsnd/bufr_gfs_${CLASS}.tbl fort.1
 ln -sf ${STNLIST:-$PARMbufrsnd/bufr_stalist.meteo.gfs} fort.8
 ln -sf $PARMbufrsnd/bufr_ij13km.txt fort.7
 
-${APRUN_POSTSND} $EXECbufrsnd/gfs_bufr < gfsparm > out_gfs_bufr_$FEND
-export err=$?;err_chk
+${APRUN_POSTSND} "${EXECbufrsnd}/${pgm}" < gfsparm > "out_gfs_bufr_${FEND}"
+export err=$?
+
+exit ${err}

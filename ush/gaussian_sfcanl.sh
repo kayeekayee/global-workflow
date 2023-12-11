@@ -1,4 +1,5 @@
-#!/bin/ksh
+#! /usr/bin/env bash
+
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
@@ -27,9 +28,9 @@
 #     HOMEgfs       Directory for gfs version.  Default is
 #                   $BASEDIR/gfs_ver.v15.0.0}
 #     FIXam         Directory for the global fixed climatology files.
-#                   Defaults to $HOMEgfs/fix/fix_am
+#                   Defaults to $HOMEgfs/fix/am
 #     FIXfv3        Directory for the model grid and orography netcdf
-#                   files.  Defaults to $HOMEgfs/fix/fix_fv3_gmted2010
+#                   files.  Defaults to $HOMEgfs/fix/orog
 #     FIXWGTS       Weight file to use for interpolation
 #     EXECgfs       Directory of the program executable.  Defaults to
 #                   $HOMEgfs/exec
@@ -41,7 +42,7 @@
 #                   defaults to current working directory
 #     XC            Suffix to add to executables. Defaults to none.
 #     GAUSFCANLEXE  Program executable.
-#                   Defaults to $EXECgfs/gaussian_sfcanl.exe
+#                   Defaults to $EXECgfs/gaussian_sfcanl.x
 #     INISCRIPT     Preprocessing script.  Defaults to none.
 #     LOGSCRIPT     Log posting script.  Defaults to none.
 #     ERRSCRIPT     Error processing script
@@ -86,11 +87,11 @@
 #                  $FIXWGTS
 #                  $FIXam/global_hyblev.l65.txt
 #
-#     input data : $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile*.nc
+#     input data : ${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile*.nc
 #
 #     output data: $PGMOUT
 #                  $PGMERR
-#                  $COMOUT/${APREFIX}sfcanl${ASUFFIX}
+#                  $COMOUT/${APREFIX}sfcanl.nc
 #
 # Remarks:
 #
@@ -109,12 +110,7 @@
 #
 ################################################################################
 
-#  Set environment.
-VERBOSE=${VERBOSE:-"NO"}
-if [[ "$VERBOSE" = "YES" ]] ; then
-   echo $(date) EXECUTING $0 $* >&2
-   set -x
-fi
+source "$HOMEgfs/ush/preamble.sh"
 
 CASE=${CASE:-C768}
 res=$(echo $CASE | cut -c2-)
@@ -125,27 +121,19 @@ LATB_SFC=${LATB_SFC:-$LATB_CASE}
 DONST=${DONST:-"NO"}
 LEVS=${LEVS:-64}
 LEVSP1=$(($LEVS+1))
-OUTPUT_FILE=${OUTPUT_FILE:-"nemsio"}
-if [ $OUTPUT_FILE = "netcdf" ]; then
-    export NETCDF_OUT=".true."
-else
-    export NETCDF_OUT=".false."
-fi
-
 #  Directories.
-gfs_ver=${gfs_ver:-v15.0.0}
-BASEDIR=${BASEDIR:-${NWROOT:-/nwprod2}}
-HOMEgfs=${HOMEgfs:-$BASEDIR/gfs_ver.${gfs_ver}}
+gfs_ver=${gfs_ver:-v16.3.0}
+BASEDIR=${BASEDIR:-${PACKAGEROOT:-/lfs/h1/ops/prod/packages}}
+HOMEgfs=${HOMEgfs:-$BASEDIR/gfs.${gfs_ver}}
 EXECgfs=${EXECgfs:-$HOMEgfs/exec}
-FIXfv3=${FIXfv3:-$HOMEgfs/fix/fix_fv3_gmted2010}
-FIXam=${FIXam:-$HOMEgfs/fix/fix_am}
+FIXfv3=${FIXfv3:-$HOMEgfs/fix/orog}
+FIXam=${FIXam:-$HOMEgfs/fix/am}
 FIXWGTS=${FIXWGTS:-$FIXfv3/$CASE/fv3_SCRIP_${CASE}_GRIDSPEC_lon${LONB_SFC}_lat${LATB_SFC}.gaussian.neareststod.nc}
 DATA=${DATA:-$(pwd)}
-COMOUT=${COMOUT:-$(pwd)}
 
 #  Filenames.
-XC=${XC}
-GAUSFCANLEXE=${GAUSFCANLEXE:-$EXECgfs/gaussian_sfcanl.exe}
+XC=${XC:-}
+GAUSFCANLEXE=${GAUSFCANLEXE:-$EXECgfs/gaussian_sfcanl.x}
 SIGLEVEL=${SIGLEVEL:-$FIXam/global_hyblev.l${LEVSP1}.txt}
 
 CDATE=${CDATE:?}
@@ -160,7 +148,7 @@ export REDERR=${REDERR:-'2>'}
 # Set defaults
 ################################################################################
 #  Preprocessing
-$INISCRIPT
+${INISCRIPT:-}
 pwd=$(pwd)
 if [[ -d $DATA ]]
 then
@@ -170,7 +158,8 @@ else
    mkdata=YES
 fi
 cd $DATA||exit 99
-[[ -d $COMOUT ]]||mkdir -p $COMOUT
+[[ -d "${COM_ATMOS_ANALYSIS}" ]] || mkdir -p "${COM_ATMOS_ANALYSIS}"
+[[ -d "${COM_ATMOS_RESTART}" ]] || mkdir -p "${COM_ATMOS_RESTART}"
 cd $DATA
 
 ################################################################################
@@ -179,12 +168,10 @@ export PGM=$GAUSFCANLEXE
 export pgm=$PGM
 $LOGSCRIPT
 
-PDY=$(echo $CDATE | cut -c1-8)
-cyc=$(echo $CDATE | cut -c9-10)
-iy=$(echo $CDATE | cut -c1-4)
-im=$(echo $CDATE | cut -c5-6)
-id=$(echo $CDATE | cut -c7-8)
-ih=$(echo $CDATE | cut -c9-10)
+iy=${PDY:0:4}
+im=${PDY:4:2}
+id=${PDY:6:2}
+ih=${cyc}
 
 export OMP_NUM_THREADS=${OMP_NUM_THREADS_SFC:-1}
 
@@ -192,12 +179,12 @@ export OMP_NUM_THREADS=${OMP_NUM_THREADS_SFC:-1}
 $NLN $FIXWGTS ./weights.nc
 
 # input analysis tiles (with nst records)
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile1.nc   ./anal.tile1.nc
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile2.nc   ./anal.tile2.nc
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile3.nc   ./anal.tile3.nc
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile4.nc   ./anal.tile4.nc
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile5.nc   ./anal.tile5.nc
-$NLN $COMOUT/RESTART/${PDY}.${cyc}0000.sfcanl_data.tile6.nc   ./anal.tile6.nc
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile1.nc" "./anal.tile1.nc"
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile2.nc" "./anal.tile2.nc"
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile3.nc" "./anal.tile3.nc"
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile4.nc" "./anal.tile4.nc"
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile5.nc" "./anal.tile5.nc"
+${NLN} "${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile6.nc" "./anal.tile6.nc"
 
 # input orography tiles
 $NLN $FIXfv3/$CASE/${CASE}_oro_data.tile1.nc   ./orog.tile1.nc
@@ -210,19 +197,21 @@ $NLN $FIXfv3/$CASE/${CASE}_oro_data.tile6.nc   ./orog.tile6.nc
 $NLN $SIGLEVEL                                 ./vcoord.txt
 
 # output gaussian global surface analysis files
-$NLN $COMOUT/${APREFIX}sfcanl${ASUFFIX} ./sfc.gaussian.analysis.file
+${NLN} "${COM_ATMOS_ANALYSIS}/${APREFIX}sfcanl.nc" "./sfc.gaussian.analysis.file"
+
+# Namelist uses booleans now
+if [[ ${DONST} == "YES" ]]; then do_nst='.true.'; else do_nst='.false.'; fi
 
 # Executable namelist
 cat <<EOF > fort.41
  &setup
-  yy=$iy,
-  mm=$im,
-  dd=$id,
-  hh=$ih,
-  igaus=$LONB_SFC,
-  jgaus=$LATB_SFC,
-  donst=$DONST,
-  netcdf_out=$NETCDF_OUT
+  yy=${iy},
+  mm=${im},
+  dd=${id},
+  hh=${ih},
+  igaus=${LONB_SFC},
+  jgaus=${LATB_SFC},
+  donst=${do_nst},
  /
 EOF
 
@@ -236,10 +225,5 @@ $ERRSCRIPT||exit 2
 #  Postprocessing
 cd $pwd
 [[ $mkdata = YES ]]&&rmdir $DATA
-$ENDSCRIPT
-set +x
-if [[ "$VERBOSE" = "YES" ]]
-then
-   echo $(date) EXITING $0 with return code $err >&2
-fi
-exit $err
+
+exit ${err}
