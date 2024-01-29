@@ -1,5 +1,4 @@
 #!/bin/bash
-export STRICT="NO"
 source "${HOMEgfs}/ush/preamble.sh"
 export WIPE_DATA="NO"
 export DATA="${DATAROOT}/${RUN}ocnanal_${cyc}"
@@ -32,7 +31,7 @@ export PYTHONPATH
 # Run relevant script
 ###############################################################
 
-EXSCRIPT=${GDASPREPPY:-${HOMEgfs}/sorc/gdas.cd/scripts/exgdas_global_marine_analysis_post.py}
+EXSCRIPT=${GDASOCNPOSTPY:-${HOMEgfs}/sorc/gdas.cd/scripts/exgdas_global_marine_analysis_post.py}
 ${EXSCRIPT}
 status=$?
 [[ ${status} -ne 0 ]] && exit "${status}"

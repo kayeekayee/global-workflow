@@ -17,27 +17,36 @@ rCDUMP=${CDUMP}
 [[ ${CDUMP} = "gfs" ]] && export rCDUMP="gdas"
 
 # Forecast length for GFS forecast
-if [ ${CDUMP} = "gfs" ]; then
+case ${RUN} in
+  *gfs | *gefs)
+    # shellcheck disable=SC2153
     export FHMAX=${FHMAX_GFS}
+    # shellcheck disable=SC2153
     export FHOUT=${FHOUT_GFS}
     export FHMAX_HF=${FHMAX_HF_GFS}
     export FHOUT_HF=${FHOUT_HF_GFS}
-else
+    ;;
+  *gdas)
     export FHMAX_HF=0
     export FHOUT_HF=0
-fi
+    ;;
+  *)
+    echo "FATAL ERROR: Unsupported RUN '${RUN}'"
+    exit 1
+esac
 
 
 # Ignore possible spelling error (nothing is misspelled)
 # shellcheck disable=SC2153
-GDATE=$(${NDATE} -"${assim_freq}" "${PDY}${cyc}")
+GDATE=$(date --utc -d "${PDY} ${cyc} - ${assim_freq} hours" +%Y%m%d%H)
+declare -rx GDATE
 # shellcheck disable=
-declare -x gPDY="${GDATE:0:8}"
-declare -x gcyc="${GDATE:8:2}"
+declare -rx gPDY="${GDATE:0:8}"
+declare -rx gcyc="${GDATE:8:2}"
 
 # Construct COM variables from templates (see config.com)
 YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_RESTART COM_ATMOS_INPUT COM_ATMOS_ANALYSIS \
-  COM_ATMOS_HISTORY COM_ATMOS_MASTER COM_TOP
+  COM_ATMOS_HISTORY COM_ATMOS_MASTER COM_TOP COM_CONF
 
 RUN=${rCDUMP} YMD="${gPDY}" HH="${gcyc}" generate_com -rx \
   COM_ATMOS_RESTART_PREV:COM_ATMOS_RESTART_TMPL
@@ -52,13 +61,13 @@ fi
 if [[ ${DO_OCN} == "YES" ]]; then
   YMD=${PDY} HH=${cyc} generate_com -rx COM_MED_RESTART COM_OCEAN_RESTART COM_OCEAN_INPUT \
     COM_OCEAN_HISTORY COM_OCEAN_ANALYSIS
-  RUN=${CDUMP} YMD="${gPDY}" HH="${gcyc}" generate_com -rx \
+  RUN=${rCDUMP} YMD="${gPDY}" HH="${gcyc}" generate_com -rx \
     COM_OCEAN_RESTART_PREV:COM_OCEAN_RESTART_TMPL
 fi
 
 if [[ ${DO_ICE} == "YES" ]]; then
   YMD=${PDY} HH=${cyc} generate_com -rx COM_ICE_HISTORY COM_ICE_INPUT COM_ICE_RESTART
-  RUN=${CDUMP} YMD="${gPDY}" HH="${gcyc}" generate_com -rx \
+  RUN=${rCDUMP} YMD="${gPDY}" HH="${gcyc}" generate_com -rx \
     COM_ICE_RESTART_PREV:COM_ICE_RESTART_TMPL
 fi
 

@@ -12,6 +12,9 @@ ulimit_s=$( ulimit -S -s )
 # Find module command and purge:
 source "${HOMEgfs}/modulefiles/module-setup.sh.inc"
 
+# Source versions file for runtime
+source "${HOMEgfs}/versions/run.ver"
+
 # Load our modules:
 module use "${HOMEgfs}/modulefiles"
 
@@ -25,8 +28,14 @@ elif [[ -d /scratch1 ]] ; then
   # We are on NOAA Hera
   module load module_base.hera
 elif [[ -d /work ]] ; then
-  # We are on MSU Orion
-  module load module_base.orion
+  # We are on MSU Orion or Hercules
+  if [[ -d /apps/other ]] ; then
+     # Hercules
+     module load module_base.hercules
+  else
+     # Orion
+     module load module_base.orion
+  fi
 elif [[ -d /glade ]] ; then
   # We are on NCAR Yellowstone
   module load module_base.cheyenne
@@ -46,4 +55,8 @@ module list
 ulimit -S -s "${ulimit_s}"
 unset ulimit_s
 
-set_trace
+# If this function exists in the environment, run it; else do not
+ftype=$(type -t set_trace || echo "")
+if [[ "${ftype}" == "function" ]]; then
+  set_trace
+fi

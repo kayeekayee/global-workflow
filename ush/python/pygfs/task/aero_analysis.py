@@ -7,15 +7,15 @@ import tarfile
 from logging import getLogger
 from typing import Dict, List, Any
 
-from pygw.attrdict import AttrDict
-from pygw.file_utils import FileHandler
-from pygw.timetools import add_to_datetime, to_fv3time, to_timedelta
-from pygw.fsutils import rm_p, chdir
-from pygw.timetools import to_fv3time
-from pygw.yaml_file import YAMLFile, parse_yamltmpl, parse_j2yaml, save_as_yaml
-from pygw.logger import logit
-from pygw.executable import Executable
-from pygw.exceptions import WorkflowException
+from wxflow import (AttrDict,
+                    FileHandler,
+                    add_to_datetime, to_fv3time, to_timedelta,
+                    chdir,
+                    to_fv3time,
+                    YAMLFile, parse_yamltmpl, parse_j2yaml, save_as_yaml,
+                    logit,
+                    Executable,
+                    WorkflowException)
 from pygfs.task.analysis import Analysis
 
 logger = getLogger(__name__.split('.')[-1])
@@ -30,7 +30,7 @@ class AerosolAnalysis(Analysis):
         super().__init__(config)
 
         _res = int(self.config['CASE'][1:])
-        _res_enkf = int(self.config['CASE_ENS'][1:])
+        _res_anl = int(self.config['CASE_ANL'][1:])
         _window_begin = add_to_datetime(self.runtime_config.current_cycle, -to_timedelta(f"{self.config['assim_freq']}H") / 2)
         _fv3jedi_yaml = os.path.join(self.runtime_config.DATA, f"{self.runtime_config.CDUMP}.t{self.runtime_config['cyc']:02d}z.aerovar.yaml")
 
@@ -41,11 +41,12 @@ class AerosolAnalysis(Analysis):
                 'npy_ges': _res + 1,
                 'npz_ges': self.config.LEVS - 1,
                 'npz': self.config.LEVS - 1,
-                'npx_anl': _res_enkf + 1,
-                'npy_anl': _res_enkf + 1,
+                'npx_anl': _res_anl + 1,
+                'npy_anl': _res_anl + 1,
                 'npz_anl': self.config['LEVS'] - 1,
                 'AERO_WINDOW_BEGIN': _window_begin,
                 'AERO_WINDOW_LENGTH': f"PT{self.config['assim_freq']}H",
+                'aero_bkg_fhr': map(int, self.config['aero_bkg_times'].split(',')),
                 'OPREFIX': f"{self.runtime_config.CDUMP}.t{self.runtime_config.cyc:02d}z.",  # TODO: CDUMP is being replaced by RUN
                 'APREFIX': f"{self.runtime_config.CDUMP}.t{self.runtime_config.cyc:02d}z.",  # TODO: CDUMP is being replaced by RUN
                 'GPREFIX': f"gdas.t{self.runtime_config.previous_cycle.hour:02d}z.",
@@ -72,15 +73,15 @@ class AerosolAnalysis(Analysis):
         super().initialize()
 
         # stage CRTM fix files
-        crtm_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'parm_gdas', 'aero_crtm_coeff.yaml')
+        crtm_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aero_crtm_coeff.yaml')
         logger.debug(f"Staging CRTM fix files from {crtm_fix_list_path}")
-        crtm_fix_list = parse_yamltmpl(crtm_fix_list_path, self.task_config)
+        crtm_fix_list = parse_j2yaml(crtm_fix_list_path, self.task_config)
         FileHandler(crtm_fix_list).sync()
 
         # stage fix files
-        jedi_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'parm_gdas', 'aero_jedi_fix.yaml')
+        jedi_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aero_jedi_fix.yaml')
         logger.debug(f"Staging JEDI fix files from {jedi_fix_list_path}")
-        jedi_fix_list = parse_yamltmpl(jedi_fix_list_path, self.task_config)
+        jedi_fix_list = parse_j2yaml(jedi_fix_list_path, self.task_config)
         FileHandler(jedi_fix_list).sync()
 
         # stage berror files
@@ -137,8 +138,6 @@ class AerosolAnalysis(Analysis):
         - applying the increments to the original RESTART files
         - moving the increment files to the ROTDIR
 
-        Please note that some of these steps are temporary and will be modified
-        once the model is able to read aerosol tracer increments.
         """
         # ---- tar up diags
         # path of output tar statfile
@@ -167,10 +166,12 @@ class AerosolAnalysis(Analysis):
         }
         FileHandler(yaml_copy).sync()
 
-        # ---- NOTE below is 'temporary', eventually we will not be using FMS RESTART formatted files
-        # ---- all of the rest of this method will need to be changed but requires model and JEDI changes
         # ---- copy RESTART fv_tracer files for future reference
-        template = '{}.fv_tracer.res.tile{}.nc'.format(to_fv3time(self.task_config.current_cycle), '{tilenum}')
+        if self.task_config.DOIAU:
+            bkgtime = self.task_config.AERO_WINDOW_BEGIN
+        else:
+            bkgtime = self.task_config.current_cycle
+        template = '{}.fv_tracer.res.tile{}.nc'.format(to_fv3time(bkgtime), '{tilenum}')
         bkglist = []
         for itile in range(1, self.task_config.ntiles + 1):
             tracer = template.format(tilenum=itile)
@@ -200,15 +201,18 @@ class AerosolAnalysis(Analysis):
     @logit(logger)
     def _add_fms_cube_sphere_increments(self: Analysis) -> None:
         """This method adds increments to RESTART files to get an analysis
-        NOTE this is only needed for now because the model cannot read aerosol increments.
-        This method will be assumed to be deprecated before this is implemented operationally
         """
+        if self.task_config.DOIAU:
+            bkgtime = self.task_config.AERO_WINDOW_BEGIN
+        else:
+            bkgtime = self.task_config.current_cycle
         # only need the fv_tracer files
-        template = f'{to_fv3time(self.task_config.current_cycle)}.fv_tracer.res.tile{{tilenum}}.nc'
-        inc_template = os.path.join(self.task_config.DATA, 'anl', 'aeroinc.' + template)
-        bkg_template = os.path.join(self.task_config.COM_ATMOS_RESTART_PREV, template)
+        restart_template = f'{to_fv3time(bkgtime)}.fv_tracer.res.tile{{tilenum}}.nc'
+        increment_template = f'{to_fv3time(self.task_config.current_cycle)}.fv_tracer.res.tile{{tilenum}}.nc'
+        inc_template = os.path.join(self.task_config.DATA, 'anl', 'aeroinc.' + increment_template)
+        bkg_template = os.path.join(self.task_config.COM_ATMOS_RESTART_PREV, restart_template)
         # get list of increment vars
-        incvars_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'parm_gdas', 'aeroanl_inc_vars.yaml')
+        incvars_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aeroanl_inc_vars.yaml')
         incvars = YAMLFile(path=incvars_list_path)['incvars']
         super().add_fv3_increments(inc_template, bkg_template, incvars)
 
@@ -238,16 +242,24 @@ class AerosolAnalysis(Analysis):
         # Start accumulating list of background files to copy
         bkglist = []
 
-        # aerosol DA needs coupler
-        basename = f'{to_fv3time(task_config.current_cycle)}.coupler.res'
-        bkglist.append([os.path.join(rst_dir, basename), os.path.join(run_dir, basename)])
+        # if using IAU, we can use FGAT
+        bkgtimes = []
+        begintime = task_config.previous_cycle
+        for fcsthr in task_config.aero_bkg_fhr:
+            bkgtimes.append(add_to_datetime(begintime, to_timedelta(f"{fcsthr}H")))
 
-        # aerosol DA only needs core/tracer
-        for ftype in ['core', 'tracer']:
-            template = f'{to_fv3time(self.task_config.current_cycle)}.fv_{ftype}.res.tile{{tilenum}}.nc'
-            for itile in range(1, task_config.ntiles + 1):
-                basename = template.format(tilenum=itile)
-                bkglist.append([os.path.join(rst_dir, basename), os.path.join(run_dir, basename)])
+        # now loop over background times
+        for bkgtime in bkgtimes:
+            # aerosol DA needs coupler
+            basename = f'{to_fv3time(bkgtime)}.coupler.res'
+            bkglist.append([os.path.join(rst_dir, basename), os.path.join(run_dir, basename)])
+
+            # aerosol DA only needs core/tracer
+            for ftype in ['core', 'tracer']:
+                template = f'{to_fv3time(bkgtime)}.fv_{ftype}.res.tile{{tilenum}}.nc'
+                for itile in range(1, task_config.ntiles + 1):
+                    basename = template.format(tilenum=itile)
+                    bkglist.append([os.path.join(rst_dir, basename), os.path.join(run_dir, basename)])
 
         bkg_dict = {
             'mkdir': [run_dir],
@@ -279,18 +291,21 @@ class AerosolAnalysis(Analysis):
         b_datestr = to_fv3time(config.BERROR_DATE)
         berror_list = []
 
-        for ftype in ['cor_rh', 'cor_rv', 'stddev']:
+        for ftype in ['stddev']:
             coupler = f'{b_datestr}.{ftype}.coupler.res'
             berror_list.append([
                 os.path.join(b_dir, coupler), os.path.join(config.DATA, 'berror', coupler)
             ])
-            template = '{b_datestr}.{ftype}.fv_tracer.res.tile{{tilenum}}.nc'
+            template = f'{b_datestr}.{ftype}.fv_tracer.res.tile{{tilenum}}.nc'
             for itile in range(1, config.ntiles + 1):
                 tracer = template.format(tilenum=itile)
                 berror_list.append([
                     os.path.join(b_dir, tracer), os.path.join(config.DATA, 'berror', tracer)
                 ])
-
+        radius = 'cor_aero_universe_radius'
+        berror_list.append([
+            os.path.join(b_dir, radius), os.path.join(config.DATA, 'berror', radius)
+        ])
         nproc = config.ntiles * config.layout_x * config.layout_y
         for nn in range(1, nproc + 1):
             berror_list.append([

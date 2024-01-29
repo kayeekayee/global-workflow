@@ -1,1 +1,0 @@
-vrfy_gsl.sh

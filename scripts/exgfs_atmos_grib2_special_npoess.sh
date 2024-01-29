@@ -40,13 +40,52 @@ export opt26=' -set_grib_max_bits 25 -fi -if '
 export opt27=":(APCP|ACPCP|PRATE|CPRAT|DZDT):"
 export opt28=' -new_grid_interpolation budget -fi '
 
-SLEEP_LOOP_MAX=$(expr $SLEEP_TIME / $SLEEP_INT)
+####################################
+# Specify Timeout Behavior of Post
+#
+# SLEEP_TIME - Amount of time to wait for
+#              a restart file before exiting
+# SLEEP_INT  - Amount of time to wait between
+#              checking for restart files
+####################################
+export SLEEP_TIME=${SLEEP_TIME:-900}
+export SLEEP_INT=${SLEEP_TIME:-5}
+
+SLEEP_LOOP_MAX=$(( SLEEP_TIME / SLEEP_INT ))
+
+# TODO: Does this section do anything? I retained if for clarity of
+# changes/updates, but it does not appear to do anything.
+
+####################################
+# Check if this is a restart
+####################################
+if [[ -f "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.goessimpgrb2" ]]; then
+   modelrecvy=$(cat < "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.goessimpgrb")
+   recvy_cyc="${modelrecvy:8:2}"
+   recvy_shour="${modelrecvy:10:13}"
+
+   if [[ ${RERUN} == "NO" ]]; then
+      NEW_SHOUR=$(( recvy_shour + FHINC ))
+      if (( NEW_SHOUR >= SHOUR )); then
+         export SHOUR="${NEW_SHOUR}"
+      fi
+      if (( recvy_shour >= FHOUR )); then
+         echo "Forecast Pgrb Generation Already Completed to ${FHOUR}"
+      else
+         echo "Starting: PDY=${PDY} cycle=t${recvy_cyc}z SHOUR=${SHOUR}"
+      fi
+   fi
+fi
 
 ##############################################################################
 # Specify Forecast Hour Range F000 - F024 for GFS_NPOESS_PGRB2_0P5DEG
 ##############################################################################
 export SHOUR=000
 export FHOUR=024
+export FHINC=003
+if [[ "${FHOUR}" -gt "${FHMAX_GFS}" ]]; then
+   export FHOUR="${FHMAX_GFS}"
+fi
 
 ############################################################
 # Loop Through the Post Forecast Files 
@@ -90,18 +129,16 @@ for (( fhr=$((10#${SHOUR})); fhr <= $((10#${FHOUR})); fhr = fhr + FHINC )); do
    ${WGRIB2} tmpfile | grep -F -f ${paramlist} | ${WGRIB2} -i -grib  pgb2file tmpfile
    export err=$?; err_chk
 
-   if [[ ${SENDCOM} == "YES" ]]; then
-      cp pgb2file "${COM_ATMOS_GOES}/${RUN}.${cycle}.pgrb2f${fhr3}.npoess"
+   cp pgb2file "${COM_ATMOS_GOES}/${RUN}.${cycle}.pgrb2f${fhr3}.npoess"
 
-      if [[ ${SENDDBN} == "YES" ]]; then
-         "${DBNROOT}/bin/dbn_alert" MODEL GFS_PGBNPOESS "${job}" \
-            "${COM_ATMOS_GOES}/${RUN}.${cycle}.pgrb2f${fhr3}.npoess"
-      else
-         msg="File ${RUN}.${cycle}.pgrb2f${fhr3}.npoess not posted to db_net."
-         postmsg "${msg}" || echo "${msg}"
-      fi
-      echo "${PDY}${cyc}${fhr3}" > "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.halfdeg.npoess"
+   if [[ ${SENDDBN} == "YES" ]]; then
+       "${DBNROOT}/bin/dbn_alert" MODEL GFS_PGBNPOESS "${job}" \
+				  "${COM_ATMOS_GOES}/${RUN}.${cycle}.pgrb2f${fhr3}.npoess"
+   else
+       msg="File ${RUN}.${cycle}.pgrb2f${fhr3}.npoess not posted to db_net."
+       postmsg "${msg}" || echo "${msg}"
    fi
+   echo "${PDY}${cyc}${fhr3}" > "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.halfdeg.npoess"
    rm tmpfile pgb2file
 
 done
@@ -111,6 +148,10 @@ done
 ################################################################
 export SHOUR=000
 export FHOUR=180
+export FHINC=003
+if [[ "${FHOUR}" -gt "${FHMAX_GFS}" ]]; then
+   export FHOUR="${FHMAX_GFS}"
+fi
 
 #################################
 # Process GFS PGRB2_SPECIAL_POST
@@ -161,23 +202,20 @@ for (( fhr=$((10#${SHOUR})); fhr <= $((10#${FHOUR})); fhr = fhr + FHINC )); do
 
    ${WGRIB2} pgb2file -s > pgb2ifile
 
-   if [[ ${SENDCOM} == "YES" ]]; then
+   cp pgb2file "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr3}"
+   cp pgb2ifile "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr3}.idx"
+   cp pgb2file2 "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2f${fhr3}.grd221"
 
-      cp pgb2file "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr3}"
-      cp pgb2ifile "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr3}.idx"
-      cp pgb2file2 "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2f${fhr3}.grd221"
-
-      if [[ ${SENDDBN} == "YES" ]]; then
-         "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMPGB2_0P25 "${job}" \
-            "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr}"
-         "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMPGB2_0P25_WIDX "${job}" \
-            "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr}.idx"
-         "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMGRD221_PGB2 "${job}" \
-            "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2f${fhr}.grd221"
-      fi
-
-      echo "${PDY}${cyc}${fhr}" > "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.goessimpgrb"
+   if [[ ${SENDDBN} == "YES" ]]; then
+       "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMPGB2_0P25 "${job}" \
+				  "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr}"
+       "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMPGB2_0P25_WIDX "${job}" \
+				  "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2.0p25.f${fhr}.idx"
+       "${DBNROOT}/bin/dbn_alert" MODEL GFS_GOESSIMGRD221_PGB2 "${job}" \
+				  "${COM_ATMOS_GOES}/${RUN}.${cycle}.goessimpgrb2f${fhr}.grd221"
    fi
+
+   echo "${PDY}${cyc}${fhr}" > "${COM_ATMOS_GOES}/${RUN}.t${cyc}z.control.goessimpgrb"
    rm pgb2file2 pgb2ifile
 
    if [[ ${SENDECF} == "YES" ]]; then

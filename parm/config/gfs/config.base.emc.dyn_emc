@@ -16,24 +16,29 @@ export ACCOUNT="@ACCOUNT@"
 export QUEUE="@QUEUE@"
 export QUEUE_SERVICE="@QUEUE_SERVICE@"
 export PARTITION_BATCH="@PARTITION_BATCH@"
-export PARTITION_POST_BATCH="@PARTITION_POST_BATCH@"
 export PARTITION_SERVICE="@PARTITION_SERVICE@"
 
 # Project to use in mass store:
-HPSS_PROJECT="@HPSS_PROJECT@"
+export HPSS_PROJECT="@HPSS_PROJECT@"
 
 # Directories relative to installation areas:
 export HOMEgfs=@HOMEgfs@
-export PARMgfs=${HOMEgfs}/parm
-export FIXgfs=${HOMEgfs}/fix
-export USHgfs=${HOMEgfs}/ush
-export UTILgfs=${HOMEgfs}/util
-export EXECgfs=${HOMEgfs}/exec
-export SCRgfs=${HOMEgfs}/scripts
+export PARMgfs="${HOMEgfs}/parm"
+export FIXgfs="${HOMEgfs}/fix"
+export USHgfs="${HOMEgfs}/ush"
+export UTILgfs="${HOMEgfs}/util"
+export EXECgfs="${HOMEgfs}/exec"
+export SCRgfs="${HOMEgfs}/scripts"
 
-export FIXcice=${HOMEgfs}/fix/cice
-export FIXmom=${HOMEgfs}/fix/mom6
-export FIXreg2grb2=${HOMEgfs}/fix/reg2grb2
+export FIXam="${FIXgfs}/am"
+export FIXaer="${FIXgfs}/aer"
+export FIXcpl="${FIXgfs}/cpl"
+export FIXlut="${FIXgfs}/lut"
+export FIXorog="${FIXgfs}/orog"
+export FIXcice="${FIXgfs}/cice"
+export FIXmom="${FIXgfs}/mom6"
+export FIXreg2grb2="${FIXgfs}/reg2grb2"
+export FIXugwd="${FIXgfs}/ugwd"
 
 ########################################################################
 
@@ -42,6 +47,7 @@ export PACKAGEROOT="@PACKAGEROOT@"    # TODO: set via prod_envir in Ops
 export COMROOT="@COMROOT@"    # TODO: set via prod_envir in Ops
 export COMINsyn="@COMINsyn@"
 export DMPDIR="@DMPDIR@"
+export BASE_CPLIC="@BASE_CPLIC@"
 
 # USER specific paths
 export HOMEDIR="@HOMEDIR@"
@@ -53,16 +59,23 @@ export NOSCRUB="@NOSCRUB@"
 export BASE_GIT="@BASE_GIT@"
 
 # Toggle to turn on/off GFS downstream processing.
+export DO_GOES="NO"        # GOES products
 export DO_BUFRSND="NO"     # BUFR sounding products
 export DO_GEMPAK="NO"      # GEMPAK products
 export DO_AWIPS="NO"       # AWIPS products
-export WAFSF="NO"          # WAFS products
-export DO_VRFY="YES"       # VRFY step
+export DO_NPOESS="NO"       # NPOESS products
+export DO_TRACKER="YES"    # Hurricane track verification
+export DO_GENESIS="YES"    # Cyclone genesis verification
+export DO_GENESIS_FSU="NO" # Cyclone genesis verification (FSU)
+export DO_VERFOZN="YES"    # Ozone data assimilation monitoring
+export DO_VERFRAD="YES"    # Radiance data assimilation monitoring
+export DO_VMINMON="YES"    # GSI minimization monitoring
+export DO_MOS="NO"         # GFS Model Output Statistics - Only supported on WCOSS2
 
 # NO for retrospective parallel; YES for real-time parallel
 #  arch.sh uses REALTIME for MOS.  Need to set REALTIME=YES
 #  if want MOS written to HPSS.   Should update arch.sh to
-#  use RUNMOS flag (currently in config.vrfy)
+#  use RUNMOS flag
 export REALTIME="YES"
 
 # Experiment mode (cycled or forecast-only)
@@ -77,7 +90,7 @@ export MODE="@MODE@" # cycled/forecast-only
 # Build paths relative to $HOMEgfs
 export FIXgsi="${HOMEgfs}/fix/gsi"
 export HOMEpost="${HOMEgfs}"
-export HOMEobsproc="${BASE_GIT}/obsproc/v1.1.2"
+export HOMEobsproc="${BASE_GIT:-}/obsproc/v${obsproc_run_ver:-1.1.2}"
 
 # CONVENIENT utility scripts and other environment parameters
 export NCP="/bin/cp -p"
@@ -87,8 +100,8 @@ export VERBOSE="YES"
 export KEEPDATA="NO"
 export CHGRP_RSTPROD="@CHGRP_RSTPROD@"
 export CHGRP_CMD="@CHGRP_CMD@"
-export NCDUMP="$NETCDF/bin/ncdump"
-export NCLEN="$HOMEgfs/ush/getncdimlen"
+export NCDUMP="${NETCDF:-${netcdf_c_ROOT:-}}/bin/ncdump"
+export NCLEN="${HOMEgfs}/ush/getncdimlen"
 
 # Machine environment, jobs, and other utility scripts
 export BASE_ENV="${HOMEgfs}/env"
@@ -131,11 +144,10 @@ export REDOUT="1>"
 export REDERR="2>"
 
 export SENDECF=${SENDECF:-"NO"}
-export SENDCOM=${SENDCOM:-"YES"}
 export SENDSDM=${SENDSDM:-"NO"}
 export SENDDBN_NTC=${SENDDBN_NTC:-"NO"}
 export SENDDBN=${SENDDBN:-"NO"}
-export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
+export DBNROOT=${DBNROOT:-${UTILROOT:-}/fakedbn}
 
 # APP settings
 export APP=@APP@
@@ -147,14 +159,12 @@ export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO="NO"
-export CCPP_SUITE="@CCPP_SUITE@"
 export WAVE_CDUMP="" # When to include wave suite: gdas, gfs, or both
 export DOBNDPNT_WAVE="NO"
-export cplwav2atm=".false."
 export FRAC_GRID=".true."
 
 # Set operational resolution
-export OPS_RES="C768" # Do not change
+export OPS_RES="C768" # Do not change # TODO: Why is this needed and where is it used?
 
 # Resolution specific parameters
 export LEVS=128
@@ -163,29 +173,43 @@ export CASE_ENS="@CASEENS@"
 # TODO: This should not depend on $CASE or $CASE_ENS
 # These are the currently available grid-combinations
 case "${CASE}" in
-    "C48") export OCNRES=500;;
-    "C96") export OCNRES=100;;
-    "C192") export OCNRES=050;;
-    "C384") export OCNRES=025;;
-    "C768") export OCNRES=025;;
-    *) export OCNRES=025;;
+    "C48")
+        export OCNRES=500
+        export waveGRD='glo_500'
+        ;;
+    "C96")
+        export OCNRES=500
+        export waveGRD='glo_200'
+        ;;
+    "C192")
+        export OCNRES=050
+        export waveGRD='glo_200'
+        ;;
+    "C384")
+        export OCNRES=025
+        export waveGRD='glo_025'
+        ;;
+    "C768" | "C1152")
+        export OCNRES=025
+        export waveGRD='mx025'
+        ;;
+    *)
+        echo "FATAL ERROR: Unrecognized CASE ${CASE}, ABORT!"
+        exit 1
+        ;;
 esac
 export ICERES=${OCNRES}
-export waveGRD='mx025'
 
 case "${APP}" in
   ATM)
-    export confignamevarfornems="atm"
     ;;
   ATMA)
     export DO_AERO="YES"
-    export confignamevarfornems="atm_aero"
     ;;
   ATMW)
     export DO_COUPLED="YES"
     export DO_WAVE="YES"
     export WAVE_CDUMP="both"
-    export confignamevarfornems="leapfrog_atm_wav"
     ;;
   NG-GODAS)
     export DO_ATM="NO"
@@ -196,26 +220,18 @@ case "${APP}" in
     export DO_COUPLED="YES"
     export DO_OCN="YES"
     export DO_ICE="YES"
-    export CCPP_SUITE="FV3_GFS_v17_coupled_p8"
-    export confignamevarfornems="cpld"
 
     if [[ "${APP}" =~ A$ ]]; then
         export DO_AERO="YES"
-        export confignamevarfornems="${confignamevarfornems}_aero"
     fi
 
     if [[ "${APP}" =~ ^S2SW ]]; then
         export DO_WAVE="YES"
         export WAVE_CDUMP="both"
-        export cplwav2atm=".true."
-        export confignamevarfornems="${confignamevarfornems}_outerwave"
     fi
-
-    source ${EXPDIR}/config.defaults.s2sw
-
     ;;
   *)
-    echo "Unrecognized APP: ${1}"
+    echo "Unrecognized APP: '${APP}'"
     exit 1
     ;;
 esac
@@ -242,15 +258,15 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 
-export FHMAX_GFS_00=${FHMAX_GFS_00:-120}                        ## JKH
-export FHMAX_GFS_06=${FHMAX_GFS_06:-120}                        ## JKH
-export FHMAX_GFS_12=${FHMAX_GFS_12:-120}                        ## JKH
-export FHMAX_GFS_18=${FHMAX_GFS_18:-120}                        ## JKH
-export FHMAX_GFS=$(eval echo \${FHMAX_GFS_${cyc}})
+export FHMAX_GFS_00=120
+export FHMAX_GFS_06=120
+export FHMAX_GFS_12=120
+export FHMAX_GFS_18=120
+current_fhmax_var=FHMAX_GFS_${cyc}; declare -x FHMAX_GFS=${!current_fhmax_var}
 
-export FHOUT_GFS=${FHOUT_GFS:-6}                        ## JKH
-export FHMAX_HF_GFS=${FHMAX_HF_GFS:-0}
-export FHOUT_HF_GFS=${FHOUT_HF_GFS:-1}
+export FHOUT_GFS=6 # Must be 6 for S2S until #1629 is addressed; 3 for ops
+export FHMAX_HF_GFS=0
+export FHOUT_HF_GFS=1
 if (( gfs_cyc != 0 )); then
     export STEP_GFS=$(( 24 / gfs_cyc ))
 else
@@ -259,7 +275,11 @@ fi
 export ILPOST=1           # gempak output frequency up to F120
 
 # GFS restart interval in hours
-export restart_interval_gfs=0
+#JKHexport restart_interval_gfs=12
+export restart_interval_gfs=-1                        ## JKH
+# NOTE: Do not set this to zero.  Instead set it to $FHMAX_GFS
+# TODO: Remove this variable from config.base and reference from config.fcst
+# TODO: rework logic in config.wave and push it to parsing_nameslist_WW3.sh where it is actually used
 
 export QUILTING=".true."
 export OUTPUT_GRID="gaussian_grid"
@@ -267,9 +287,9 @@ export WRITE_DOPOST=".true." # WRITE_DOPOST=true, use inline POST
 export WRITE_NSFLIP=".true."
 
 # IAU related parameters
-export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
+export DOIAU="@DOIAU@"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
-export IAU_FHROT=$(echo ${IAUFHRS} | cut -c1)
+export IAU_FHROT=${IAUFHRS%%,*}
 export IAU_DELTHRS=6
 export IAU_OFFSET=6
 export DOIAU_ENKF=${DOIAU:-"YES"}   # Enable 4DIAU for EnKF ensemble
@@ -285,7 +305,7 @@ export lobsdiag_forenkf=".true."
 # fi
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
-export imp_physics=@IMP_PHYSICS@
+export imp_physics=8
 
 # Shared parameters
 # DA engine
@@ -309,7 +329,7 @@ if [[ ${DOHYBVAR} = "YES" ]]; then
     export FHMAX_ENKF=9
     export FHMAX_ENKF_GFS=120
     export FHOUT_ENKF_GFS=3
-    if [ $l4densvar = ".true." ]; then
+    if [[ ${l4densvar} = ".true." ]]; then
         export FHOUT=1
         export FHOUT_ENKF=1
     else
@@ -329,7 +349,10 @@ fi
 if [[ "${MODE}" = "cycled" && "${SDATE}" = "${PDY}${cyc}" && ${EXP_WARM_START} = ".false." ]] || [[ "${DOIAU}" = "NO" ]] || [[ "${MODE}" = "forecast-only" && ${EXP_WARM_START} = ".false." ]] ; then
   export IAU_OFFSET=0
   export IAU_FHROT=0
+  export IAUFHRS="6"
 fi
+
+if [[ "${DOIAU_ENKF}" = "NO" ]]; then export IAUFHRS_ENKF="6"; fi
 
 # turned on nsst in anal and/or fcst steps, and turn off rtgsst
 export DONST="YES"
@@ -356,13 +379,13 @@ export INCVARS_EFOLD="5"
 
 # Swith to generate netcdf or binary diagnostic files.  If not specified,
 # script default to binary diagnostic files.   Set diagnostic file
-# variables here since used in both DA and vrfy jobs
+# variables here since used in DA job
 export netcdf_diag=".true."
 export binary_diag=".false."
 
 # Verification options
-export DO_METP="YES"         # Run METPLUS jobs - set METPLUS settings in config.metp
-export DO_FIT2OBS="NO"      # Run fit to observations package
+export DO_METP="NO"          # Run METPLUS jobs - set METPLUS settings in config.metp; not supported with spack-stack
+export DO_FIT2OBS="YES"      # Run fit to observations package
 
 # Archiving options
 export HPSSARCH="@HPSSARCH@"        # save data to HPSS archive
@@ -375,6 +398,9 @@ export ARCH_CYC=00           # Archive data at this cycle for warm_start capabil
 export ARCH_WARMICFREQ=4     # Archive frequency in days for warm_start capability
 export ARCH_FCSTICFREQ=1     # Archive frequency in days for gdas and gfs forecast-only capability
 
-export DELETE_COM_IN_ARCHIVE_JOB="YES"   # NO=retain ROTDIR.  YES default in arch.sh and earc.sh.
+#--online archive of nemsio files for fit2obs verification
+export FITSARC="YES"
+export FHMAX_FITS=132
+[[ "${FHMAX_FITS}" -gt "${FHMAX_GFS}" ]] && export FHMAX_FITS=${FHMAX_GFS}
 
 echo "END: config.base"

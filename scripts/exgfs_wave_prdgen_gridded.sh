@@ -31,7 +31,7 @@ source "$HOMEgfs/ush/preamble.sh"
  export FHOUT_WAV=${FHOUT_WAV:-6}         #from 72 to 180 inc=6
  export FHOUT_HF_WAV=${FHOUT_HF_WAV:-3}
  export maxtries=720
- export FIXwave=${FIXwave:-$HOMEgfs/fix}
+ export FIXwave=${FIXwave:-$HOMEgfs/fix/wave}
  export PARMwave=${PARMwave:-$HOMEgfs/parm/parm_wave}
  export USHwave=${USHwave:-$HOMEgfs/ush}
  export cyc=${cyc:-00}
@@ -233,15 +233,13 @@ grids=${grids:-ak_10m at_10m ep_10m wc_10m glo_30m}
      #set +x
      echo "   Get awips GRIB bulletins out ..."
      #set_trace
-     if [ "$SENDCOM" = 'YES' ]
-     then
-       #set +x
-       echo "      Saving $AWIPSGRB.$grdOut.f${fhr} as grib2.$cycle.awipsww3_${grdID}.f${fhr}"
-       echo "          in ${COM_WAVE_WMO}"
-       #set_trace
-       cp "${AWIPSGRB}.${grdID}.f${fhr}" "${COM_WAVE_WMO}/grib2.${cycle}.f${fhr}.awipsww3_${grdOut}"
-       #set +x
-     fi
+     #set +x
+     echo "      Saving $AWIPSGRB.$grdOut.f${fhr} as grib2.$cycle.awipsww3_${grdID}.f${fhr}"
+     echo "          in ${COM_WAVE_WMO}"
+     #set_trace
+     cp "${AWIPSGRB}.${grdID}.f${fhr}" "${COM_WAVE_WMO}/grib2.${cycle}.f${fhr}.awipsww3_${grdOut}"
+     #set +x
+
 
      if [ "$SENDDBN" = 'YES' ]
      then

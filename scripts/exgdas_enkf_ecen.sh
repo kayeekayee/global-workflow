@@ -24,7 +24,6 @@ pwd=$(pwd)
 
 # Base variables
 CDATE=${CDATE:-"2010010100"}
-CDUMP=${CDUMP:-"gdas"}
 DONST=${DONST:-"NO"}
 export CASE=${CASE:-384}
 ntiles=${ntiles:-6}
@@ -60,7 +59,7 @@ FHMIN=${FHMIN_ECEN:-3}
 FHMAX=${FHMAX_ECEN:-9}
 FHOUT=${FHOUT_ECEN:-3}
 FHSFC=${FHSFC_ECEN:-$FHMIN}
-if [ $CDUMP = "enkfgfs" ]; then
+if [ $RUN = "enkfgfs" ]; then
    DO_CALC_INCREMENT=${DO_CALC_INCREMENT_ENKF_GFS:-"NO"}
 else
    DO_CALC_INCREMENT=${DO_CALC_INCREMENT:-"NO"}
@@ -77,8 +76,8 @@ CYCLESH=${CYCLESH:-$HOMEgfs/ush/global_cycle.sh}
 export CYCLEXEC=${CYCLEXEC:-$HOMEgfs/exec/global_cycle}
 APRUN_CYCLE=${APRUN_CYCLE:-${APRUN:-""}}
 NTHREADS_CYCLE=${NTHREADS_CYCLE:-${NTHREADS:-1}}
-export FIXfv3=${FIXfv3:-$HOMEgfs/fix/orog}
-export FIXgsm=${FIXgsm:-$HOMEgfs/fix/am}
+export FIXorog=${FIXorog:-$HOMEgfs/fix/orog}
+export FIXam=${FIXam:-$HOMEgfs/fix/am}
 export CYCLVARS=${CYCLVARS:-"FSNOL=-2.,FSNOS=99999.,"}
 export FHOUR=${FHOUR:-0}
 export DELTSFC=${DELTSFC:-6}
@@ -242,7 +241,7 @@ if [ $RECENTER_ENKF = "YES" ]; then
 
       $NLN $ATMANL_GSI        atmanl_gsi
       $NLN $ATMANL_GSI_ENSRES atmanl_gsi_ensres
-      SIGLEVEL=${SIGLEVEL:-${FIXgsm}/global_hyblev.l${LEVS}.txt}
+      SIGLEVEL=${SIGLEVEL:-${FIXam}/global_hyblev.l${LEVS}.txt}
       $NLN $CHGRESNC chgres.x
       chgresnml=chgres_nc_gauss.nml
       nmltitle=chgres

@@ -1,5 +1,0 @@
-
-#################### rt_v17p8_c3 ####################
-MAILTO=""
-*/5 * * * * /apps/rocoto/1.3.3/bin/rocotorun -w /lfs1/BMC/gsd-fv3-test/HFIP/GFSv17p8_HFIP23/FV3GFSwfm/rt_v17p8_c3/rt_v17p8_c3.xml -d ~/rt_dbfiles/rt_v17p8_c3.db 
-#################################################################

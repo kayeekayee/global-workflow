@@ -8,7 +8,7 @@
 	NOTES:
 		This workflow was automatically generated at 2023-06-13 23:31:49.582810
 	-->
-	<!ENTITY PSLOT "v17_p8_12x12_2wg_12wt">
+	<!ENTITY PSLOT "test">
 	<!ENTITY HOMEgfs "/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23">
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
 	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
@@ -116,26 +116,25 @@
 
 </task>
 
-<metatask name="gfspost">
+<metatask name="gfsatmprod">
 
-	<var name="grp">_f000-f000 _f006-f006 _f012-f012 _f018-f018 _f024-f024 _f030-f030 _f036-f036 _f042-f042 _f048-f048 _f054-f054 _f060-f060 _f066-f066 _f072-f072 _f078-f078 _f084-f084 _f090-f090 _f096-f096 _f102-f102 _f108-f108 _f114-f114 _f120-f120 _f126-f126 _f132-f132 _f138-f138 _f144-f144 _f150-f150 _f156-f156 _f162-f162 _f168-f168</var>
-	<var name="dep">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 f150 f156 f162 f168</var>
-	<var name="lst">f000 f006 f012 f018 f024 f030 f036 f042 f048 f054 f060 f066 f072 f078 f084 f090 f096 f102 f108 f114 f120 f126 f132 f138 f144 f150 f156 f162 f168</var>
+	<var name="grp">_f000-f012 _f018-f030 _f036-f048 _f054-f066 _f072-f084 _f090-f102 _f108-f120</var>
+	<var name="dep">f012 f030 f048 f066 f084 f102 f120</var>
+	<var name="lst">f000_f006_f012 f018_f024_f030 f036_f042_f048 f054_f060_f066 f072_f078_f084 f090_f096_f102 f108_f114_f120</var>
 
-	<task name="gfspost#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
+	<task name="gfsatmprod#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
-		<command>&JOBS_DIR;/post.sh</command>
+		<command>&JOBS_DIR;/atmos_products.sh</command>
 
-		<jobname><cyclestr>&PSLOT;_gfspost#grp#_@H</cyclestr></jobname>
+		<jobname><cyclestr>&PSLOT;_gfsatmprod#grp#_@H</cyclestr></jobname>
 		<account>gsd-fv3-dev</account>
 		<queue>batch</queue>
 		<partition>xjet</partition>
 		<walltime>00:20:00</walltime>
-<!--		<nodes>1:ppn=16:tpp=1</nodes>     vjet/sjet  -->
 		<nodes>1:ppn=24:tpp=1</nodes>
 		<native>&NATIVE_STR;</native>
 
-		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfspost#grp#.log</cyclestr></join>
+		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsatmprod#grp#.log</cyclestr></join>
 
 		<envar><name>RUN_ENVIR</name><value>emc</value></envar>
 		<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
@@ -149,11 +148,10 @@
 		<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 		<envar><name>COMROOT</name><value>/lfs4/HFIP/hfv3gfs/glopara/com</value></envar>
 		<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
-		<envar><name>FHRGRP</name><value>#grp#</value></envar>
 		<envar><name>FHRLST</name><value>#lst#</value></envar>
 
 		<dependency>
-			<datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/history/gfs.t@Hz.atm.log#dep#.txt</cyclestr></datadep>
+			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2#dep#</cyclestr></datadep>
 		</dependency>
 
 	</task>
@@ -189,61 +187,18 @@
 	<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
 
 	<dependency>
-		<metataskdep metatask="gfspost"/>
+		<metataskdep metatask="gfsatmprod"/>
 	</dependency>
 
 </task>
 
 <!--
-<metatask name="gfsmetp">
-
-	<var name="metpcase">g2g1 g2o1 pcp1</var>
-
-	<task name="gfsmetp#metpcase#" cycledefs="gfs" maxtries="&MAXTRIES;">
-
-		<command>&JOBS_DIR;/metp.sh</command>
-
-		<jobname><cyclestr>&PSLOT;_gfsmetp#metpcase#_@H</cyclestr></jobname>
-		<account>gsd-fv3-dev</account>
-		<queue>batch</queue>
-		<partition>xjet</partition>
-		<walltime>06:00:00</walltime>
-		<nodes>1:ppn=4:tpp=1</nodes>
-		<native>&NATIVE_STR;</native>
-
-		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsmetp#metpcase#.log</cyclestr></join>
-
-		<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-		<envar><name>HOMEgfs</name><value>/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23</value></envar>
-		<envar><name>EXPDIR</name><value>/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23/FV3GFSwfm/jet</value></envar>
-		<envar><name>ROTDIR</name><value>/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23/FV3GFSrun/jet</value></envar>
-		<envar><name>NET</name><value>gfs</value></envar>
-		<envar><name>CDUMP</name><value>gfs</value></envar>
-		<envar><name>RUN</name><value>gfs</value></envar>
-		<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-		<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-		<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-		<envar><name>COMROOT</name><value>/lfs4/HFIP/hfv3gfs/glopara/com</value></envar>
-		<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
-		<envar><name>SDATE_GFS</name><value>None</value></envar>
-		<envar><name>METPCASE</name><value>#metpcase#</value></envar>
-
-		<dependency>
-			<and>
-				<metataskdep metatask="gfspost"/>
-			</and>
-		</dependency>
-
-	</task>
-
-</metatask>
-
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/arch.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
-	<account>gsd-fv3-dev</account>
+	<account>gsd-fv3</account>
 	<queue>batch</queue>
 	<partition>service</partition>
 	<walltime>06:00:00</walltime>
@@ -254,9 +209,9 @@
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsarch.log</cyclestr></join>
 
 	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>/mnt/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23</value></envar>
-	<envar><name>EXPDIR</name><value>/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23/FV3GFSwfm/jet</value></envar>
-	<envar><name>ROTDIR</name><value>/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23/FV3GFSrun/jet</value></envar>
+	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite</value></envar>
+	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_ugwpv1_mynn</value></envar>
+	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_ugwpv1_mynn</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
@@ -268,12 +223,50 @@
 
 	<dependency>
 		<and>
-			<taskdep task="gfsvrfy"/>
-			<metataskdep metatask="gfsmetp"/>
+			<taskdep task="gfstracker"/>
+			<taskdep task="gfsgenesis"/>
+			<metataskdep metatask="gfsatmprod"/>
+		</and>
+	</dependency>
+
+</task>
+
+<task name="gfscleanup" cycledefs="gfs" maxtries="&MAXTRIES;">
+
+	<command>&JOBS_DIR;/cleanup.sh</command>
+
+	<jobname><cyclestr>&PSLOT;_gfscleanup_@H</cyclestr></jobname>
+	<account>gsd-fv3</account>
+	<queue>batch</queue>
+	<partition>hera</partition>
+	<walltime>01:00:00</walltime>
+	<nodes>1:ppn=1:tpp=1</nodes>
+	<memory>4096M</memory>
+	<native>&NATIVE_STR;</native>
+
+	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfscleanup.log</cyclestr></join>
+
+	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
+	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite</value></envar>
+	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_ugwpv1_mynn</value></envar>
+	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_ugwpv1_mynn</value></envar>
+	<envar><name>NET</name><value>gfs</value></envar>
+	<envar><name>CDUMP</name><value>gfs</value></envar>
+	<envar><name>RUN</name><value>gfs</value></envar>
+	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+	<envar><name>COMROOT</name><value>/lfs4/HFIP/hfv3gfs/glopara/com</value></envar>
+	<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
+
+	<dependency>
+		<and>
+			<taskdep task="gfsarch"/>
 		</and>
 	</dependency>
 
 </task>
 
 -->
+
 </workflow>

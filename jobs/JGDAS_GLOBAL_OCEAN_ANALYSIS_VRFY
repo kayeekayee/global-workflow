@@ -1,5 +1,4 @@
 #!/bin/bash
-export STRICT="NO"
 source "${HOMEgfs}/ush/preamble.sh"
 source "${HOMEgfs}/ush/jjob_header.sh" -e "ocnanalprep" -c "base ocnanal ocnanalprep"
 
@@ -11,7 +10,7 @@ export CDUMP=${CDUMP:-${RUN:-"gfs"}}
 export GDUMP=${GDUMP:-"gdas"}
 # Ignore possible spelling error (nothing is misspelled)
 # shellcheck disable=SC2153
-GDATE=$(date +%Y%m%d%H -d "${PDY} ${cyc} - ${assim_freq} hours")
+GDATE=$(date --utc +%Y%m%d%H -d "${PDY} ${cyc} - ${assim_freq} hours")
 export gPDY=${GDATE:0:8}
 export gcyc=${GDATE:8:2}
 
@@ -28,11 +27,12 @@ YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_ANALYSIS
 
 # Add UFSDA to PYTHONPATH
 export PYTHONPATH=${HOMEgfs}/sorc/gdas.cd/ush/:${HOMEgfs}/sorc/gdas.cd/ush/eva:${PYTHONPATH}
+export PYTHONPATH=${HOMEgfs}/sorc/gdas.cd/ush/soca:${PYTHONPATH}
 
 ###############################################################
 # Run relevant script
 
-EXSCRIPT=${GDASPREPPY:-${HOMEgfs}/sorc/gdas.cd/scripts/exgdas_global_marine_analysis_vrfy.py}
+EXSCRIPT=${GDASOCNVRFYPY:-${HOMEgfs}/sorc/gdas.cd/scripts/exgdas_global_marine_analysis_vrfy.py}
 ${EXSCRIPT}
 status=$?
 [[ ${status} -ne 0 ]] && exit "${status}"

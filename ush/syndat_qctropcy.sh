@@ -46,7 +46,7 @@
 #             subsequent program SYNDAT_SYNDATA)
 #   PARMSYND  - path to syndat parm field directory
 #   EXECSYND  - path to syndat executable directory
-#   FIXSYND   - path to syndat fix field directory
+#   FIXam     - path to syndat fix field directory
 #   USHSYND   - path to syndat ush directory
 
 # Imported variables that can be passed in:
@@ -59,11 +59,9 @@
 #                data base
 #                (Default: /dcom/us007003)
 #   slmask    - path to t126 32-bit gaussian land/sea mask file
-#                (Default: $FIXSYND/syndat_slmask.t126.gaussian)
+#                (Default: $FIXam/syndat_slmask.t126.gaussian)
 #   copy_back - switch to copy updated files back to archive directory and
 #                to tcvitals directory
-#                (Default: YES)
-#   SENDCOM     switch  copy output files to $COMSP
 #                (Default: YES)
 #   files_override - switch to override default "files" setting for given run
 #                (Default: not set)
@@ -76,14 +74,13 @@ HOMENHCp1=${HOMENHCp1:-/gpfs/?p1/nhc/save/guidance/storm-data/ncep}
 HOMENHC=${HOMENHC:-/gpfs/dell2/nhc/save/guidance/storm-data/ncep}
 TANK_TROPCY=${TANK_TROPCY:-${DCOMROOT}/us007003}
 
-FIXSYND=${FIXSYND:-$HOMEgfs/fix/am}
+FIXam=${FIXam:-$HOMEgfs/fix/am}
 USHSYND=${USHSYND:-$HOMEgfs/ush}
 EXECSYND=${EXECSYND:-$HOMEgfs/exec}
 PARMSYND=${PARMSYND:-$HOMEgfs/parm/relo}
 
-slmask=${slmask:-$FIXSYND/syndat_slmask.t126.gaussian}
+slmask=${slmask:-$FIXam/syndat_slmask.t126.gaussian}
 copy_back=${copy_back:-YES}
-SENDCOM=${SENDCOM:-YES}
 files_override=${files_override:-""}
 
 cd $DATA
@@ -119,13 +116,11 @@ positional parameter 1"
 #  to remote machine(s)
 #  (Note: Only do so if files don't already exist)
 
-   if [ $SENDCOM = YES ]; then
-      if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}" ]]; then
-         cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
-      fi
-      if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}" ]]; then
-         cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
-      fi
+   if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}" ]]; then
+       cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
+   fi
+   if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}" ]]; then
+       cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
    fi
 
    exit
@@ -195,10 +190,10 @@ fi
 echo " &INPUT  RUNID = '${net}_${tmmark}_${cyc}', FILES = $files " > vitchk.inp
 cat $PARMSYND/syndat_qctropcy.${RUN}.parm >> vitchk.inp
  
-#  Copy the fixed fields from FIXSYND
+#  Copy the fixed fields from FIXam
  
-cp $FIXSYND/syndat_fildef.vit fildef.vit
-cp $FIXSYND/syndat_stmnames stmnames
+cp $FIXam/syndat_fildef.vit fildef.vit
+cp $FIXam/syndat_stmnames stmnames
 
 
 rm -f nhc fnoc lthistry
@@ -296,13 +291,11 @@ if [ "$errqct" -gt '0' ];then
 #  wasting time with multiple attempts to remote machine(s)
 #  (Note: Only do so if files don't already exist)
 
-   if [ $SENDCOM = YES ]; then
-      if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}" ]]; then
-         cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
-      fi
-      if [[ ! -s ${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark} ]]; then
-         cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
-      fi
+   if [[ ! -s "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}" ]]; then
+       cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
+   fi
+   if [[ ! -s ${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark} ]]; then
+       cp "/dev/null" "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
    fi
 
    exit
@@ -379,7 +372,7 @@ fi
 
 
 #  This is the file that connects to the later RELOCATE and/or PREP scripts
-[ $SENDCOM = YES ]  &&  cp current "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
+cp current "${COM_OBS}/${RUN}.${cycle}.syndata.tcvitals.${tmmark}"
 
 #  Create the DBNet alert 
 if [ $SENDDBN = "YES" ]
@@ -388,6 +381,6 @@ then
 fi
     
 #  Write JTWC/FNOC Tcvitals to /com path since not saved anywhere else
-[ $SENDCOM = YES ]  &&  cp fnoc "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
+cp fnoc "${COM_OBS}/${RUN}.${cycle}.jtwc-fnoc.tcvitals.${tmmark}"
 
 exit

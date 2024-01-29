@@ -1,10 +1,10 @@
 USER=Judy.K.Henderson
-GITDIR=/lfs1/BMC/gsd-fv3-test/jhender/scratch/emc_gw             ## where your git checkout is located
+GITDIR=/lfs1/BMC/gsd-fv3-test/jhender/scratch/gsl_ufs_rt             ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 ICSDIR=/lfs1/BMC/gsd-fv3-test/rtfim/FV3ICS_L127
 
-PSLOT=test
+PSLOT=test_jet
 IDATE=2022110900
 EDATE=2022110900
 RESDET=768               ## 96 192 384 768

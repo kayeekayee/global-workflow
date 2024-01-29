@@ -15,15 +15,29 @@ elif [[ ${MACHINE_ID} = hera* ]] ; then
         source /apps/lmod/lmod/init/bash
     fi
     export LMOD_SYSTEM_DEFAULT_MODULES=contrib
+    set +u
     module reset
+    set -u
+
+elif [[ ${MACHINE_ID} = hercules* ]] ; then
+    # We are on Hercules
+    if ( ! eval module help > /dev/null 2>&1 ) ; then
+        source /apps/other/lmod/lmod/init/bash
+    fi
+    export LMOD_SYSTEM_DEFAULT_MODULES=contrib
+    set +u
+    module reset
+    set -u
 
 elif [[ ${MACHINE_ID} = orion* ]] ; then
     # We are on Orion
     if ( ! eval module help > /dev/null 2>&1 ) ; then
-        source /apps/lmod/init/bash
+        source /apps/lmod/lmod/init/bash
     fi
     export LMOD_SYSTEM_DEFAULT_MODULES=contrib
+    set +u
     module reset
+    set -u
 
 elif [[ ${MACHINE_ID} = s4* ]] ; then
     # We are on SSEC Wisconsin S4
@@ -102,6 +116,22 @@ elif [[ ${MACHINE_ID} = discover* ]]; then
     export PATH=${PATH}:${SPACK_ROOT}/bin
     . "${SPACK_ROOT}"/share/spack/setup-env.sh
 
+# TODO: This can likely be made more general once other cloud
+# platforms come online.
+elif [[ ${MACHINE_ID} = "noaacloud" ]]; then
+
+    export SPACK_ROOT=/contrib/global-workflow/spack-stack/spack
+    export PATH=${PATH}:${SPACK_ROOT}/bin
+    . "${SPACK_ROOT}"/share/spack/setup-env.sh
+    
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
+fi
+
+# If this function exists in the environment, run it; else do not
+ftype=$(type -t set_strict || echo "")
+if [[ "${ftype}" == "function" ]]; then
+  set_strict
+else
+  set +u
 fi

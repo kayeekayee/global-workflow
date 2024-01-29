@@ -1,11 +1,12 @@
 BASE_GIT: '/scratch1/NCEPDEV/global/glopara/git'
 DMPDIR: '/scratch1/NCEPDEV/global/glopara/dump'
+BASE_CPLIC: '/scratch1/NCEPDEV/global/glopara/data/ICSDIR/prototype_ICs'
 PACKAGEROOT: '/scratch1/NCEPDEV/global/glopara/nwpara'
 COMROOT: '/scratch1/NCEPDEV/global/glopara/com'
 COMINsyn: '${COMROOT}/gfs/prod/syndat'
 HOMEDIR: '/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/${USER}'
-STMP: '/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSrun/'
-PTMP: '/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite/FV3GFSrun/'
+STMP: '${HOMEgfs}/${PSLOT}/FV3GFSrun/'
+PTMP: '${HOMEgfs}/${PSLOT}/FV3GFSrun/'
 NOSCRUB: $HOMEDIR
 ACCOUNT: gsd-fv3
 SCHEDULER: slurm
@@ -18,7 +19,7 @@ CHGRP_CMD: 'chgrp rstprod'
 HPSSARCH: 'YES'
 HPSS_PROJECT: fim
 LOCALARCH: 'NO'
-ATARDIR: '/BMC/${HPSS_PROJECT}/2year/${PSLOT}'
+ATARDIR: '/BMC/${HPSS_PROJECT}/1year/${USER}/${machine}/scratch/${PSLOT}'
 MAKE_NSSTBUFR: 'NO'
 MAKE_ACFTBUFR: 'NO'
-SUPPORTED_RESOLUTIONS: ['C768', 'C384', 'C192', 'C96', 'C48']
+SUPPORTED_RESOLUTIONS: ['C1152', 'C768', 'C384', 'C192', 'C96', 'C48']

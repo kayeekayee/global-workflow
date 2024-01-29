@@ -12,9 +12,9 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS
 
 from hosts import Host
 
-from pygw.yaml_file import parse_j2yaml
-from pygw.attrdict import AttrDict
-from pygw.timetools import to_datetime, to_timedelta, datetime_to_YMDH
+from wxflow import parse_j2yaml
+from wxflow import AttrDict
+from wxflow import to_datetime, to_timedelta, datetime_to_YMDH
 
 
 _here = os.path.dirname(__file__)
@@ -61,7 +61,7 @@ def fill_COMROT_cycled(host, inputs):
 
     do_ocean = do_ice = do_med = False
 
-    if inputs.app in ['S2S', 'S2SW']:
+    if 'S2S' in inputs.app:
         do_ocean = do_ice = do_med = True
 
     if inputs.icsdir is None:
@@ -71,7 +71,15 @@ def fill_COMROT_cycled(host, inputs):
     rdatestr = datetime_to_YMDH(inputs.idate - to_timedelta('T06H'))
     idatestr = datetime_to_YMDH(inputs.idate)
 
-    if os.path.isdir(os.path.join(inputs.icsdir, f'{inputs.cdump}.{rdatestr[:8]}', rdatestr[8:], 'model_data', 'atmos')):
+    # Test if we are using the new COM structure or the old flat one for ICs
+    if inputs.start in ['warm']:
+        pathstr = os.path.join(inputs.icsdir, f'{inputs.cdump}.{rdatestr[:8]}',
+                               rdatestr[8:], 'model_data', 'atmos')
+    else:
+        pathstr = os.path.join(inputs.icsdir, f'{inputs.cdump}.{idatestr[:8]}',
+                               idatestr[8:], 'model_data', 'atmos')
+
+    if os.path.isdir(pathstr):
         flat_structure = False
     else:
         flat_structure = True
@@ -87,7 +95,7 @@ def fill_COMROT_cycled(host, inputs):
         do_med = False
     dst_ocn_rst_dir = os.path.join('model_data', 'ocean', 'restart')
     dst_ocn_anl_dir = os.path.join('analysis', 'ocean')
-    dst_ice_dir = os.path.join('model_data', 'ice', 'restart')
+    dst_ice_rst_dir = os.path.join('model_data', 'ice', 'restart')
     dst_atm_anl_dir = os.path.join('analysis', 'atmos')
 
     if flat_structure:
@@ -102,14 +110,14 @@ def fill_COMROT_cycled(host, inputs):
         # ocean and ice have the same filenames for warm and cold
         src_ocn_rst_dir = os.path.join('ocean', 'RESTART')
         src_ocn_anl_dir = 'ocean'
-        src_ice_dir = os.path.join('ice', 'RESTART')
+        src_ice_rst_dir = os.path.join('ice', 'RESTART')
         src_atm_anl_dir = 'atmos'
     else:
         src_atm_dir = dst_atm_dir
         src_med_dir = dst_med_dir
         src_ocn_rst_dir = dst_ocn_rst_dir
         src_ocn_anl_dir = dst_ocn_anl_dir
-        src_ice_dir = dst_ice_dir
+        src_ice_rst_dir = dst_ice_rst_dir
         src_atm_anl_dir = dst_atm_anl_dir
 
     def link_files_from_src_to_dst(src_dir, dst_dir):
@@ -121,69 +129,95 @@ def fill_COMROT_cycled(host, inputs):
 
     # Link ensemble member initial conditions
     if inputs.nens > 0:
-        if inputs.start in ['warm']:
-            enkfdir = f'enkf{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-        elif inputs.start in ['cold']:
-            enkfdir = f'enkf{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
+        previous_cycle_dir = f'enkf{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
+        current_cycle_dir = f'enkf{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
 
         for ii in range(1, inputs.nens + 1):
             memdir = f'mem{ii:03d}'
             # Link atmospheric files
-            dst_dir = os.path.join(comrot, enkfdir, memdir, dst_atm_dir)
-            src_dir = os.path.join(inputs.icsdir, enkfdir, memdir, src_atm_dir)
+            if inputs.start in ['warm']:
+                dst_dir = os.path.join(comrot, previous_cycle_dir, memdir, dst_atm_dir)
+                src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, memdir, src_atm_dir)
+            elif inputs.start in ['cold']:
+                dst_dir = os.path.join(comrot, current_cycle_dir, memdir, dst_atm_dir)
+                src_dir = os.path.join(inputs.icsdir, current_cycle_dir, memdir, src_atm_dir)
             makedirs_if_missing(dst_dir)
             link_files_from_src_to_dst(src_dir, dst_dir)
-            # ocean, ice, etc. TBD ...
+
+            # Link ocean files
+            if do_ocean:
+                dst_dir = os.path.join(comrot, previous_cycle_dir, memdir, dst_ocn_rst_dir)
+                src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, memdir, src_ocn_rst_dir)
+                makedirs_if_missing(dst_dir)
+                link_files_from_src_to_dst(src_dir, dst_dir)
+
+                # First 1/2 cycle needs a MOM6 increment
+                incfile = f'enkf{inputs.cdump}.t{idatestr[8:]}z.ocninc.nc'
+                src_file = os.path.join(inputs.icsdir, current_cycle_dir, memdir, src_ocn_anl_dir, incfile)
+                dst_file = os.path.join(comrot, current_cycle_dir, memdir, dst_ocn_anl_dir, incfile)
+                makedirs_if_missing(os.path.join(comrot, current_cycle_dir, memdir, dst_ocn_anl_dir))
+                os.symlink(src_file, dst_file)
+
+            # Link ice files
+            if do_ice:
+                dst_dir = os.path.join(comrot, previous_cycle_dir, memdir, dst_ice_rst_dir)
+                src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, memdir, src_ice_rst_dir)
+                makedirs_if_missing(dst_dir)
+                link_files_from_src_to_dst(src_dir, dst_dir)
+
+            # Link mediator files
+            if do_med:
+                dst_dir = os.path.join(comrot, previous_cycle_dir, memdir, dst_med_dir)
+                src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, memdir, src_med_dir)
+                makedirs_if_missing(dst_dir)
+                link_files_from_src_to_dst(src_dir, dst_dir)
 
     # Link deterministic initial conditions
+    previous_cycle_dir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
+    current_cycle_dir = f'{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
 
     # Link atmospheric files
     if inputs.start in ['warm']:
-        detdir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
+        dst_dir = os.path.join(comrot, previous_cycle_dir, dst_atm_dir)
+        src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, src_atm_dir)
     elif inputs.start in ['cold']:
-        detdir = f'{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
+        dst_dir = os.path.join(comrot, current_cycle_dir, dst_atm_dir)
+        src_dir = os.path.join(inputs.icsdir, current_cycle_dir, src_atm_dir)
 
-    dst_dir = os.path.join(comrot, detdir, dst_atm_dir)
-    src_dir = os.path.join(inputs.icsdir, detdir, src_atm_dir)
     makedirs_if_missing(dst_dir)
     link_files_from_src_to_dst(src_dir, dst_dir)
 
     # Link ocean files
     if do_ocean:
-        detdir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-        dst_dir = os.path.join(comrot, detdir, dst_ocn_rst_dir)
-        src_dir = os.path.join(inputs.icsdir, detdir, src_ocn_rst_dir)
+        dst_dir = os.path.join(comrot, previous_cycle_dir, dst_ocn_rst_dir)
+        src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, src_ocn_rst_dir)
         makedirs_if_missing(dst_dir)
         link_files_from_src_to_dst(src_dir, dst_dir)
 
         # First 1/2 cycle needs a MOM6 increment
-        incdir = f'{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
         incfile = f'{inputs.cdump}.t{idatestr[8:]}z.ocninc.nc'
-        src_file = os.path.join(inputs.icsdir, incdir, src_ocn_anl_dir, incfile)
-        dst_file = os.path.join(comrot, incdir, dst_ocn_anl_dir, incfile)
-        makedirs_if_missing(os.path.join(comrot, incdir, dst_ocn_anl_dir))
+        src_file = os.path.join(inputs.icsdir, current_cycle_dir, src_ocn_anl_dir, incfile)
+        dst_file = os.path.join(comrot, current_cycle_dir, dst_ocn_anl_dir, incfile)
+        makedirs_if_missing(os.path.join(comrot, current_cycle_dir, dst_ocn_anl_dir))
         os.symlink(src_file, dst_file)
 
     # Link ice files
     if do_ice:
-        detdir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-        dst_dir = os.path.join(comrot, detdir, dst_ice_dir)
-        src_dir = os.path.join(inputs.icsdir, detdir, src_ice_dir)
+        dst_dir = os.path.join(comrot, previous_cycle_dir, dst_ice_rst_dir)
+        src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, src_ice_rst_dir)
         makedirs_if_missing(dst_dir)
         link_files_from_src_to_dst(src_dir, dst_dir)
 
     # Link mediator files
     if do_med:
-        detdir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-        dst_dir = os.path.join(comrot, detdir, dst_med_dir)
-        src_dir = os.path.join(inputs.icsdir, detdir, src_med_dir)
+        dst_dir = os.path.join(comrot, previous_cycle_dir, dst_med_dir)
+        src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, src_med_dir)
         makedirs_if_missing(dst_dir)
         link_files_from_src_to_dst(src_dir, dst_dir)
 
     # Link bias correction and radiance diagnostics files
-    detdir = f'{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
-    src_dir = os.path.join(inputs.icsdir, detdir, src_atm_anl_dir)
-    dst_dir = os.path.join(comrot, detdir, dst_atm_anl_dir)
+    src_dir = os.path.join(inputs.icsdir, current_cycle_dir, src_atm_anl_dir)
+    dst_dir = os.path.join(comrot, current_cycle_dir, dst_atm_anl_dir)
     makedirs_if_missing(dst_dir)
     for ftype in ['abias', 'abias_pc', 'abias_air', 'radstat']:
         fname = f'{inputs.cdump}.t{idatestr[8:]}z.{ftype}'
@@ -199,7 +233,6 @@ def fill_COMROT_forecasts(host, inputs):
     Implementation of 'fill_COMROT' for forecast-only mode
     """
     print('forecast-only mode treats ICs differently and cannot be staged here')
-    return
 
 
 def fill_EXPDIR(inputs):
@@ -266,6 +299,11 @@ def edit_baseconfig(host, inputs, yaml_dict):
     extend_dict = get_template_dict(host.info)
     tmpl_dict = dict(tmpl_dict, **extend_dict)
 
+    if inputs.start in ["warm"]:
+        is_warm_start = ".true."
+    elif inputs.start in ["cold"]:
+        is_warm_start = ".false."
+
     extend_dict = dict()
     extend_dict = {
         "@PSLOT@": inputs.pslot,
@@ -274,7 +312,7 @@ def edit_baseconfig(host, inputs, yaml_dict):
         "@CASECTL@": f'C{inputs.resdet}',
         "@EXPDIR@": inputs.expdir,
         "@ROTDIR@": inputs.comrot,
-        "@EXP_WARM_START@": inputs.warm_start,
+        "@EXP_WARM_START@": is_warm_start,
         "@MODE@": inputs.mode,
         "@gfs_cyc@": inputs.gfs_cyc,
         "@APP@": inputs.app
@@ -295,10 +333,6 @@ def edit_baseconfig(host, inputs, yaml_dict):
             "@DOHYBVAR@": "YES" if inputs.nens > 0 else "NO",
         }
         tmpl_dict = dict(tmpl_dict, **extend_dict)
-
-    # All apps and modes now use the same physics and CCPP suite by default
-    extend_dict = {"@CCPP_SUITE@": "FV3_GFS_v17_p8", "@IMP_PHYSICS@": 8}
-    tmpl_dict = dict(tmpl_dict, **extend_dict)
 
     try:
         tmpl_dict = dict(tmpl_dict, **get_template_dict(yaml_dict['base']))
@@ -343,10 +377,70 @@ def get_template_dict(input_dict):
     return output_dict
 
 
-def input_args():
+def input_args(*argv):
     """
     Method to collect user arguments for `setup_expt.py`
     """
+
+    ufs_apps = ['ATM', 'ATMA', 'ATMW', 'S2S', 'S2SA', 'S2SW']
+
+    def _common_args(parser):
+        parser.add_argument('--pslot', help='parallel experiment name',
+                            type=str, required=False, default='test')
+        parser.add_argument('--resdet', help='resolution of the deterministic model forecast',
+                            type=int, required=False, default=384)
+        parser.add_argument('--comrot', help='full path to COMROT',
+                            type=str, required=False, default=os.getenv('HOME'))
+        parser.add_argument('--expdir', help='full path to EXPDIR',
+                            type=str, required=False, default=os.getenv('HOME'))
+        parser.add_argument('--idate', help='starting date of experiment, initial conditions must exist!',
+                            required=True, type=lambda dd: to_datetime(dd))
+        parser.add_argument('--edate', help='end date experiment', required=True, type=lambda dd: to_datetime(dd))
+        return parser
+
+    def _gfs_args(parser):
+        parser.add_argument('--start', help='restart mode: warm or cold', type=str,
+                            choices=['warm', 'cold'], required=False, default='cold')
+        parser.add_argument('--cdump', help='CDUMP to start the experiment',
+                            type=str, required=False, default='gdas')
+        # --configdir is hidden from help
+        parser.add_argument('--configdir', help=SUPPRESS, type=str, required=False, default=os.path.join(_top, 'parm/config/gfs'))
+        parser.add_argument('--yaml', help='Defaults to substitute from', type=str,
+                            required=False, default=os.path.join(_top, 'parm/config/gfs/yaml/defaults.yaml'))
+        return parser
+
+    def _gfs_cycled_args(parser):
+        parser.add_argument('--icsdir', help='full path to initial condition directory', type=str, required=False, default=None)
+        parser.add_argument('--app', help='UFS application', type=str,
+                            choices=ufs_apps, required=False, default='ATM')
+        parser.add_argument('--gfs_cyc', help='cycles to run forecast', type=int,
+                            choices=[0, 1, 2, 4], default=1, required=False)
+        return parser
+
+    def _gfs_or_gefs_ensemble_args(parser):
+        parser.add_argument('--resens', help='resolution of the ensemble model forecast',
+                            type=int, required=False, default=192)
+        parser.add_argument('--nens', help='number of ensemble members',
+                            type=int, required=False, default=20)
+        return parser
+
+    def _gfs_or_gefs_forecast_args(parser):
+        parser.add_argument('--app', help='UFS application', type=str,
+                            choices=ufs_apps + ['S2SWA'], required=False, default='ATM')
+        parser.add_argument('--gfs_cyc', help='Number of forecasts per day', type=int,
+                            choices=[1, 2, 4], default=1, required=False)
+        return parser
+
+    def _gefs_args(parser):
+        parser.add_argument('--start', help='restart mode: warm or cold', type=str,
+                            choices=['warm', 'cold'], required=False, default='cold')
+        parser.add_argument('--configdir', help=SUPPRESS, type=str, required=False,
+                            default=os.path.join(_top, 'parm/config/gefs'))
+        parser.add_argument('--yaml', help='Defaults to substitute from', type=str, required=False,
+                            default=os.path.join(_top, 'parm/config/gefs/yaml/defaults.yaml'))
+        parser.add_argument('--icsdir', help='full path to initial condition directory [temporary hack in place for testing]',
+                            type=str, required=False, default=None)
+        return parser
 
     description = """
         Setup files and directories to start a GFS parallel.\n
@@ -362,78 +456,38 @@ def input_args():
     gfs = sysparser.add_parser('gfs', help='arguments for GFS')
     gefs = sysparser.add_parser('gefs', help='arguments for GEFS')
 
-    modeparser = gfs.add_subparsers(dest='mode')
-    cycled = modeparser.add_parser('cycled', help='arguments for cycled mode')
-    forecasts = modeparser.add_parser('forecast-only', help='arguments for forecast-only mode')
+    gfsmodeparser = gfs.add_subparsers(dest='mode')
+    gfscycled = gfsmodeparser.add_parser('cycled', help='arguments for cycled mode')
+    gfsforecasts = gfsmodeparser.add_parser('forecast-only', help='arguments for forecast-only mode')
+
+    gefsmodeparser = gefs.add_subparsers(dest='mode')
+    gefsforecasts = gefsmodeparser.add_parser('forecast-only', help='arguments for forecast-only mode')
 
     # Common arguments across all modes
-    for subp in [cycled, forecasts, gefs]:
-        subp.add_argument('--pslot', help='parallel experiment name',
-                          type=str, required=False, default='test')
-        subp.add_argument('--resdet', help='resolution of the deterministic model forecast',
-                          type=int, required=False, default=384)
-        subp.add_argument('--comrot', help='full path to COMROT',
-                          type=str, required=False, default=os.getenv('HOME'))
-        subp.add_argument('--expdir', help='full path to EXPDIR',
-                          type=str, required=False, default=os.getenv('HOME'))
-        subp.add_argument('--idate', help='starting date of experiment, initial conditions must exist!',
-                          required=True, type=lambda dd: to_datetime(dd))
-        subp.add_argument('--edate', help='end date experiment', required=True, type=lambda dd: to_datetime(dd))
-
-    ufs_apps = ['ATM', 'ATMA', 'ATMW', 'S2S', 'S2SA', 'S2SW']
+    for subp in [gfscycled, gfsforecasts, gefsforecasts]:
+        subp = _common_args(subp)
 
     # GFS-only arguments
-    for subp in [cycled, forecasts]:
-        subp.add_argument('--start', help='restart mode: warm or cold', type=str,
-                          choices=['warm', 'cold'], required=False, default='cold')
-        subp.add_argument('--cdump', help='CDUMP to start the experiment',
-                          type=str, required=False, default='gdas')
-        # --configdir is hidden from help
-        subp.add_argument('--configdir', help=SUPPRESS, type=str, required=False, default=os.path.join(_top, 'parm/config/gfs'))
-        subp.add_argument('--yaml', help='Defaults to substitute from', type=str,
-                          required=False, default=os.path.join(_top, 'parm/config/gfs/yaml/defaults.yaml'))
+    for subp in [gfscycled, gfsforecasts]:
+        subp = _gfs_args(subp)
 
     # ensemble-only arguments
-    for subp in [cycled, gefs]:
-        subp.add_argument('--resens', help='resolution of the ensemble model forecast',
-                          type=int, required=False, default=192)
-        subp.add_argument('--nens', help='number of ensemble members',
-                          type=int, required=False, default=20)
+    for subp in [gfscycled, gefsforecasts]:
+        subp = _gfs_or_gefs_ensemble_args(subp)
 
     # GFS/GEFS forecast-only additional arguments
-    for subp in [forecasts, gefs]:
-        subp.add_argument('--app', help='UFS application', type=str,
-                          choices=ufs_apps + ['S2SWA'], required=False, default='ATM')
-        subp.add_argument('--gfs_cyc', help='Number of forecasts per day', type=int,
-                          choices=[1, 2, 4], default=1, required=False)
+    for subp in [gfsforecasts, gefsforecasts]:
+        subp = _gfs_or_gefs_forecast_args(subp)
 
     # cycled mode additional arguments
-    cycled.add_argument('--icsdir', help='full path to initial condition directory', type=str, required=False, default=None)
-    cycled.add_argument('--app', help='UFS application', type=str,
-                        choices=ufs_apps, required=False, default='ATM')
-    cycled.add_argument('--gfs_cyc', help='cycles to run forecast', type=int,
-                        choices=[0, 1, 2, 4], default=1, required=False)
+    for subp in [gfscycled]:
+        subp = _gfs_cycled_args(subp)
 
-    # GEFS-only arguments
-    # Create hidden mode argument since there is real option for GEFS
-    gefs.add_argument('--mode', help=SUPPRESS, type=str, required=False, default='forecast-only')
-    # Create hidden start argument since GEFS is always cold start
-    gefs.add_argument('--start', help=SUPPRESS, type=str, required=False, default='cold')
-    # Create hidden arguments for configdir and yaml
-    gefs.add_argument('--configdir', help=SUPPRESS, type=str, required=False,
-                      default=os.path.join(_top, 'parm/config/gefs'))
-    gefs.add_argument('--yaml', help='Defaults to substitute from', type=str, required=False,
-                      default=os.path.join(_top, 'parm/config/gefs/yaml/defaults.yaml'))
+    # GEFS forecast-only arguments
+    for subp in [gefsforecasts]:
+        subp = _gefs_args(subp)
 
-    args = parser.parse_args()
-
-    # Add an entry for warm_start = .true. or .false.
-    if args.start in ['warm']:
-        args.warm_start = ".true."
-    elif args.start in ['cold']:
-        args.warm_start = ".false."
-
-    return args
+    return parser.parse_args(list(*argv) if len(argv) else None)
 
 
 def query_and_clean(dirname):
@@ -467,9 +521,9 @@ def validate_user_request(host, inputs):
             raise NotImplementedError(f"Supported resolutions on {machine} are:\n{', '.join(supp_res)}")
 
 
-if __name__ == '__main__':
+def main(*argv):
 
-    user_inputs = input_args()
+    user_inputs = input_args(*argv)
     host = Host()
 
     validate_user_request(host, user_inputs)
@@ -488,3 +542,8 @@ if __name__ == '__main__':
         makedirs_if_missing(expdir)
         fill_EXPDIR(user_inputs)
         update_configs(host, user_inputs)
+
+
+if __name__ == '__main__':
+
+    main()

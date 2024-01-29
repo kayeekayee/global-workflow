@@ -29,87 +29,88 @@ PDY_MOS="${CDATE_MOS:0:8}"
 ###############################################################
 # Archive online for verification and diagnostics
 ###############################################################
-##JKHsource "${HOMEgfs}/ush/file_utils.sh"
-##JKH
-##JKH[[ ! -d ${ARCDIR} ]] && mkdir -p "${ARCDIR}"
-##JKHnb_copy "${COM_ATMOS_ANALYSIS}/${APREFIX}gsistat" "${ARCDIR}/gsistat.${RUN}.${PDY}${cyc}"
-##JKHnb_copy "${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.anl" "${ARCDIR}/pgbanl.${RUN}.${PDY}${cyc}.grib2"
-##JKH
-##JKH# Archive 1 degree forecast GRIB2 files for verification
-##JKHif [[ "${RUN}" == "gfs" ]]; then
-##JKH    fhmax=${FHMAX_GFS}
-##JKH    fhr=0
-##JKH    while [ "${fhr}" -le "${fhmax}" ]; do
-##JKH        fhr2=$(printf %02i "${fhr}")
-##JKH        fhr3=$(printf %03i "${fhr}")
-##JKH        nb_copy "${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.f${fhr3}" "${ARCDIR}/pgbf${fhr2}.${RUN}.${PDY}${cyc}.grib2"
-##JKH        fhr=$((10#${fhr} + 10#${FHOUT_GFS} ))
-##JKH    done
-##JKHfi
-##JKHif [[ "${RUN}" == "gdas" ]]; then
-##JKH    flist="000 003 006 009"
-##JKH    for fhr in ${flist}; do
-##JKH        fname="${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.f${fhr}"
-##JKH        # TODO Shouldn't the archived files also use three-digit tags?
-##JKH        fhr2=$(printf %02i $((10#${fhr})))
-##JKH        nb_copy "${fname}" "${ARCDIR}/pgbf${fhr2}.${RUN}.${PDY}${cyc}.grib2"
-##JKH    done
-##JKHfi
-##JKH
-##JKHif [[ -s "${COM_ATMOS_TRACK}/avno.t${cyc}z.cyclone.trackatcfunix" ]]; then
-##JKH    # shellcheck disable=2153
-##JKH    PSLOT4=${PSLOT:0:4}
-##JKH    # shellcheck disable=
-##JKH    PSLOT4=${PSLOT4^^}
-##JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/avno.t${cyc}z.cyclone.trackatcfunix" \
-##JKH        > "${ARCDIR}/atcfunix.${RUN}.${PDY}${cyc}"
-##JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/avnop.t${cyc}z.cyclone.trackatcfunix" \
-##JKH        > "${ARCDIR}/atcfunixp.${RUN}.${PDY}${cyc}"
-##JKHfi
-##JKH
-##JKHif [[ "${RUN}" == "gdas" ]] && [[ -s "${COM_ATMOS_TRACK}/gdas.t${cyc}z.cyclone.trackatcfunix" ]]; then
-##JKH    # shellcheck disable=2153
-##JKH    PSLOT4=${PSLOT:0:4}
-##JKH    # shellcheck disable=
-##JKH    PSLOT4=${PSLOT4^^}
-##JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/gdas.t${cyc}z.cyclone.trackatcfunix" \
-##JKH        > "${ARCDIR}/atcfunix.${RUN}.${PDY}${cyc}"
-##JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/gdasp.t${cyc}z.cyclone.trackatcfunix" \
-##JKH        > "${ARCDIR}/atcfunixp.${RUN}.${PDY}${cyc}"
-##JKHfi
-##JKH
-##JKHif [ "${RUN}" = "gfs" ]; then
-##JKH    nb_copy "${COM_ATMOS_GENESIS}/storms.gfso.atcf_gen.${PDY}${cyc}"      "${ARCDIR}/."
-##JKH    nb_copy "${COM_ATMOS_GENESIS}/storms.gfso.atcf_gen.altg.${PDY}${cyc}" "${ARCDIR}/."
-##JKH    nb_copy "${COM_ATMOS_TRACK}/trak.gfso.atcfunix.${PDY}${cyc}"          "${ARCDIR}/."
-##JKH    nb_copy "${COM_ATMOS_TRACK}/trak.gfso.atcfunix.altg.${PDY}${cyc}"     "${ARCDIR}/."
-##JKH
-##JKH    mkdir -p "${ARCDIR}/tracker.${PDY}${cyc}/${RUN}"
-##JKH    blist="epac natl"
-##JKH    for basin in ${blist}; do
-##JKH        if [[ -f ${basin} ]]; then
-##JKH            cp -rp "${COM_ATMOS_TRACK}/${basin}" "${ARCDIR}/tracker.${PDY}${cyc}/${RUN}"
-##JKH        fi
-##JKH    done
-##JKHfi
-##JKH
-##JKH# Archive required gaussian gfs forecast files for Fit2Obs
-##JKHif [[ "${RUN}" == "gfs" ]] && [[ "${FITSARC}" = "YES" ]]; then
-##JKH    VFYARC=${VFYARC:-${ROTDIR}/vrfyarch}
-##JKH    [[ ! -d ${VFYARC} ]] && mkdir -p "${VFYARC}"
-##JKH    mkdir -p "${VFYARC}/${RUN}.${PDY}/${cyc}"
-##JKH    prefix="${RUN}.t${cyc}z"
-##JKH    fhmax=${FHMAX_FITS:-${FHMAX_GFS}}
-##JKH    fhr=0
-##JKH    while [[ ${fhr} -le ${fhmax} ]]; do
-##JKH        fhr3=$(printf %03i "${fhr}")
-##JKH        sfcfile="${COM_ATMOS_HISTORY}/${prefix}.sfcf${fhr3}.nc"
-##JKH        sigfile="${COM_ATMOS_HISTORY}/${prefix}.atmf${fhr3}.nc"
-##JKH        nb_copy "${sfcfile}" "${VFYARC}/${RUN}.${PDY}/${cyc}/"
-##JKH        nb_copy "${sigfile}" "${VFYARC}/${RUN}.${PDY}/${cyc}/"
-##JKH        (( fhr = 10#${fhr} + 6 ))
-##JKH    done
-##JKHfi
+#JKHsource "${HOMEgfs}/ush/file_utils.sh"
+#JKH
+#JKH[[ ! -d ${ARCDIR} ]] && mkdir -p "${ARCDIR}"
+#JKHnb_copy "${COM_ATMOS_ANALYSIS}/${APREFIX}gsistat" "${ARCDIR}/gsistat.${RUN}.${PDY}${cyc}"
+#JKHnb_copy "${COM_CHEM_ANALYSIS}/${APREFIX}aerostat" "${ARCDIR}/aerostat.${RUN}.${PDY}${cyc}"
+#JKHnb_copy "${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.anl" "${ARCDIR}/pgbanl.${RUN}.${PDY}${cyc}.grib2"
+#JKH
+#JKH# Archive 1 degree forecast GRIB2 files for verification
+#JKHif [[ "${RUN}" == "gfs" ]]; then
+#JKH    fhmax=${FHMAX_GFS}
+#JKH    fhr=0
+#JKH    while [ "${fhr}" -le "${fhmax}" ]; do
+#JKH        fhr2=$(printf %02i "${fhr}")
+#JKH        fhr3=$(printf %03i "${fhr}")
+#JKH        nb_copy "${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.f${fhr3}" "${ARCDIR}/pgbf${fhr2}.${RUN}.${PDY}${cyc}.grib2"
+#JKH        fhr=$((10#${fhr} + 10#${FHOUT_GFS} ))
+#JKH    done
+#JKHfi
+#JKHif [[ "${RUN}" == "gdas" ]]; then
+#JKH    flist="000 003 006 009"
+#JKH    for fhr in ${flist}; do
+#JKH        fname="${COM_ATMOS_GRIB_1p00}/${APREFIX}pgrb2.1p00.f${fhr}"
+#JKH        # TODO Shouldn't the archived files also use three-digit tags?
+#JKH        fhr2=$(printf %02i $((10#${fhr})))
+#JKH        nb_copy "${fname}" "${ARCDIR}/pgbf${fhr2}.${RUN}.${PDY}${cyc}.grib2"
+#JKH    done
+#JKHfi
+#JKH
+#JKHif [[ -s "${COM_ATMOS_TRACK}/avno.t${cyc}z.cyclone.trackatcfunix" ]]; then
+#JKH    # shellcheck disable=2153
+#JKH    PSLOT4=${PSLOT:0:4}
+#JKH    # shellcheck disable=
+#JKH    PSLOT4=${PSLOT4^^}
+#JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/avno.t${cyc}z.cyclone.trackatcfunix" \
+#JKH        > "${ARCDIR}/atcfunix.${RUN}.${PDY}${cyc}"
+#JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/avnop.t${cyc}z.cyclone.trackatcfunix" \
+#JKH        > "${ARCDIR}/atcfunixp.${RUN}.${PDY}${cyc}"
+#JKHfi
+#JKH
+#JKHif [[ "${RUN}" == "gdas" ]] && [[ -s "${COM_ATMOS_TRACK}/gdas.t${cyc}z.cyclone.trackatcfunix" ]]; then
+#JKH    # shellcheck disable=2153
+#JKH    PSLOT4=${PSLOT:0:4}
+#JKH    # shellcheck disable=
+#JKH    PSLOT4=${PSLOT4^^}
+#JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/gdas.t${cyc}z.cyclone.trackatcfunix" \
+#JKH        > "${ARCDIR}/atcfunix.${RUN}.${PDY}${cyc}"
+#JKH    sed "s:AVNO:${PSLOT4}:g" < "${COM_ATMOS_TRACK}/gdasp.t${cyc}z.cyclone.trackatcfunix" \
+#JKH        > "${ARCDIR}/atcfunixp.${RUN}.${PDY}${cyc}"
+#JKHfi
+#JKH
+#JKHif [ "${RUN}" = "gfs" ]; then
+#JKH    nb_copy "${COM_ATMOS_GENESIS}/storms.gfso.atcf_gen.${PDY}${cyc}"      "${ARCDIR}/."
+#JKH    nb_copy "${COM_ATMOS_GENESIS}/storms.gfso.atcf_gen.altg.${PDY}${cyc}" "${ARCDIR}/."
+#JKH    nb_copy "${COM_ATMOS_TRACK}/trak.gfso.atcfunix.${PDY}${cyc}"          "${ARCDIR}/."
+#JKH    nb_copy "${COM_ATMOS_TRACK}/trak.gfso.atcfunix.altg.${PDY}${cyc}"     "${ARCDIR}/."
+#JKH
+#JKH    mkdir -p "${ARCDIR}/tracker.${PDY}${cyc}/${RUN}"
+#JKH    blist="epac natl"
+#JKH    for basin in ${blist}; do
+#JKH        if [[ -f ${basin} ]]; then
+#JKH            cp -rp "${COM_ATMOS_TRACK}/${basin}" "${ARCDIR}/tracker.${PDY}${cyc}/${RUN}"
+#JKH        fi
+#JKH    done
+#JKHfi
+#JKH
+#JKH# Archive required gaussian gfs forecast files for Fit2Obs
+#JKHif [[ "${RUN}" == "gfs" ]] && [[ "${FITSARC}" = "YES" ]]; then
+#JKH    VFYARC=${VFYARC:-${ROTDIR}/vrfyarch}
+#JKH    [[ ! -d ${VFYARC} ]] && mkdir -p "${VFYARC}"
+#JKH    mkdir -p "${VFYARC}/${RUN}.${PDY}/${cyc}"
+#JKH    prefix="${RUN}.t${cyc}z"
+#JKH    fhmax=${FHMAX_FITS:-${FHMAX_GFS}}
+#JKH    fhr=0
+#JKH    while [[ ${fhr} -le ${fhmax} ]]; do
+#JKH        fhr3=$(printf %03i "${fhr}")
+#JKH        sfcfile="${COM_ATMOS_HISTORY}/${prefix}.sfcf${fhr3}.nc"
+#JKH        sigfile="${COM_ATMOS_HISTORY}/${prefix}.atmf${fhr3}.nc"
+#JKH        nb_copy "${sfcfile}" "${VFYARC}/${RUN}.${PDY}/${cyc}/"
+#JKH        nb_copy "${sigfile}" "${VFYARC}/${RUN}.${PDY}/${cyc}/"
+#JKH        (( fhr = 10#${fhr} + 6 ))
+#JKH    done
+#JKHfi
 
 
 ###############################################################
@@ -150,15 +151,10 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
         if [[ "${PDY}${cyc}" -eq "${SDATE}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
     fi
 
-    if [[ "${machine}" = "JET" ]]; then         ## save ICS only on Jet experiments
-      mod=$((nday % ARCH_FCSTICFREQ))
-      if [[ "${mod}" -eq 0 ]] || [[ "${PDY}${cyc}" -eq "${firstday}" ]]; then SAVEFCSTIC="YES" ; fi
-    fi
+    mod=$((nday % ARCH_FCSTICFREQ))
+    if [[ "${mod}" -eq 0 ]] || [[ "${PDY}${cyc}" -eq "${firstday}" ]]; then SAVEFCSTIC="YES" ; fi
 
-    ARCH_LIST="${DATA}/archlist"
-    [[ -d ${ARCH_LIST} ]] && rm -rf "${ARCH_LIST}"
-    mkdir -p "${ARCH_LIST}"
-    cd "${ARCH_LIST}" || exit 2
+    cd "${DATA}" || exit 2
 
     "${HOMEgfs}/ush/hpssarch_gen.sh" "${RUN}"
     status=$?
@@ -182,24 +178,54 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
             targrp_list="${targrp_list} gfs_ics"
         fi
 
-    fi
-
     # Turn on extended globbing options
     yyyy="${PDY:0:4}"
     shopt -s extglob
     for targrp in ${targrp_list}; do
         set +e
-        ${TARCMD} -P -cvf "${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar" $(cat "${ARCH_LIST}/${targrp}.txt")
-        status=$?
+
+        # Test whether gdas.tar or gdas_restarta.tar will have rstprod data
+        has_rstprod="NO"
         case ${targrp} in
             'gdas'|'gdas_restarta')
-                ${HSICMD} chgrp rstprod "${ATARDIR}/${yyyy}/${CDATE}/${targrp}.tar"
-                ${HSICMD} chmod 640 "${ATARDIR}/${yyyy}/${CDATE}/${targrp}.tar"
+                # Test for rstprod in each archived file
+                while IFS= read -r file; do
+                    if [[ -f ${file} ]]; then
+                        group=$( stat -c "%G" "${file}" )
+                        if [[ "${group}" == "rstprod" ]]; then
+                            has_rstprod="YES"
+                            break
+                        fi
+                    fi
+                done < "${DATA}/${targrp}.txt"
+
                 ;;
             *) ;;
         esac
-        if [ "${status}" -ne 0 ] && [ "${PDY}${cyc}" -ge "${firstday}" ]; then
-            echo "FATAL ERROR: ${TARCMD} ${PDY}${cyc} ${targrp}.tar failed"
+
+        # Create the tarball
+        tar_fl="${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar"
+        ${TARCMD} -P -cvf "${tar_fl}" $(cat "${DATA}/${targrp}.txt")
+        status=$?
+
+        # Change group to rstprod if it was found even if htar/tar failed in case of partial creation
+        if [[ "${has_rstprod}" == "YES" ]]; then
+            ${HSICMD} chgrp rstprod "${tar_fl}"
+            stat_chgrp=$?
+            ${HSICMD} chmod 640 "${tar_fl}"
+            stat_chgrp=$((stat_chgrp+$?))
+            if [ "${stat_chgrp}" -gt 0 ]; then
+                echo "FATAL ERROR: Unable to properly restrict ${tar_fl}!"
+                echo "Attempting to delete ${tar_fl}"
+                ${HSICMD} rm "${tar_fl}"
+                echo "Please verify that ${tar_fl} was deleted!"
+                exit "${stat_chgrp}"
+            fi
+        fi
+
+        # For safety, test if the htar/tar command failed after changing groups
+        if [[ "${status}" -ne 0 ]] && [[ "${PDY}${cyc}" -ge "${firstday}" ]]; then
+            echo "FATAL ERROR: ${TARCMD} ${tar_fl} failed"
             exit "${status}"
         fi
         set_strict
@@ -210,30 +236,5 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
 ###############################################################
 fi  ##end of HPSS archive
 ###############################################################
-
-
-
-###############################################################
-# Clean up previous cycles; various depths
-# PRIOR CYCLE: Leave the prior cycle alone
-GDATE=$(${NDATE} -"${assim_freq}" "${PDY}${cyc}")
-
-# PREVIOUS to the PRIOR CYCLE
-GDATE=$(${NDATE} -"${assim_freq}" "${GDATE}")
-gPDY="${GDATE:0:8}"
-gcyc="${GDATE:8:2}"
-
-# Remove the TMPDIR directory
-# TODO Only prepbufr is currently using this directory, and all jobs should be
-#   cleaning up after themselves anyway
-COMIN="${DATAROOT}/${GDATE}"
-[[ -d ${COMIN} ]] && rm -rf "${COMIN}"
-
-if [[ "${DELETE_COM_IN_ARCHIVE_JOB:-YES}" == NO ]] ; then
-    exit 0
-fi
-
-###############################################################
-
 
 exit 0

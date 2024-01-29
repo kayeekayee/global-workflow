@@ -65,14 +65,12 @@ fi
 if [[ ${PROCESS_TROPCY} = "YES" ]]; then
 
     export COMINsyn=${COMINsyn:-$(compath.py gfs/prod/syndat)}
-    if [[ ${RUN_ENVIR} != "nco" ]]; then
-        export ARCHSYND=${ROTDIR}/syndat
-        if [[ ! -d ${ARCHSYND} ]]; then mkdir -p ${ARCHSYND}; fi
-        if [[ ! -s ${ARCHSYND}/syndat_akavit ]]; then
-            for file in syndat_akavit syndat_dateck syndat_stmcat.scr syndat_stmcat syndat_sthisto syndat_sthista ; do
-                cp ${COMINsyn}/${file} ${ARCHSYND}/.
-            done
-        fi
+    export ARCHSYND=${ROTDIR}/syndat
+    if [[ ! -d ${ARCHSYND} ]]; then mkdir -p ${ARCHSYND}; fi
+    if [[ ! -s ${ARCHSYND}/syndat_akavit ]]; then
+        for file in syndat_akavit syndat_dateck syndat_stmcat.scr syndat_stmcat syndat_sthisto syndat_sthista ; do
+            cp ${COMINsyn}/${file} ${ARCHSYND}/.
+        done
     fi
 
     if [[ ${ROTDIR_DUMP} = "YES" ]]; then rm "${COM_OBS}/${CDUMP}.t${cyc}z.syndata.tcvitals.tm00"; fi
@@ -96,7 +94,6 @@ if [[ ${MAKE_PREPBUFR} = "YES" ]]; then
     fi
 
     export job="j${CDUMP}_prep_${cyc}"
-    export DATAROOT="${RUNDIR}/${CDATE}/${CDUMP}/prepbufr"
     export COMIN=${COM_OBS}
     export COMOUT=${COM_OBS}
     RUN="gdas" YMD=${PDY} HH=${cyc} generate_com -rx COMINgdas:COM_ATMOS_HISTORY_TMPL

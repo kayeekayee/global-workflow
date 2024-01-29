@@ -4,16 +4,13 @@ set -x
 script_dir=$(dirname "${BASH_SOURCE[0]}")
 cd "${script_dir}" || exit 1
 
-export RT_COMPILER="intel"
-source "${script_dir}/ufs_model.fd/tests/detect_machine.sh"
-source "${script_dir}/ufs_model.fd/tests/module-setup.sh"
-
 # Default settings
 APP="S2SWA"
 
-while getopts "a:v" option; do
+while getopts ":j:a:v" option; do
   case "${option}" in
-    a) APP="${OPTARG}" ;;
+    a) APP="${OPTARG}";;
+    j) BUILD_JOBS="${OPTARG}";;
     v) export BUILD_VERBOSE="YES";;
     :)
       echo "[${BASH_SOURCE[0]}]: ${option} requires an argument"
@@ -27,12 +24,12 @@ while getopts "a:v" option; do
 done
 
 
-# Determine which switch to use 
-if [[ "${APP}" == "ATMW" ]]; then 
+# Determine which switch to use
+if [[ "${APP}" == "ATMW" ]]; then
   ww3switch="model/esmf/switch"
-else 
+else
   ww3switch="model/bin/switch_meshcap"
-fi 
+fi
 
 
 # Check final exec folder exists
@@ -44,11 +41,13 @@ finalexecdir="$( pwd -P )/../exec"
 
 #Determine machine and load modules
 set +x
+source "${script_dir}/ufs_model.fd/tests/detect_machine.sh"
+source "${script_dir}/ufs_model.fd/tests/module-setup.sh"
 module use "${script_dir}/ufs_model.fd/modulefiles"
-module load "ufs_${MACHINE_ID}"
+module load "ufs_${MACHINE_ID}.intel"
 set -x
 
-#Set WW3 directory, switch, prep and post exes 
+#Set WW3 directory, switch, prep and post exes
 cd ufs_model.fd/WW3 || exit 1
 WW3_DIR=$( pwd -P )
 export WW3_DIR
@@ -58,11 +57,12 @@ export SWITCHFILE="${WW3_DIR}/${ww3switch}"
 prep_exes="ww3_grid ww3_prep ww3_prnc ww3_grid"
 post_exes="ww3_outp ww3_outf ww3_outp ww3_gint ww3_ounf ww3_ounp ww3_grib"
 
-#create build directory: 
+#create build directory:
 path_build="${WW3_DIR}/build_SHRD"
+[[ -d "${path_build}" ]] && rm -rf "${path_build}"
 mkdir -p "${path_build}" || exit 1
 cd "${path_build}" || exit 1
-echo "Forcing a SHRD build" 
+echo "Forcing a SHRD build"
 
 cat "${SWITCHFILE}" > "${path_build}/tempswitch"
 
@@ -77,26 +77,26 @@ sed -e "s/DIST/SHRD/g"\
        "${path_build}/tempswitch" > "${path_build}/switch"
 rm "${path_build}/tempswitch"
 
-echo "Switch file is ${path_build}/switch with switches:" 
+echo "Switch file is ${path_build}/switch with switches:"
 cat "${path_build}/switch"
 
-#Build executables: 
-cmake "${WW3_DIR}" -DSWITCH="${path_build}/switch" -DCMAKE_INSTALL_PREFIX=install 
+#Build executables:
+cmake "${WW3_DIR}" -DSWITCH="${path_build}/switch" -DCMAKE_INSTALL_PREFIX=install
 rc=$?
 if (( rc != 0 )); then
   echo "Fatal error in cmake."
   exit "${rc}"
 fi
-make -j 8 
+make -j "${BUILD_JOBS:-8}"
 rc=$?
 if (( rc != 0 )); then
   echo "Fatal error in make."
   exit "${rc}"
 fi
-make install 
+make install
 if (( rc != 0 )); then
   echo "Fatal error in make install."
-  exit "${rc}" 
+  exit "${rc}"
 fi
 
 # Copy to top-level exe directory
@@ -110,8 +110,8 @@ for prog in ${prep_exes} ${post_exes}; do
 done
 
 #clean-up build directory:
-echo "executables are in ${finalexecdir}" 
-echo "cleaning up ${path_build}" 
+echo "executables are in ${finalexecdir}"
+echo "cleaning up ${path_build}"
 rm -rf "${path_build}"
 
 exit 0

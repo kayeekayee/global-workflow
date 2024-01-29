@@ -21,9 +21,6 @@ source "${HOMEgfs}/ush/jjob_header.sh" -e "ocnpost" -c "base ocnpost"
 # Set variables used in the exglobal script
 ##############################################
 export CDUMP=${RUN/enkf}
-if [[ ${RUN_ENVIR} = "nco" ]]; then
-    export ROTDIR=${COMROOT:?}/${NET}/${envir}
-fi
 
 ##############################################
 # Begin JOB SPECIFIC work
@@ -32,7 +29,7 @@ YMD=${PDY} HH=${cyc} generate_com -rx COM_OCEAN_HISTORY COM_OCEAN_2D COM_OCEAN_3
   COM_OCEAN_XSECT COM_ICE_HISTORY
 
 for grid in "0p50" "0p25"; do
-  YMD=${PDY} HH=${cyc} GRID=${grid} generate_com -rx "COM_OCEAN_GRIB_${grid}:COM_OCEAN_GRIB_TMPL"
+  YMD=${PDY} HH=${cyc} GRID=${grid} generate_com -rx "COM_OCEAN_GRIB_${grid}:COM_OCEAN_GRIB_GRID_TMPL"
 done
 
 for outdir in COM_OCEAN_2D COM_OCEAN_3D COM_OCEAN_XSECT COM_OCEAN_GRIB_0p25 COM_OCEAN_GRIB_0p50; do
@@ -44,19 +41,19 @@ done
 fhrlst=$(echo ${FHRLST} | sed -e 's/_/ /g; s/f/ /g; s/,/ /g')
 
 export OMP_NUM_THREADS=1
-export ENSMEM=${ENSMEM:-01}
+export ENSMEM=${ENSMEM:-000}
 
 export IDATE=${PDY}${cyc}
 
 for fhr in ${fhrlst}; do
-  export fhr=${fhr}  
+  export fhr=${fhr}
   # Ignore possible spelling error (nothing is misspelled)
   # shellcheck disable=SC2153
   VDATE=$(${NDATE} "${fhr}" "${IDATE}")
   # shellcheck disable=
   declare -x VDATE
   cd "${DATA}" || exit 2
-  if (( fhr > 0 )); then
+  if (( 10#${fhr} > 0 )); then
     # TODO: This portion calls NCL scripts that are deprecated (see Issue #923)
     if [[ "${MAKE_OCN_GRIB:-YES}" == "YES" ]]; then
       export MOM6REGRID=${MOM6REGRID:-${HOMEgfs}}
@@ -93,18 +90,18 @@ for fhr in ${fhrlst}; do
       [[ ${status} -ne 0 ]] && exit "${status}"
     fi
     if [[ -f "${COM_OCEAN_XSECT}/ocn-temp-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc" ]]; then
-       echo "File ${COM_OCEAN_XSECT}/ocn-temp-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc already exists"
+      echo "File ${COM_OCEAN_XSECT}/ocn-temp-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc already exists"
     else
-      ncks -v temp -d yh,503 -d xh,-299.92,60.03 \
+      ncks -v temp -d yh,0.0 \
         "${COM_OCEAN_3D}/ocn_3D_${VDATE}.${ENSMEM}.${IDATE}.nc" \
         "${COM_OCEAN_XSECT}/ocn-temp-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc"
       status=$?
       [[ ${status} -ne 0 ]] && exit "${status}"
     fi
     if [[ -f "${COM_OCEAN_XSECT}/ocn-uo-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc" ]]; then
-       echo "File ${COM_OCEAN_XSECT}/ocn-uo-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc already exists"
+      echo "File ${COM_OCEAN_XSECT}/ocn-uo-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc already exists"
     else
-      ncks -v uo -d yh,503 -d xh,-299.92,60.03 \
+      ncks -v uo -d yh,0.0 \
         "${COM_OCEAN_3D}/ocn_3D_${VDATE}.${ENSMEM}.${IDATE}.nc" \
         "${COM_OCEAN_XSECT}/ocn-uo-EQ_${VDATE}.${ENSMEM}.${IDATE}.nc"
       status=$?
