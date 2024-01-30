@@ -166,6 +166,9 @@ export progsigma=".true."
 if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
     export imfdeepcnv=5
     export imfshalcnv=-1                 ## JKH - no shallow GF
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3" ]] ; then 
+    export imfdeepcnv=5
+    export imfshalcnv=5              
 elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then 
     export progsigma=.false.
     export imfdeepcnv=5
