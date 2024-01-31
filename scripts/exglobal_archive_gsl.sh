@@ -178,6 +178,8 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
             targrp_list="${targrp_list} gfs_ics"
         fi
 
+    fi
+
     # Turn on extended globbing options
     yyyy="${PDY:0:4}"
     shopt -s extglob
