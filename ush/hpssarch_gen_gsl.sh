@@ -72,13 +72,12 @@ if [[ ${type} = "gfs" ]]; then
   while (( fh <= FHMAX_GFS )); do
     fhr=$(printf %03i "${fh}")
 
-    if [[ ${ARCH_GAUSSIAN} = "YES" ]]; then
-      {
-      if [[ -s ${COM_ATMOS_GRIB_0p25}/${head}pgrb2.0p25.f${fhr} ]]; then
-        echo "${COM_ATMOS_GRIB_0p25/${ROTDIR}\//}/${head}pgrb2.0p25.f${fhr}"
-        echo "${COM_ATMOS_GRIB_0p25/${ROTDIR}\//}/${head}pgrb2.0p25.f${fhr}.idx"
-        echo "${COM_ATMOS_HISTORY/${ROTDIR}\//}/${head}atm.logf${fhr}.txt"
-      fi
+    {
+    if [[ -s ${COM_ATMOS_GRIB_0p25}/${head}pgrb2.0p25.f${fhr} ]]; then
+      echo "${COM_ATMOS_GRIB_0p25/${ROTDIR}\//}/${head}pgrb2.0p25.f${fhr}"
+      echo "${COM_ATMOS_GRIB_0p25/${ROTDIR}\//}/${head}pgrb2.0p25.f${fhr}.idx"
+      echo "${COM_ATMOS_HISTORY/${ROTDIR}\//}/${head}atm.logf${fhr}.txt"
+    fi
     } >> "${DATA}/gfs_pgrb2.txt"
 
 #JKH    {
