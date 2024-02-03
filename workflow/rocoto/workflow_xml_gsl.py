@@ -60,8 +60,8 @@ class RocotoXML(ABC):
         entity['PSLOT'] = self._base['PSLOT']
 
         entity['HOMEgfs'] = self._base['HOMEgfs']
-        entity['EXPDIR'] = "&HOMEgfs;/FV3GFSwfm/&PSLOT;"
-        entity['ROTDIR'] = "&HOMEgfs;/FV3GFSrun/&PSLOT;"
+        entity['EXPDIR'] = "&HOMEgfs;/FV3GFSwfm/rt_v17p8_ugwpv1_mynn/&PSLOT;"
+        entity['ROTDIR'] = "&HOMEgfs;/FV3GFSrun/rt_v17p8_ugwpv1_mynn/&PSLOT;"
         entity['JOBS_DIR'] = "&HOMEgfs;/jobs/rocoto"
         entity['ICSDIR'] = "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127"
 

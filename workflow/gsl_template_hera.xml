@@ -10,11 +10,12 @@
 	-->
 	<!ENTITY PSLOT "test">
 	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa">
-	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
-	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
+	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/rt_v17p8_ugwpv1_mynn/&PSLOT;">
+	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/rt_v17p8_ugwpv1_mynn/&PSLOT;">
 	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
         <!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127">
         <!ENTITY CASE     "C768">
+        <!ENTITY ATCFNAME "">
         <!ENTITY COMPONENT "atmos">
 	<!ENTITY NATIVE_STR "--export=NONE">
 	<!ENTITY MAXTRIES "2">
@@ -152,7 +153,6 @@
 
 </metatask>
 
-<!--
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/arch.sh</command>
@@ -173,6 +173,7 @@
 	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_ugwpv1_mynn</value></envar>
 	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_ugwpv1_mynn</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
+        <envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
@@ -182,15 +183,11 @@
 	<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
 
 	<dependency>
-		<and>
-			<taskdep task="gfstracker"/>
-			<taskdep task="gfsgenesis"/>
-			<metataskdep metatask="gfsatmprod"/>
-		</and>
+		<metataskdep metatask="gfsatmprod"/>
 	</dependency>
 
 </task>
-
+<!--
 <task name="gfscleanup" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/cleanup.sh</command>
