@@ -5,8 +5,8 @@ PACKAGEROOT: '/scratch1/NCEPDEV/global/glopara/nwpara'
 COMROOT: '/scratch1/NCEPDEV/global/glopara/com'
 COMINsyn: '${COMROOT}/gfs/prod/syndat'
 HOMEDIR: '/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/${USER}'
-STMP: '${HOMEgfs}/${PSLOT}/FV3GFSrun/'
-PTMP: '${HOMEgfs}/${PSLOT}/FV3GFSrun/'
+STMP: '${HOMEgfs}/FV3GFSrun/'
+PTMP: '${HOMEgfs}/FV3GFSrun/'
 NOSCRUB: $HOMEDIR
 ACCOUNT: gsd-fv3
 SCHEDULER: slurm
