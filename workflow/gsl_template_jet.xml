@@ -10,8 +10,8 @@
 	-->
 	<!ENTITY PSLOT "test">
 	<!ENTITY HOMEgfs "/lfs1/BMC/gsd-fv3-test/jhender/scratch/gw_19may23">
-	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/rt_v17p8_ugwpv1_mynn/&PSLOT;">
-	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/rt_v17p8_ugwpv1_mynn/&PSLOT;">
+	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
+	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
 	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
         <!ENTITY ICSDIR "/lfs1/BMC/gsd-fv3-test/rtfim/FV3ICS_L127">
         <!ENTITY CASE     "C768">
@@ -209,9 +209,9 @@
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsarch.log</cyclestr></join>
 
 	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite</value></envar>
-	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_ugwpv1_mynn</value></envar>
-	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_ugwpv1_mynn</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
@@ -247,9 +247,9 @@
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfscleanup.log</cyclestr></join>
 
 	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite</value></envar>
-	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_v17p8_ugwpv1_mynn</value></envar>
-	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite//FV3GFSrun/rt_v17p8_ugwpv1_mynn</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
