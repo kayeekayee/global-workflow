@@ -1,7 +1,7 @@
 USER=Judy.K.Henderson
 GITDIR=/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gsl_ufs_rt         ## where your git checkout is located
-COMROT=$GITDIR/FV3GFSrun/                                        ## default COMROT directory
-EXPDIR=$GITDIR/FV3GFSwfm/                                        ## default EXPDIR directory
+COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
+EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127
 
 PSLOT=test_hera
