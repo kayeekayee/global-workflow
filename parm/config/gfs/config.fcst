@@ -224,7 +224,8 @@ case ${imp_physics} in
         export ttendlim="-999"
         export dt_inner=$((DELTIM/2))
         export sedi_semi=.true.
-        if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
+        #JKH  keep dt_inner $DELTIM/2 (75) even if sedi_semi is set to .true.
+#JKH        if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
         export decfl=10
 
         export hord_mt_nh_nonmono=5
