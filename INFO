@@ -1,3 +1,6 @@
+02-28-24
+========
+   Change dt_inner=75 for any configuration running aerosol-aware Thompson (ltaerosol=.true.)
 
 02-13-24
 ========
