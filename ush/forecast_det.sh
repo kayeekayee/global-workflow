@@ -8,7 +8,7 @@
 ## This script is a definition of functions.
 #####
 
-# For all non-evironment variables
+# For all non-environment variables
 # Cycling and forecast hour specific parameters
 
 FV3_det(){
@@ -67,7 +67,11 @@ FV3_det(){
 
       # Check for availability of FV3 restarts
       if [[ -f "${COM_ATMOS_RESTART}/${PDYS}.${cycs}0000.coupler.res" ]]; then
+<<<<<<< HEAD
         mv "${COM_ATMOS_RESTART}/${PDYS}.${cycs}0000.coupler.res" "${COM_ATMOS_RESTART}/${PDYS}.${cycs}0000.coupler.res.old"   ## JKH
+=======
+        mv "${COM_ATMOS_RESTART}/${PDYS}.${cycs}0000.coupler.res" "${COM_ATMOS_RESTART}/${PDYS}.${cycs}0000.coupler.res.old"
+>>>>>>> dev_29Feb24_5166593
       else
         local fv3_rst_ok="NO"
       fi
