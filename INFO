@@ -1,11 +1,12 @@
 03-13-24
 ========
-   29Feb24 global-workflow
+   29Feb24 global-workflow, 25c026e
    UFS: 29Jan24, 625ac02
    FV3: 06Jan24, 5e7f196
    UPP:  07Nov23, 78f369b
 
-   update pointers to FV3 and UPP
+   update pointers for ufs_model and ufs_utils
+   remove GSL directories for ufs_model and ufs_utils
    add GSL C3_MYNN xml suite
 
 02-13-24
