@@ -1,0 +1,25 @@
+03-13-24
+========
+   29Feb24 global-workflow
+   UFS: 29Jan24, 625ac02
+   FV3: 06Jan24, 5e7f196
+   UPP:  07Nov23, 78f369b
+
+   update pointers to FV3 and UPP
+   add GSL C3_MYNN xml suite
+
+02-13-24
+========
+   12Jan24 global-workflow
+   UFS: 29Jan24, 625ac02
+   FV3: 06Jan24, 5e7f196
+   UPP:  07Nov23, 78f369b
+
+01-08-24
+========
+  02Jan24 global-workflow
+  UFS: 21Dec23, 991d652
+  UPP:  07Nov23, 78f369b
+
+  use submodules instead of checkout.sh
+  gfsatmos_products replaces gfspost tasks
