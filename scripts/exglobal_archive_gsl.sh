@@ -183,7 +183,7 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
     fi
 
     # Turn on extended globbing options
-    yyyy="${PDY:0:4}"
+    yyyy="${PDY:0:4}"           ##JKH
     shopt -s extglob
     for targrp in ${targrp_list}; do
         set +e
@@ -208,7 +208,7 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
         esac
 
         # Create the tarball
-        tar_fl="${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar"
+        tar_fl="${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar"   ##JKH
         ${TARCMD} -P -cvf "${tar_fl}" $(cat "${DATA}/${targrp}.txt")
         status=$?
 
