@@ -5,7 +5,7 @@ COMROT=${GITDIR}/FV3GFSrun                                         ## default CO
 EXPDIR=${GITDIR}/FV3GFSwfm                                         ## default EXPDIR directory
 #ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127
 
-PSLOT=p8
+PSLOT=c3
 IDATE=2023112800
 EDATE=2023112800
 RESDET=768               ## 96 192 384 768
