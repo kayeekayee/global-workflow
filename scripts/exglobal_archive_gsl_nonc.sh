@@ -140,7 +140,7 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
     # TODO: This math yields multiple dates sharing the same nday
     nday=$(( (10#${mm}-1)*30+10#${dd} ))
     mod=$((nday % ARCH_WARMICFREQ))
-    if [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
+    #JHKif [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
     if [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]]; then SAVEWARMICB="YES" ; fi
     #JKHif [[ "${mod}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
     if [[ "${mod}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]]; then SAVEWARMICB="YES" ; fi
@@ -149,7 +149,7 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
         nday1=$((nday+1))
         mod1=$((nday1 % ARCH_WARMICFREQ))
         if [[ "${mod1}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
-        if [[ "${mod1}" -ne 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="NO" ; fi
+        #JHKif [[ "${mod1}" -ne 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="NO" ; fi
         #JKHif [[ "${PDY}${cyc}" -eq "${SDATE}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
     fi
 
