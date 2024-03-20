@@ -14,7 +14,7 @@ if [[ "${ARCHICS_CYC}" -lt 0 ]]; then
 fi
 
 # CURRENT CYCLE
-APREFIX="${RUN}.t${cyc}z."
+#JKHAPREFIX="${RUN}.t${cyc}z."
 
 # Realtime parallels run GFS MOS on 1 day delay
 # If realtime parallel, back up CDATE_MOS one day
@@ -140,17 +140,17 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
     # TODO: This math yields multiple dates sharing the same nday
     nday=$(( (10#${mm}-1)*30+10#${dd} ))
     mod=$((nday % ARCH_WARMICFREQ))
-    if [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
+    #JHKif [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
     if [[ "${PDY}${cyc}" -eq "${firstday}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]]; then SAVEWARMICB="YES" ; fi
-    if [[ "${mod}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
+    #JKHif [[ "${mod}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHINC_CYC}" ]]; then SAVEWARMICA="YES" ; fi
     if [[ "${mod}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]]; then SAVEWARMICB="YES" ; fi
 
     if [[ "${ARCHICS_CYC}" -eq 18 ]]; then
         nday1=$((nday+1))
         mod1=$((nday1 % ARCH_WARMICFREQ))
         if [[ "${mod1}" -eq 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
-        if [[ "${mod1}" -ne 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="NO" ; fi
-        if [[ "${PDY}${cyc}" -eq "${SDATE}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
+        #JHKif [[ "${mod1}" -ne 0 ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="NO" ; fi
+        #JKHif [[ "${PDY}${cyc}" -eq "${SDATE}" ]] && [[ "${cyc}" -eq "${ARCHICS_CYC}" ]] ; then SAVEWARMICB="YES" ; fi
     fi
 
     mod=$((nday % ARCH_FCSTICFREQ))
@@ -171,9 +171,9 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
 
         targrp_list="gfs_pgrb2"
 
-        if [[ "${ARCH_GAUSSIAN:-"NO"}" = "YES" ]]; then
-            targrp_list="${targrp_list} gfs_nc"
-        fi
+#JKH        if [ "${ARCH_GAUSSIAN:-"NO"}" = "YES" ]; then
+#JKH            targrp_list="${targrp_list} gfs_nc"
+#JKH        fi
 
         #for initial conditions
         if [[ "${SAVEFCSTIC}" = "YES" ]]; then
