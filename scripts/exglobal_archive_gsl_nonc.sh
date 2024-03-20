@@ -171,9 +171,9 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
 
         targrp_list="gfs_pgrb2"
 
-        if [[ "${ARCH_GAUSSIAN:-"NO"}" = "YES" ]]; then
-            targrp_list="${targrp_list} gfs_nc"
-        fi
+#JKH        if [ "${ARCH_GAUSSIAN:-"NO"}" = "YES" ]; then
+#JKH            targrp_list="${targrp_list} gfs_nc"
+#JKH        fi
 
         #for initial conditions
         if [[ "${SAVEFCSTIC}" = "YES" ]]; then

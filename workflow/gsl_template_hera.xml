@@ -9,7 +9,7 @@
 		This workflow was automatically generated at 2023-06-13 23:31:49.582810
 	-->
 	<!ENTITY PSLOT "test">
-	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/dev_19may23_0fae23fa">
+	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3-dev/Judy.K.Henderson/test/gsl_ufs_dev"
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
 	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
 	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
