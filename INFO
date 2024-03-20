@@ -8,7 +8,6 @@
 
    update pointers for ufs_model and ufs_utils
    add GSL C3_MYNN xml suite
-   Change dt_inner=75 for any configuration running aerosol-aware Thompson (ltaerosol=.true.)
 
 01-08-24
 ========
