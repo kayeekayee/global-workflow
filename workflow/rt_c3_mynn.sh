@@ -1,6 +1,6 @@
 #!/bin/sh
 USER=role.rtfim
-GITDIR=${HOME}/UFS-CAMsuite/                                     ## where your git checkout is located
+GITDIR=${HOME}/UFS-CAMsuite_dev1/                                     ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127
