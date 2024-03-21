@@ -1,3 +1,4 @@
+#!/bin/sh
 USER=role.rtfim
 GITDIR=${HOME}/UFS-CAMsuite/                                     ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
