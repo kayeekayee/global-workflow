@@ -1,0 +1,33 @@
+03-28-24
+========
+  change dt_inner to 50 for aerosol aware Thompson
+
+  effective 00Z 03/29/24
+
+03-20-24
+========
+  update files for Rocky8 OS
+   (temporary fix until EMC does commit to authoritative repository)
+
+  effective 00Z 03/21/24
+
+03-19-24
+========
+   12Jan24 global-workflow
+   UFS: 29Jan24, 625ac02
+   FV3: 29Jan24, bd38c56 (GSL: 28Feb24 , a439cc7)
+   UPP: 07Nov23, 78f369b
+   UFS_UTILS: 22Dev23, ce385ce
+
+   update pointers for ufs_model and ufs_utils
+   add GSL C3_MYNN xml suite
+   Change dt_inner=75 for any configuration running aerosol-aware Thompson (ltaerosol=.true.)
+
+01-08-24
+========
+  02Jan24 global-workflow
+  UFS: 21Dec23, 991d652
+  UPP:  07Nov23, 78f369b
+
+  use submodules instead of checkout.sh
+  gfsatmos_products replaces gfspost tasks
