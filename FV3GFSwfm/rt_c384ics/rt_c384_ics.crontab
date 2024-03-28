@@ -1,0 +1,5 @@
+
+#################### rt_c384ics ####################
+MAILTO=""
+*/5 * * * * /apps/rocoto/1.3.6/bin/rocotorun -d /home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_c384ics/rt_c384ics.db -w /home/role.rtfim/UFS-CAMsuite//FV3GFSwfm/rt_c384ics/rt_c384ics.xml
+#################################################################

@@ -1,0 +1,6 @@
+ rocotorun -w rt_c384_ics.xml -d ~/rt_dbfiles/rt_c384_ics.db
+ rocotostat -w rt_c384_ics.xml -d ~/rt_dbfiles/rt_c384_ics.db  -c `date --date='4 days ago' +%Y%m%d0000`: | m
+
+ rocotorun -w c384_ics.xml -d ~/retro_dbfiles/c384_ics.db
+ rocotostat -w c384_ics.xml -d ~/retro_dbfiles/c384_ics.db
+
