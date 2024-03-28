@@ -72,8 +72,11 @@ case "${machine}" in
   "WCOSS2")
     npe_node_max=128
     ;;
-  "HERA" | "ORION" | "HERCULES")
+  "HERA" | "ORION" )
     npe_node_max=40
+    ;;
+  "HERCULES" )
+    npe_node_max=80
     ;;
   "JET")
     case "${PARTITION_BATCH}" in
@@ -276,7 +279,7 @@ export cplice=".false."
 export cplchm=".false."
 export cplwav=".false."
 export cplwav2atm=".false."
-export CCPP_SUITE="FV3_GFS_v17_p8_ugwpv1_c3"
+export CCPP_SUITE="FV3_GFS_v17_p8_ugwpv1_c3_mynn"
 model_list="atm"
 
 # Mediator specific settings

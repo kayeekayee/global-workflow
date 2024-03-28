@@ -6,16 +6,17 @@
 		Main workflow manager for Global Forecast System
 
 	NOTES:
-		This workflow was automatically generated at 2024-01-30 01:20:36.596041
+		This workflow was automatically generated at 2024-03-21 10:20:53.400689
 	-->
-	<!ENTITY PSLOT "rt_v17p8_ugwpv1_c3">
+	<!ENTITY PSLOT "rt_v17p8_ugwpv1_c3_mynn">
 	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite_dev1">
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
 	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
 	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
-	<!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127">
-	<!ENTITY CASE "C768">
-	<!ENTITY COMPONENT "atmos">
+        <!ENTITY ICSDIR "/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127">
+        <!ENTITY CASE     "C768">
+        <!ENTITY ATCFNAME "">
+        <!ENTITY COMPONENT "atmos">
 	<!ENTITY NATIVE_STR "--export=NONE">
 	<!ENTITY MAXTRIES "2">
 ]>
@@ -25,7 +26,7 @@
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
-	<cycledef group="gfs">202401290000 202501290000 24:00:00</cycledef>
+	<cycledef group="gfs">202403210000 203401140000 24:00:00</cycledef>
 
 <task name="gfsgetic" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -79,7 +80,7 @@
 	<account>gsd-fv3</account>
 	<queue>batch</queue>
 	<partition>hera</partition>
-	<walltime>04:10:00</walltime>
+	<walltime>05:30:00</walltime>
 <!--	<nodes>101:ppn=40:tpp=1</nodes> -->    <!-- 16x16, 2th, 2wg, 40wt -->
 	<nodes>56:ppn=40:tpp=1</nodes>         <!-- 12x12, 2th, 1wg, 40wt -->
         <native>&NATIVE_STR;</native>
@@ -152,7 +153,6 @@
 
 </metatask>
 
-<!--
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/arch.sh</command>
@@ -169,10 +169,11 @@
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsarch.log</cyclestr></join>
 
 	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite_dev1</value></envar>
-	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite_dev1//FV3GFSwfm/rt_v17p8_ugwpv1_c3</value></envar>
-	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite_dev1//FV3GFSrun/rt_v17p8_ugwpv1_c3</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
+        <envar><name>ATCFNAME</name><value>&ATCFNAME;</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
 	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
@@ -182,15 +183,11 @@
 	<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
 
 	<dependency>
-		<and>
-			<taskdep task="gfstracker"/>
-			<taskdep task="gfsgenesis"/>
-			<metataskdep metatask="gfsatmprod"/>
-		</and>
+		<metataskdep metatask="gfsatmprod"/>
 	</dependency>
 
 </task>
-
+<!--
 <task name="gfscleanup" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 	<command>&JOBS_DIR;/cleanup.sh</command>
@@ -207,9 +204,9 @@
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfscleanup.log</cyclestr></join>
 
 	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite_dev1</value></envar>
-	<envar><name>EXPDIR</name><value>/home/role.rtfim/UFS-CAMsuite_dev1//FV3GFSwfm/rt_v17p8_ugwpv1_c3</value></envar>
-	<envar><name>ROTDIR</name><value>/home/role.rtfim/UFS-CAMsuite_dev1//FV3GFSrun/rt_v17p8_ugwpv1_c3</value></envar>
+	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 	<envar><name>NET</name><value>gfs</value></envar>
 	<envar><name>CDUMP</name><value>gfs</value></envar>
 	<envar><name>RUN</name><value>gfs</value></envar>
