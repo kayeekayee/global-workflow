@@ -1,14 +1,21 @@
+
 03-28-24
 ========
   change dt_inner to 50 for aerosol aware Thompson
 
   effective 00Z 03/29/24
 
+=======
+03-21-24
+========
+   change paths to run under Rocky8
+   removed unneeded gsl directories
+   
 03-20-24
 ========
   update files for Rocky8 OS
    (temporary fix until EMC does commit to authoritative repository)
-
+ 
 03-19-24
 ========
    12Jan24 global-workflow
