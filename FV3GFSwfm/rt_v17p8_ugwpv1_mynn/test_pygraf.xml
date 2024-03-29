@@ -10,8 +10,8 @@
 	<!ENTITY FCST_LENGTH "120">
 
 	<!-- Experiment parameters such as starting, ending dates -->
-	<!ENTITY SDATE    "202403210000">
-	<!ENTITY EDATE    "202403210000">
+	<!ENTITY SDATE    "202403270000">
+	<!ENTITY EDATE    "202403270000">
 	<!ENTITY INTERVAL "24:00:00">
 
 	<!-- Run Envrionment -->
@@ -24,8 +24,8 @@
 	<!-- Experiment related directories -->
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
 	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
-	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/exp/pygraf">
-	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/rtruns/pygraf">
+	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/exp/pygraf">                   <!-- updated with latest for Rocky8 -->
+	<!ENTITY PYGRAFDIR "/scratch1/BMC/gsd-fv3/rtruns/pygraf">                <!-- running under CentOs7 -->
 
 	<!-- Machine related entities -->
 	<!ENTITY ACCOUNT    "gsd-fv3">
@@ -58,13 +58,15 @@
 	<!-- Define the cycles -->
 	<cycledef group="gfs">&SDATE; &EDATE; &INTERVAL;</cycledef>
 
+<!--
+
   <metatask name="remapgrib" throttle="58">
 
     <var name="fcst"> 0 6 12 18 24 30 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 </var>
     <var name="T"> 000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 </var>
 
     <task name="remapgrib_#T#" cycledefs="gfs" maxtries="4">
-        <command>&JOBS_DIR;/remapgrib.ksh</command>
+        <command>&JOBS_DIR;/remapgrib.sh</command>
         <account>&ACCOUNT;</account>
         <cores>1</cores>
         <walltime>00:35:00</walltime>
@@ -83,12 +85,18 @@
     </task>
 
   </metatask>
+-->
 
   <metatask>
 
+<!--
     <var name="GRID_ID">full 242 130 201</var>
     <var name="TILESET">full,Africa,Beijing,Cambodia,EPacific,Europe,Taiwan,WAtlantic,WPacific AK,AKZoom,AKZoom2 CONUS,NC,NE,NW,SC,SE,SW NHemi</var>
     <var name="IMGFILE">global.yml globalAK.yml globalCONUS.yml globalNHemi.yml</var>
+-->
+    <var name="GRID_ID">242 </var>
+    <var name="TILESET">AK,AKZoom,AKZoom2 </var>
+    <var name="IMGFILE">globalAK.yml </var>
 
     <task name="gfspygraf_#GRID_ID#" cycledefs="gfs" maxtries="&MAXTRIES;">
   
@@ -118,15 +126,15 @@
           <native>--exclusive</native>
           <jobname><cyclestr>FV3GFS_python_maps_#GRID_ID#_@H_ugwpv1_mynn</cyclestr></jobname>
           <join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/python_@Y@m@d@H00_maps_#GRID_ID#_0-6-&FCST_LENGTH;.log</cyclestr></join>
-  
+ <!-- 
     <dependency>
-<!--        <or>
+        <or>
           <timedep><cyclestr offset="030:00:00">@Y@m@d@H@M00</cyclestr></timedep>
           <metataskdep metatask="remapgrib"/>
         </or>
--->
           <metataskdep metatask="remapgrib"/>
     </dependency>
+-->
   
     </task>
 
