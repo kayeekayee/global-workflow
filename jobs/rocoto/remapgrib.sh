@@ -4,9 +4,7 @@
 #    236 201 244 130 224 242
 
 # initialize
-module load gnu/13.2.0
-module load netcdf/4.7.0 
-module load wgrib2/3.1.2_ncep
+module load gnu/13.2.0 intel/2023.2.0 netcdf/4.7.0 wgrib2/3.1.2_ncep
 module list
 ECHO=echo
 MKDIR=mkdir
