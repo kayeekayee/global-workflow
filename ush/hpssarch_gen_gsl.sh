@@ -8,9 +8,9 @@
 # --only echo name of file if file exists
 # --assume we only run cold starts
 ###################################################
-source "${HOMEgfs}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
-type=${1:-gfs}                ##gfs
+type=${1:-gfs}                ##gfs  ##JKH
 
 ARCH_GAUSSIAN=${ARCH_GAUSSIAN:-"YES"}
 ARCH_GAUSSIAN_FHMAX=${ARCH_GAUSSIAN_FHMAX:-36}
@@ -31,7 +31,7 @@ if [[ ${type} = "gfs" ]]; then
   FHMAX_HF_GFS=${FHMAX_HF_GFS:-120}
   FHOUT_HF_GFS=${FHOUT_HF_GFS:-1}
 
-  rm -f "${DATA}/gfs_pgrb2.txt"
+  rm -f "${DATA}/gfs_pgrb2.txt"      ##JKH session start here!!!!
   rm -f "${DATA}/gfs_ics.txt"
   touch "${DATA}/gfs_pgrb2.txt"
   touch "${DATA}/gfs_ics.txt"
@@ -121,4 +121,4 @@ if [[ ${type} = "gfs" ]]; then
 fi   ##end of gfs
 #-----------------------------------------------------
 
-#JKHexit 0
+#JKHexit 0      ##JKH session end here!!!!

@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-source "${HOMEgfs}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 ##############################################
 # Begin JOB SPECIFIC work
@@ -158,17 +158,17 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
 
     cd "${DATA}" || exit 2
 
-    "${HOMEgfs}/ush/hpssarch_gen.sh" "${RUN}"
+    "${USHgfs}/hpssarch_gen.sh" "${RUN}"
     status=$?
-    if [[ "${status}" -ne 0  ]]; then
-        echo "${HOMEgfs}/ush/hpssarch_gen.sh ${RUN} failed, ABORT!"
+    if [ "${status}" -ne 0  ]; then
+        echo "${USHgfs}/hpssarch_gen.sh ${RUN} failed, ABORT!"
         exit "${status}"
     fi
 
     cd "${ROTDIR}" || exit 2
 
     if [[ "${RUN}" = "gfs" ]]; then
-
+#######JKH session starts here!!!! ########
         targrp_list="gfs_pgrb2"
 
         if [[ "${ARCH_GAUSSIAN:-"NO"}" = "YES" ]]; then
@@ -180,10 +180,11 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
             targrp_list="${targrp_list} gfs_ics"
         fi
 
+#######JKH session ends here!!!! ########
     fi
 
     # Turn on extended globbing options
-    yyyy="${PDY:0:4}"
+    yyyy="${PDY:0:4}"     ##JKH
     shopt -s extglob
     for targrp in ${targrp_list}; do
         set +e
@@ -208,7 +209,7 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
         esac
 
         # Create the tarball
-        tar_fl="${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar"
+        tar_fl="${ATARDIR}/${yyyy}/${PDY}${cyc}/${targrp}.tar"     ##JKH
         ${TARCMD} -P -cvf "${tar_fl}" $(cat "${DATA}/${targrp}.txt")
         status=$?
 
@@ -240,4 +241,4 @@ if [[ ${HPSSARCH} = "YES" || ${LOCALARCH} = "YES" ]]; then
 ###############################################################
 fi  ##end of HPSS archive
 ###############################################################
-
+     ##JKH
