@@ -8,10 +8,16 @@ echo "BEGIN: config.fcst"
 export USE_ESMF_THREADING="YES"  # Toggle to use ESMF-managed threading or traditional threading in UFSWM
 export COPY_FINAL_RESTARTS="NO" # Toggle to copy restarts from the end of GFS/GEFS Run (GDAS is handled seperately)
 
-# Turn off waves if not used for this CDUMP
+# Turn off waves if not used for this RUN
 case ${WAVE_CDUMP} in
-  both | "${CDUMP/enkf}" ) ;; # Don't change
+  both | "${RUN/enkf}" ) ;; # Don't change
   *) DO_WAVE="NO" ;; # Turn waves off
+esac
+
+# Turn off aerosols if not used for this RUN
+case ${AERO_FCST_CDUMP} in
+  both | "${RUN/enkf}" ) ;; # Don't change
+  *) DO_AERO="NO" ;; # Turn waves off
 esac
 
 # Source model specific information that is resolution dependent
@@ -30,7 +36,8 @@ export FHMAX=${FHMAX_GFS}
 export FHOUT=${FHOUT_GFS}
 export FHMAX_HF=${FHMAX_HF_GFS}
 export FHOUT_HF=${FHOUT_HF_GFS}
-export FHOUT_OCNICE=${FHOUT_OCNICE_GFS}
+export FHOUT_OCN=${FHOUT_OCN_GFS}
+export FHOUT_ICE=${FHOUT_ICE_GFS} 
 
 # Get task specific resources
 source "${EXPDIR}/config.resources" fcst
@@ -249,6 +256,9 @@ else
   export io_layout="1,1"
 fi
 
+if (( OFFSET_START_HOUR != 0 )); then
+    export reforecast="YES"
+fi
 # Remember config.efcs will over-ride these values for ensemble forecasts
 # if these variables are re-defined there.
 # Otherwise, the ensemble forecast will inherit from config.fcst

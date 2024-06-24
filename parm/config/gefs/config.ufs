@@ -15,7 +15,7 @@ if (( $# <= 1 )); then
     echo "--fv3 C48|C96|C192|C384|C768|C1152|C3072"
     echo "--mom6 500|100|025"
     echo "--cice6 500|100|025"
-    echo "--ww3 gnh_10m;aoc_9km;gsh_15m|gwes_30m|glo_025|glo_200|glo_500|mx025"
+    echo "--ww3 gnh_10m;aoc_9km;gsh_15m|gwes_30m|glo_025|glo_200|glo_500|mx025|glo_100"
     echo "--gocart"
 
     exit 1
@@ -324,7 +324,7 @@ if [[ "${skip_mom6}" == "false" ]]; then
       MOM6_RESTART_SETTING='r'
       MOM6_RIVER_RUNOFF='False'
       eps_imesh="2.5e-1"
-      TOPOEDITS="ufs.topo_edits_011818.nc"
+      TOPOEDITS="topo_edits_011818.nc"
       if [[ "${DO_JEDIOCNVAR:-NO}" = "YES" ]]; then
         MOM6_DIAG_COORD_DEF_Z_FILE="oceanda_zgrid_75L.nc"
         MOM6_DIAG_MISVAL="0.0"
@@ -455,6 +455,10 @@ if [[ "${skip_ww3}" == "false" ]]; then
       ;;
     "glo_025")
       ntasks_ww3=262
+      ;;
+    "glo_100")
+      ntasks_ww3=20
+      nthreads_ww3=1
       ;;
     "glo_200")
       ntasks_ww3=30
