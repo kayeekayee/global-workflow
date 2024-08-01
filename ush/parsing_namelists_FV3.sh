@@ -314,6 +314,7 @@ EOF
   do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
   do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
   do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
+  alpha_fd     = ${alpha_fd:-"12.0"}
   min_lakeice  = ${min_lakeice:-"0.15"}
   min_seaice   = ${min_seaice:-"0.15"}
   use_cice_alb = ${use_cice_alb:-".false."}
@@ -349,6 +350,7 @@ EOF
   do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
   do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
   do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
+  alpha_fd     = ${alpha_fd:-"12.0"}
   min_lakeice  = ${min_lakeice:-"0.15"}
   min_seaice   = ${min_seaice:-"0.15"}
   use_cice_alb = ${use_cice_alb:-".false."}
