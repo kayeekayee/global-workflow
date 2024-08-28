@@ -1,17 +1,17 @@
 #! /usr/bin/env bash
 
-source "${HOMEgfs}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 # Programs used
 export WGRIB2=${WGRIB2:-${wgrib2_ROOT}/bin/wgrib2}
 
 # Scripts used
-INTERP_ATMOS_MASTERSH=${INTERP_ATMOS_MASTERSH:-"${HOMEgfs}/ush/interp_atmos_master.sh"}
-INTERP_ATMOS_SFLUXSH=${INTERP_ATMOS_SFLUXSH:-"${HOMEgfs}/ush/interp_atmos_sflux.sh"}
+INTERP_ATMOS_MASTERSH=${INTERP_ATMOS_MASTERSH:-"${USHgfs}/interp_atmos_master.sh"}
+INTERP_ATMOS_SFLUXSH=${INTERP_ATMOS_SFLUXSH:-"${USHgfs}/interp_atmos_sflux.sh"}
 
 # Variables used in this job
 downset=${downset:-1}  # No. of groups of pressure grib2 products to create
-npe_atmos_products=${npe_atmos_products:-8}  # no. of processors available to process each group
+ntasks_atmos_products=${ntasks_atmos_products:-8}  # no. of processors available to process each group
 
 cd "${DATA}" || exit 1
 
@@ -68,7 +68,7 @@ for (( nset=1 ; nset <= downset ; nset++ )); do
   echo "Begin processing nset = ${nset}"
 
   # Number of processors available to process $nset
-  nproc=${npe_atmos_products}
+  nproc=${ntasks}
 
   # Each set represents a group of files
   if (( nset == 1 )); then
@@ -129,7 +129,7 @@ for (( nset=1 ; nset <= downset ; nset++ )); do
 
   # Run with MPMD or serial
   if [[ "${USE_CFP:-}" = "YES" ]]; then
-    OMP_NUM_THREADS=1 "${HOMEgfs}/ush/run_mpmd.sh" "${DATA}/poescript"
+    OMP_NUM_THREADS=1 "${USHgfs}/run_mpmd.sh" "${DATA}/poescript"
     export err=$?
   else
     chmod 755 "${DATA}/poescript"

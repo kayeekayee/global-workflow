@@ -1,3 +1,13 @@
+08-31-24
+========
+   05Aug24 global-workflow
+   UFS: 19Jul24, c127601
+   FV3: 19Jul24, 2527c11
+   UPP: 23Apr24, be0410e
+   CCPP-PHYSICS: 19Jul24, 46df080
+   UFS_UTILS: 26Jun24, 3ef2e6b
+   GFS_UTILS: 25Jul24, 279bbf2
+
 07-31-24
 ========
   Added alpha_fd coefficient for Beljaars TOFD in GSL drag
