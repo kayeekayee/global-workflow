@@ -26,23 +26,43 @@
 
 _COMROOT_/gfs/_SHORTVER_/gfs._PDY_/
 + /??/
+<<<<<<<< HEAD:parm/transfer/transfer_gfs_10a.list
 + /??/atmos/
 + /??/atmos/gfs.t??z.master.*1
 + /??/atmos/gfs.t??z.master.*3
 + /??/atmos/gfs.t??z.master.*5
 + /??/atmos/gfs.t??z.master.*7
 + /??/atmos/gfs.t??z.master.*9
+========
++ /??/wave/
++ /??/wave/gridded/
++ /??/wave/gridded/*
++ /??/wave/station/
++ /??/wave/station/*
++ /??/wave/gempak/
++ /??/wave/gempak/*
+>>>>>>>> dev_07Aug2024_37c53ac:parm/transfer/transfer_gfs_wave_wave.list
 - *
 B 100
 
 _COMROOT_/gfs/_SHORTVER_/gfs._PDYm1_/
 + /??/
+<<<<<<<< HEAD:parm/transfer/transfer_gfs_10a.list
 + /??/atmos/
 + /??/atmos/gfs.t??z.master.*1
 + /??/atmos/gfs.t??z.master.*3
 + /??/atmos/gfs.t??z.master.*5
 + /??/atmos/gfs.t??z.master.*7
 + /??/atmos/gfs.t??z.master.*9
+========
++ /??/wave/
++ /??/wave/gridded/
++ /??/wave/gridded/*
++ /??/wave/station/
++ /??/wave/station/*
++ /??/wave/gempak/
++ /??/wave/gempak/*
+>>>>>>>> dev_07Aug2024_37c53ac:parm/transfer/transfer_gfs_wave_wave.list
 - *
 B 100
 

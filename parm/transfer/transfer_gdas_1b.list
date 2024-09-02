@@ -24,6 +24,7 @@
 # directory are included, so if no exclude patterns match that file, it will be
 # tranatmferred.
 
+<<<<<<<< HEAD:parm/transfer/transfer_gdas_1b.list
 _COMROOT_/gfs/_SHORTVER_/gdas._PDY_/
 + /??/
 + /??/atmos/
@@ -33,10 +34,18 @@ _COMROOT_/gfs/_SHORTVER_/gdas._PDY_/
 + /??/atmos/*atmg*
 + /??/atmos/*atmanl*
 - /??/atmos/*
+========
+_COMROOT_/gfs/_SHORTVER_/gfs._PDY_/
++ /??/
++ /??/wave/
++ /??/wave/rundata/
++ /??/wave/rundata/*
+>>>>>>>> dev_07Aug2024_37c53ac:parm/transfer/transfer_gfs_wave_rundata.list
 - *
 
 B 100
 
+<<<<<<<< HEAD:parm/transfer/transfer_gdas_1b.list
 _COMROOT_/gfs/_SHORTVER_/gdas._PDYm1_/
 + /??/
 + /??/atmos/
@@ -46,8 +55,14 @@ _COMROOT_/gfs/_SHORTVER_/gdas._PDYm1_/
 + /??/atmos/*atmg*
 + /??/atmos/*atmanl*
 - /??/atmos/*
+========
+_COMROOT_/gfs/_SHORTVER_/gfs._PDYm1_/
++ /??/
++ /??/wave/
++ /??/wave/rundata/
++ /??/wave/rundata/*
+>>>>>>>> dev_07Aug2024_37c53ac:parm/transfer/transfer_gfs_wave_rundata.list
 - *
 
 B 100
-
 

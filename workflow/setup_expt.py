@@ -73,10 +73,10 @@ def fill_ROTDIR_cycled(host, inputs):
 
     # Test if we are using the new COM structure or the old flat one for ICs
     if inputs.start in ['warm']:
-        pathstr = os.path.join(inputs.icsdir, f'{inputs.cdump}.{rdatestr[:8]}',
+        pathstr = os.path.join(inputs.icsdir, f'{inputs.run}.{rdatestr[:8]}',
                                rdatestr[8:], 'model_data', 'atmos')
     else:
-        pathstr = os.path.join(inputs.icsdir, f'{inputs.cdump}.{idatestr[:8]}',
+        pathstr = os.path.join(inputs.icsdir, f'{inputs.run}.{idatestr[:8]}',
                                idatestr[8:], 'model_data', 'atmos')
 
     if os.path.isdir(pathstr):
@@ -96,6 +96,7 @@ def fill_ROTDIR_cycled(host, inputs):
     dst_ocn_rst_dir = os.path.join('model_data', 'ocean', 'restart')
     dst_ocn_anl_dir = os.path.join('analysis', 'ocean')
     dst_ice_rst_dir = os.path.join('model_data', 'ice', 'restart')
+    dst_ice_anl_dir = os.path.join('analysis', 'ice')
     dst_atm_anl_dir = os.path.join('analysis', 'atmos')
 
     if flat_structure:
@@ -111,6 +112,7 @@ def fill_ROTDIR_cycled(host, inputs):
         src_ocn_rst_dir = os.path.join('ocean', 'RESTART')
         src_ocn_anl_dir = 'ocean'
         src_ice_rst_dir = os.path.join('ice', 'RESTART')
+        src_ice_anl_dir = dst_ice_anl_dir
         src_atm_anl_dir = 'atmos'
     else:
         src_atm_dir = dst_atm_dir
@@ -118,6 +120,7 @@ def fill_ROTDIR_cycled(host, inputs):
         src_ocn_rst_dir = dst_ocn_rst_dir
         src_ocn_anl_dir = dst_ocn_anl_dir
         src_ice_rst_dir = dst_ice_rst_dir
+        src_ice_anl_dir = dst_ice_anl_dir
         src_atm_anl_dir = dst_atm_anl_dir
 
     def link_files_from_src_to_dst(src_dir, dst_dir):
@@ -129,8 +132,8 @@ def fill_ROTDIR_cycled(host, inputs):
 
     # Link ensemble member initial conditions
     if inputs.nens > 0:
-        previous_cycle_dir = f'enkf{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-        current_cycle_dir = f'enkf{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
+        previous_cycle_dir = f'enkf{inputs.run}.{rdatestr[:8]}/{rdatestr[8:]}'
+        current_cycle_dir = f'enkf{inputs.run}.{idatestr[:8]}/{idatestr[8:]}'
 
         for ii in range(1, inputs.nens + 1):
             memdir = f'mem{ii:03d}'
@@ -152,7 +155,7 @@ def fill_ROTDIR_cycled(host, inputs):
                 link_files_from_src_to_dst(src_dir, dst_dir)
 
                 # First 1/2 cycle needs a MOM6 increment
-                incfile = f'enkf{inputs.cdump}.t{idatestr[8:]}z.ocninc.nc'
+                incfile = f'enkf{inputs.run}.t{idatestr[8:]}z.ocninc.nc'
                 src_file = os.path.join(inputs.icsdir, current_cycle_dir, memdir, src_ocn_anl_dir, incfile)
                 dst_file = os.path.join(rotdir, current_cycle_dir, memdir, dst_ocn_anl_dir, incfile)
                 makedirs_if_missing(os.path.join(rotdir, current_cycle_dir, memdir, dst_ocn_anl_dir))
@@ -173,8 +176,8 @@ def fill_ROTDIR_cycled(host, inputs):
                 link_files_from_src_to_dst(src_dir, dst_dir)
 
     # Link deterministic initial conditions
-    previous_cycle_dir = f'{inputs.cdump}.{rdatestr[:8]}/{rdatestr[8:]}'
-    current_cycle_dir = f'{inputs.cdump}.{idatestr[:8]}/{idatestr[8:]}'
+    previous_cycle_dir = f'{inputs.run}.{rdatestr[:8]}/{rdatestr[8:]}'
+    current_cycle_dir = f'{inputs.run}.{idatestr[:8]}/{idatestr[8:]}'
 
     # Link atmospheric files
     if inputs.start in ['warm']:
@@ -195,7 +198,7 @@ def fill_ROTDIR_cycled(host, inputs):
         link_files_from_src_to_dst(src_dir, dst_dir)
 
         # First 1/2 cycle needs a MOM6 increment
-        incfile = f'{inputs.cdump}.t{idatestr[8:]}z.ocninc.nc'
+        incfile = f'{inputs.run}.t{idatestr[8:]}z.ocninc.nc'
         src_file = os.path.join(inputs.icsdir, current_cycle_dir, src_ocn_anl_dir, incfile)
         dst_file = os.path.join(rotdir, current_cycle_dir, dst_ocn_anl_dir, incfile)
         makedirs_if_missing(os.path.join(rotdir, current_cycle_dir, dst_ocn_anl_dir))
@@ -203,8 +206,9 @@ def fill_ROTDIR_cycled(host, inputs):
 
     # Link ice files
     if do_ice:
-        dst_dir = os.path.join(rotdir, previous_cycle_dir, dst_ice_rst_dir)
-        src_dir = os.path.join(inputs.icsdir, previous_cycle_dir, src_ice_rst_dir)
+        # First 1/2 cycle needs a CICE6 analysis restart
+        src_dir = os.path.join(inputs.icsdir, current_cycle_dir, src_ice_anl_dir)
+        dst_dir = os.path.join(rotdir, current_cycle_dir, src_ice_anl_dir)
         makedirs_if_missing(dst_dir)
         link_files_from_src_to_dst(src_dir, dst_dir)
 
@@ -220,10 +224,29 @@ def fill_ROTDIR_cycled(host, inputs):
     dst_dir = os.path.join(rotdir, current_cycle_dir, dst_atm_anl_dir)
     makedirs_if_missing(dst_dir)
     for ftype in ['abias', 'abias_pc', 'abias_air', 'radstat']:
-        fname = f'{inputs.cdump}.t{idatestr[8:]}z.{ftype}'
+        fname = f'{inputs.run}.t{idatestr[8:]}z.{ftype}'
         src_file = os.path.join(src_dir, fname)
         if os.path.exists(src_file):
             os.symlink(src_file, os.path.join(dst_dir, fname))
+    # First 1/2 cycle also needs a atmos increment if doing warm start
+    if inputs.start in ['warm']:
+        for ftype in ['atmi003.nc', 'atminc.nc', 'atmi009.nc']:
+            fname = f'{inputs.run}.t{idatestr[8:]}z.{ftype}'
+            src_file = os.path.join(src_dir, fname)
+            if os.path.exists(src_file):
+                os.symlink(src_file, os.path.join(dst_dir, fname))
+        if inputs.nens > 0:
+            current_cycle_dir = f'enkf{inputs.run}.{idatestr[:8]}/{idatestr[8:]}'
+            for ii in range(1, inputs.nens + 1):
+                memdir = f'mem{ii:03d}'
+                src_dir = os.path.join(inputs.icsdir, current_cycle_dir, memdir, src_atm_anl_dir)
+                dst_dir = os.path.join(rotdir, current_cycle_dir, memdir, dst_atm_anl_dir)
+                makedirs_if_missing(dst_dir)
+                for ftype in ['ratmi003.nc', 'ratminc.nc', 'ratmi009.nc']:
+                    fname = f'enkf{inputs.run}.t{idatestr[8:]}z.{ftype}'
+                    src_file = os.path.join(src_dir, fname)
+                    if os.path.exists(src_file):
+                        os.symlink(src_file, os.path.join(dst_dir, fname))
 
     return
 
@@ -245,12 +268,6 @@ def fill_EXPDIR(inputs):
     expdir = os.path.join(inputs.expdir, inputs.pslot)
 
     configs = glob.glob(f'{configdir}/config.*')
-    exclude_configs = ['base', 'base.emc.dyn', 'base.nco.static', 'fv3.nco.static']
-    for exclude in exclude_configs:
-        try:
-            configs.remove(f'{configdir}/config.{exclude}')
-        except ValueError:
-            pass
     if len(configs) == 0:
         raise IOError(f'no config files found in {configdir}')
     for config in configs:
@@ -270,6 +287,8 @@ def update_configs(host, inputs):
     data = AttrDict(host.info, **inputs.__dict__)
     data.HOMEgfs = _top
     yaml_path = inputs.yaml
+    if not os.path.exists(yaml_path):
+        raise IOError(f'YAML file does not exist, check path:' + yaml_path)
     yaml_dict = _update_defaults(AttrDict(parse_j2yaml(yaml_path, data)))
 
     # First update config.base
@@ -288,7 +307,8 @@ def update_configs(host, inputs):
 
 def edit_baseconfig(host, inputs, yaml_dict):
     """
-    Parses and populates the templated `config.base.emc.dyn` to `config.base`
+    Parses and populates the templated `HOMEgfs/parm/config/<gfs|gefs>/config.base`
+    to `EXPDIR/pslot/config.base`
     """
 
     tmpl_dict = {
@@ -316,7 +336,8 @@ def edit_baseconfig(host, inputs, yaml_dict):
         "@EXP_WARM_START@": is_warm_start,
         "@MODE@": inputs.mode,
         "@gfs_cyc@": inputs.gfs_cyc,
-        "@APP@": inputs.app
+        "@APP@": inputs.app,
+        "@NMEM_ENS@": getattr(inputs, 'nens', 0)
     }
     tmpl_dict = dict(tmpl_dict, **extend_dict)
 
@@ -324,7 +345,6 @@ def edit_baseconfig(host, inputs, yaml_dict):
     if getattr(inputs, 'nens', 0) > 0:
         extend_dict = {
             "@CASEENS@": f'C{inputs.resensatmos}',
-            "@NMEM_ENS@": inputs.nens,
         }
         tmpl_dict = dict(tmpl_dict, **extend_dict)
 
@@ -340,7 +360,7 @@ def edit_baseconfig(host, inputs, yaml_dict):
     except KeyError:
         pass
 
-    base_input = f'{inputs.configdir}/config.base.emc.dyn'
+    base_input = f'{inputs.configdir}/config.base'
     base_output = f'{inputs.expdir}/{inputs.pslot}/config.base'
     edit_config(base_input, base_output, tmpl_dict)
 
@@ -383,7 +403,7 @@ def input_args(*argv):
     Method to collect user arguments for `setup_expt.py`
     """
 
-    ufs_apps = ['ATM', 'ATMA', 'ATMW', 'S2S', 'S2SA', 'S2SW']
+    ufs_apps = ['ATM', 'ATMA', 'ATMW', 'S2S', 'S2SA', 'S2SW', 'S2SWA']
 
     def _common_args(parser):
         parser.add_argument('--pslot', help='parallel experiment name',
@@ -399,12 +419,14 @@ def input_args(*argv):
         parser.add_argument('--idate', help='starting date of experiment, initial conditions must exist!',
                             required=True, type=lambda dd: to_datetime(dd))
         parser.add_argument('--edate', help='end date experiment', required=True, type=lambda dd: to_datetime(dd))
+        parser.add_argument('--overwrite', help='overwrite previously created experiment (if it exists)',
+                            action='store_true', required=False)
         return parser
 
     def _gfs_args(parser):
         parser.add_argument('--start', help='restart mode: warm or cold', type=str,
                             choices=['warm', 'cold'], required=False, default='cold')
-        parser.add_argument('--cdump', help='CDUMP to start the experiment',
+        parser.add_argument('--run', help='RUN to start the experiment',
                             type=str, required=False, default='gdas')
         # --configdir is hidden from help
         parser.add_argument('--configdir', help=SUPPRESS, type=str, required=False, default=os.path.join(_top, 'parm/config/gfs'))
@@ -429,7 +451,7 @@ def input_args(*argv):
 
     def _gfs_or_gefs_forecast_args(parser):
         parser.add_argument('--app', help='UFS application', type=str,
-                            choices=ufs_apps + ['S2SWA'], required=False, default='ATM')
+                            choices=ufs_apps, required=False, default='ATM')
         parser.add_argument('--gfs_cyc', help='Number of forecasts per day', type=int,
                             choices=[1, 2, 4], default=1, required=False)
         return parser
@@ -493,17 +515,19 @@ def input_args(*argv):
     return parser.parse_args(list(*argv) if len(argv) else None)
 
 
-def query_and_clean(dirname):
+def query_and_clean(dirname, force_clean=False):
     """
     Method to query if a directory exists and gather user input for further action
     """
 
     create_dir = True
     if os.path.exists(dirname):
-        print()
-        print(f'directory already exists in {dirname}')
-        print()
-        overwrite = input('Do you wish to over-write [y/N]: ')
+        print(f'\ndirectory already exists in {dirname}')
+        if force_clean:
+            overwrite = True
+            print(f'removing directory ........ {dirname}\n')
+        else:
+            overwrite = input('Do you wish to over-write [y/N]: ')
         create_dir = True if overwrite in [
             'y', 'yes', 'Y', 'YES'] else False
         if create_dir:
@@ -553,8 +577,8 @@ def main(*argv):
     rotdir = os.path.join(user_inputs.comroot, user_inputs.pslot)
     expdir = os.path.join(user_inputs.expdir, user_inputs.pslot)
 
-    create_rotdir = query_and_clean(rotdir)
-    create_expdir = query_and_clean(expdir)
+    create_rotdir = query_and_clean(rotdir, force_clean=user_inputs.overwrite)
+    create_expdir = query_and_clean(expdir, force_clean=user_inputs.overwrite)
 
     if create_rotdir:
         makedirs_if_missing(rotdir)
@@ -564,6 +588,11 @@ def main(*argv):
         makedirs_if_missing(expdir)
         fill_EXPDIR(user_inputs)
         update_configs(host, user_inputs)
+
+    print(f"*" * 100)
+    print(f'EXPDIR: {expdir}')
+    print(f'ROTDIR: {rotdir}')
+    print(f"*" * 100)
 
 
 if __name__ == '__main__':

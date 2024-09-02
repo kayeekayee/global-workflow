@@ -23,17 +23,7 @@
 #     OUTPUT_FILE   Output gaussian analysis file format.  Default is "nemsio"
 #                   Set to "netcdf" for netcdf output file
 #                   Otherwise, output in nemsio.
-#     BASEDIR       Root directory where all scripts and fixed files reside.
-#                   Default is /nwprod2.
-#     HOMEgfs       Directory for gfs version.  Default is
-#                   $BASEDIR/gfs_ver.v15.0.0}
-#     FIXam         Directory for the global fixed climatology files.
-#                   Defaults to $HOMEgfs/fix/am
-#     FIXorog       Directory for the model grid and orography netcdf
-#                   files.  Defaults to $HOMEgfs/fix/orog
 #     FIXWGTS       Weight file to use for interpolation
-#     EXECgfs       Directory of the program executable.  Defaults to
-#                   $HOMEgfs/exec
 #     DATA          Working directory
 #                   (if nonexistent will be made, used and deleted)
 #                   Defaults to current working directory
@@ -85,7 +75,7 @@
 #
 #     fixed data : ${FIXorog}/${CASE}/${CASE}.mx${OCNRES}_oro_data.tile*.nc
 #                  ${FIXWGTS}
-#                  ${FIXam}/global_hyblev.l65.txt
+#                  ${FIXgfs}/am/global_hyblev.l65.txt
 #
 #     input data : ${COM_ATMOS_RESTART}/${PDY}.${cyc}0000.sfcanl_data.tile*.nc
 #
@@ -110,7 +100,7 @@
 #
 ################################################################################
 
-source "$HOMEgfs/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 CASE=${CASE:-C768}
 res=$(echo $CASE | cut -c2-)
@@ -121,25 +111,17 @@ LATB_SFC=${LATB_SFC:-$LATB_CASE}
 DONST=${DONST:-"NO"}
 LEVS=${LEVS:-64}
 LEVSP1=$(($LEVS+1))
-#  Directories.
-gfs_ver=${gfs_ver:-v16.3.0}
-BASEDIR=${BASEDIR:-${PACKAGEROOT:-/lfs/h1/ops/prod/packages}}
-HOMEgfs=${HOMEgfs:-$BASEDIR/gfs.${gfs_ver}}
-EXECgfs=${EXECgfs:-$HOMEgfs/exec}
-FIXorog=${FIXorog:-$HOMEgfs/fix/orog}
-FIXam=${FIXam:-$HOMEgfs/fix/am}
-FIXWGTS=${FIXWGTS:-$FIXorog/$CASE/fv3_SCRIP_${CASE}_GRIDSPEC_lon${LONB_SFC}_lat${LATB_SFC}.gaussian.neareststod.nc}
+FIXWGTS=${FIXWGTS:-${FIXorog}/${CASE}/fv3_SCRIP_${CASE}_GRIDSPEC_lon${LONB_SFC}_lat${LATB_SFC}.gaussian.neareststod.nc}
 DATA=${DATA:-$(pwd)}
 
 #  Filenames.
 XC=${XC:-}
 GAUSFCANLEXE=${GAUSFCANLEXE:-$EXECgfs/gaussian_sfcanl.x}
-SIGLEVEL=${SIGLEVEL:-$FIXam/global_hyblev.l${LEVSP1}.txt}
+SIGLEVEL=${SIGLEVEL:-${FIXgfs}/am/global_hyblev.l${LEVSP1}.txt}
 
 CDATE=${CDATE:?}
 
 #  Other variables.
-export NLN=${NLN:-"/bin/ln -sf"}
 export PGMOUT=${PGMOUT:-${pgmout:-'&1'}}
 export PGMERR=${PGMERR:-${pgmerr:-'&2'}}
 export REDOUT=${REDOUT:-'1>'}
@@ -150,17 +132,9 @@ export REDERR=${REDERR:-'2>'}
 #  Preprocessing
 ${INISCRIPT:-}
 pwd=$(pwd)
-if [[ -d $DATA ]]
-then
-   mkdata=NO
-else
-   mkdir -p $DATA
-   mkdata=YES
-fi
-cd $DATA||exit 99
+cd "${DATA}" || exit 99
 [[ -d "${COM_ATMOS_ANALYSIS}" ]] || mkdir -p "${COM_ATMOS_ANALYSIS}"
 [[ -d "${COM_ATMOS_RESTART}" ]] || mkdir -p "${COM_ATMOS_RESTART}"
-cd $DATA
 
 ################################################################################
 #  Make surface analysis
@@ -224,6 +198,5 @@ $ERRSCRIPT||exit 2
 ################################################################################
 #  Postprocessing
 cd $pwd
-[[ $mkdata = YES ]]&&rmdir $DATA
 
 exit ${err}

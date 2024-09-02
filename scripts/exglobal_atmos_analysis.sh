@@ -19,14 +19,14 @@
 
 #  Set environment.
 
-source "${HOMEgfs}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 #  Directories.
 pwd=$(pwd)
 
 # Base variables
 CDATE=${CDATE:-"2001010100"}
-CDUMP=${CDUMP:-"gdas"}
+rCDUMP=${rCDUMP:-"gdas"}
 GDUMP=${GDUMP:-"gdas"}
 
 # Derived base variables
@@ -38,11 +38,8 @@ bPDY=$(echo ${BDATE} | cut -c1-8)
 bcyc=$(echo ${BDATE} | cut -c9-10)
 
 # Utilities
-export NCP=${NCP:-"/bin/cp"}
-export NMV=${NMV:-"/bin/mv"}
-export NLN=${NLN:-"/bin/ln -sf"}
 export CHGRP_CMD=${CHGRP_CMD:-"chgrp ${group_name:-rstprod}"}
-export NCLEN=${NCLEN:-${HOMEgfs}/ush/getncdimlen}
+export NCLEN=${NCLEN:-${USHgfs}/getncdimlen}
 COMPRESS=${COMPRESS:-gzip}
 UNCOMPRESS=${UNCOMPRESS:-gunzip}
 APRUNCFP=${APRUNCFP:-""}
@@ -68,19 +65,19 @@ DOIAU=${DOIAU:-"NO"}
 export IAUFHRS=${IAUFHRS:-"6"}
 
 # Dependent Scripts and Executables
-GSIEXEC=${GSIEXEC:-${HOMEgfs}/exec/gsi.x}
+GSIEXEC=${GSIEXEC:-${EXECgfs}/gsi.x}
 export NTHREADS_CALCINC=${NTHREADS_CALCINC:-1}
 export APRUN_CALCINC=${APRUN_CALCINC:-${APRUN:-""}}
 export APRUN_CALCANL=${APRUN_CALCANL:-${APRUN:-""}}
 export APRUN_CHGRES=${APRUN_CALCANL:-${APRUN:-""}}
-export CALCINCEXEC=${CALCINCEXEC:-${HOMEgfs}/exec/calc_increment_ens.x}
-export CALCINCNCEXEC=${CALCINCNCEXEC:-${HOMEgfs}/exec/calc_increment_ens_ncio.x}
-export CALCANLEXEC=${CALCANLEXEC:-${HOMEgfs}/exec/calc_analysis.x}
-export CHGRESNCEXEC=${CHGRESNCEXEC:-${HOMEgfs}/exec/enkf_chgres_recenter_nc.x}
-export CHGRESINCEXEC=${CHGRESINCEXEC:-${HOMEgfs}/exec/interp_inc.x}
-CHGRESEXEC=${CHGRESEXEC:-${HOMEgfs}/exec/enkf_chgres_recenter.x}
+export CALCINCEXEC=${CALCINCEXEC:-${EXECgfs}/calc_increment_ens.x}
+export CALCINCNCEXEC=${CALCINCNCEXEC:-${EXECgfs}/calc_increment_ens_ncio.x}
+export CALCANLEXEC=${CALCANLEXEC:-${EXECgfs}/calc_analysis.x}
+export CHGRESNCEXEC=${CHGRESNCEXEC:-${EXECgfs}/enkf_chgres_recenter_nc.x}
+export CHGRESINCEXEC=${CHGRESINCEXEC:-${EXECgfs}/interp_inc.x}
+CHGRESEXEC=${CHGRESEXEC:-${EXECgfs}/enkf_chgres_recenter.x}
 export NTHREADS_CHGRES=${NTHREADS_CHGRES:-24}
-CALCINCPY=${CALCINCPY:-${HOMEgfs}/ush/calcinc_gfs.py}
+CALCINCPY=${CALCINCPY:-${USHgfs}/calcinc_gfs.py}
 
 # OPS flags
 RUN=${RUN:-""}
@@ -89,6 +86,8 @@ SENDDBN=${SENDDBN:-"NO"}
 RUN_GETGES=${RUN_GETGES:-"NO"}
 GETGESSH=${GETGESSH:-"getges.sh"}
 export gesenvir=${gesenvir:-${envir}}
+ 
+export hofx_2m_sfcfile=${hofx_2m_sfcfile:-".false."}
 
 # Observations
 OPREFIX=${OPREFIX:-""}
@@ -101,10 +100,10 @@ OSCATBF=${OSCATBF:-${COM_OBS}/${OPREFIX}oscatw.tm00.bufr_d${OSUFFIX}}
 RAPIDSCATBF=${RAPIDSCATBF:-${COM_OBS}/${OPREFIX}rapidscatw.tm00.bufr_d${OSUFFIX}}
 GSNDBF=${GSNDBF:-${COM_OBS}/${OPREFIX}goesnd.tm00.bufr_d${OSUFFIX}}
 GSNDBF1=${GSNDBF1:-${COM_OBS}/${OPREFIX}goesfv.tm00.bufr_d${OSUFFIX}}
-B1HRS2=${B1HRS2:-${COM_OBS}/${OPREFIX}1bhrs2.tm00.bufr_d${OSUFFIX}}
+#B1HRS2=${B1HRS2:-${COM_OBS}/${OPREFIX}1bhrs2.tm00.bufr_d${OSUFFIX}} # HIRS temporarily disabled due to CRTM versioning issues
 B1MSU=${B1MSU:-${COM_OBS}/${OPREFIX}1bmsu.tm00.bufr_d${OSUFFIX}}
-B1HRS3=${B1HRS3:-${COM_OBS}/${OPREFIX}1bhrs3.tm00.bufr_d${OSUFFIX}}
-B1HRS4=${B1HRS4:-${COM_OBS}/${OPREFIX}1bhrs4.tm00.bufr_d${OSUFFIX}}
+#B1HRS3=${B1HRS3:-${COM_OBS}/${OPREFIX}1bhrs3.tm00.bufr_d${OSUFFIX}} # HIRS temporarily disabled due to CRTM versioning issues
+#B1HRS4=${B1HRS4:-${COM_OBS}/${OPREFIX}1bhrs4.tm00.bufr_d${OSUFFIX}} # HIRS temporarily disabled due to CRTM versioning issues
 B1AMUA=${B1AMUA:-${COM_OBS}/${OPREFIX}1bamua.tm00.bufr_d${OSUFFIX}}
 B1AMUB=${B1AMUB:-${COM_OBS}/${OPREFIX}1bamub.tm00.bufr_d${OSUFFIX}}
 B1MHS=${B1MHS:-${COM_OBS}/${OPREFIX}1bmhs.tm00.bufr_d${OSUFFIX}}
@@ -289,21 +288,21 @@ else
 fi
 
 # GSI Fix files
-BERROR=${BERROR:-${FIXgsi}/Big_Endian/global_berror.l${LEVS}y${NLAT_A}.f77}
-SATANGL=${SATANGL:-${FIXgsi}/global_satangbias.txt}
-SATINFO=${SATINFO:-${FIXgsi}/global_satinfo.txt}
-RADCLOUDINFO=${RADCLOUDINFO:-${FIXgsi}/cloudy_radiance_info.txt}
-ATMSFILTER=${ATMSFILTER:-${FIXgsi}/atms_beamwidth.txt}
-ANAVINFO=${ANAVINFO:-${FIXgsi}/global_anavinfo.l${LEVS}.txt}
-CONVINFO=${CONVINFO:-${FIXgsi}/global_convinfo.txt}
-vqcdat=${vqcdat:-${FIXgsi}/vqctp001.dat}
-INSITUINFO=${INSITUINFO:-${FIXgsi}/global_insituinfo.txt}
-OZINFO=${OZINFO:-${FIXgsi}/global_ozinfo.txt}
-PCPINFO=${PCPINFO:-${FIXgsi}/global_pcpinfo.txt}
-AEROINFO=${AEROINFO:-${FIXgsi}/global_aeroinfo.txt}
-SCANINFO=${SCANINFO:-${FIXgsi}/global_scaninfo.txt}
-HYBENSINFO=${HYBENSINFO:-${FIXgsi}/global_hybens_info.l${LEVS}.txt}
-OBERROR=${OBERROR:-${FIXgsi}/prepobs_errtable.global}
+BERROR=${BERROR:-${FIXgfs}/gsi/Big_Endian/global_berror.l${LEVS}y${NLAT_A}.f77}
+SATANGL=${SATANGL:-${FIXgfs}/gsi/global_satangbias.txt}
+SATINFO=${SATINFO:-${FIXgfs}/gsi/global_satinfo.txt}
+RADCLOUDINFO=${RADCLOUDINFO:-${FIXgfs}/gsi/cloudy_radiance_info.txt}
+ATMSFILTER=${ATMSFILTER:-${FIXgfs}/gsi/atms_beamwidth.txt}
+ANAVINFO=${ANAVINFO:-${FIXgfs}/gsi/global_anavinfo.l${LEVS}.txt}
+CONVINFO=${CONVINFO:-${FIXgfs}/gsi/global_convinfo.txt}
+vqcdat=${vqcdat:-${FIXgfs}/gsi/vqctp001.dat}
+INSITUINFO=${INSITUINFO:-${FIXgfs}/gsi/global_insituinfo.txt}
+OZINFO=${OZINFO:-${FIXgfs}/gsi/global_ozinfo.txt}
+PCPINFO=${PCPINFO:-${FIXgfs}/gsi/global_pcpinfo.txt}
+AEROINFO=${AEROINFO:-${FIXgfs}/gsi/global_aeroinfo.txt}
+SCANINFO=${SCANINFO:-${FIXgfs}/gsi/global_scaninfo.txt}
+HYBENSINFO=${HYBENSINFO:-${FIXgfs}/gsi/global_hybens_info.l${LEVS}.txt}
+OBERROR=${OBERROR:-${FIXgfs}/gsi/prepobs_errtable.global}
 
 # GSI namelist
 SETUP=${SETUP:-""}
@@ -378,11 +377,20 @@ ${NLN} ${SCANINFO}     scaninfo
 ${NLN} ${HYBENSINFO}   hybens_info
 ${NLN} ${OBERROR}      errtable
 
+${NLN} ${FIXgfs}/gsi/AIRS_CLDDET.NL   AIRS_CLDDET.NL
+${NLN} ${FIXgfs}/gsi/CRIS_CLDDET.NL   CRIS_CLDDET.NL
+${NLN} ${FIXgfs}/gsi/IASI_CLDDET.NL   IASI_CLDDET.NL
+
 #If using correlated error, link to the covariance files
 if [ ${USE_CORRELATED_OBERRS} == "YES" ];  then
   if grep -q "Rcov" ${ANAVINFO} ;  then
-     if ls ${FIXgsi}/Rcov* 1> /dev/null 2>&1; then
-       ${NLN} ${FIXgsi}/Rcov* ${DATA}
+     # shellcheck disable=SC2312
+     mapfile -t covfile_array < <(find "${FIXgfs}/gsi/" -name "Rcov*")
+     if (( ${#covfile_array[@]} > 0 )); then
+       for covfile in "${covfile_array[@]}"; do
+         covfile_base=$(basename "${covfile}")
+         ${NLN} "${covfile}" "${DATA}/${covfile_base}"
+       done
        echo "using correlated obs error"
      else
        echo "FATAL ERROR: Satellite error covariance files (Rcov) are missing."
@@ -422,7 +430,18 @@ ${NLN} ${CRTM_FIX}/NPOESS.VISsnow.EmisCoeff.bin  ./crtm_coeffs/NPOESS.VISsnow.Em
 ${NLN} ${CRTM_FIX}/NPOESS.VISwater.EmisCoeff.bin ./crtm_coeffs/NPOESS.VISwater.EmisCoeff.bin
 ${NLN} ${CRTM_FIX}/FASTEM6.MWwater.EmisCoeff.bin ./crtm_coeffs/FASTEM6.MWwater.EmisCoeff.bin
 ${NLN} ${CRTM_FIX}/AerosolCoeff.bin              ./crtm_coeffs/AerosolCoeff.bin
-${NLN} ${CRTM_FIX}/CloudCoeff.GFDLFV3.-109z-1.bin ./crtm_coeffs/CloudCoeff.bin
+if (( imp_physics == 8 )); then
+   echo "using CRTM Thompson cloud optical table"
+   ${NLN} "${CRTM_FIX}/CloudCoeff.Thompson08.-109z-1.bin" ./crtm_coeffs/CloudCoeff.bin
+elif (( imp_physics == 11 )); then
+   echo "using CRTM GFDL cloud optical table"
+   ${NLN} "${CRTM_FIX}/CloudCoeff.GFDLFV3.-109z-1.bin" ./crtm_coeffs/CloudCoeff.bin
+else
+   echo "INVALID imp_physics = ${imp_physics}"
+   echo "FATAL ERROR: No valid CRTM cloud optical table found for imp_physics =  ${imp_physics}"
+   exit 1
+fi
+
 
 ##############################################################
 # Observational data
@@ -526,7 +545,7 @@ if [ ${DOHYBVAR} = "YES" ]; then
 
    for imem in $(seq 1 ${NMEM_ENS}); do
       memchar="mem$(printf %03i "${imem}")"
-      MEMDIR=${memchar} RUN=${GDUMP_ENS} YMD=${gPDY} HH=${gcyc} generate_com COM_ATMOS_HISTORY
+      MEMDIR=${memchar} RUN=${GDUMP_ENS} YMD=${gPDY} HH=${gcyc} declare_from_tmpl COM_ATMOS_HISTORY
 
       for fhr in ${fhrs}; do
          ${NLN} ${COM_ATMOS_HISTORY}/${GPREFIX_ENS}atmf0${fhr}${ENKF_SUFFIX}.nc ./ensemble_data/sigf${fhr}_ens_${memchar}
@@ -562,8 +581,8 @@ if [ ${GENDIAG} = "YES" ] ; then
       if [ -d ${DIAG_DIR} ]; then
          rm -rf ${DIAG_DIR}
       fi
-      npe_m1="$((${npe_gsi}-1))"
-      for pe in $(seq 0 ${npe_m1}); do
+      ntasks_m1="$((ntasks-1))"
+      for pe in $(seq 0 ${ntasks_m1}); do
         pedir="dir."$(printf %04i ${pe})
         mkdir -p ${DIAG_DIR}/${pedir}
         ${NLN} ${DIAG_DIR}/${pedir} ${pedir}
@@ -656,7 +675,7 @@ EOFunzip
       chmod 755 ${DATA}/mp_unzip.sh
       ncmd=$(cat ${DATA}/mp_unzip.sh | wc -l)
       if [ ${ncmd} -gt 0 ]; then
-         ncmd_max=$((ncmd < npe_node_max ? ncmd : npe_node_max))
+         ncmd_max=$((ncmd < max_tasks_per_node ? ncmd : max_tasks_per_node))
          APRUNCFP_UNZIP=$(eval echo ${APRUNCFP})
          ${APRUNCFP_UNZIP} ${DATA}/mp_unzip.sh
          export err=$?; err_chk
@@ -743,11 +762,13 @@ cat > gsiparm.anl << EOF
   dfact=0.75,dfact1=3.0,noiqc=.true.,oberrflg=.false.,c_varqc=0.02,
   use_poq7=.true.,qc_noirjaco3_pole=.true.,vqc=.false.,nvqc=.true.,
   aircraft_t_bc=.true.,biaspredt=1.0e5,upd_aircraft=.true.,cleanup_tail=.true.,
-  tcp_width=70.0,tcp_ermax=7.35,
+  tcp_width=70.0,tcp_ermax=7.35,airs_cads=${AIRS_CADS},cris_cads=${CRIS_CADS},
+  iasi_cads=${IASI_CADS},
   ${OBSQC}
 /
 &OBS_INPUT
   dmesh(1)=145.0,dmesh(2)=150.0,dmesh(3)=100.0,dmesh(4)=50.0,time_window_max=3.0,
+  hofx_2m_sfcfile=${hofx_2m_sfcfile},
   ${OBSINPUT}
 /
 OBS_INPUT::
@@ -821,9 +842,11 @@ OBS_INPUT::
    gomebufr       gome        metop-b     gome_metop-b        0.0     2     0
    atmsbufr       atms        npp         atms_npp            0.0     1     1
    atmsbufr       atms        n20         atms_n20            0.0     1     1
+   atmsbufr       atms        n21         atms_n21            0.0     1     1
    crisbufr       cris        npp         cris_npp            0.0     1     0
    crisfsbufr     cris-fsr    npp         cris-fsr_npp        0.0     1     0
    crisfsbufr     cris-fsr    n20         cris-fsr_n20        0.0     1     0
+   crisfsbufr     cris-fsr    n21         cris-fsr_n21        0.0     1     0
    gsnd1bufr      sndrd1      g14         sndrD1_g14          0.0     1     0
    gsnd1bufr      sndrd2      g14         sndrD2_g14          0.0     1     0
    gsnd1bufr      sndrd3      g14         sndrD3_g14          0.0     1     0
@@ -845,6 +868,7 @@ OBS_INPUT::
    ahibufr        ahi         himawari8   ahi_himawari8       0.0     1     0
    abibufr        abi         g16         abi_g16             0.0     1     0
    abibufr        abi         g17         abi_g17             0.0     1     0
+   abibufr        abi         g18         abi_g18             0.0     1     0
    rapidscatbufr  uv          null        uv                  0.0     0     0
    ompsnpbufr     ompsnp      npp         ompsnp_npp          0.0     0     0
    ompslpbufr     ompslp      npp         ompslp_npp          0.0     0     0
@@ -872,7 +896,9 @@ OBS_INPUT::
   l_hyb_ens=${l_hyb_ens},
   generate_ens=.false.,
   beta_s0=0.125,readin_beta=.false.,
-  s_ens_h=800.,s_ens_v=-0.8,readin_localization=.true.,
+  s_ens_h=1000.0,300.0,150.0,685.0,219.2,s_ens_v=-0.5,-0.5,-0.5,0.0,0.0,
+  readin_localization=.false.,global_spectral_filter_sd=.false.,
+  r_ensloccov4scl=1,nsclgrp=3,naensloc=5,
   aniso_a_en=.false.,oz_univ_static=.false.,uv_hyb_ens=.true.,
   ensemble_path='./ensemble_data/',
   ens_fast_read=.true.,
@@ -964,7 +990,7 @@ cd ${pwd}
 if [ ${SENDECF} = "YES" -a "${RUN}" != "enkf" ]; then
    ecflow_client --event release_fcst
 fi
-echo "${CDUMP} ${CDATE} atminc done at $(date)" > ${COM_ATMOS_ANALYSIS}/${APREFIX}loginc.txt
+echo "${rCDUMP} ${CDATE} atminc done at $(date)" > ${COM_ATMOS_ANALYSIS}/${APREFIX}loginc.txt
 
 ################################################################################
 
