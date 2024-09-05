@@ -142,10 +142,23 @@ else
   export satmedmf=".true."
 fi
 export isatmedmf=1
+#JKH
+if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
+   export satmedmf=".false."
+   export isatmedmf=0
+   export CPP
+   export do_mynnedmf=".true."
+   export do_mynnsfclay=".false."
+   export icloud_bl=1
+   export bl_mynn_tkeadvect=".true."
+   export bl_mynn_edmf=1
+   export bl_mynn_edmf_mom=1
+   export lcnorm=".true."                           ## JKH
+fi
 tbf=""
 if [[ "${satmedmf}" == ".true." ]]; then tbf="_satmedmf" ; fi
 
-#Convection schemes
+#Convection schemes      ### JKH  - affects field table name
 export progsigma=".true."
 tbp=""
 if [[ "${progsigma}" == ".true." ]]; then tbp="_progsigma" ; fi
@@ -173,6 +186,32 @@ export doGP_lwscat=.false.
 export iopt_sfc="3"
 export iopt_trs="2"
 
+#JKH
+# Convection Options: 2-SASAS, 3-GF
+export progsigma=".true."
+if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" ]] ; then
+    export imfdeepcnv=5
+    export imfshalcnv=-1                 ## JKH - no shallow GF
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3" ]] ; then
+    export imfdeepcnv=5
+    export imfshalcnv=5
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then
+    export progsigma=.false.
+    export imfdeepcnv=5
+    export imfshalcnv=5
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf" ]] ; then
+    export imfdeepcnv=3
+    export imfshalcnv=3
+else
+    export imfdeepcnv=2
+    if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then
+      export imfshalcnv=-1
+    else
+      export imfshalcnv=2
+    fi
+fi
+#JKH
+
 # Microphysics configuration
 export dnats=0
 export cal_pre=".true."
@@ -192,20 +231,30 @@ case ${imp_physics} in
         ;;
     8)  # Thompson
         export ncld=2
-        export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_noaero_tke${tbp}"
         export nwat=6
 
         export cal_pre=".false."
         export random_clds=".false."
         export effr_in=".true."
-        export ltaerosol=".false."
         export lradar=".true."
         export ttendlim="-999"
-        export dt_inner=$((DELTIM/2))
         export sedi_semi=.true.
         if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
         export decfl=10
-
+#JKH
+        if [[ "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_c3_mynn" ||
+              "${CCPP_SUITE}" == "FV3_GFS_v17_p8_thompson" ]] ; then
+          #JKH  set dt_inner to 50 if running aerosol-aware Thompson
+          export dt_inner=50
+          export ltaerosol=".true."
+          export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_aero_tke${tbp}"
+        else
+          export dt_inner=$((DELTIM/2))
+          if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
+          export ltaerosol=".false."
+          export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_noaero_tke${tbp}"
+        fi
+#JKH
         export hord_mt_nh_nonmono=5
         export hord_xx_nh_nonmono=5
         export vtdm4_nh_nonmono=0.02
