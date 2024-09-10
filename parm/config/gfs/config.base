@@ -317,7 +317,8 @@ fi
 
 # GFS restart interval in hours
 #JKHexport restart_interval_gfs=12
-export restart_interval_gfs=-1                        ## JKH
+#KYWexport restart_interval_gfs=-1                        ## JKH
+export restart_interval_gfs=$FHMAX_GFS
 # NOTE: Do not set this to zero.  Instead set it to $FHMAX_GFS
 # TODO: Remove this variable from config.base and reference from config.fcst
 # TODO: rework logic in config.wave and push it to parsing_nameslist_WW3.sh where it is actually used
