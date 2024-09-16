@@ -286,7 +286,7 @@ export gfs_cyc=@gfs_cyc@ # 0: no GFS cycle, 1: 00Z only, 2: 00Z and 12Z only, 4:
 # GFS output and frequency
 export FHMIN_GFS=0
 export FHMAX_GFS=@FHMAX_GFS@
-export FHOUT_GFS=3 # 3 for ops
+export FHOUT_GFS=6 # 3 for ops
 export FHMAX_HF_GFS=@FHMAX_HF_GFS@
 export FHOUT_HF_GFS=1
 export FHOUT_OCN_GFS=6
@@ -317,7 +317,7 @@ fi
 
 # GFS restart interval in hours
 #JKHexport restart_interval_gfs=12
-export restart_interval_gfs=-1                        ## JKH
+export restart_interval_gfs=$FHMAX_GFS                ## JKH
 # NOTE: Do not set this to zero.  Instead set it to $FHMAX_GFS
 # TODO: Remove this variable from config.base and reference from config.fcst
 # TODO: rework logic in config.wave and push it to parsing_nameslist_WW3.sh where it is actually used
