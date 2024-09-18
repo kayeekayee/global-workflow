@@ -17,8 +17,8 @@ source "${HOMEgfs}/ush/module-setup.sh"
 source "${HOMEgfs}/versions/run.ver"
 
 # Load our modules:
-#KYWmodule use "${HOMEgfs}/modulefiles"
-module use "/scratch1/BMC/gsd-fv3/rtruns/modulefiles/"
+module use "${HOMEgfs}/modulefiles"
+#KYWmodule use "/scratch1/BMC/gsd-fv3/rtruns/modulefiles/"
 
 case "${MACHINE_ID}" in
   "wcoss2" | "hera" | "orion" | "hercules" | "gaea" | "jet" | "s4")

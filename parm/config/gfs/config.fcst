@@ -126,7 +126,7 @@ if (( gwd_opt == 2 )); then
     export do_gwd_opt_psl=".false."
     #export do_gwd_opt_psl=".true."    #KYW (Checked with Mike)
     export do_ugwp_v1_orog_only=".false."
-    export alpha_fd     = 35.0    #KYW (Checked with Mike)
+    export alpha_fd=35.0    #KYW (Checked with Mike)
     launch_level=$(echo "${LEVS}/2.35" |bc)
     export launch_level
 fi

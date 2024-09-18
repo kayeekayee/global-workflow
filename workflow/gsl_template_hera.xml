@@ -60,11 +60,16 @@
 	<envar><name>FHR3</name><value>#fhr#</value></envar>
         <envar><name>COMPONENT</name><value>atmos</value></envar>
 
-	<dependency>
-                        <or>
-                                <datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
-                                <taskdep task="gfsfcst"/>
-                        </or>
+        <dependency>
+                <and>
+                        <not>
+                                <datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/model_data/atmos/input</cyclestr></datadep>
+                        </not>
+                        <and>
+                                <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/gfs/&CASE;/INPUT/gfs_data.tile6.nc</cyclestr></datadep>
+                                <datadep><cyclestr>&ICSDIR;/@Y@m@d@H/gfs/&CASE;/INPUT/sfc_data.tile6.nc</cyclestr></datadep>
+                        </and>
+                </and>
 	</dependency>
 
 </task>
