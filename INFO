@@ -1,39 +1,39 @@
-05-30-24
+09-18-24
+========
+Update realtime branch, gsl_ufs_rt
+ - based on gsl_ufs_dev from KaYee's fork
+   global-workflow: 07Aug24,37c53ac [develop_07Aug2024_37c53ac]
+   UFS: 19Jul24, c127601
+   FV3: 19Jul24, 2527c11
+   UPP: 23Apr24, be0410e
+   CCPP-PHYSICS: 19Jul24, 46df080
+   UFS_UTILS: 26Jun24, 3ef2e6b
+
+07-31-24
 ========
   Added alpha_fd coefficient for Beljaars TOFD in GSL drag
-  effective 00Z 06/01/24
 
-04-10-24
+04-15-24
 ========
    temporary fix for Rocky 8
 
-03-28-24
-========
-  change dt_inner to 50 for aerosol aware Thompson
-
-  effective 00Z 03/29/24
-
-=======
-03-21-24
-========
-   change paths to run under Rocky8
-   removed unneeded gsl directories
-   
-03-20-24
-========
-  update files for Rocky8 OS
-   (temporary fix until EMC does commit to authoritative repository)
- 
-03-19-24
+03-12-24
 ========
    12Jan24 global-workflow
    UFS: 29Jan24, 625ac02
-   FV3: 29Jan24, bd38c56 (GSL: 28Feb24 , a439cc7)
+   FV3: 29Jan24, bd38c56
    UPP: 07Nov23, 78f369b
    UFS_UTILS: 22Dev23, ce385ce
 
    update pointers for ufs_model and ufs_utils
    add GSL C3_MYNN xml suite
+   Change dt_inner=75 for any configuration running aerosol-aware Thompson (ltaerosol=.true.)
+
+02-13-24
+========
+   12Jan24 global-workflow
+   UFS: 29Jan24, 625ac02
+   UPP:  07Nov23, 78f369b
 
 01-08-24
 ========
