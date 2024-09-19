@@ -1,21 +1,21 @@
 #! /usr/bin/env bash
 
-#####
-## "parsing_namelist_FV3.sh"
-## This script writes namelist for FV3 model
-##
-## This is the child script of ex-global forecast,
-## writing namelist for FV3
-## This script is a direct execution.
-#####
+# parsing namelist of FV3, diag_table, etc.
 
+# Disable variable not used warnings
+# shellcheck disable=SC2034
 FV3_namelists(){
 
 # setup the tables
-DIAG_TABLE=${DIAG_TABLE:-${HOMEgfs}/parm/ufs/fv3/diag_table}
-DIAG_TABLE_APPEND=${DIAG_TABLE_APPEND:-${HOMEgfs}/parm/ufs/fv3/diag_table_aod}
-DATA_TABLE=${DATA_TABLE:-${HOMEgfs}/parm/ufs/fv3/data_table}
-FIELD_TABLE=${FIELD_TABLE:-${HOMEgfs}/parm/ufs/fv3/field_table}
+DIAG_TABLE=${DIAG_TABLE:-${PARMgfs}/ufs/fv3/diag_table}
+DIAG_TABLE_APPEND=${DIAG_TABLE_APPEND:-${PARMgfs}/ufs/fv3/diag_table_aod}
+DATA_TABLE=${DATA_TABLE:-${PARMgfs}/ufs/MOM6_data_table.IN}
+FIELD_TABLE=${FIELD_TABLE:-${PARMgfs}/ufs/fv3/field_table}
+
+# set cdmbgwd
+if (( gwd_opt == 2 )) && [[ ${do_gsl_drag_ls_bl} == ".true." ]]; then
+  cdmbgwd=${cdmbgwd_gsl}
+fi
 
 # ensure non-prognostic tracers are set
 dnats=${dnats:-0}
@@ -33,7 +33,16 @@ if [[ -n "${AERO_DIAG_TABLE:-}" ]]; then
   cat "${AERO_DIAG_TABLE}"
 fi
 cat "${DIAG_TABLE_APPEND}"
-} >> diag_table
+} >> diag_table_template
+
+local template=diag_table_template
+local SYEAR=${current_cycle:0:4}
+local SMONTH=${current_cycle:4:2}
+local SDAY=${current_cycle:6:2}
+local CHOUR=${current_cycle:8:2}
+local MOM6_OUTPUT_DIR="./MOM6_OUTPUT"
+
+atparse < "${template}" >> "diag_table"
 
 
 # copy data table
@@ -109,7 +118,7 @@ cat >> input.nml << EOF
   range_warn = ${range_warn:-".true."}
   reset_eta = .false.
   n_sponge = ${n_sponge:-"10"}
-  nudge_qv = ${nudge_qv:-".true."}
+  nudge_qv = ${nudge_qv:-".false."}
   nudge_dz = ${nudge_dz:-".false."}
   tau = ${tau:-10.}
   rf_cutoff = ${rf_cutoff:-"7.5e2"}
@@ -349,6 +358,43 @@ EOF
   do_gsl_drag_ls_bl    = ${do_gsl_drag_ls_bl:-".true."}
   do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
   do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
+  do_gwd_opt_psl       = ${do_gwd_opt_psl:-".false."}
+  do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
+  min_lakeice  = ${min_lakeice:-"0.15"}
+  min_seaice   = ${min_seaice:-"0.15"}
+  use_cice_alb = ${use_cice_alb:-".false."}
+EOF
+  ;;
+  FV3_global_nest*)
+  local default_dt_inner=$(( DELTIM/2 ))
+  cat >> input.nml << EOF
+  iovr         = ${iovr:-"3"}
+  lcnorm       = ${lcnorm:-".false."}
+  ltaerosol    = ${ltaerosol:-".false."}
+  lradar       = ${lradar:-".true."}
+  ttendlim     = ${ttendlim:-"-999"}
+  dt_inner     = ${dt_inner:-"${default_dt_inner}"}
+  sedi_semi    = ${sedi_semi:-".true."}
+  decfl        = ${decfl:-"10"}
+  oz_phys      = ${oz_phys:-".false."}
+  oz_phys_2015 = ${oz_phys_2015:-".true."}
+  lsoil_lsm    = ${lsoil_lsm:-"4"}
+  do_mynnedmf  = ${do_mynnedmf:-".false."}
+  do_mynnsfclay = ${do_mynnsfclay:-".false."}
+  icloud_bl    = ${icloud_bl:-"1"}
+  bl_mynn_edmf = ${bl_mynn_edmf:-"1"}
+  bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:-".true."}
+  bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:-"1"}
+  do_ugwp      = ${do_ugwp:-".false."}
+  do_tofd      = ${do_tofd:-".false."}
+  gwd_opt      = ${gwd_opt:-"2"}
+  do_ugwp_v0   = ${do_ugwp_v0:-".false."}
+  do_ugwp_v1   = ${do_ugwp_v1:-".true."}
+  do_ugwp_v0_orog_only = ${do_ugwp_v0_orog_only:-".false."}
+  do_ugwp_v0_nst_only  = ${do_ugwp_v0_nst_only:-".false."}
+  do_gsl_drag_ls_bl    = ${do_gsl_drag_ls_bl:-".true."}
+  do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
+  do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
   do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
   alpha_fd     = ${alpha_fd:-"12.0"}
   min_lakeice  = ${min_lakeice:-"0.15"}
@@ -390,6 +436,7 @@ cat >> input.nml <<EOF
   random_clds  = ${random_clds:-".true."}
   trans_trac   = ${trans_trac:-".true."}
   cnvcld       = ${cnvcld:-".true."}
+  xr_cnvcld    = ${xr_cnvcld:-".true."}
   imfshalcnv   = ${imfshalcnv:-"2"}
   imfdeepcnv   = ${imfdeepcnv:-"2"}
   progsigma    = ${progsigma:-".true."}
@@ -398,6 +445,7 @@ cat >> input.nml <<EOF
   betadcu      = ${betadcu:-"2.0"}
   ras          = ${ras:-".false."}
   cdmbgwd      = ${cdmbgwd:-"3.5,0.25"}
+  psl_gwd_dx_factor  = ${psl_gwd_dx_factor:-"6.0"}
   prslrd0      = ${prslrd0:-"0."}
   ivegsrc      = ${ivegsrc:-"1"}
   isot         = ${isot:-"1"}
@@ -416,7 +464,7 @@ cat >> input.nml <<EOF
   iopt_tbot    = ${iopt_tbot:-"2"}
   iopt_stc     = ${iopt_stc:-"1"}
   iopt_trs     = ${iopt_trs:-"2"}
-  iopt_diag    = ${iopt_diag:-"1"}
+  iopt_diag    = ${iopt_diag:-"2"}
   debug        = ${gfs_phys_debug:-".false."}
   nstf_name    = ${nstf_name}
   nst_anl      = ${nst_anl}
@@ -458,6 +506,14 @@ cat >> input.nml <<EOF
   cplwav2atm   = ${cplwav2atm:-".false."}
 EOF
 
+if [[ ${DO_SPPT} = "YES" ]]; then
+cat >> input.nml <<EOF
+  pert_mp = .false.
+  pert_radtend = .false.
+  pert_clds = .true.
+EOF
+fi
+
 # Add namelist for IAU
 if [[ ${DOIAU} = "YES" ]]; then
   cat >> input.nml << EOF
@@ -486,7 +542,7 @@ if [[ ${DO_CA:-"NO"} = "YES" ]]; then
 EOF
 fi
 
-if [[ ${DO_LAND_PERT:-"NO"} = "YES" ]]; then
+if [[ "${DO_LAND_PERT:-NO}" == "YES" ]]; then
   cat >> input.nml << EOF
   lndp_type = ${lndp_type:-2}
   n_var_lndp = ${n_var_lndp:-0}
@@ -671,7 +727,7 @@ EOF
   skeb_tau = ${SKEB_TAU:-"-999."}
   skeb_lscale = ${SKEB_LSCALE:-"-999."}
   skebnorm = ${SKEBNORM:-"1"}
-  skeb_npass = ${SKEB_nPASS:-"30"}
+  skeb_npass = ${SKEB_NPASS:-"30"}
   skeb_vdof = ${SKEB_VDOF:-"5"}
 EOF
   fi
@@ -694,11 +750,47 @@ EOF
   sppt_logit = ${SPPT_LOGIT:-".true."}
   sppt_sfclimit = ${SPPT_SFCLIMIT:-".true."}
   use_zmtnblck = ${use_zmtnblck:-".true."}
+  pbl_taper = ${pbl_taper:-"0,0,0,0.125,0.25,0.5,0.75"}
+EOF
+  fi
+
+  if [[ "${DO_OCN_SPPT:-NO}" == "YES" ]]; then
+    cat >> input.nml <<EOF
+  OCNSPPT=${OCNSPPT}
+  OCNSPPT_LSCALE=${OCNSPPT_LSCALE}
+  OCNSPPT_TAU=${OCNSPPT_TAU}
+  ISEED_OCNSPPT=${ISEED_OCNSPPT:-${ISEED}}
+EOF
+  fi
+
+  if [[ "${DO_OCN_PERT_EPBL:-NO}" == "YES" ]]; then
+    cat >> input.nml <<EOF
+  EPBL=${EPBL}
+  EPBL_LSCALE=${EPBL_LSCALE}
+  EPBL_TAU=${EPBL_TAU}
+  ISEED_EPBL=${ISEED_EPBL:-${ISEED}}
+EOF
+  fi
+
+  if [[ "${DO_OCN_SPPT:-NO}" == "YES" ]]; then
+    cat >> input.nml <<EOF
+  OCNSPPT=${OCNSPPT}
+  OCNSPPT_LSCALE=${OCNSPPT_LSCALE}
+  OCNSPPT_TAU=${OCNSPPT_TAU}
+  ISEED_OCNSPPT=${ISEED_OCNSPPT:-${ISEED}}
+EOF
+  fi
+
+  if [[ "${DO_OCN_PERT_EPBL:-NO}" == "YES" ]]; then
+    cat >> input.nml <<EOF
+  EPBL=${EPBL}
+  EPBL_LSCALE=${EPBL_LSCALE}
+  EPBL_TAU=${EPBL_TAU}
+  ISEED_EPBL=${ISEED_EPBL:-${ISEED}}
 EOF
   fi
 
   cat >> input.nml << EOF
-  ${nam_stochy_nml:-}
 /
 EOF
 
@@ -711,13 +803,11 @@ EOF
   ISEED_LNDP = ${ISEED_LNDP:-${ISEED}}
   lndp_var_list = ${lndp_var_list}
   lndp_prt_list = ${lndp_prt_list}
-  ${nam_sfcperts_nml:-}
 /
 EOF
   else
     cat >> input.nml << EOF
 &nam_sfcperts
-  ${nam_sfcperts_nml:-}
 /
 EOF
   fi

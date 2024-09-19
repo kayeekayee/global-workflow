@@ -12,7 +12,7 @@ from wxflow import (AttrDict,
                     add_to_datetime, to_fv3time, to_timedelta,
                     chdir,
                     to_fv3time,
-                    YAMLFile, parse_yamltmpl, parse_j2yaml, save_as_yaml,
+                    YAMLFile, parse_j2yaml, save_as_yaml,
                     logit,
                     Executable,
                     WorkflowException)
@@ -29,33 +29,33 @@ class AerosolAnalysis(Analysis):
     def __init__(self, config):
         super().__init__(config)
 
-        _res = int(self.config['CASE'][1:])
-        _res_anl = int(self.config['CASE_ANL'][1:])
-        _window_begin = add_to_datetime(self.runtime_config.current_cycle, -to_timedelta(f"{self.config['assim_freq']}H") / 2)
-        _fv3jedi_yaml = os.path.join(self.runtime_config.DATA, f"{self.runtime_config.CDUMP}.t{self.runtime_config['cyc']:02d}z.aerovar.yaml")
+        _res = int(self.task_config['CASE'][1:])
+        _res_anl = int(self.task_config['CASE_ANL'][1:])
+        _window_begin = add_to_datetime(self.task_config.current_cycle, -to_timedelta(f"{self.task_config['assim_freq']}H") / 2)
+        _jedi_yaml = os.path.join(self.task_config.DATA, f"{self.task_config.RUN}.t{self.task_config['cyc']:02d}z.aerovar.yaml")
 
         # Create a local dictionary that is repeatedly used across this class
         local_dict = AttrDict(
             {
                 'npx_ges': _res + 1,
                 'npy_ges': _res + 1,
-                'npz_ges': self.config.LEVS - 1,
-                'npz': self.config.LEVS - 1,
+                'npz_ges': self.task_config.LEVS - 1,
+                'npz': self.task_config.LEVS - 1,
                 'npx_anl': _res_anl + 1,
                 'npy_anl': _res_anl + 1,
-                'npz_anl': self.config['LEVS'] - 1,
+                'npz_anl': self.task_config['LEVS'] - 1,
                 'AERO_WINDOW_BEGIN': _window_begin,
-                'AERO_WINDOW_LENGTH': f"PT{self.config['assim_freq']}H",
-                'aero_bkg_fhr': map(int, self.config['aero_bkg_times'].split(',')),
-                'OPREFIX': f"{self.runtime_config.CDUMP}.t{self.runtime_config.cyc:02d}z.",  # TODO: CDUMP is being replaced by RUN
-                'APREFIX': f"{self.runtime_config.CDUMP}.t{self.runtime_config.cyc:02d}z.",  # TODO: CDUMP is being replaced by RUN
-                'GPREFIX': f"gdas.t{self.runtime_config.previous_cycle.hour:02d}z.",
-                'fv3jedi_yaml': _fv3jedi_yaml,
+                'AERO_WINDOW_LENGTH': f"PT{self.task_config['assim_freq']}H",
+                'aero_bkg_fhr': map(int, str(self.task_config['aero_bkg_times']).split(',')),
+                'OPREFIX': f"{self.task_config.RUN}.t{self.task_config.cyc:02d}z.",
+                'APREFIX': f"{self.task_config.RUN}.t{self.task_config.cyc:02d}z.",
+                'GPREFIX': f"gdas.t{self.task_config.previous_cycle.hour:02d}z.",
+                'jedi_yaml': _jedi_yaml,
             }
         )
 
-        # task_config is everything that this task should need
-        self.task_config = AttrDict(**self.config, **self.runtime_config, **local_dict)
+        # Extend task_config with local_dict
+        self.task_config = AttrDict(**self.task_config, **local_dict)
 
     @logit(logger)
     def initialize(self: Analysis) -> None:
@@ -73,15 +73,13 @@ class AerosolAnalysis(Analysis):
         super().initialize()
 
         # stage CRTM fix files
-        crtm_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aero_crtm_coeff.yaml')
-        logger.debug(f"Staging CRTM fix files from {crtm_fix_list_path}")
-        crtm_fix_list = parse_j2yaml(crtm_fix_list_path, self.task_config)
+        logger.info(f"Staging CRTM fix files from {self.task_config.CRTM_FIX_YAML}")
+        crtm_fix_list = parse_j2yaml(self.task_config.CRTM_FIX_YAML, self.task_config)
         FileHandler(crtm_fix_list).sync()
 
         # stage fix files
-        jedi_fix_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aero_jedi_fix.yaml')
-        logger.debug(f"Staging JEDI fix files from {jedi_fix_list_path}")
-        jedi_fix_list = parse_j2yaml(jedi_fix_list_path, self.task_config)
+        logger.info(f"Staging JEDI fix files from {self.task_config.JEDI_FIX_YAML}")
+        jedi_fix_list = parse_j2yaml(self.task_config.JEDI_FIX_YAML, self.task_config)
         FileHandler(jedi_fix_list).sync()
 
         # stage berror files
@@ -93,10 +91,9 @@ class AerosolAnalysis(Analysis):
         FileHandler(self.get_bkg_dict(AttrDict(self.task_config, **self.task_config))).sync()
 
         # generate variational YAML file
-        logger.debug(f"Generate variational YAML file: {self.task_config.fv3jedi_yaml}")
-        varda_yaml = parse_j2yaml(self.task_config['AEROVARYAML'], self.task_config)
-        save_as_yaml(varda_yaml, self.task_config.fv3jedi_yaml)
-        logger.info(f"Wrote variational YAML to: {self.task_config.fv3jedi_yaml}")
+        logger.debug(f"Generate variational YAML file: {self.task_config.jedi_yaml}")
+        save_as_yaml(self.task_config.jedi_config, self.task_config.jedi_yaml)
+        logger.info(f"Wrote variational YAML to: {self.task_config.jedi_yaml}")
 
         # need output dir for diags and anl
         logger.debug("Create empty output [anl, diags] directories to receive output from executable")
@@ -112,9 +109,11 @@ class AerosolAnalysis(Analysis):
         chdir(self.task_config.DATA)
 
         exec_cmd = Executable(self.task_config.APRUN_AEROANL)
-        exec_name = os.path.join(self.task_config.DATA, 'fv3jedi_var.x')
+        exec_name = os.path.join(self.task_config.DATA, 'gdas.x')
         exec_cmd.add_default_arg(exec_name)
-        exec_cmd.add_default_arg(self.task_config.fv3jedi_yaml)
+        exec_cmd.add_default_arg('fv3jedi')
+        exec_cmd.add_default_arg('variational')
+        exec_cmd.add_default_arg(self.task_config.jedi_yaml)
 
         try:
             logger.debug(f"Executing {exec_cmd}")
@@ -158,8 +157,8 @@ class AerosolAnalysis(Analysis):
                 archive.add(diaggzip, arcname=os.path.basename(diaggzip))
 
         # copy full YAML from executable to ROTDIR
-        src = os.path.join(self.task_config['DATA'], f"{self.task_config['CDUMP']}.t{self.runtime_config['cyc']:02d}z.aerovar.yaml")
-        dest = os.path.join(self.task_config.COM_CHEM_ANALYSIS, f"{self.task_config['CDUMP']}.t{self.runtime_config['cyc']:02d}z.aerovar.yaml")
+        src = os.path.join(self.task_config['DATA'], f"{self.task_config['RUN']}.t{self.task_config['cyc']:02d}z.aerovar.yaml")
+        dest = os.path.join(self.task_config.COM_CHEM_ANALYSIS, f"{self.task_config['RUN']}.t{self.task_config['cyc']:02d}z.aerovar.yaml")
         yaml_copy = {
             'mkdir': [self.task_config.COM_CHEM_ANALYSIS],
             'copy': [[src, dest]]
@@ -212,7 +211,7 @@ class AerosolAnalysis(Analysis):
         inc_template = os.path.join(self.task_config.DATA, 'anl', 'aeroinc.' + increment_template)
         bkg_template = os.path.join(self.task_config.COM_ATMOS_RESTART_PREV, restart_template)
         # get list of increment vars
-        incvars_list_path = os.path.join(self.task_config['HOMEgfs'], 'parm', 'gdas', 'aeroanl_inc_vars.yaml')
+        incvars_list_path = os.path.join(self.task_config['PARMgfs'], 'gdas', 'aeroanl_inc_vars.yaml')
         incvars = YAMLFile(path=incvars_list_path)['incvars']
         super().add_fv3_increments(inc_template, bkg_template, incvars)
 
