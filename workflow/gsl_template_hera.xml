@@ -115,7 +115,10 @@
 
 <metatask name="gfsatmprod">
 
-	<var name="fhr">000 003 006 009 012 015 018 021 024 027 030 033 036 039 042 045 048 051 054 057 060 063 066 069 072 075 078 081 084 087 090 093 096 099 102 105 108 111 114 117 120</var>
+        <!--
+        <var name="fhr">000 003 006 009 012 015 018 021 024 027 030 033 036 039 042 045 048 051 054 057 060 063 066 069 072 075 078 081 084 087 090 093 096 099 102 105 108 111 114 117 120</var>
+        -->
+        <var name="fhr">000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120</var>
 
 	<task name="gfsatmprod_#fhr#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
@@ -145,7 +148,7 @@
 		<envar><name>COMPONENT</name><value>atmos</value></envar>
 
 		<dependency>
-			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2#fhr#</cyclestr></datadep>
+			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
 		</dependency>
 
 	</task>
