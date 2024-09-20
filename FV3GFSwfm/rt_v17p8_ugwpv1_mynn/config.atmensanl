@@ -5,14 +5,21 @@
 
 echo "BEGIN: config.atmensanl"
 
-export OBS_YAML_DIR=${HOMEgfs}/sorc/gdas.cd/parm/atm/obs/config/
-export OBS_LIST=${HOMEgfs}/sorc/gdas.cd/parm/atm/obs/lists/lgetkf_prototype.yaml
-export ATMENSYAML=${HOMEgfs}/sorc/gdas.cd/parm/atm/lgetkf/lgetkf.yaml
+export JCB_BASE_YAML="${PARMgfs}/gdas/atm/jcb-base.yaml.j2"
+export JCB_ALGO_YAML=${PARMgfs}/gdas/atm/jcb-prototype_lgetkf.yaml.j2
+
 export INTERP_METHOD='barycentric'
+
+export CRTM_FIX_YAML="${PARMgfs}/gdas/atm_crtm_coeff.yaml.j2"
+export JEDI_FIX_YAML="${PARMgfs}/gdas/atm_jedi_fix.yaml.j2"
+export LGETKF_BKG_STAGING_YAML="${PARMgfs}/gdas/staging/atm_lgetkf_bkg.yaml.j2"
+
+export layout_x_atmensanl=8
+export layout_y_atmensanl=8
 
 export io_layout_x=1
 export io_layout_y=1
 
-export JEDIEXE=${HOMEgfs}/exec/fv3jedi_letkf.x
+export JEDIEXE=${EXECgfs}/gdas.x
 
 echo "END: config.atmensanl"
