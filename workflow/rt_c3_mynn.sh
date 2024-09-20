@@ -1,7 +1,6 @@
 #!/bin/sh
 USER=role.rtfim
-#GITDIR=${HOME}/UFS-CAMsuite/                                     ## where your git checkout is located
-GITDIR=/scratch2/BMC/gsd-fv3-dev/KaYee.Wong/global/test/Merge_gsl_ufs_dev_to_gsl_ufsrtdev1/
+GITDIR=${HOME}/UFS-CAMsuite/                                     ## where your git checkout is located
 COMROT=$GITDIR/FV3GFSrun                                         ## default COMROT directory
 EXPDIR=$GITDIR/FV3GFSwfm                                         ## default EXPDIR directory
 ICSDIR=/scratch1/BMC/gsd-fv3/rtruns/FV3ICS_L127
