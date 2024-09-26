@@ -66,7 +66,7 @@ class Tasks:
         envar_dict = {'RUN_ENVIR': self._base.get('RUN_ENVIR', 'emc'),
                       'HOMEgfs': self.HOMEgfs,
                       'EXPDIR': self._base.get('EXPDIR'),
-#JKH
+                      # JKH
                       'ROTDIR': self._base.get('ROTDIR'),
                       'NET': self._base.get('NET'),
                       'RUN': self.run,
@@ -211,7 +211,7 @@ class Tasks:
             else:
                 native += ':shared'
         elif scheduler in ['slurm']:
-#JKH            native = '--export=NONE'
+            # JKH            native = '--export=NONE'
             native = '&NATIVE_STR;'
             if task_config['RESERVATION'] != "":
                 native += '' if task_name in Tasks.SERVICE_TASKS else ' --reservation=' + task_config['RESERVATION']
