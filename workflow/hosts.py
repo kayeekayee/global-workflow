@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import socket
 from pathlib import Path
 
 from wxflow import YAMLFile
@@ -15,7 +16,7 @@ class Host:
     """
 
     SUPPORTED_HOSTS = ['HERA', 'ORION', 'JET', 'HERCULES',
-                       'WCOSS2', 'S4', 'CONTAINER', 'AWSPW']
+                       'WCOSS2', 'S4', 'CONTAINER', 'AWSPW', 'GAEA']
 
     def __init__(self, host=None):
 
@@ -39,16 +40,15 @@ class Host:
         if os.path.exists('/scratch1/NCEPDEV'):
             machine = 'HERA'
         elif os.path.exists('/work/noaa'):
-            if os.path.exists('/apps/other'):
-                machine = 'HERCULES'
-            else:
-                machine = 'ORION'
+            machine = socket.gethostname().split("-", 1)[0].upper()
         elif os.path.exists('/lfs4/HFIP'):
             machine = 'JET'
         elif os.path.exists('/lfs/f1'):
             machine = 'WCOSS2'
         elif os.path.exists('/data/prod'):
             machine = 'S4'
+        elif os.path.exists('/gpfs/f5'):
+            machine = 'GAEA'
         elif container is not None:
             machine = 'CONTAINER'
         elif pw_csp is not None:
