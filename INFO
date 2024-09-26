@@ -1,7 +1,7 @@
 09-17-24
 ========
 Update develop branch, gsl_ufs_dev
- - based on gsl_ufs_dev from KaYee's fork
+   based on gsl_ufs_dev from KaYee's fork
    global-workflow: 07Aug24,37c53ac [develop_07Aug2024_37c53ac]
    UFS: 19Jul24, c127601
    FV3: 19Jul24, 2527c11
