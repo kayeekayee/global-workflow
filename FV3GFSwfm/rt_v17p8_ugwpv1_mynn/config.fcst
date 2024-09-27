@@ -149,7 +149,7 @@ export isatmedmf=1
 if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
    export satmedmf=".false."
    export isatmedmf=0
-   export CPP
+   export shal_cnv=".false."
    export do_mynnedmf=".true."
    export do_mynnsfclay=".false."
    export icloud_bl=1
