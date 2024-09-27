@@ -1,11 +1,11 @@
-BASE_GIT: '/work/noaa/global/glopara/git'
+BASE_GIT: '/work/noaa/global/glopara/git_rocky9'
 DMPDIR: '/work/noaa/rstprod/dump'
 BASE_CPLIC: '/work/noaa/global/glopara/data/ICSDIR/prototype_ICs'
 PACKAGEROOT: '/work/noaa/global/glopara/nwpara'
 COMINsyn: '/work/noaa/global/glopara/com/gfs/prod/syndat'
 HOMEDIR: '/work/noaa/global/${USER}'
-STMP: '/work/noaa/stmp/${USER}'
-PTMP: '/work/noaa/stmp/${USER}'
+STMP: '/work/noaa/stmp/${USER}/HERCULES'
+PTMP: '/work/noaa/stmp/${USER}/HERCULES'
 NOSCRUB: $HOMEDIR
 SCHEDULER: slurm
 ACCOUNT: fv3-cpu
@@ -13,7 +13,9 @@ QUEUE: batch
 QUEUE_SERVICE: batch
 PARTITION_BATCH: hercules
 PARTITION_SERVICE: service
+RESERVATION: ''
 CHGRP_RSTPROD: 'YES'
+CLUSTERS: ''
 CHGRP_CMD: 'chgrp rstprod'
 HPSSARCH: 'NO'
 HPSS_PROJECT: emc-global
@@ -22,3 +24,6 @@ ATARDIR: '${NOSCRUB}/archive_rotdir/${PSLOT}'
 MAKE_NSSTBUFR: 'NO'
 MAKE_ACFTBUFR: 'NO'
 SUPPORTED_RESOLUTIONS: ['C1152', 'C768', 'C384', 'C192', 'C96', 'C48']
+COMINecmwf: /work/noaa/global/glopara/data/external_gempak/ecmwf
+COMINnam: /work/noaa/global/glopara/data/external_gempak/nam
+COMINukmet: /work/noaa/global/glopara/data/external_gempak/ukmet

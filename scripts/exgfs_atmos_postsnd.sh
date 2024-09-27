@@ -20,7 +20,7 @@
 #   9) 2019-12-18       Guang Ping Lou generalizing to reading in NetCDF or nemsio
 ################################################################
 
-source "$HOMEgfs/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 cd $DATA
 
@@ -44,12 +44,14 @@ export NINT3=${FHOUT_GFS:-3}
 
 rm -f -r "${COM_ATMOS_BUFR}"
 mkdir -p "${COM_ATMOS_BUFR}"
-GETDIM="${HOMEgfs}/ush/getncdimlen"
+GETDIM="${USHgfs}/getncdimlen"
 LEVS=$(${GETDIM} "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atmf000.${atmfm}" pfull)
 declare -x LEVS
 
 ### Loop for the hour and wait for the sigma and surface flux file:
 export FSTART=$STARTHOUR
+sleep_interval=10
+max_tries=360
 #
 while [ $FSTART -lt $ENDHOUR ]
 do
@@ -69,29 +71,18 @@ export FINT=$NINT1
        export MAKEBUFR=YES
    fi
 
-   ic=0
-   while [ $ic -lt 1000 ]; do
-      if [[ ! -f "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atm.logf${FEND}.${logfm}" ]]; then
-          sleep 10
-          ic=$(expr $ic + 1)
-      else
-          break
-      fi
-
-      if [ $ic -ge 360 ]
-      then
-         err_exit "COULD NOT LOCATE logf$FEND file AFTER 1 HOUR"
-      fi
-   done
+   filename="${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atm.logf${FEND}.${logfm}"
+   if ! wait_for_file "${filename}" "${sleep_interval}" "${max_tries}"; then
+     err_exit "FATAL ERROR: logf${FEND} not found after waiting $((sleep_interval * ( max_tries - 1) )) secs"
+   fi
 
 ## 1-hourly output before $NEND1, 3-hourly output after
-   if [ $FEND -gt $NEND1 ]; then
+   if [[ $((10#$FEND)) -gt $((10#$NEND1)) ]]; then
      export FINT=$NINT3
    fi
-##   $USHbufrsnd/gfs_bufr.sh
-   $USHbufrsnd/gfs_bufr.sh
+   ${USHgfs}/gfs_bufr.sh
   
-   export FSTART=$FEND
+   export FSTART="${FEND}"
 done
 
 ##############################################################
@@ -114,8 +105,8 @@ fi
 # add appropriate WMO Headers.
 ########################################
 rm -rf poe_col
-for (( m = 1; m <10 ; m++ )); do
-    echo "sh ${USHbufrsnd}/gfs_sndp.sh ${m} " >> poe_col
+for (( m = 1; m <= NUM_SND_COLLECTIVES ; m++ )); do
+    echo "sh ${USHgfs}/gfs_sndp.sh ${m} " >> poe_col
 done
 
 if [[ ${CFP_MP:-"NO"} == "YES" ]]; then
@@ -129,7 +120,7 @@ chmod +x cmdfile
 
 ${APRUN_POSTSNDCFP} cmdfile
 
-sh "${USHbufrsnd}/gfs_bfr2gpk.sh"
+sh "${USHgfs}/gfs_bfr2gpk.sh"
 
 
 ############## END OF SCRIPT #######################

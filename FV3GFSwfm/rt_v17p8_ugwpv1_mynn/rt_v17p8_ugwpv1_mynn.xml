@@ -6,10 +6,10 @@
 		Main workflow manager for Global Forecast System
 
 	NOTES:
-		This workflow was automatically generated at 2024-03-21 08:04:21.280010
+		This workflow was automatically generated at 2024-09-18 23:03:39.395324
 	-->
 	<!ENTITY PSLOT "rt_v17p8_ugwpv1_mynn">
-	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite_21mar24">
+	<!ENTITY HOMEgfs "/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite">
 	<!ENTITY EXPDIR "&HOMEgfs;/FV3GFSwfm/&PSLOT;">
 	<!ENTITY ROTDIR "&HOMEgfs;/FV3GFSrun/&PSLOT;">
 	<!ENTITY JOBS_DIR "&HOMEgfs;/jobs/rocoto">
@@ -26,7 +26,7 @@
 	<log verbosity="10"><cyclestr>&EXPDIR;/logs/@Y@m@d@H.log</cyclestr></log>
 
 	<!-- Define the cycles -->
-	<cycledef group="gfs">202403210000 203401140000 24:00:00</cycledef>
+	<cycledef group="gfs">202409180000 202409180000 24:00:00</cycledef>
 
 <!--  
   NOTE:  this task is not needed since rt_c768_icsonly.xml makes the link under model_data/atmos/input
@@ -45,23 +45,25 @@
 
 	<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsinit.log</cyclestr></join>
 
-	<envar><name>RUN_ENVIR</name><value>emc</value></envar>
-	<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
-	<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-	<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
-	<envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
-	<envar><name>CASE</name><value>&CASE;</value></envar>
-	<envar><name>COMPONENT</name><value>&COMPONENT;</value></envar>
-	<envar><name>NET</name><value>gfs</value></envar>
-	<envar><name>CDUMP</name><value>gfs</value></envar>
-	<envar><name>RUN</name><value>gfs</value></envar>
-	<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
-	<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
-	<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
-	<envar><name>COMROOT</name><value>/scratch1/NCEPDEV/global/glopara/com</value></envar>
-	<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
+        <envar><name>RUN_ENVIR</name><value>emc</value></envar>
+        <envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
+        <envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
+        <envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
+        <envar><name>ICSDIR</name><value>&ICSDIR;</value></envar>
+        <envar><name>CASE</name><value>&CASE;</value></envar>
+        <envar><name>COMPONENT</name><value>&COMPONENT;</value></envar>
+        <envar><name>NET</name><value>gfs</value></envar>
+        <envar><name>CDUMP</name><value>gfs</value></envar>
+        <envar><name>RUN</name><value>gfs</value></envar>
+        <envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
+        <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+        <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+        <envar><name>COMROOT</name><value>/scratch1/NCEPDEV/global/glopara/com</value></envar>
+        <envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
+	<envar><name>FHR3</name><value>#fhr#</value></envar>
+        <envar><name>COMPONENT</name><value>atmos</value></envar>
 
-	<dependency>
+        <dependency>
                 <and>
                         <not>
                                 <datadep><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H/model_data/atmos/input</cyclestr></datadep>
@@ -84,7 +86,7 @@
 	<account>gsd-fv3</account>
 	<queue>batch</queue>
 	<partition>hera</partition>
-	<walltime>05:50:00</walltime>
+	<walltime>06:00:00</walltime>
 <!--	<nodes>101:ppn=40:tpp=1</nodes> -->    <!-- 16x16, 2th, 2wg, 40wt -->
 	<nodes>56:ppn=40:tpp=1</nodes>         <!-- 12x12, 2th, 1wg, 40wt -->
         <native>&NATIVE_STR;</native>
@@ -117,15 +119,16 @@
 
 <metatask name="gfsatmprod">
 
-	<var name="grp">_f000-f012 _f018-f030 _f036-f048 _f054-f066 _f072-f084 _f090-f102 _f108-f120</var>
-	<var name="dep">f012 f030 f048 f066 f084 f102 f120</var>
-	<var name="lst">f000_f006_f012 f018_f024_f030 f036_f042_f048 f054_f060_f066 f072_f078_f084 f090_f096_f102 f108_f114_f120</var>
+        <!--
+        <var name="fhr">000 003 006 009 012 015 018 021 024 027 030 033 036 039 042 045 048 051 054 057 060 063 066 069 072 075 078 081 084 087 090 093 096 099 102 105 108 111 114 117 120</var>
+        -->
+        <var name="fhr">000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120</var>
 
-	<task name="gfsatmprod#grp#" cycledefs="gfs" maxtries="&MAXTRIES;">
+	<task name="gfsatmprod_#fhr#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 		<command>&JOBS_DIR;/atmos_products.sh</command>
 
-		<jobname><cyclestr>&PSLOT;_gfsatmprod#grp#_@H</cyclestr></jobname>
+		<jobname><cyclestr>&PSLOT;_gfsatmprod_f#fhr#_@H</cyclestr></jobname>
 		<account>gsd-fv3</account>
 		<queue>batch</queue>
 		<partition>hera</partition>
@@ -133,24 +136,23 @@
 		<nodes>1:ppn=24:tpp=1</nodes>
 		<native>&NATIVE_STR;</native>
 
-		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsatmprod#grp#.log</cyclestr></join>
+		<join><cyclestr>&ROTDIR;/logs/@Y@m@d@H/gfsatmprod_f#fhr#.log</cyclestr></join>
 
 		<envar><name>RUN_ENVIR</name><value>emc</value></envar>
 		<envar><name>HOMEgfs</name><value>&HOMEgfs;</value></envar>
 		<envar><name>EXPDIR</name><value>&EXPDIR;</value></envar>
-		<envar><name>ROTDIR</name><value>&ROTDIR;</value></envar>
 		<envar><name>NET</name><value>gfs</value></envar>
-		<envar><name>CDUMP</name><value>gfs</value></envar>
 		<envar><name>RUN</name><value>gfs</value></envar>
 		<envar><name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value></envar>
 		<envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
 		<envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
 		<envar><name>COMROOT</name><value>/scratch1/NCEPDEV/global/glopara/com</value></envar>
 		<envar><name>DATAROOT</name><value>&ROTDIR;/../RUNDIRS/&PSLOT;</value></envar>
-		<envar><name>FHRLST</name><value>#lst#</value></envar>
+		<envar><name>FHR3</name><value>#fhr#</value></envar>
+		<envar><name>COMPONENT</name><value>atmos</value></envar>
 
 		<dependency>
-			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2#dep#</cyclestr></datadep>
+			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
 		</dependency>
 
 	</task>

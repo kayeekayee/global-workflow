@@ -6,21 +6,15 @@
 echo "BEGIN: config.ocnanal"
 
 export OBS_YAML_DIR="${HOMEgfs}/sorc/gdas.cd/parm/soca/obs/config"
-export OBS_LIST=/scratch1/BMC/gsd-fv3/rtruns/UFS-CAMsuite_21mar24/sorc/gdas.cd/parm/soca/obs/obs_list.yaml
-export OBS_YAML="${OBS_LIST}"
-export FV3JEDI_STAGE_YAML="${HOMEgfs}/sorc/gdas.cd/test/soca/testinput/dumy.yaml"
-export SOCA_INPUT_FIX_DIR=/scratch2/NCEPDEV/ocean/Guillaume.Vernieres/data/static/72x35x25/soca
-export SOCA_VARS=tocn,socn,ssh
-export SABER_BLOCKS_YAML=
+export OBS_LIST=${PARMgfs}/gdas/soca/obs/obs_list.yaml  # TODO(GA): doesn't look necessary as is to have
+export OBS_YAML="${OBS_LIST}"    #           OBS_LIST and OBS_YAML pick one or add logic
+export SOCA_INPUT_FIX_DIR=${FIXgfs}/gdas/soca/72x35x25/soca
 export SOCA_NINNER=100
-export CASE_ANL=C48
 export DOMAIN_STACK_SIZE=116640000  #TODO: Make the stack size resolution dependent
-export JEDI_BIN=${HOMEgfs}/sorc/gdas.cd/build/bin
+export SOCA_ENS_BKG_STAGE_YAML_TMPL="${PARMgfs}/gdas/soca/soca_ens_bkg_stage.yaml.j2"
+export SOCA_FIX_YAML_TMPL="${PARMgfs}/gdas/soca/soca_fix_stage_${OCNRES}.yaml.j2"
 
-export COMIN_OBS=/scratch2/NCEPDEV/marineda/r2d2-v2-v3
-
-# NICAS
-export NICAS_RESOL=1
-export NICAS_GRID_SIZE=15000
+export JEDI_BIN=${HOMEgfs}/sorc/gdas.cd/build/bin  # TODO(GA): remove once analysis "run"
+                                                   #          and "checkpoint" are refactored
 
 echo "END: config.ocnanal"

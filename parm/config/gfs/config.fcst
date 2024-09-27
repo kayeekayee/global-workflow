@@ -5,10 +5,19 @@
 
 echo "BEGIN: config.fcst"
 
-# Turn off waves if not used for this CDUMP
-case ${WAVE_CDUMP} in
-  both | "${CDUMP/enkf}" ) ;; # Don't change
+export USE_ESMF_THREADING="YES"  # Toggle to use ESMF-managed threading or traditional threading in UFSWM
+export COPY_FINAL_RESTARTS="NO" # Toggle to copy restarts from the end of GFS/GEFS Run (GDAS is handled seperately)
+
+# Turn off waves if not used for this RUN
+case ${WAVE_RUN} in
+  both | "${RUN/enkf}" ) ;; # Don't change
   *) DO_WAVE="NO" ;; # Turn waves off
+esac
+
+# Turn off aerosols if not used for this RUN
+case ${AERO_FCST_RUN} in
+  both | "${RUN/enkf}" ) ;; # Don't change
+  *) DO_AERO="NO" ;; # Turn aerosols off
 esac
 
 # Source model specific information that is resolution dependent
@@ -21,6 +30,26 @@ string="--fv3 ${CASE}"
 # shellcheck disable=SC2086
 source "${EXPDIR}/config.ufs" ${string}
 
+# Forecast length for GFS forecast
+case ${RUN} in
+  *gfs)
+    # shellcheck disable=SC2153
+    export FHMAX=${FHMAX_GFS}
+    # shellcheck disable=SC2153
+    export FHOUT=${FHOUT_GFS}
+    export FHMAX_HF=${FHMAX_HF_GFS}
+    export FHOUT_HF=${FHOUT_HF_GFS}
+    export FHOUT_OCN=${FHOUT_OCN_GFS}
+    export FHOUT_ICE=${FHOUT_ICE_GFS}
+    ;;
+  *gdas)
+    export FHMAX_HF=0
+    export FHOUT_HF=0
+    ;;
+  *)
+    echo "FATAL ERROR: Unsupported RUN '${RUN}'"
+    exit 1
+esac
 
 # Get task specific resources
 source "${EXPDIR}/config.resources" fcst
@@ -37,16 +66,14 @@ export esmf_logkind="ESMF_LOGKIND_MULTI_ON_ERROR" #Options: ESMF_LOGKIND_MULTI_O
 
 #######################################################################
 
-export FORECASTSH="${HOMEgfs}/scripts/exglobal_forecast.sh"
-#export FORECASTSH="${HOMEgfs}/scripts/exglobal_forecast.py"  # Temp. while this is worked on
-export FCSTEXECDIR="${HOMEgfs}/exec"
+export FORECASTSH="${SCRgfs}/exglobal_forecast.sh"
+#export FORECASTSH="${SCRgfs}/exglobal_forecast.py"  # Temp. while this is worked on
 export FCSTEXEC="ufs_model.x"
 
 #######################################################################
 # Model configuration
 export TYPE="nh"
 export MONO="non-mono"
-#JKHexport range_warn=".false."                  ## JKH 
 
 # Use stratosphere h2o physics
 export h2o_phys=".true."
@@ -93,33 +120,32 @@ if (( gwd_opt == 2 )); then
     export do_ugwp_v0_orog_only=".false."
     export do_ugwp_v0_nst_only=".false."
     export do_gsl_drag_ls_bl=".true."
-    export do_gsl_drag_ss=".true."
+    export do_gsl_drag_ss=".true."    #KYW (Checked with Mike)
+    #export do_gsl_drag_ss=".false."
     export do_gsl_drag_tofd=".true."
+    export do_gwd_opt_psl=".false."
+    #export do_gwd_opt_psl=".true."    #KYW (Checked with Mike)
     export do_ugwp_v1_orog_only=".false."
-    export alpha_fd=35.0
+    export alpha_fd=35.0    #KYW (Checked with Mike)
     launch_level=$(echo "${LEVS}/2.35" |bc)
     export launch_level
-    if [[ ${do_gsl_drag_ls_bl} == ".true." ]]; then
-       export cdmbgwd=${cdmbgwd_gsl}
-    fi
 fi
 
 # Sponge layer settings
-export tau=0.
-export rf_cutoff=10.
 export d2_bg_k1=0.20
 export d2_bg_k2=0.04
 export dz_min=6
 export n_sponge=42
-if (( LEVS == 128 )) && [[ "${CDUMP}" =~ "gdas" ]]; then
-   export tau=5.0
-   export rf_cutoff=1.0e3
-   export d2_bg_k1=0.20
-   export d2_bg_k2=0.0
-fi
 
 # PBL/turbulence schemes
 export hybedmf=".false."
+if [[ "${CCPP_SUITE}" == "FV3_global_nest"* ]]; then
+  export satmedmf=".false."
+else
+  export satmedmf=".true."
+fi
+export isatmedmf=1
+#JKH
 if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" ]] ; then
    export satmedmf=".false."
    export isatmedmf=0
@@ -131,20 +157,21 @@ if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS
    export bl_mynn_edmf=1
    export bl_mynn_edmf_mom=1
    export lcnorm=".true."                           ## JKH
-else
-   export satmedmf=".true."
-   export isatmedmf=1
 fi
 tbf=""
 if [[ "${satmedmf}" == ".true." ]]; then tbf="_satmedmf" ; fi
 
-#Convection schemes
+#Convection schemes      ### JKH  - affects field table name
 export progsigma=".true."
 tbp=""
 if [[ "${progsigma}" == ".true." ]]; then tbp="_progsigma" ; fi
 
 # Radiation options
-export IAER=1011    ; #spectral band mapping method for aerosol optical properties
+if [[ "${DO_AERO}" == "YES" ]]; then
+    export IAER=2011  # spectral band mapping method for aerosol optical properties
+else
+    export IAER=1011    
+fi
 export iovr_lw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
 export iovr_sw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
 export iovr=3       ; #de-correlation length cloud overlap method (Barker, 2008)
@@ -162,21 +189,22 @@ export doGP_lwscat=.false.
 export iopt_sfc="3"
 export iopt_trs="2"
 
+#JKH
 # Convection Options: 2-SASAS, 3-GF
 export progsigma=".true."
 if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" ]] ; then
     export imfdeepcnv=5
     export imfshalcnv=-1                 ## JKH - no shallow GF
-elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3" ]] ; then 
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_c3" ]] ; then
     export imfdeepcnv=5
-    export imfshalcnv=5              
-elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then 
+    export imfshalcnv=5
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_c3" ]] ; then
     export progsigma=.false.
     export imfdeepcnv=5
-    export imfshalcnv=5              
-elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf" ]] ; then 
+    export imfshalcnv=5
+elif [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_gf" ]] ; then
     export imfdeepcnv=3
-    export imfshalcnv=3              
+    export imfshalcnv=3
 else
     export imfdeepcnv=2
     if [[ "$CCPP_SUITE" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "$CCPP_SUITE" == "FV3_GFS_v17_p8_mynn" ]] ; then
@@ -185,11 +213,7 @@ else
       export imfshalcnv=2
     fi
 fi
-
-#Convection schemes      ### JKH  - affects field table name
-tbp=""
-if [ "$progsigma" = ".true." ]; then tbp="_progsigma" ; fi
-
+#JKH
 
 # Microphysics configuration
 export dnats=0
@@ -200,12 +224,12 @@ export random_clds=".true."
 case ${imp_physics} in
     99) # ZhaoCarr
         export ncld=1
-        export FIELD_TABLE="${HOMEgfs}/parm/ufs/fv3/field_table_zhaocarr${tbf}${tbp}"
+        export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_zhaocarr${tbf}${tbp}"
         export nwat=2
         ;;
     6)  # WSM6
         export ncld=2
-        export FIELD_TABLE="${HOMEgfs}/parm/ufs/fv3/field_table_wsm6${tbf}${tbp}"
+        export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_wsm6${tbf}${tbp}"
         export nwat=6
         ;;
     8)  # Thompson
@@ -218,31 +242,46 @@ case ${imp_physics} in
         export lradar=".true."
         export ttendlim="-999"
         export sedi_semi=.true.
+        if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
         export decfl=10
-
-        if [[ "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_c3_mynn" || 
+#JKH
+        if [[ "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_ugwpv1_c3_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_mynn" || "${CCPP_SUITE}" == "FV3_GFS_v17_p8_c3_mynn" ||
               "${CCPP_SUITE}" == "FV3_GFS_v17_p8_thompson" ]] ; then
           #JKH  set dt_inner to 50 if running aerosol-aware Thompson
           export dt_inner=50
           export ltaerosol=".true."
-          export FIELD_TABLE="${HOMEgfs}/parm/ufs/fv3/field_table_thompson_aero_tke${tbp}"
+          export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_aero_tke${tbp}"
         else
           export dt_inner=$((DELTIM/2))
           if [[ "${sedi_semi}" == .true. ]]; then export dt_inner=${DELTIM} ; fi
           export ltaerosol=".false."
-          export FIELD_TABLE="${HOMEgfs}/parm/ufs/fv3/field_table_thompson_noaero_tke${tbp}"
+          export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_noaero_tke${tbp}"
         fi
-
+#JKH
         export hord_mt_nh_nonmono=5
         export hord_xx_nh_nonmono=5
         export vtdm4_nh_nonmono=0.02
         export nord=2
         export dddmp=0.1
         export d4_bg=0.12
+
+        if [[ "${CCPP_SUITE}" == "FV3_global_nest"* ]]; then
+          export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_thompson_aero_tke${tbp}"
+          export ltaerosol=".true."
+          export lcnorm=".true."
+          export do_mynnedmf=".true."
+          export do_mynnsfclay=".true."
+          export imfshalcnv=5
+          export imfdeepcnv=5
+          export betascu=0.5
+          export betamcu=1.5
+          export betadcu=8.0
+        fi
+
         ;;
     11) # GFDL
         export ncld=5
-        export FIELD_TABLE="${HOMEgfs}/parm/ufs/fv3/field_table_gfdl${tbf}${tbp}"
+        export FIELD_TABLE="${PARMgfs}/ufs/fv3/field_table_gfdl${tbf}${tbp}"
         export nwat=6
         export dnats=1
         export cal_pre=".false."
@@ -268,6 +307,9 @@ export DO_SKEB=${DO_SKEB:-"NO"}
 export DO_SHUM=${DO_SHUM:-"NO"}
 export DO_LAND_PERT=${DO_LAND_PERT:-"NO"}
 export DO_CA=${DO_CA:-"YES"}
+if [[ "${DO_NEST:-NO}" == "YES" ]] ; then
+  export DO_CA="NO"  # CA does not work with nesting.
+fi
 
 #coupling settings
 export cplmode="ufs.frac"
@@ -284,38 +326,21 @@ export FSICL="0"
 export FSICS="0"
 
 #---------------------------------------------------------------------
-
-# ideflate: netcdf zlib lossless compression (0-9): 0 no compression
-# nbits: netcdf lossy compression level (0-32): 0 lossless
-export ideflate=1
-export nbits=14
-export ishuffle=0
-# compression for RESTART files written by FMS
-export shuffle=1
-export deflate_level=1
-
-#---------------------------------------------------------------------
-# Disable the use of coupler.res; get model start time from model_configure
-export USE_COUPLER_RES="NO"
-
-if [[ "${CDUMP}" =~ "gdas" ]] ; then # GDAS cycle specific parameters
+if [[ "${RUN}" =~ "gdas" ]] ; then # GDAS cycle specific parameters
 
     # Variables used in DA cycling
-    export DIAG_TABLE="${HOMEgfs}/parm/ufs/fv3/diag_table_da"
+    export DIAG_TABLE="${PARMgfs}/ufs/fv3/diag_table_da"
 
-    if [[ "${DOIAU}" == "YES" ]]; then
-      export restart_interval="3"
-    else
-      export restart_interval="6"
-    fi
+    # Write gfs restart files to rerun fcst from any break point
+    export restart_interval=${restart_interval_gdas:-6}
 
     # Turn on dry mass adjustment in GDAS
     export adjust_dry_mass=".true."
 
-elif [[ "${CDUMP}" =~ "gfs" ]] ; then # GFS cycle specific parameters
+elif [[ "${RUN}" =~ "gfs" ]] ; then # GFS cycle specific parameters
 
     # Write more variables to output
-    export DIAG_TABLE="${HOMEgfs}/parm/ufs/fv3/diag_table"
+    export DIAG_TABLE="${PARMgfs}/ufs/fv3/diag_table"
 
     # Write gfs restart files to rerun fcst from any break point
     export restart_interval=${restart_interval_gfs:-12}

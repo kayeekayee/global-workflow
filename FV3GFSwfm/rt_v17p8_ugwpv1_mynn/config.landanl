@@ -28,7 +28,7 @@ export BESTDDEV="30."  # Background Error Std. Dev. for LETKFOI
 export APPLY_INCR_EXE="${HOMEgfs}/exec/apply_incr.exe"
 export APPLY_INCR_NML_TMPL="${HOMEgfs}/sorc/gdas.cd/parm/land/letkfoi/apply_incr_nml.j2"
 
-export io_layout_x=1
-export io_layout_y=1
+export io_layout_x=@IO_LAYOUT_X@
+export io_layout_y=@IO_LAYOUT_Y@
 
 echo "END: config.landanl"
