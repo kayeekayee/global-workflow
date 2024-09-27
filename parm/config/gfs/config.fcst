@@ -214,10 +214,6 @@ else
     fi
 fi
 #JKH
-#Convection schemes      ### JKH  - affects field table name
-tbp=""
-if [ "$progsigma" = ".true." ]; then tbp="_progsigma" ; fi
-
 
 # Microphysics configuration
 export dnats=0
