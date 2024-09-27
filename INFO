@@ -1,3 +1,14 @@
+09-17-24
+========
+Update develop branch, gsl_ufs_dev
+   based on gsl_ufs_dev from KaYee's fork
+   global-workflow: 07Aug24,37c53ac [develop_07Aug2024_37c53ac]
+   UFS: 19Jul24, c127601
+   FV3: 19Jul24, 2527c11
+   UPP: 23Apr24, be0410e
+   CCPP-PHYSICS: 19Jul24, 46df080
+   UFS_UTILS: 26Jun24, 3ef2e6b
+
 07-31-24
 ========
   Added alpha_fd coefficient for Beljaars TOFD in GSL drag

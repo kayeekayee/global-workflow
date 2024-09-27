@@ -10,7 +10,7 @@ function usage() {
 Builds all of the global-workflow components by calling the individual build
   scripts in sequence.
 
-Usage: ${BASH_SOURCE[0]} [-h][-o]
+Usage: ${BASH_SOURCE[0]} [-h][-o][--nest]
   -h:
     Print this help message and exit
   -o:
@@ -23,12 +23,17 @@ RUN_ENVIR="emc"
 
 # Reset option counter in case this script is sourced
 OPTIND=1
-while getopts ":ho" option; do
+while getopts ":ho-:" option; do
   case "${option}" in
     h) usage ;;
     o)
       echo "-o option received, configuring for NCO"
       RUN_ENVIR="nco";;
+    -)
+      if [[ "${OPTARG}" == "nest" ]]; then
+        LINK_NEST=ON
+      fi
+      ;;
     :)
       echo "[${BASH_SOURCE[0]}]: ${option} requires an argument"
       usage
@@ -70,6 +75,7 @@ case "${machine}" in
   "hercules") FIX_DIR="/work/noaa/global/glopara/fix" ;;
   "jet")      FIX_DIR="/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix" ;;
   "s4")       FIX_DIR="/data/prod/glopara/fix" ;;
+  "gaea")     FIX_DIR="/gpfs/f5/ufs-ard/world-shared/global/glopara/data/fix" ;;
   *)
     echo "FATAL: Unknown target machine ${machine}, couldn't set FIX_DIR"
     exit 1
@@ -79,18 +85,31 @@ esac
 # Source fix version file
 source "${HOMEgfs}/versions/fix.ver"
 
-# Link wxflow in ush/python, workflow and ci/scripts
+# Link python pacakges in ush/python
+# TODO: This will be unnecessary when these are part of the virtualenv
+packages=("wxflow")
+for package in "${packages[@]}"; do
+    cd "${HOMEgfs}/ush/python" || exit 1
+    [[ -s "${package}" ]] && rm -f "${package}"
+    ${LINK} "${HOMEgfs}/sorc/${package}/src/${package}" .
+done
+
+# Link GDASapp python packages in ush/python
+packages=("jcb")
+for package in "${packages[@]}"; do
+    cd "${HOMEgfs}/ush/python" || exit 1
+    [[ -s "${package}" ]] && rm -f "${package}"
+    ${LINK} "${HOMEgfs}/sorc/gdas.cd/sorc/${package}/src/${package}" .
+done
+
+# Link wxflow in workflow and ci/scripts
 # TODO: This will be unnecessary when wxflow is part of the virtualenv
-cd "${HOMEgfs}/ush/python" || exit 1
-[[ -s "wxflow" ]] && rm -f wxflow
-${LINK} "${HOMEgfs}/sorc/wxflow/src/wxflow" .
 cd "${HOMEgfs}/workflow" || exit 1
 [[ -s "wxflow" ]] && rm -f wxflow
 ${LINK} "${HOMEgfs}/sorc/wxflow/src/wxflow" .
 cd "${HOMEgfs}/ci/scripts" || exit 1
 [[ -s "wxflow" ]] && rm -f wxflow
 ${LINK} "${HOMEgfs}/sorc/wxflow/src/wxflow" .
-
 
 # Link fix directories
 if [[ -n "${FIX_DIR}" ]]; then
@@ -107,7 +126,6 @@ for dir in aer \
             lut \
             mom6 \
             orog \
-            reg2grb2 \
             sfc_climo \
             ugwd \
             verif \
@@ -120,7 +138,20 @@ do
   fix_ver="${dir}_ver"
   ${LINK_OR_COPY} "${FIX_DIR}/${dir}/${!fix_ver}" "${dir}"
 done
-
+# global-nest uses different versions of orog and ugwd
+if [[ "${LINK_NEST:-OFF}" == "ON" ]] ; then
+  for dir in orog \
+             ugwd
+  do
+    nestdir=${dir}_nest
+    if [[ -d "${nestdir}" ]]; then
+      [[ "${RUN_ENVIR}" == "nco" ]] && chmod -R 755 "${nestdir}"
+      rm -rf "${nestdir}"
+    fi
+    fix_ver="${dir}_nest_ver"
+    ${LINK_OR_COPY} "${FIX_DIR}/${dir}/${!fix_ver}" "${nestdir}"
+  done
+fi
 
 if [[ -d "${HOMEgfs}/sorc/ufs_utils.fd" ]]; then
   cd "${HOMEgfs}/sorc/ufs_utils.fd/fix" || exit 1
@@ -136,45 +167,70 @@ cd "${HOMEgfs}/parm/ufs" || exit 1
 ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_model.fd/tests/parm/noahmptable.tbl" .
 
 cd "${HOMEgfs}/parm/post" || exit 1
-for file in postxconfig-NT-GEFS-ANL.txt postxconfig-NT-GEFS-F00.txt postxconfig-NT-GEFS.txt postxconfig-NT-GFS-ANL.txt \
-    postxconfig-NT-GFS-F00-TWO.txt postxconfig-NT-GFS-F00.txt postxconfig-NT-GFS-FLUX-F00.txt postxconfig-NT-GFS-FLUX.txt \
-    postxconfig-NT-GFS-GOES.txt postxconfig-NT-GFS-TWO.txt \
-    postxconfig-NT-GFS.txt postxconfig-NT-gefs-aerosol.txt postxconfig-NT-gefs-chem.txt params_grib2_tbl_new \
-    post_tag_gfs128 post_tag_gfs65 nam_micro_lookup.dat \
-    AEROSOL_LUTS.dat optics_luts_DUST.dat optics_luts_SALT.dat optics_luts_SOOT.dat optics_luts_SUSO.dat optics_luts_WASO.dat
+for file in postxconfig-NT-GEFS-F00.txt postxconfig-NT-GEFS.txt postxconfig-NT-GEFS-WAFS.txt \
+    postxconfig-NT-GEFS-F00-aerosol.txt postxconfig-NT-GEFS-aerosol.txt \
+    postxconfig-NT-GFS-ANL.txt postxconfig-NT-GFS-F00.txt postxconfig-NT-GFS-FLUX-F00.txt \
+    postxconfig-NT-GFS.txt postxconfig-NT-GFS-FLUX.txt postxconfig-NT-GFS-GOES.txt \
+    postxconfig-NT-GFS-F00-TWO.txt postxconfig-NT-GFS-TWO.txt \
+    params_grib2_tbl_new post_tag_gfs128 post_tag_gfs65 nam_micro_lookup.dat
 do
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/parm/${file}" .
+done
+for file in optics_luts_DUST.dat optics_luts_DUST_nasa.dat optics_luts_NITR_nasa.dat \
+    optics_luts_SALT.dat optics_luts_SALT_nasa.dat optics_luts_SOOT.dat optics_luts_SOOT_nasa.dat \
+    optics_luts_SUSO.dat optics_luts_SUSO_nasa.dat optics_luts_WASO.dat optics_luts_WASO_nasa.dat
+do
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/fix/chem/${file}" .
+done
+for file in ice.csv ocean.csv ocnicepost.nml.jinja2
+do
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gfs_utils.fd/parm/ocnicepost/${file}" .
 done
 
 cd "${HOMEgfs}/scripts" || exit 8
 ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_utils.fd/scripts/exemcsfc_global_sfc_prep.sh" .
+if [[ -d "${HOMEgfs}/sorc/gdas.cd" ]]; then
+  declare -a gdas_scripts=(exglobal_prep_ocean_obs.py \
+                           exgdas_global_marine_analysis_ecen.py \
+                           )
+  for gdas_script in "${gdas_scripts[@]}" ; do
+    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/scripts/${gdas_script}" .
+  done
+fi
 cd "${HOMEgfs}/ush" || exit 8
 for file in emcsfc_ice_blend.sh global_cycle_driver.sh emcsfc_snow.sh global_cycle.sh; do
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_utils.fd/ush/${file}" .
 done
-for file in finddate.sh make_ntc_bull.pl make_NTC_file.pl make_tif.sh month_name.sh ; do
+for file in make_ntc_bull.pl make_NTC_file.pl make_tif.sh month_name.sh ; do
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gfs_utils.fd/ush/${file}" .
 done
 
-# TODO: Link these ufs.configure templates from ufs-weather-model
-#cd "${HOMEgfs}/parm/ufs" || exit 1
-#declare -a ufs_configure_files=("ufs.configure.atm.IN" \
-#                                 "ufs.configure.atm_aero.IN" \
-#                                 "ufs.configure.atmw.IN" \
-#                                 "ufs.configure.blocked_atm_wav_2way.IN" \
-#                                 "ufs.configure.blocked_atm_wav.IN" \
-#                                 "ufs.configure.cpld_agrid.IN" \
-#                                 "ufs.configure.cpld_esmfthreads.IN" \
-#                                 "ufs.configure.cpld.IN" \
-#                                 "ufs.configure.cpld_noaero.IN" \
-#                                 "ufs.configure.cpld_noaero_nowave.IN" \
-#                                 "ufs.configure.cpld_noaero_outwav.IN" \
-#                                 "ufs.configure.leapfrog_atm_wav.IN")
-#for file in "${ufs_configure_files[@]}"; do
-#  [[ -s "${file}" ]] && rm -f "${file}"
-#  ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_model.fd/tests/parm/${file}" .
-#done
+# Link these templates from ufs-weather-model
+cd "${HOMEgfs}/parm/ufs" || exit 1
+declare -a ufs_templates=("model_configure.IN" "model_configure_nest.IN"\
+                          "MOM_input_025.IN" "MOM_input_050.IN" "MOM_input_100.IN" "MOM_input_500.IN" \
+                          "MOM6_data_table.IN" \
+                          "ice_in.IN" \
+                          "ufs.configure.atm.IN" \
+                          "ufs.configure.atm_esmf.IN" \
+                          "ufs.configure.atmaero.IN" \
+                          "ufs.configure.atmaero_esmf.IN" \
+                          "ufs.configure.s2s.IN" \
+                          "ufs.configure.s2s_esmf.IN" \
+                          "ufs.configure.s2sa.IN" \
+                          "ufs.configure.s2sa_esmf.IN" \
+                          "ufs.configure.s2sw.IN" \
+                          "ufs.configure.s2sw_esmf.IN" \
+                          "ufs.configure.s2swa.IN" \
+                          "ufs.configure.s2swa_esmf.IN" \
+                          "ufs.configure.leapfrog_atm_wav.IN" \
+                          "ufs.configure.leapfrog_atm_wav_esmf.IN" )
+for file in "${ufs_templates[@]}"; do
+  [[ -s "${file}" ]] && rm -f "${file}"
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_model.fd/tests/parm/${file}" .
+done
 
+# Link the script from ufs-weather-model that parses the templates
 cd "${HOMEgfs}/ush" || exit 1
 [[ -s "atparse.bash" ]] && rm -f "atparse.bash"
 ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_model.fd/tests/atparse.bash" .
@@ -187,7 +243,7 @@ if [[ -d "${HOMEgfs}/sorc/gdas.cd" ]]; then
   cd "${HOMEgfs}/fix" || exit 1
   [[ ! -d gdas ]] && mkdir -p gdas
   cd gdas || exit 1
-  for gdas_sub in fv3jedi gsibec; do
+  for gdas_sub in fv3jedi gsibec obs soca; do
     if [[ -d "${gdas_sub}" ]]; then
        rm -rf "${gdas_sub}"
     fi
@@ -197,15 +253,37 @@ if [[ -d "${HOMEgfs}/sorc/gdas.cd" ]]; then
 fi
 
 #------------------------------
+#--add GDASApp parm directory
+#------------------------------
+if [[ -d "${HOMEgfs}/sorc/gdas.cd" ]]; then
+  cd "${HOMEgfs}/parm/gdas" || exit 1
+  declare -a gdasapp_comps=("aero" "atm" "io" "ioda" "snow" "soca" "jcb-gdas" "jcb-algorithms")
+  for comp in "${gdasapp_comps[@]}"; do
+    [[ -d "${comp}" ]] && rm -rf "${comp}"
+    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/parm/${comp}" .
+  done
+fi
+
+#------------------------------
 #--add GDASApp files
 #------------------------------
 if [[ -d "${HOMEgfs}/sorc/gdas.cd/build" ]]; then
   cd "${HOMEgfs}/ush" || exit 1
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/soca"                              .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ufsda"                              .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/jediinc2fv3.py"                     .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/gen_bufr2ioda_json.py"    .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/gen_bufr2ioda_yaml.py"    .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/run_bufr2ioda.py"    .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/build/bin/imsfv3_scf2ioda.py"           .
-  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/scripts/exglobal_prep_ocean_obs.py"           .
+  declare -a gdasapp_ocn_insitu_profile_platforms=("argo" "bathy" "glider" "marinemammal" "tesac" "xbtctd")
+  for platform in "${gdasapp_ocn_insitu_profile_platforms[@]}"; do
+    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/marine/bufr2ioda_insitu_profile_${platform}.py" .
+  done
+  declare -a gdasapp_ocn_insitu_sfc_platforms=("altkob" "trkob")
+  for platform in "${gdasapp_ocn_insitu_sfc_platforms[@]}"; do
+    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/marine/bufr2ioda_insitu_surface_${platform}.py" .
+  done
 fi
 
 
@@ -242,8 +320,9 @@ if [[ ! -d "${HOMEgfs}/exec" ]]; then mkdir "${HOMEgfs}/exec" || exit 1 ; fi
 cd "${HOMEgfs}/exec" || exit 1
 
 for utilexe in fbwndgfs.x gaussian_sfcanl.x gfs_bufr.x supvit.x syndat_getjtbul.x \
-  syndat_maksynrc.x syndat_qctropcy.x tocsbufr.x overgridid.x \
-  mkgfsawps.x enkf_chgres_recenter_nc.x tave.x vint.x reg2grb2.x
+  syndat_maksynrc.x syndat_qctropcy.x tocsbufr.x overgridid.x rdbfmsua.x \
+  mkgfsawps.x enkf_chgres_recenter_nc.x tave.x vint.x ocnicepost.x webtitle.x \
+  ensadd.x ensppf.x ensstat.x wave_stat.x
 do
   [[ -s "${utilexe}" ]] && rm -f "${utilexe}"
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gfs_utils.fd/install/bin/${utilexe}" .
@@ -291,28 +370,17 @@ fi
 
 # GDASApp
 if [[ -d "${HOMEgfs}/sorc/gdas.cd/build" ]]; then
-  declare -a JEDI_EXE=("fv3jedi_addincrement.x" \
-                       "fv3jedi_diffstates.x" \
-                       "fv3jedi_ensvariance.x" \
-                       "fv3jedi_hofx.x" \
-                       "fv3jedi_var.x" \
-                       "fv3jedi_convertincrement.x" \
-                       "fv3jedi_dirac.x" \
-                       "fv3jedi_error_covariance_training.x" \
-                       "fv3jedi_letkf.x" \
-                       "fv3jedi_convertstate.x" \
-                       "fv3jedi_eda.x" \
-                       "fv3jedi_forecast.x" \
+  declare -a JEDI_EXE=("gdas.x" \
+                       "gdas_soca_gridgen.x" \
+                       "gdas_soca_error_covariance_toolbox.x" \
+                       "gdas_soca_setcorscales.x" \
+                       "gdas_soca_diagb.x" \
                        "fv3jedi_plot_field.x" \
-                       "fv3jedi_data_checker.py" \
-                       "fv3jedi_enshofx.x" \
-                       "fv3jedi_hofx_nomodel.x" \
-                       "fv3jedi_testdata_downloader.py" \
-                       "soca_convertincrement.x" \
-                       "soca_error_covariance_training.x" \
-                       "soca_setcorscales.x" \
-                       "soca_gridgen.x" \
-                       "soca_var.x" \
+                       "fv3jedi_fv3inc.x" \
+                       "gdas_ens_handler.x" \
+                       "gdas_incr_handler.x" \
+                       "gdas_obsprovider2ioda.x" \
+                       "gdas_socahybridweights.x" \
                        "bufr2ioda.x" \
                        "calcfIMS.exe" \
                        "apply_incr.exe" )
@@ -397,7 +465,6 @@ for prog in enkf_chgres_recenter_nc.fd \
   mkgfsawps.fd \
   overgridid.fd \
   rdbfmsua.fd \
-  reg2grb2.fd \
   supvit.fd \
   syndat_getjtbul.fd \
   syndat_maksynrc.fd \
@@ -405,7 +472,8 @@ for prog in enkf_chgres_recenter_nc.fd \
   tave.fd \
   tocsbufr.fd \
   vint.fd \
-  webtitle.fd
+  webtitle.fd \
+  ocnicepost.fd
 do
   if [[ -d "${prog}" ]]; then rm -rf "${prog}"; fi
   ${LINK_OR_COPY} "gfs_utils.fd/src/${prog}" .

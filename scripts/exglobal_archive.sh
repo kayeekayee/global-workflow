@@ -1,1 +1,0 @@
-exglobal_archive_gsl.sh
