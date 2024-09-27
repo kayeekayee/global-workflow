@@ -17,9 +17,10 @@
 # 2018-05-22 Guang Ping Lou: Making it work for both GFS and FV3GFS 
 # 2018-05-30  Guang Ping Lou: Make sure all files are available.
 # 2019-10-10  Guang Ping Lou: Read in NetCDF files
+# 2024-03-03 Bo Cui: Add options to use different bufr table for different resolution NetCDF files
 # echo "History: February 2003 - First implementation of this utility script"
 #
-source "${HOMEgfs:?}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 if [[ "${F00FLAG}" == "YES" ]]; then
    f00flag=".true."
@@ -50,44 +51,50 @@ cat << EOF > gfsparm
 /
 EOF
 
+sleep_interval=10
+max_tries=1000
 for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
    hh2=$(printf %02i "${hr}")
    hh3=$(printf %03i "${hr}")
 
    #---------------------------------------------------------
    # Make sure all files are available:
-   ic=0
-   while (( ic < 1000 )); do
-      if [[ ! -f "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atm.logf${hh3}.${logfm}" ]]; then
-          sleep 10
-          ic=$((ic + 1))
-      else
-          break
-      fi
-
-      if (( ic >= 360 )); then
-         echo "FATAL: COULD NOT LOCATE logf${hh3} file AFTER 1 HOUR"
-         exit 2
-      fi
-   done
+   filename="${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atm.logf${hh3}.${logfm}"
+   if ! wait_for_file "${filename}" "${sleep_interval}" "${max_tries}"; then
+     echo "FATAL ERROR: COULD NOT LOCATE logf${hh3} file"
+     exit 2
+   fi
+   
    #------------------------------------------------------------------
-   ln -sf "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atmf${hh3}.${atmfm}" "sigf${hh2}" 
-   ln -sf "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.sfcf${hh3}.${atmfm}" "flxf${hh2}"
+   ${NLN} "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atmf${hh3}.${atmfm}" "sigf${hh2}"
+   ${NLN} "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.sfcf${hh3}.${atmfm}" "flxf${hh2}"
 done
 
 #  define input BUFR table file.
-ln -sf "${PARMbufrsnd}/bufr_gfs_${CLASS}.tbl" fort.1
-ln -sf "${STNLIST:-${PARMbufrsnd}/bufr_stalist.meteo.gfs}" fort.8
-ln -sf "${PARMbufrsnd}/bufr_ij13km.txt" fort.7
+${NLN} "${PARMgfs}/product/bufr_gfs_${CLASS}.tbl" fort.1
+${NLN} "${STNLIST:-${PARMgfs}/product/bufr_stalist.meteo.gfs}" fort.8
 
-${APRUN_POSTSND} "${EXECbufrsnd}/${pgm}" < gfsparm > "out_gfs_bufr_${FEND}"
+case "${CASE}" in
+    "C768")
+        ${NLN} "${PARMgfs}/product/bufr_ij13km.txt" fort.7
+        ;;
+    "C1152")
+        ${NLN} "${PARMgfs}/product/bufr_ij9km.txt"  fort.7
+        ;;
+    *)
+        echo "WARNING: No bufr table for this resolution, using the one for C768"
+        ${NLN} "${PARMgfs}/product/bufr_ij13km.txt" fort.7
+        ;;
+esac
+
+${APRUN_POSTSND} "${EXECgfs}/${pgm}" < gfsparm > "out_gfs_bufr_${FEND}"
 export err=$?
 
-if [ $err -ne 0 ]; then
+if [[ "${err}" -ne 0 ]]; then
    echo "GFS postsnd job error, Please check files "
    echo "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.atmf${hh2}.${atmfm}"
    echo "${COM_ATMOS_HISTORY}/${RUN}.${cycle}.sfcf${hh2}.${atmfm}"
    err_chk
 fi
 
-exit ${err}
+exit "${err}"

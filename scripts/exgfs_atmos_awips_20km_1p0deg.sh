@@ -19,7 +19,7 @@
 # echo " "
 ###############################################################################
 
-source "${HOMEgfs}/ush/preamble.sh"
+source "${USHgfs}/preamble.sh"
 
 fcsthrs="$1"
 num=$#
@@ -38,25 +38,19 @@ fi
 cd "${DATA}" || exit 2
 
 # "Import" functions used in this script
-source "${HOMEgfs}/ush/product_functions.sh"
+source "${USHgfs}/product_functions.sh"
 
 ###############################################
 # Wait for the availability of the pgrb file
 ###############################################
-icnt=1
-while (( icnt < 1000 )); do
-   if [[ -s "${COM_ATMOS_GRIB_0p25}/${RUN}.${cycle}.pgrb2b.0p25.f${fcsthrs}.idx" ]]; then
-      break
-   fi
-
-   sleep 10
-   icnt=$((icnt + 1))
-   if (( icnt >= 180 )); then
-      msg="FATAL ERROR: No GFS pgrb2 file after 30 min of waiting"
-      err_exit "${msg}"
-      exit 5
-   fi
-done
+sleep_interval=10
+max_tries=180
+idxfile="${COM_ATMOS_GRIB_0p25}/${RUN}.${cycle}.pgrb2b.0p25.f${fcsthrs}.idx"
+if ! wait_for_file "${idxfile}" "${sleep_interval}" "${max_tries}"; then
+  msg="FATAL ERROR: No GFS pgrb2 file after waiting"
+  err_exit "${msg}"
+  exit 5
+fi
 
 ########################################
 
@@ -91,7 +85,7 @@ export opt28=' -new_grid_interpolation budget -fi '
 cp "${COM_ATMOS_GRIB_0p25}/gfs.t${cyc}z.pgrb2.0p25.f${fcsthrs}" "tmpfile2${fcsthrs}"
 cp "${COM_ATMOS_GRIB_0p25}/gfs.t${cyc}z.pgrb2b.0p25.f${fcsthrs}" "tmpfile2b${fcsthrs}"
 cat "tmpfile2${fcsthrs}" "tmpfile2b${fcsthrs}" > "tmpfile${fcsthrs}"
-${WGRIB2} "tmpfile${fcsthrs}" | grep -F -f "${PARMproduct}/gfs_awips_parmlist_g2" | \
+${WGRIB2} "tmpfile${fcsthrs}" | grep -F -f "${PARMgfs}/product/gfs_awips_parmlist_g2" | \
    ${WGRIB2} -i -grib masterfile "tmpfile${fcsthrs}"
 export err=$?
 if [[ $err -ne 0 ]]; then
@@ -179,7 +173,7 @@ for GRID in conus ak prico pac 003; do
       export FORT31="awps_file_fi${fcsthrs}_${GRID}"
       export FORT51="grib2.awpgfs${fcsthrs}.${GRID}"
 
-      cp "${PARMwmo}/grib2_awpgfs${fcsthrs}.${GRID}" "parm_list"
+      cp "${PARMgfs}/wmo/grib2_awpgfs${fcsthrs}.${GRID}" "parm_list"
       if [[ ${DO_WAVE} != "YES" ]]; then
          # Remove wave field it not running wave model
          grep -vw "5WAVH" "parm_list" > "parm_list_temp"
@@ -213,7 +207,7 @@ for GRID in conus ak prico pac 003; do
       export FORT31="awps_file_fi${fcsthrs}_${GRID}"
       export FORT51="grib2.awpgfs_20km_${GRID}_f${fcsthrs}"
 
-      cp "${PARMwmo}/grib2_awpgfs_20km_${GRID}f${fcsthrs}" "parm_list"
+      cp "${PARMgfs}/wmo/grib2_awpgfs_20km_${GRID}f${fcsthrs}" "parm_list"
       if [[ ${DO_WAVE} != "YES" ]]; then
          # Remove wave field it not running wave model
          grep -vw "5WAVH" "parm_list" > "parm_list_temp"
