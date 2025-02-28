@@ -51,6 +51,8 @@ elif [[ ${MACHINE_ID} = s4* ]] ; then
 
 elif [[ ${MACHINE_ID} = wcoss2 ]]; then
     # We are on WCOSS2
+    # Ignore default modules of the same version lower in the search path (req'd by spack-stack)
+    #export LMOD_TMOD_FIND_FIRST=yes #TODO: Uncomment this when using spack-stack for the entire workflow
     module reset
 
 elif [[ ${MACHINE_ID} = cheyenne* ]] ; then
@@ -92,10 +94,8 @@ elif [[ ${MACHINE_ID} = discover* ]]; then
 # TODO: This can likely be made more general once other cloud
 # platforms come online.
 elif [[ ${MACHINE_ID} = "noaacloud" ]]; then
-
-    export SPACK_ROOT=/contrib/global-workflow/spack-stack/spack
-    export PATH=${PATH}:${SPACK_ROOT}/bin
-    . "${SPACK_ROOT}"/share/spack/setup-env.sh
+    # We are on NOAA Cloud
+    module purge
 
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2

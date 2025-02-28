@@ -7,7 +7,7 @@ _here = os.path.dirname(__file__)
 HOMEgfs = os.sep.join(_here.split(os.sep)[:-3])
 RUNDIR = os.path.join(_here, 'testdata/RUNDIR')
 pslot = "C48_ATM"
-account = "gsd-fv3"
+account = "fv3-cpu"
 foobar = "foobar"
 
 
