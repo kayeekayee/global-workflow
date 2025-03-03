@@ -1078,16 +1078,16 @@ case ${step} in
     ;;
 
   "init")
-   #KYW walltime="00:30:00"
-   #KYW ntasks=24
-   #KYW threads_per_task=1
-   #KYW tasks_per_node=6
-   #KYW memory="70GB"
-   wtime_init="00:30:00"
-   npe_init=24
-   nth_init=1
-   npe_node_init=6
-   memory_init="70G"
+    walltime="00:30:00"
+    ntasks=24
+    threads_per_task=1
+    tasks_per_node=6
+    memory="70GB"
+   #KYWwtime_init="00:30:00"
+   #KYWnpe_init=24
+   #KYWnth_init=1
+   #KYWnpe_node_init=6
+   #KYWmemory_init="70G"
     ;;
 
   "init_chem")
