@@ -13,20 +13,15 @@ status=$?
 if (( status != 0 )); then exit "${status}"; fi
 
 export job="atmos_products"
+export jobid="${job}.$$"
 
-# shellcheck disable=SC2153
-IFS=', ' read -r -a fhr_list <<< "${FHR_LIST}"
+# Negatation needs to be before the base
+fhr3_base="10#${FHR3}"
+export FORECAST_HOUR=$(( ${fhr3_base/10#-/-10#} ))
 
-export FORECAST_HOUR jobid
-for FORECAST_HOUR in "${fhr_list[@]}"; do
-	fhr3=$(printf '%03d' "${FORECAST_HOUR}")
-	jobid="${job}_f${fhr3}.$$"
-	###############################################################
-	# Execute the JJOB
-	###############################################################
-	"${HOMEgfs}/jobs/JGLOBAL_ATMOS_PRODUCTS"
-	status=$?
-	[[ ${status} -ne 0 ]] && exit "${status}"
-done
+###############################################################
+# Execute the JJOB
+###############################################################
+"${HOMEgfs}/jobs/JGLOBAL_ATMOS_PRODUCTS"
 
-exit 0
+exit $?
