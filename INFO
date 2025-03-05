@@ -1,3 +1,14 @@
+02-24-25 
+========
+Update develop branch, gsl_ufs_dev
+   based on gsl_ufs_dev from KaYee's fork
+   global-workflow: 21Feb25,ba09498 [develop_Feb212025_ba09498]
+   UFS: 05Feb25, ee3d52d
+   FV3: 03Feb25, 2c902a6
+   UPP: 08Nov24, ce5f3b1
+   CCPP-PHYSICS: 03Feb25, db19a6d
+   UFS_UTILS: 15Nov24, 5b2bfa3 
+
 09-17-24
 ========
 Update develop branch, gsl_ufs_dev

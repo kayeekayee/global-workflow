@@ -1,1 +1,29 @@
-hera_gsl.yaml
+BASE_GIT: '/scratch1/NCEPDEV/global/glopara/git'
+DMPDIR: '/scratch1/NCEPDEV/global/glopara/dump'
+BASE_CPLIC: '/scratch1/NCEPDEV/global/glopara/data/ICSDIR/prototype_ICs'
+PACKAGEROOT: '/scratch1/NCEPDEV/global/glopara/nwpara'
+COMINsyn: '/scratch1/NCEPDEV/global/glopara/com/gfs/prod/syndat'
+HOMEDIR: '/scratch1/BMC/gsd-fv3-dev/NCEPDEV/global/${USER}'
+STMP: '${HOMEgfs}/FV3GFSrun/'
+PTMP: '${HOMEgfs}/FV3GFSrun/'
+NOSCRUB: $HOMEDIR
+ACCOUNT: gsd-fv3
+SCHEDULER: slurm
+QUEUE: batch
+QUEUE_SERVICE: batch
+PARTITION_BATCH: hera
+PARTITION_SERVICE: service
+RESERVATION: ''
+CHGRP_RSTPROD: 'YES'
+CLUSTERS: ''
+CHGRP_CMD: 'chgrp rstprod'
+HPSSARCH: 'YES'
+HPSS_PROJECT: fim
+LOCALARCH: 'NO'
+ATARDIR: '/BMC/${HPSS_PROJECT}/1year/${USER}/${machine}/scratch/${PSLOT}'
+MAKE_NSSTBUFR: 'NO'
+MAKE_ACFTBUFR: 'NO'
+SUPPORTED_RESOLUTIONS: ['C1152', 'C768', 'C384', 'C192', 'C96', 'C48']
+COMINecmwf: /scratch1/NCEPDEV/global/glopara/data/external_gempak/ecmwf
+COMINnam: /scratch1/NCEPDEV/global/glopara/data/external_gempak/nam
+COMINukmet: /scratch1/NCEPDEV/global/glopara/data/external_gempak/ukmet
