@@ -22,7 +22,7 @@ class UPP(Task):
     """Unified Post Processor Task
     """
 
-    VALID_UPP_RUN = ['analysis', 'forecast', 'goes', 'wafs']
+    VALID_UPP_RUN = ['analysis', 'forecast', 'goes']
 
     @logit(logger, name="UPP")
     def __init__(self, config: Dict[str, Any]) -> None:
@@ -33,7 +33,6 @@ class UPP(Task):
         analysis: process analysis output
         forecast: process UFS-weather-model forecast output
         goes: process UFS-weather-model forecast output for simulated satellite imagery
-        wafs: process UFS-weather-model forecast output for WAFS products
 
         Parameters
         ----------
@@ -202,7 +201,7 @@ class UPP(Task):
 
         template = f"GFS{{file_type}}.GrbF{forecast_hour:02d}"
 
-        for ftype in ['PRS', 'FLX']:
+        for ftype in ['PRS', 'FLX', 'GOES']:
             grbfile = template.format(file_type=ftype)
             grbfidx = f"{grbfile}.idx"
 
@@ -249,7 +248,7 @@ class UPP(Task):
     @logit(logger)
     def finalize(upp_run: Dict, upp_yaml: Dict) -> None:
         """Perform closing actions of the task.
-        Copy data back from the DATA/ directory to COM/
+        Copy data back from the DATA/ directory to COMOUT/
 
         Parameters
         ----------
@@ -259,6 +258,6 @@ class UPP(Task):
             Fully resolved upp.yaml dictionary
         """
 
-        # Copy "upp_run" specific generated data to COM/ directory
-        logger.info(f"Copy '{upp_run}' processed data to COM/ directory")
+        # Copy "upp_run" specific generated data to COMOUT/ directory
+        logger.info(f"Copy '{upp_run}' processed data to COMOUT/ directory")
         FileHandler(upp_yaml[upp_run].data_out).sync()

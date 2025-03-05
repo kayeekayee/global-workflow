@@ -24,16 +24,6 @@
 # directory are included, so if no exclude patterns match that file, it will be
 # tranatmferred.
 
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_9a.list
-_COMROOT_/gfs/_SHORTVER_/gfs._PDY_/
-+ /??/
-+ /??/atmos/
-+ /??/atmos/gfs.t??z.sfcf??0.nc
-+ /??/atmos/gfs.t??z.sfcf??2.nc
-+ /??/atmos/gfs.t??z.sfcf??4.nc
-+ /??/atmos/gfs.t??z.sfcf??6.nc
-+ /??/atmos/gfs.t??z.sfcf??8.nc
-========
 _COMROOT_/gfs/_SHORTVER_/gdas._PDY_/
 + /??/
 + /??/atmos/
@@ -43,21 +33,10 @@ _COMROOT_/gfs/_SHORTVER_/gdas._PDY_/
 + /??/atmos/*atmg*
 + /??/atmos/*atmanl*
 - /??/atmos/*
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gdas_gdas_1b.list
 - *
 
 B 100
 
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_9a.list
-_COMROOT_/gfs/_SHORTVER_/gfs._PDYm1_/
-+ /??/
-+ /??/atmos/
-+ /??/atmos/gfs.t??z.sfcf??0.nc
-+ /??/atmos/gfs.t??z.sfcf??2.nc
-+ /??/atmos/gfs.t??z.sfcf??4.nc
-+ /??/atmos/gfs.t??z.sfcf??6.nc
-+ /??/atmos/gfs.t??z.sfcf??8.nc
-========
 _COMROOT_/gfs/_SHORTVER_/gdas._PDYm1_/
 + /??/
 + /??/atmos/
@@ -67,7 +46,6 @@ _COMROOT_/gfs/_SHORTVER_/gdas._PDYm1_/
 + /??/atmos/*atmg*
 + /??/atmos/*atmanl*
 - /??/atmos/*
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gdas_gdas_1b.list
 - *
 
 B 100

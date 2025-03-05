@@ -388,7 +388,7 @@ if [[ "${DO_NEST:-NO}" == "YES" ]] ; then
   export CCPP_SUITE="${CCPP_SUITE:-FV3_global_nest_v1}"
 else
 #JKH  export CCPP_SUITE="${CCPP_SUITE:-FV3_GFS_v17_p8_ugwpv1}"
-export CCPP_SUITE="FV3_GFS_v17_p8_ugwpv1_c3_mynn"
+export CCPP_SUITE="FV3_GFS_v17_p8_ugwpv1_mynn"
 fi
 model_list="atm"
 

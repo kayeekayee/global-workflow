@@ -2,8 +2,8 @@
 # exglobal_atmens_analysis_initialize.py
 # This script creates an AtmEnsAnalysis class
 # and runs the initialize method
-# which create and stage the runtime directory
-# and create the YAML configuration
+# which creates and stages the runtime directory
+# and creates the YAML configuration
 # for a global atm local ensemble analysis
 import os
 
@@ -21,4 +21,6 @@ if __name__ == '__main__':
 
     # Instantiate the atmens analysis task
     AtmEnsAnl = AtmEnsAnalysis(config)
+
+    # Initialize JEDI ensemble DA analysis
     AtmEnsAnl.initialize()

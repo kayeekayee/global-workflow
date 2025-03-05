@@ -27,12 +27,8 @@
 # This directory is a good candidate for compression
 #Z
 
-<<<<<<<< HEAD:parm/transfer/transfer_rdhpcs_gdas_enkf_enkf_3.list
-_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/com/gfs/_ENVIR_/enkfgdas._PDYm1_/
-========
 #_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDYm1_/
 _COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDYm1_/
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_rdhpcs_gfs_gdas_enkf_enkf_3.list
 + /12/
 + /12/atmos/
 + /12/atmos/mem???/
@@ -42,12 +38,8 @@ _COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVE
 E
 # This directory is a good candidate for compression
 #Z
-<<<<<<<< HEAD:parm/transfer/transfer_rdhpcs_gdas_enkf_enkf_3.list
-_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDY_/ _REMOTEPATH_/com/gfs/_ENVIR_/enkfgdas._PDY_/
-========
 #_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDY_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDY_/
 _COMROOT_/gfs/_SHORTVER_/enkfgdas._PDY_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDY_/
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_rdhpcs_gfs_gdas_enkf_enkf_3.list
 + /12/
 + /12/atmos/
 + /12/atmos/mem???/
