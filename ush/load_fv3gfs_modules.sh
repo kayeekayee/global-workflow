@@ -18,10 +18,9 @@ source "${HOMEgfs}/versions/run.ver"
 
 # Load our modules:
 module use "${HOMEgfs}/modulefiles"
-#KYWmodule use "/scratch1/BMC/gsd-fv3/rtruns/modulefiles/"
 
 case "${MACHINE_ID}" in
-  "wcoss2" | "hera" | "orion" | "hercules" | "gaea" | "jet" | "s4")
+  "wcoss2" | "hera" | "orion" | "hercules" | "gaeac5" | "gaeac6" | "jet" | "s4" | "noaacloud")
     module load "module_base.${MACHINE_ID}"
     ;;
   *)

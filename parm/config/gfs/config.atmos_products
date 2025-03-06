@@ -8,8 +8,8 @@ echo "BEGIN: config.atmos_products"
 # Get task specific resources
 . "${EXPDIR}/config.resources" atmos_products
 
-# No. of forecast hours to process in a single job
-export NFHRS_PER_GROUP=3
+## Maximum number of rocoto tasks per member
+export MAX_TASKS=25
 
 # Scripts used by this job
 export INTERP_ATMOS_MASTERSH="${USHgfs}/interp_atmos_master.sh"
@@ -27,6 +27,8 @@ elif [[ "${RUN:-}" == "gfs" ]]; then
   export FHOUT_PGBS=${FHOUT_GFS:-3}  # Output frequency of supplemental gfs pgb file at 1.0 and 0.5 deg
   export FLXGF="NO"  # Create interpolated sflux.1p00 file
 fi
+
+export APCP_MSG="597"  # Message number for APCP in GFSv16.  Look for TODO in exglobal_atmos_products.sh
 
 # paramlist files for the different forecast hours and downsets
 export paramlista="${PARMgfs}/product/gfs.fFFF.paramlist.a.txt"
