@@ -1,9 +1,9 @@
 
 ###############
-Global Workflow 
+Global Workflow
 ###############
 
-**Global-workflow** is the end-to-end workflow designed to run global configurations of medium range weather forecasting for the UFS weather model. It supports both development and operational implementations. In its current format it supports the Global Forecast System (GFS) and the Global Ensemble Forecast System (GEFS) configurations
+**Global-workflow** is the end-to-end workflow designed to run global configurations of medium range weather forecasting for the UFS weather model. It supports both development and operational implementations. In its current format it supports the Global Forecast System (GFS), Global Ensemble Forecast System (GEFS), and Subseasonal Forecast System (SFS) configurations.
 
 ======
 Status
@@ -18,6 +18,7 @@ Code managers
 
 * Kate Friedman - @KateFriedman-NOAA / kate.friedman@noaa.gov
 * Walter Kolczynski - @WalterKolczynski-NOAA / walter.kolczynski@noaa.gov
+* David Huber - @DavidHuber-NOAA / david.huber@noaa.gov
 
 =============
 Announcements
@@ -31,7 +32,7 @@ GitHub updates: Users should adjust their "Watch" settings for this repo so they
 Table of Contents
 =================
 
-.. toctree:: 
+.. toctree::
    :numbered:
    :maxdepth: 3
 
@@ -41,4 +42,6 @@ Table of Contents
    hpc.rst
    output.rst
    run.rst
+   wave.rst
    noaa_csp.rst
+   errors_faq.rst

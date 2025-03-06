@@ -1,7 +1,18 @@
-09-17-24
+03-05-25 
 ========
 Update realtime branch, gsl_ufs_rtdev1
- - based on gsl_ufs_dev from KaYee's fork
+   based on gsl_ufs_dev from KaYee's fork
+   global-workflow: 21Feb25,ba09498 [develop_Feb212025_ba09498]
+   UFS: 05Feb25, ee3d52d
+   FV3: 03Feb25, 2c902a6
+   UPP: 08Nov24, ce5f3b1
+   CCPP-PHYSICS: 03Feb25, db19a6d
+   UFS_UTILS: 15Nov24, 5b2bfa3 
+
+09-17-24
+========
+Update realtimebranch, gsl_ufs_rtdev1
+   based on gsl_ufs_dev from KaYee's fork
    global-workflow: 07Aug24,37c53ac [develop_07Aug2024_37c53ac]
    UFS: 19Jul24, c127601
    FV3: 19Jul24, 2527c11

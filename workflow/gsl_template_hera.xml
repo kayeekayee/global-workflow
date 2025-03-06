@@ -120,7 +120,6 @@
         -->
         <var name="fhr">000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120</var>
 
-
 	<task name="gfsatmprod_#fhr#" cycledefs="gfs" maxtries="&MAXTRIES;">
 
 		<command>&JOBS_DIR;/atmos_products.sh</command>
@@ -149,7 +148,7 @@
 		<envar><name>COMPONENT</name><value>atmos</value></envar>
 
 		<dependency>
-			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
+			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
 		</dependency>
 
 	</task>

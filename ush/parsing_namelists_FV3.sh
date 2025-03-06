@@ -42,6 +42,18 @@ local SDAY=${current_cycle:6:2}
 local CHOUR=${current_cycle:8:2}
 local MOM6_OUTPUT_DIR="./MOM6_OUTPUT"
 
+if [[ "${REPLAY_ICS:-NO}" == "YES" ]]; then
+  local current_cycle_p1 
+  current_cycle_p1=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${FHOUT_OCN} hours" +%Y%m%d%H)
+  local current_cycle_offset
+  current_cycle_offset=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${OFFSET_START_HOUR} hours" +%Y%m%d%H)
+  local SYEAR1=${current_cycle_p1:0:4}
+  local SMONTH1=${current_cycle_p1:4:2}
+  local SDAY1=${current_cycle_p1:6:2}
+  local CHOUR1=${current_cycle_p1:8:2}
+  local CHOUR_offset=${current_cycle_offset:8:2}
+fi
+
 atparse < "${template}" >> "diag_table"
 
 
@@ -103,15 +115,6 @@ cat > input.nml <<EOF
   npz = ${npz}
   dz_min =  ${dz_min:-"6"}
   psm_bc = ${psm_bc:-"0"}
-EOF
-
-if [ "$CCPP_SUITE" = "FV3_RAP_cires_ugwp" -o "$CCPP_SUITE" = "FV3_RAP_noah_sfcdiff_unified_ugwp" -o "$CCPP_SUITE" = "FV3_RAP_noah_sfcdiff_ugwpv1" ]; then
-  cat >> input.nml << EOF
-  nord_tr = ${nord_tr:-"2"}
-EOF
-fi
-
-cat >> input.nml << EOF
   grid_type = -1
   make_nh = ${make_nh}
   fv_debug = ${fv_debug:-".false."}
@@ -131,6 +134,7 @@ cat >> input.nml << EOF
   hydrostatic = ${hydrostatic}
   phys_hydrostatic = ${phys_hydrostatic}
   use_hydro_pressure = ${use_hydro_pressure}
+  pass_full_omega_to_physics_in_non_hydrostatic_mode = ${pass_full_omega_to_physics_in_non_hydrostatic_mode:-".false."}
   beta = 0.
   a_imp = 1.
   p_fac = 0.1
@@ -159,7 +163,7 @@ cat >> input.nml << EOF
   hord_mt = ${hord_mt}
   hord_vt = ${hord_xx}
   hord_tm = ${hord_xx}
-  hord_dp = -${hord_xx}
+  hord_dp = ${hord_dp}
   hord_tr = ${hord_tr:-"8"}
   adjust_dry_mass = ${adjust_dry_mass:-".true."}
   dry_mass=${dry_mass:-98320.0}
@@ -207,41 +211,21 @@ case "${CCPP_SUITE:-}" in
   oz_phys_2015 = .true.
 EOF
   ;;
-  FV3_RAP_noah*)
+  "FV3_GSD_v0")
   cat >> input.nml << EOF
   iovr         = ${iovr:-"3"}
   ltaerosol    = ${ltaerosol:-".false."}
   lradar       = ${lradar:-".false."}
-  dt_inner     = ${dt_inner:-"40."}
-  ttendlim     = ${ttendlim:-"-999"}
+  ttendlim     = ${ttendlim:-0.005}
   oz_phys      = ${oz_phys:-".false."}
   oz_phys_2015 = ${oz_phys_2015:-".true."}
   lsoil_lsm    = ${lsoil_lsm:-"4"}
   do_mynnedmf  = ${do_mynnedmf:-".false."}
   do_mynnsfclay = ${do_mynnsfclay:-".false."}
   icloud_bl    = ${icloud_bl:-"1"}
-  tke_budget    = ${tke_budget:-"0"}
-  bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:=".true."}
-  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:="2"}
-  bl_mynn_mixlength = ${bl_mynn_mixlength:="1"}
-  bl_mynn_edmf = ${bl_mynn_edmf:="1"}
-  bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:="1"}
-  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:="0"}
-  bl_mynn_cloudmix = ${bl_mynn_cloudmix:="1"}
-  bl_mynn_mixqt = ${bl_mynn_mixqt:="0"} 
-  bl_mynn_output = ${bl_mynn_output:="0"} 
-  bl_mynn_closure = ${bl_mynn_closure:="2.6"}
-  do_ugwp      = ${do_ugwp:-".false."}
-  do_tofd      = ${do_tofd:-".true."}
-  gwd_opt      = ${gwd_opt:-"2"}
-  do_ugwp_v0   = ${do_ugwp_v0:-".true."}
-  do_ugwp_v1   = ${do_ugwp_v1:-".false."}
-  do_ugwp_v0_orog_only = ${do_ugwp_v0_orog_only:-".false."}
-  do_ugwp_v0_nst_only  = ${do_ugwp_v0_nst_only:-".false."}
-  do_gsl_drag_ls_bl    = ${do_gsl_drag_ls_bl:-".false."}
-  do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
-  do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
-  do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
+  bl_mynn_edmf = ${bl_mynn_edmf:-"1"}
+  bl_mynn_tkeadvect=${bl_mynn_tkeadvect:-".true."}
+  bl_mynn_edmf_mom=${bl_mynn_edmf_mom:-"1"}
   min_lakeice  = ${min_lakeice:-"0.15"}
   min_seaice   = ${min_seaice:-"0.15"}
   use_cice_alb = ${use_cice_alb:-".false."}
@@ -282,51 +266,6 @@ EOF
   bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:-"1"}
   min_lakeice  = ${min_lakeice:-"0.15"}
   min_seaice   = ${min_seaice:-"0.15"}
-EOF
-  ;;
-  FV3_GFS_v17_p8_*mynn)
-  local default_dt_inner=$(( DELTIM/2 ))
-  cat >> input.nml << EOF
-  iovr         = ${iovr:-"3"}
-  ltaerosol    = ${ltaerosol:-".false."}
-  lradar       = ${lradar:-".true."}
-  ttendlim     = ${ttendlim:-"-999"}
-  dt_inner     = ${dt_inner:-"${default_dt_inner}"}
-  sedi_semi    = ${sedi_semi:-".true."}
-  decfl        = ${decfl:-"10"}
-  oz_phys      = ${oz_phys:-".false."}
-  oz_phys_2015 = ${oz_phys_2015:-".true."}
-  lsoil_lsm    = ${lsoil_lsm:-"4"}
-  do_mynnedmf  = ${do_mynnedmf:-".false."}
-  do_mynnsfclay = ${do_mynnsfclay:-".false."}
-  icloud_bl    = ${icloud_bl:-"1"}
-  tke_budget = ${tke_budget:-"0"}
-  bl_mynn_tkeadvect = ${bl_mynn_tkeadvect:-".true."}
-  bl_mynn_cloudpdf = ${bl_mynn_cloudpdf:="2"}
-  bl_mynn_mixlength = ${bl_mynn_mixlength:="1"}
-  bl_mynn_edmf = ${bl_mynn_edmf:-"1"}
-  bl_mynn_edmf_mom = ${bl_mynn_edmf_mom:-"1"}
-  bl_mynn_edmf_tke = ${bl_mynn_edmf_tke:="0"}
-  bl_mynn_cloudmix = ${bl_mynn_cloudmix:="1"}
-  bl_mynn_mixqt = ${bl_mynn_mixqt:="0"}
-  bl_mynn_output = ${bl_mynn_output:="0"}
-  bl_mynn_closure = ${bl_mynn_closure:="2.6"}
-  lcnorm       = ${lcnorm:-".true."}
-  do_ugwp      = ${do_ugwp:-".false."}
-  do_tofd      = ${do_tofd:-".false."}
-  gwd_opt      = ${gwd_opt:-"2"}
-  do_ugwp_v0   = ${do_ugwp_v0:-".false."}
-  do_ugwp_v1   = ${do_ugwp_v1:-".true."}
-  do_ugwp_v0_orog_only = ${do_ugwp_v0_orog_only:-".false."}
-  do_ugwp_v0_nst_only  = ${do_ugwp_v0_nst_only:-".false."}
-  do_gsl_drag_ls_bl    = ${do_gsl_drag_ls_bl:-".true."}
-  do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
-  do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
-  do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
-  alpha_fd     = ${alpha_fd:-"12.0"}
-  min_lakeice  = ${min_lakeice:-"0.15"}
-  min_seaice   = ${min_seaice:-"0.15"}
-  use_cice_alb = ${use_cice_alb:-".false."}
 EOF
   ;;
   FV3_GFS_v17*)
@@ -396,7 +335,6 @@ EOF
   do_gsl_drag_ss       = ${do_gsl_drag_ss:-".true."}
   do_gsl_drag_tofd     = ${do_gsl_drag_tofd:-".true."}
   do_ugwp_v1_orog_only = ${do_ugwp_v1_orog_only:-".false."}
-  alpha_fd     = ${alpha_fd:-"12.0"}
   min_lakeice  = ${min_lakeice:-"0.15"}
   min_seaice   = ${min_seaice:-"0.15"}
   use_cice_alb = ${use_cice_alb:-".false."}
@@ -718,6 +656,7 @@ if [[ "${DO_SPPT}" = "YES" || "${DO_SHUM}" = "YES" || "${DO_SKEB}" = "YES" || "$
 
     cat >> input.nml << EOF
 &nam_stochy
+  stochini=${stochini:-".false."}
 EOF
 
   if [[ ${DO_SKEB} = "YES" ]]; then
@@ -751,24 +690,6 @@ EOF
   sppt_sfclimit = ${SPPT_SFCLIMIT:-".true."}
   use_zmtnblck = ${use_zmtnblck:-".true."}
   pbl_taper = ${pbl_taper:-"0,0,0,0.125,0.25,0.5,0.75"}
-EOF
-  fi
-
-  if [[ "${DO_OCN_SPPT:-NO}" == "YES" ]]; then
-    cat >> input.nml <<EOF
-  OCNSPPT=${OCNSPPT}
-  OCNSPPT_LSCALE=${OCNSPPT_LSCALE}
-  OCNSPPT_TAU=${OCNSPPT_TAU}
-  ISEED_OCNSPPT=${ISEED_OCNSPPT:-${ISEED}}
-EOF
-  fi
-
-  if [[ "${DO_OCN_PERT_EPBL:-NO}" == "YES" ]]; then
-    cat >> input.nml <<EOF
-  EPBL=${EPBL}
-  EPBL_LSCALE=${EPBL_LSCALE}
-  EPBL_TAU=${EPBL_TAU}
-  ISEED_EPBL=${ISEED_EPBL:-${ISEED}}
 EOF
   fi
 

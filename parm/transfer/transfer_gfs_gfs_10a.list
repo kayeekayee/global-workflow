@@ -26,37 +26,24 @@
 
 _COMROOT_/gfs/_SHORTVER_/gfs._PDY_/
 + /??/
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_wave_restart2.list
-+ /??/wave/
-+ /??/wave/restart/
-+ /??/wave/restart/*gsh_15m
-========
 + /??/atmos/
 + /??/atmos/gfs.t??z.master.*1
 + /??/atmos/gfs.t??z.master.*3
 + /??/atmos/gfs.t??z.master.*5
 + /??/atmos/gfs.t??z.master.*7
 + /??/atmos/gfs.t??z.master.*9
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gfs_10a.list
 - *
 B 100
 
 _COMROOT_/gfs/_SHORTVER_/gfs._PDYm1_/
 + /??/
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_wave_restart2.list
-+ /??/wave/
-+ /??/wave/restart/
-+ /??/wave/restart/*gsh_15m
-========
 + /??/atmos/
 + /??/atmos/gfs.t??z.master.*1
 + /??/atmos/gfs.t??z.master.*3
 + /??/atmos/gfs.t??z.master.*5
 + /??/atmos/gfs.t??z.master.*7
 + /??/atmos/gfs.t??z.master.*9
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gfs_10a.list
 - *
 B 100
-
 
 
