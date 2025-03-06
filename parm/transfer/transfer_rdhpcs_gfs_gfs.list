@@ -24,12 +24,8 @@
 # directory are included, so if no exclude patterns match that file, it will be
 # transferred.
 
-<<<<<<<< HEAD:parm/transfer/transfer_rdhpcs_gfs.list
-_COMROOT_/gfs/_SHORTVER_/gfs._PDY_/ _REMOTEPATH_/com/gfs/_ENVIR_/gfs._PDY_/
-========
 #_COMROOT_/gfs/_SHORTVER_/gfs._PDY_/ _REMOTEPATH_/com/gfs/_ENVIR_/gfs._PDY_/
 _COMROOT_/gfs/_SHORTVER_/gfs._PDY_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/gfs._PDY_/
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_rdhpcs_gfs_gfs.list
 + /??/
 + /??/atmos/
 + /??/atmos/gfs.t??z.*bufr*

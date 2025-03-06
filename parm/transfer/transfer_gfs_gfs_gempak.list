@@ -27,38 +27,19 @@
 _COMROOT_/gfs/_SHORTVER_/gfs._PDY_/
 + /??/
 + /??/atmos/
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_1.list
-- /??/atmos/gfs.t??z.atmf???.nc
-- /??/atmos/gfs.t??z.sfcf???.nc
-- /??/atmos/gfs.t??z.master.*
-- /??/atmos/gempak/
-- /??/atmos/gempak/*
-- /??/wave/
-- /??/wave/*
-========
 + /??/atmos/gempak/
 + /??/atmos/gempak/*
 - *
 
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gfs_gempak.list
 B 100
 
 _COMROOT_/gfs/_SHORTVER_/gfs._PDYm1_/
 + /??/
 + /??/atmos/
-<<<<<<<< HEAD:parm/transfer/transfer_gfs_1.list
-- /??/atmos/gfs.t??z.atmf???.nc
-- /??/atmos/gfs.t??z.sfcf???.nc
-- /??/atmos/gfs.t??z.master.*
-- /??/atmos/gempak/
-- /??/atmos/gempak/*
-- /??/wave/
-- /??/wave/*
-========
 + /??/atmos/gempak/
 + /??/atmos/gempak/*
 - *
 
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_gfs_gfs_gempak.list
 B 100
+
 

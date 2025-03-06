@@ -17,6 +17,7 @@ load(pathJoin("libjpeg", (os.getenv("libjpeg_ver") or "None")))
 load(pathJoin("udunits", (os.getenv("udunits_ver") or "None")))
 load(pathJoin("gsl", (os.getenv("gsl_ver") or "None")))
 load(pathJoin("cdo", (os.getenv("cdo_ver") or "None")))
+load(pathJoin("imagemagick", (os.getenv("imagemagick_ver") or "None")))
 
 load(pathJoin("hdf5", (os.getenv("hdf5_ver") or "None")))
 load(pathJoin("netcdf", (os.getenv("netcdf_ver") or "None")))
@@ -36,7 +37,7 @@ setenv("HPC_OPT", "/apps/ops/para/libs")
 load(pathJoin("met", (os.getenv("met_ver") or "None")))
 load(pathJoin("metplus", (os.getenv("metplus_ver") or "None")))
 
-prepend_path("MODULEPATH", pathJoin("/lfs/h2/emc/global/save/emc.global/git/prepobs/v" .. (os.getenv("prepobs_run_ver") or "None"), "modulefiles"))
+prepend_path("MODULEPATH", pathJoin("/lfs/h2/emc/global/save/emc.global/git/prepobs/gfsv17_v" .. (os.getenv("prepobs_run_ver") or "None"), "modulefiles"))
 load(pathJoin("prepobs", (os.getenv("prepobs_run_ver") or "None")))
 
 prepend_path("MODULEPATH", pathJoin("/lfs/h2/emc/global/save/emc.global/git/Fit2Obs/v" .. (os.getenv("fit2obs_ver") or "None"), "modulefiles"))

@@ -27,42 +27,22 @@
 # This directory is a good candidate for compression
 #Z
 
-<<<<<<<< HEAD:parm/transfer/transfer_rdhpcs_gdas_enkf_enkf_5.list
-_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/com/gfs/_ENVIR_/enkfgdas._PDYm1_/
-+ /00/
-+ /00/atmos/
-+ /00/atmos/mem???/
-+ /00/atmos/mem???/gdas.t??z.ratminc.nc
-+ /00/atmos/gdas.t??z.atmf006.ensmean.nc
-+ /00/atmos/gdas.t??z.atmf009.ensmean.nc
-========
 _COMROOT_/gfs/_SHORTVER_/enkfgdas._PDYm1_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDYm1_/
 + /00/
 + /00/atmos/
 + /00/atmos/mem???/
 + /00/atmos/mem???/gdas.t??z.atmf006.nc
 + /00/atmos/mem???/gdas.t??z.atmf009.nc
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_rdhpcs_gfs_gdas_enkf_enkf_1.list
 - *
 E
 # This directory is a good candidate for compression
 #Z
-<<<<<<<< HEAD:parm/transfer/transfer_rdhpcs_gdas_enkf_enkf_5.list
-_COMROOT_/gfs/_SHORTVER_/enkfgdas._PDY_/ _REMOTEPATH_/com/gfs/_ENVIR_/enkfgdas._PDY_/
-+ /00/
-+ /00/atmos/
-+ /00/atmos/mem???/
-+ /00/atmos/mem???/gdas.t??z.ratminc.nc
-+ /00/atmos/gdas.t??z.atmf006.ensmean.nc
-+ /00/atmos/gdas.t??z.atmf009.ensmean.nc
-========
 _COMROOT_/gfs/_SHORTVER_/enkfgdas._PDY_/ _REMOTEPATH_/_ENVIR_/com/gfs/_SHORTVER_/enkfgdas._PDY_/
 + /00/
 + /00/atmos/
 + /00/atmos/mem???/
 + /00/atmos/mem???/gdas.t??z.atmf006.nc
 + /00/atmos/mem???/gdas.t??z.atmf009.nc
->>>>>>>> gsl_ufs_dev_Sept18_4e0a81f7:parm/transfer/transfer_rdhpcs_gfs_gdas_enkf_enkf_1.list
 - *
 E
 # This directory is a good candidate for compression
