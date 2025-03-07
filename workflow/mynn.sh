@@ -10,7 +10,7 @@ IDATE=2025030100
 EDATE=2025030100
 RESDET=768               ## 96 192 384 768
 
-### gfs_cyc 1  00Z only;  gfs_cyc 2  00Z and 12Z
+### interval 24 00Z only
 
 ./setup_expt.py gfs forecast-only --pslot "${PSLOT}" --interval 24 \
        --idate "${IDATE}" --edate "${EDATE}" --resdetatmos "${RESDET}" \
