@@ -157,7 +157,7 @@
 
 <task name="gfsarch" cycledefs="gfs" maxtries="&MAXTRIES;">
 
-	<command>&JOBS_DIR;/arch.sh</command>
+	<command>&JOBS_DIR;/arch_vrfy.sh</command>
 
 	<jobname><cyclestr>&PSLOT;_gfsarch_@H</cyclestr></jobname>
 	<account>gsd-fv3</account>
