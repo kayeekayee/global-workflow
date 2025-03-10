@@ -24,8 +24,9 @@ case ${RUN} in
     # Convert comma-separated string into bash array
     IFS=', ' read -ra segments <<< "${FCST_SEGMENTS}"
     # Determine MIN and MAX based on the forecast segment
-    export FHMIN=${segments[${FCST_SEGMENT}]}
-    export FHMAX=${segments[${FCST_SEGMENT}+1]}
+
+    export FHMIN=$FHMIN_GFS
+    export FHMAX=$FHMAX_GFS
     # Cap other FH variables at FHMAX for the segment
     export FHMIN_WAV=$(( FHMIN > FHMIN_WAV ? FHMIN : FHMIN_WAV ))
     export FHMAX_HF=$(( FHMAX_HF_GFS > FHMAX ? FHMAX : FHMAX_HF_GFS ))

@@ -148,7 +148,7 @@
 		<envar><name>COMPONENT</name><value>atmos</value></envar>
 
 		<dependency>
-			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model_data/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
+			<datadep age="120"><cyclestr>&ROTDIR;/gfs.@Y@m@d/@H//model/atmos/master/gfs.t@Hz.master.grb2f#fhr#</cyclestr></datadep>
 		</dependency>
 
 	</task>
